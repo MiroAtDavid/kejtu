@@ -70,17 +70,55 @@ def sandbox(row):
     # Mask broad parent grants last, then restore only exact approved program
     # dependencies. The temporary parent stays writable only during mount setup.
     private=row.get('private_paths',[])
+    desktop=row.get('desktop_private_paths',{})
+    for native,resolved in desktop.items():
+        if (not Path(native).is_absolute() or resolved not in private
+                or str(Path(native).resolve())!=resolved):
+            raise Failure('mcp_private_path',
+                'Kejtu’s private desktop folder changed location. Refresh the connection before trying again.')
+    # Include translated host mounts: e.g. a connection cache is exposed at
+    # /mcp-cache, and a system dependency can have a different canonical source.
+    mounts=[(Path(args[i+1]).resolve(),Path(args[i+2]))
+            for i,arg in enumerate(args) if arg in ('--bind','--ro-bind')]
+    def exposed_at(path):
+        for source,target in mounts:
+            if path==source or source in path.parents:
+                yield target/path.relative_to(source)
+            elif path in source.parents:
+                yield target
+    masks=set()
+    absent=[]
     for value in private:
         path=Path(value)
-        if not path.is_dir() or str(path.resolve())!=value:
+        if str(path.resolve())!=value:
             raise ValueError('A private app directory is unavailable or has changed identity.')
-        args.extend(['--tmpfs',value])
+        if not path.is_dir():
+            if value in desktop.values() and not path.exists():
+                absent.append(path)
+                continue
+            raise ValueError('A private app directory is unavailable or has changed identity.')
+        masks.add(path)
+        if value in desktop.values():masks.update(exposed_at(path))
+    for path in absent:
+        if any(not any(target==mask or mask in target.parents for mask in masks)
+               for target in exposed_at(path)):
+            # Creating a mount point under a writable host bind would create a
+            # real user directory. Skipping it would expose future private data.
+            raise Failure('mcp_private_path',
+                'This connection cannot safely protect a missing Kejtu desktop folder. '
+                'Choose narrower shared folders, such as Documents, or check that '
+                'Kejtu’s desktop data and configuration folders are available.')
+    masks=sorted(masks,key=lambda path:(len(path.parts),str(path)))
+    for path in masks:args.extend(['--tmpfs',str(path)])
     for value in row.get('private_read_paths',[]):
         if value not in row['read_paths'] or not any(Path(p) in Path(value).parents for p in private):
             raise ValueError('An unapproved private program mount was requested.')
+        if any(Path(value)==Path(p) or Path(p) in Path(value).parents or Path(value) in Path(p).parents
+               for p in desktop.values()):
+            raise ValueError('A program mount overlaps private desktop storage.')
         bind(value,'--ro-bind')
-    for value in reversed(private):
-        args.extend(['--remount-ro',value])
+    for path in reversed(masks):
+        args.extend(['--remount-ro',str(path)])
     for key, value in row['env'].items():
         args += ['--setenv', key, value]
     if row.get('shared_root') and not any(r['path']=='/tmp' and r['access']=='write' for r in shared):
@@ -158,7 +196,14 @@ async def main():
                 transport = StdioServerParameters(command=command, args=args, env=env,
                     cwd=row['cache'])
             else:
-                args = sandbox(row)
+                try:
+                    args = sandbox(row)
+                except Failure as error:
+                    # These bounded preflight messages contain no tool output,
+                    # credential values or arbitrary exception diagnostics.
+                    print(json.dumps(dict(ok=False, fatal=True, not_executed=True,
+                                          error=error.detail)), flush=True)
+                    return
                 transport = StdioServerParameters(command=args[0], args=args[1:], env={
                     'HOME': '/tmp', 'PATH': '/usr/bin:/bin', 'LANG': 'C.UTF-8'})
         else:

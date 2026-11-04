@@ -6,9 +6,10 @@ This is experimental software: useful already, but rough edges remain.
 
 This recipe targets **x86-64 Ubuntu 26.04 and Manjaro**. Manjaro VM checks cover
 fresh installation, update, reinstall, opening/closing and preservation of saved
-records, folder permissions and keyring access. Ubuntu installation acceptance
-is still pending its browser policy check. Other distributions, Windows and macOS
-are outside this source release.
+records, folder permissions and keyring access. Ubuntu builds, Files checks and
+desktop opening/closing pass; full installation and browser-tool acceptance still
+await its browser policy check. Other distributions, Windows and macOS are
+outside this source release.
 
 ## Requirements
 
@@ -120,8 +121,8 @@ disable AppArmor. The installer recreates a missing profile when needed.
   that every provider, file format or device has been tested.
 - Manjaro checks exercise Files read/write and permission denials, both browser
   tools, spreadsheet/word-processing operations and PDF creation/read-back.
-  Radio controls pass; video metadata is retrieved, but playback crashes in the
-  VM's virtual graphics stack. Actual video output and editing existing PDF
+  Earlier media checks passed radio controls and retrieved video metadata, but
+  playback crashed in the VM's virtual graphics stack. Actual video output and editing existing PDF
   content still need separate acceptance.
 - Model calls and enabled web tools send selected information to their services.
   Local storage does not make remote inference private. File access still needs

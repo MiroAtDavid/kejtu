@@ -29,11 +29,11 @@
       "source_sha256": "49d81c13d0ad9a479b26a8ce16dcbdc7427f7393dc949ea4b8d486a0f31a3e24"
     },
     "README.md": {
-      "bytes": 7440,
+      "bytes": 7535,
       "mode": "100644",
-      "sha256": "583c65a654205bfce04998dc4574fc424fb9a35b56c3b734b927e1daf64761a6",
+      "sha256": "b83ac294ded528a9155e105d800f1c118f90f26dfefa22854826848de53c604d",
       "source": "packaging/source/README.md",
-      "source_sha256": "583c65a654205bfce04998dc4574fc424fb9a35b56c3b734b927e1daf64761a6"
+      "source_sha256": "b83ac294ded528a9155e105d800f1c118f90f26dfefa22854826848de53c604d"
     },
     "contracts/native-v1.json": {
       "bytes": 106784,
@@ -1918,12 +1918,19 @@
       "source": "src/kejtu_next/adapters/mcp/course_material.py",
       "source_sha256": "c95befd94e2aac1db5f57cd3b896e7c75b7e432b0cd5f9aeb413d12a1d2325ee"
     },
-    "src/kejtu_next/adapters/mcp/files.py": {
-      "bytes": 15158,
+    "src/kejtu_next/adapters/mcp/desktop_paths.py": {
+      "bytes": 956,
       "mode": "100644",
-      "sha256": "55da21b1c13e21941029482fb3837ae0ef79961e377765ea3d3047276d35ee54",
+      "sha256": "338e92d9b0f1170e3170415af488f40710d9ba7d40c96996cca61d208059af68",
+      "source": "src/kejtu_next/adapters/mcp/desktop_paths.py",
+      "source_sha256": "338e92d9b0f1170e3170415af488f40710d9ba7d40c96996cca61d208059af68"
+    },
+    "src/kejtu_next/adapters/mcp/files.py": {
+      "bytes": 16099,
+      "mode": "100644",
+      "sha256": "3ac2674e906a76936f7ced0869ae0f30976ddc7fdb3fcc268daeaa3d73fa1ebd",
       "source": "src/kejtu_next/adapters/mcp/files.py",
-      "source_sha256": "55da21b1c13e21941029482fb3837ae0ef79961e377765ea3d3047276d35ee54"
+      "source_sha256": "3ac2674e906a76936f7ced0869ae0f30976ddc7fdb3fcc268daeaa3d73fa1ebd"
     },
     "src/kejtu_next/adapters/mcp/host.py": {
       "bytes": 13141,
@@ -1961,11 +1968,11 @@
       "source_sha256": "24674f88bbbc198b9bf83443ca32121a9e70cb5ddbf5f8d508c0b72184c3ae9b"
     },
     "src/kejtu_next/adapters/mcp/worker.py": {
-      "bytes": 11832,
+      "bytes": 14433,
       "mode": "100644",
-      "sha256": "1f5d25d7ffe3ad441b664ae8e14ce1508198fa5a590c39ceab2946bbb9c9d50d",
+      "sha256": "e01a08a2a988ba4e1133348e590bd5c96929be5c2388fc8371b8d089cec93c3d",
       "source": "src/kejtu_next/adapters/mcp/worker.py",
-      "source_sha256": "1f5d25d7ffe3ad441b664ae8e14ce1508198fa5a590c39ceab2946bbb9c9d50d"
+      "source_sha256": "e01a08a2a988ba4e1133348e590bd5c96929be5c2388fc8371b8d089cec93c3d"
     },
     "src/kejtu_next/adapters/models/__init__.py": {
       "bytes": 57,
@@ -3308,9 +3315,9 @@
   "inclusion_manifest_sha256": "bc88248f18bf3350ef7441d3363b7654b76669554dc63a6d3634d40e1cb6952e",
   "kind": "linux-source-x86_64",
   "schema": 1,
-  "source_commit": "b49ff8690184ca05cba15eb57b7393e120551b00",
-  "source_date_epoch": 1793754809,
-  "source_tree": "85b3ee2d513a65f9afd51841f927018761b3c8d9",
+  "source_commit": "a7c868e157777741a76f44b4e2ef6eb535b94ce1",
+  "source_date_epoch": 1793756516,
+  "source_tree": "056a63f62a89de7e6e26b5d79c95c7178cf1095f",
   "transformations": {
     "desktop/package-lock.json": {
       "unreachable_package_entries_removed": 84

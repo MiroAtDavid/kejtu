@@ -75,6 +75,9 @@ class Files:
         # Installation state includes backups, logs, launch inputs and runtimes.
         # The archive may also be explicitly located outside that installation.
         roots={(self.host.root/'.state').resolve(),self.private}
+        if sys.platform == 'linux':
+            from .desktop_paths import linux_desktop_paths
+            roots.update(path.resolve() for path in linux_desktop_paths())
         if sys.platform == 'win32':
             # A broad Home share must not permit edits to the code that owns
             # the next file request. Packaged state also has an adjacent pin.
@@ -84,14 +87,24 @@ class Files:
         return tuple(sorted(roots,key=lambda p:(len(p.parts),str(p))))
 
     def is_private(self,path):
+        if sys.platform == 'linux':path=Path(path).resolve()
         return any(path==root or root in path.parents for root in self.private_roots)
 
     def code_dependency(self,path):
         # Only an explicitly selected descendant of these installation areas may
         # reappear read-only after masking state. Never re-expose the archive,
         # even when an operator located it inside a program installation area.
+        if sys.platform == 'linux':path=path.resolve()
         if path==self.private or path in self.private.parents or self.private in path.parents:
             return False
+        if sys.platform == 'linux':
+            from .desktop_paths import linux_desktop_paths
+            # A custom desktop location inside a runtime must not be restored
+            # with that runtime's otherwise legitimate read-only exception.
+            for desktop in linux_desktop_paths():
+                desktop=desktop.resolve()
+                if path==desktop or path in desktop.parents or desktop in path.parents:
+                    return False
         state=(self.host.root/'.state').resolve()
         return any(root in path.parents for root in
             (state/'apps',state/'mcp-runtime',state/'playwright'))
@@ -99,6 +112,9 @@ class Files:
     def protect(self,row):
         if row['transport']!='stdio':return
         row['private_paths']=[str(p) for p in self.private_roots]
+        if sys.platform == 'linux':
+            from .desktop_paths import linux_desktop_paths
+            row['desktop_private_paths']={str(p):str(p.resolve()) for p in linux_desktop_paths()}
         row['private_read_paths']=[p for p in row['read_paths']
             if self.is_private(Path(p)) and self.code_dependency(Path(p))]
 
