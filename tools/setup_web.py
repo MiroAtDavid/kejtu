@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import shutil
 import signal
+import stat
 import subprocess
 import sys
 import tempfile
@@ -34,7 +35,49 @@ def managed_executable(path, directory):
     return path
 
 
-def prepared_browsers(root, *, env=None):
+def normalize_managed_permissions(files):
+    """Remove installer-umask write access from exact verified runtime files.
+
+    Validate the entire set before changing modes. Open every path component
+    without following links, then chmod the held file descriptor so a renamed
+    path cannot redirect the operation. Custom browser selections never enter
+    this set; content, ownership and existing executable bits are preserved.
+    """
+    opened = []
+    try:
+        for path, directory, expected_sha256 in files:
+            path, directory = Path(path), Path(directory)
+            if not path.is_absolute() or not path.is_relative_to(directory) or '..' in path.parts:
+                raise ValueError('Browser permission repair requires an exact managed runtime path.')
+            descriptor = os.open('/', os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                for part in path.parts[1:-1]:
+                    child = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=descriptor)
+                    os.close(descriptor)
+                    descriptor = child
+                file_descriptor = os.open(path.name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK,
+                                          dir_fd=descriptor)
+                opened.append((file_descriptor, None))
+            finally:
+                os.close(descriptor)
+            info = os.fstat(file_descriptor)
+            if (not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid()
+                    or info.st_nlink != 1 or info.st_mode & 0o7000):
+                raise ValueError('Managed browser permission repair requires ordinary, singly linked files owned by this user.')
+            with os.fdopen(os.dup(file_descriptor), 'rb') as stream:
+                actual_sha256 = hashlib.file_digest(stream, 'sha256').hexdigest()
+            if actual_sha256 != expected_sha256:
+                raise ValueError('A managed browser file changed during preparation; rerun setup.')
+            opened[-1] = (file_descriptor, stat.S_IMODE(info.st_mode))
+        for descriptor, mode in opened:
+            if mode & 0o022:
+                os.fchmod(descriptor, mode & ~0o022)
+    finally:
+        for descriptor, _ in opened:
+            os.close(descriptor)
+
+
+def prepared_browsers(root, *, env=None, normalize_permissions=False):
     """Describe installed, version-matched browsers without launching them.
 
     Executable paths come from the pinned Playwright registries. Their layout is
@@ -60,6 +103,11 @@ def prepared_browsers(root, *, env=None):
     node_pin = json.loads((root / 'ops/mcp/package-lock.json').read_text())['packages']['node_modules/playwright-core']['version']
     if node_version != node_pin:
         raise ValueError('The browser Playwright version does not match ops/mcp/package-lock.json.')
+    node_runtime = root / '.state/mcp-runtime/playwright'
+    if (node_runtime / 'package-lock.json').read_bytes() != (root / 'ops/mcp/package-lock.json').read_bytes():
+        raise ValueError('The installed browser lock does not match ops/mcp/package-lock.json.')
+    cli = node_runtime / 'node_modules/@playwright/mcp/cli.js'
+    files = [(cli, node_runtime, file_sha256(cli))]
     rows = []
     for role, package, version, name, directory in (
         ('page_reader', reader_package, reader['version'], 'chromium-headless-shell', root / '.state/playwright'),
@@ -73,6 +121,11 @@ def prepared_browsers(root, *, env=None):
                                       env=browser_env, capture=True).stdout.strip(), directory)
         rows.append(dict(role=role, playwright_version=version, registry_sha256=file_sha256(registry),
                          executable=str(path), bytes=path.stat().st_size, sha256=file_sha256(path)))
+        package_root = root / '.venv' if role == 'page_reader' else node_runtime
+        files.extend(((registry, package_root, rows[-1]['registry_sha256']),
+                      (path, directory, rows[-1]['sha256'])))
+    if normalize_permissions:
+        normalize_managed_permissions(files)
     return dict(schema=1, kind='kejtu-web-prepared', root=str(root),
                 locks={name: file_sha256(root / name) for name in ('ops/requirements.lock', 'ops/mcp/package-lock.json')},
                 browsers=rows)
@@ -203,8 +256,12 @@ def install(root=ROOT, *, prepare_only=False, receipt=None):
         env['PLAYWRIGHT_BROWSERS_PATH'] = str(runtime / 'browsers')
         print('Installing Chromium for the browser connection…', flush=True)
         run(['/usr/bin/node', cli, 'install', '--no-shell', 'chromium'], env=env)
+        # npm/pip may retain group-write bits from a desktop user's umask 0002.
+        # Repair only this checked managed set, including on an existing install,
+        # before the unchanged strict launch checks or an AppArmor receipt.
+        prepared = prepared_browsers(root, normalize_permissions=True)
         if prepare_only:
-            result = prepared_browsers(root)
+            result = prepared
             write_receipt(receipt, result)
             print('Web runtimes downloaded; browser launch and configuration are still pending.', flush=True)
             return result

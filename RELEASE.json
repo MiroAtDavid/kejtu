@@ -3312,19 +3312,19 @@
       "source_sha256": "a5e17ba56d63f0bd29ada4fc1af128f998346881c51e97ead33414a2133e6088"
     },
     "tools/setup_web.py": {
-      "bytes": 14390,
+      "bytes": 17668,
       "mode": "100644",
-      "sha256": "9ec885aa5a94f7e5c93f05216d0a484e1b144a2392a93bc0a8cf1159e18ff9e0",
+      "sha256": "8d8667dc0c7c8edb40c21b0a2f893744035496ffc4631cdb35f44a71c49e0c05",
       "source": "tools/setup_web.py",
-      "source_sha256": "9ec885aa5a94f7e5c93f05216d0a484e1b144a2392a93bc0a8cf1159e18ff9e0"
+      "source_sha256": "8d8667dc0c7c8edb40c21b0a2f893744035496ffc4631cdb35f44a71c49e0c05"
     }
   },
   "inclusion_manifest_sha256": "bc88248f18bf3350ef7441d3363b7654b76669554dc63a6d3634d40e1cb6952e",
   "kind": "linux-source-x86_64",
   "schema": 1,
-  "source_commit": "662cb85f17346d2d12ba257bca1da1d9d34fac7f",
-  "source_date_epoch": 1793817590,
-  "source_tree": "206ec1369e4aec06efc4d3a09c5dd7b63d82112f",
+  "source_commit": "0db9a756949d4db2b75b0ec672fcc95ba7da6d98",
+  "source_date_epoch": 1793818628,
+  "source_tree": "a546d3577591aa65e0e8f036633f6843fd3c6363",
   "transformations": {
     "desktop/package-lock.json": {
       "unreachable_package_entries_removed": 84
