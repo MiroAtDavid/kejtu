@@ -29,11 +29,11 @@
       "source_sha256": "49d81c13d0ad9a479b26a8ce16dcbdc7427f7393dc949ea4b8d486a0f31a3e24"
     },
     "README.md": {
-      "bytes": 5013,
+      "bytes": 6005,
       "mode": "100644",
-      "sha256": "7e4d7ac00d0cdd1a11caa0ee9ac7c64d9c5aff3969aa0c09a5a44a86dd6990d0",
+      "sha256": "7aab54b0e58bc02f104202df9a70fc1b0a862e561c5e8de1e94c9281e294bf1b",
       "source": "packaging/source/README.md",
-      "source_sha256": "7e4d7ac00d0cdd1a11caa0ee9ac7c64d9c5aff3969aa0c09a5a44a86dd6990d0"
+      "source_sha256": "7aab54b0e58bc02f104202df9a70fc1b0a862e561c5e8de1e94c9281e294bf1b"
     },
     "contracts/native-v1.json": {
       "bytes": 106784,
@@ -1834,12 +1834,19 @@
       "source": "ops/requirements.lock",
       "source_sha256": "0e03cb1d96c246ec263c12d8518b810c870c62fc081b2f28931a04fe9230d68a"
     },
-    "packaging/source/install.py": {
-      "bytes": 20867,
+    "packaging/source/apparmor.py": {
+      "bytes": 7251,
       "mode": "100644",
-      "sha256": "497100fb60dd918abd30451b477f9b281f5121723b56c3ecb9fb484b7a399552",
+      "sha256": "5dba51277a607f258aa1f7a339495f4d87189a55947153f232b590f75460767c",
+      "source": "packaging/source/apparmor.py",
+      "source_sha256": "5dba51277a607f258aa1f7a339495f4d87189a55947153f232b590f75460767c"
+    },
+    "packaging/source/install.py": {
+      "bytes": 21887,
+      "mode": "100644",
+      "sha256": "c972562fe5960f3cbc82e7f1397ab6f79965c4dcdb339821084836f9c1ba02eb",
       "source": "packaging/source/install.py",
-      "source_sha256": "497100fb60dd918abd30451b477f9b281f5121723b56c3ecb9fb484b7a399552"
+      "source_sha256": "c972562fe5960f3cbc82e7f1397ab6f79965c4dcdb339821084836f9c1ba02eb"
     },
     "packaging/source/runtime.lock.json": {
       "bytes": 2879,
@@ -1856,11 +1863,11 @@
       "source_sha256": "7a995cce33a6ec47af8be9089e2989bdb137387a570627f791d14a3985c85077"
     },
     "run-development.sh": {
-      "bytes": 2994,
+      "bytes": 3048,
       "mode": "100755",
-      "sha256": "82d12d4be7940b3dbdfc5c62fdf8813d62d860a73e0428d2f8e84717ebb917cc",
+      "sha256": "959e9b916474f37783f15a8c2dd86e713c6441b2a58dab34e7cee516dcc04438",
       "source": "run-development.sh",
-      "source_sha256": "82d12d4be7940b3dbdfc5c62fdf8813d62d860a73e0428d2f8e84717ebb917cc"
+      "source_sha256": "959e9b916474f37783f15a8c2dd86e713c6441b2a58dab34e7cee516dcc04438"
     },
     "src/kejtu_next/__init__.py": {
       "bytes": 384,
@@ -3262,6 +3269,13 @@
       "source": "src/kejtu_next/starter_skills/topic-research/SKILL.md",
       "source_sha256": "d8b32feb8dfbc6a66d5cb63a8f9fe7856d55087c4e82048d731e1378ef6cad58"
     },
+    "tools/linux_toolchain.py": {
+      "bytes": 2774,
+      "mode": "100644",
+      "sha256": "63e2919d8cebae9cf81cb87e5bccf611c3857488309e0031ecc76ed462228b29",
+      "source": "tools/linux_toolchain.py",
+      "source_sha256": "63e2919d8cebae9cf81cb87e5bccf611c3857488309e0031ecc76ed462228b29"
+    },
     "tools/prepare_first_run.py": {
       "bytes": 3272,
       "mode": "100644",
@@ -3284,19 +3298,19 @@
       "source_sha256": "a5e17ba56d63f0bd29ada4fc1af128f998346881c51e97ead33414a2133e6088"
     },
     "tools/setup_web.py": {
-      "bytes": 5375,
+      "bytes": 10834,
       "mode": "100644",
-      "sha256": "c7f89e7d409c0787cca1643ea886198f20d5ab32938b6b9b4cf3dae7f05f78a4",
+      "sha256": "0f7513132f52617884b4129d838dbd8cdb3fe31524531c704631a62c4903c432",
       "source": "tools/setup_web.py",
-      "source_sha256": "c7f89e7d409c0787cca1643ea886198f20d5ab32938b6b9b4cf3dae7f05f78a4"
+      "source_sha256": "0f7513132f52617884b4129d838dbd8cdb3fe31524531c704631a62c4903c432"
     }
   },
-  "inclusion_manifest_sha256": "6da10ad6e747c058c5d3b34272262822676f4193de1a59d10462439eeedd6844",
+  "inclusion_manifest_sha256": "bc88248f18bf3350ef7441d3363b7654b76669554dc63a6d3634d40e1cb6952e",
   "kind": "linux-source-x86_64",
   "schema": 1,
-  "source_commit": "02550e5f577b3117c29d6eb3c6b89a6ca538c7c9",
-  "source_date_epoch": 1793751311,
-  "source_tree": "fc9f2e8af35875736e41330f54dafaf0a935d1ec",
+  "source_commit": "8ac6e9de7cdac62ae6d9e724bc66c3e6c3471e23",
+  "source_date_epoch": 1793752748,
+  "source_tree": "52a4180b148dfa0386d7cd2e1c9a11a1cd5200f6",
   "transformations": {
     "desktop/package-lock.json": {
       "unreachable_package_entries_removed": 84

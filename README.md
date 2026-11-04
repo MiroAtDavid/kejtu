@@ -17,12 +17,21 @@ connection and enough disk space for a Rust build and downloaded tools. Python
 other distribution packages are checked by the installer. Missing system packages
 need `sudo`; application files and runtimes stay in this directory.
 
+On Ubuntu, setup also uses `sudo` for a per-installation AppArmor profile covering
+the two downloaded browser executables. Chromium's sandbox and Ubuntu's global
+restriction stay enabled. Custom browser selections are preserved; setup does
+not grant a policy to arbitrary browsers.
+
 Files, page reading, the temporary browser and document tools are included in
 setup. Chromium runtimes and the pinned document tools are separate downloads;
 no model weights or API account are included. `--media` also prepares optional
 radio/video dependencies. Your provider may charge for requests.
 
 ## Install and start
+
+If Git is missing, install it first: `sudo apt-get install git` on Ubuntu, or
+`sudo pacman -S --needed git` on Manjaro. Use your distribution's normal update
+procedure if its package lists are stale.
 
 Clone the private release repository with Git into its final location. Keep this
 checkout there; environments and saved tool paths refer to it. Run the plan
@@ -82,6 +91,17 @@ removing the application; shared documents live in the folders you chose.
 Keyring credentials need their own system backup. Removing this checkout removes
 its local data and backups, but does not uninstall system dependencies or delete
 shared documents or keyring entries. Keep the copied backup somewhere safe.
+
+On Ubuntu, setup prints its exact `/etc/apparmor.d/kejtu-source-…` profile path.
+To remove that policy after stopping Kejtu, run the following with that exact
+path, then remove the same file with `sudo rm -- /etc/apparmor.d/kejtu-source-EXACT_HASH`:
+
+```sh
+sudo /usr/sbin/apparmor_parser --remove --skip-cache /etc/apparmor.d/kejtu-source-EXACT_HASH
+```
+
+Keep the policy when reinstalling at the same path. Do not use a wildcard or
+disable AppArmor. The installer recreates a missing profile when needed.
 
 ## Limits
 

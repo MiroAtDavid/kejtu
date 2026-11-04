@@ -24,14 +24,20 @@ import time
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[2]
-SYSTEM_PATH = '/usr/bin:/bin'
+_spec = importlib.util.spec_from_file_location('kejtu_linux_toolchain', ROOT / 'tools/linux_toolchain.py')
+_toolchain = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_toolchain)
+_spec = importlib.util.spec_from_file_location('kejtu_source_apparmor', ROOT / 'packaging/source/apparmor.py')
+_apparmor = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_apparmor)
+SYSTEM_PATH = _toolchain.SYSTEM_PATH
 # Native packages follow Tauri's Linux prerequisites; Chromium uses the libraries
 # listed by Playwright. Package managers remain the authority for transitive deps.
 PACKAGES = {
     'ubuntu': '''python3 python3-venv python3-dev nodejs npm rustc cargo
         build-essential pkg-config libwebkit2gtk-4.1-dev libssl-dev
         libayatana-appindicator3-dev librsvg2-dev patchelf curl file git
-        bubblewrap poppler-utils libsecret-1-0 gnome-keyring
+        bubblewrap poppler-utils libsecret-1-0 libsecret-tools gnome-keyring apparmor
         libnss3 libnspr4 libatk1.0-0t64 libatk-bridge2.0-0t64 libatspi2.0-0t64
         libx11-6 libxcb1 libxcomposite1 libxdamage1 libxext6 libxfixes3
         libxrandr2 libxkbcommon0 libdrm2 libgbm1 libasound2t64 libcups2t64
@@ -95,18 +101,12 @@ def clean_group(process, leader_start):
 def run(args, *, cwd=None, env=None, capture=False):
     args = [str(value) for value in args]
     environment = dict(os.environ if env is None else env)
-    # The shared Files/browser owners require system Node. Keep npm's env-node
-    # shebang and all nested helpers on that same interpreter, including under nvm.
-    environment['PATH'] = SYSTEM_PATH
+    # Dependency bootstrap can run before Rust is installed. Build commands pass
+    # the complete shared toolchain environment once prerequisites are present.
+    if env is None:
+        environment['PATH'] = SYSTEM_PATH
     for variable in ('PYTHONPATH', 'PYTHONHOME', 'NODE_OPTIONS', 'PIP_TARGET', 'PIP_PREFIX'):
         environment.pop(variable, None)
-    if args[0] == 'cargo':
-        cargo, rustc = shutil.which('cargo'), shutil.which('rustc')
-        if not cargo or not rustc:
-            raise InstallError('The selected Rust toolchain is unavailable.')
-        args[0] = cargo
-        environment['RUSTC'] = rustc
-        environment['PATH'] += ':' + str(Path(cargo).parent)
     if not capture:
         print('+ ' + shlex.join(args), flush=True)
     privileged = args[0] == 'sudo'
@@ -119,7 +119,7 @@ def run(args, *, cwd=None, env=None, capture=False):
     except BaseException:
         with finishing_command():
             if privileged:
-                print('Waiting for the current system package transaction to finish safely before stopping…', flush=True)
+                print('Waiting for the current privileged system operation to finish safely before stopping…', flush=True)
             else:
                 clean_group(process, leader_start)
             process.communicate()
@@ -237,7 +237,7 @@ def check_toolchain():
         match = re.search(r'(\d+)\.(\d+)\.(\d+)', version)
         if not match or tuple(map(int, match.groups())) < minimum:
             raise InstallError(f'{tool} {".".join(map(str, minimum))}+ is required; found {version.strip()}. Update the toolchain first.')
-    for tool in ('npm', 'bwrap', 'pdfinfo', 'pdftotext', 'pdftoppm'):
+    for tool in ('npm', 'bwrap', 'pdfinfo', 'pdftotext', 'pdftoppm', 'secret-tool'):
         if not shutil.which(tool, path=SYSTEM_PATH):
             raise InstallError(f'The required system command {tool} is missing.')
     run(['pkg-config', '--exists', 'gtk+-3.0', 'webkit2gtk-4.1', 'openssl'])
@@ -361,25 +361,29 @@ def install_craft(root, lock):
             prepared.rename(destination)
 
 
-def build(root, python, *, media, jobs, lock):
+def build(root, python, *, media, jobs, lock, browser_policy=False, allow_system=True):
+    env = _toolchain.environment()
     interpreter = venv(root, root / '.venv', python)
-    run([interpreter, '-m', 'pip', 'install', '--disable-pip-version-check', '-r', root / 'ops/requirements.lock'])
-    run([interpreter, '-m', 'pip', 'install', '--no-deps', '--no-build-isolation', '-e', root])
-    run([interpreter, '-m', 'pip', 'check'])
-    run(['/usr/bin/npm', 'ci', '--no-audit', '--no-fund'], cwd=root / 'desktop')
-    for script in ('setup_files.py', 'setup_web.py'):
-        run([interpreter, '-B', root / 'tools' / script], cwd=root)
+    run([interpreter, '-m', 'pip', 'install', '--disable-pip-version-check', '-r', root / 'ops/requirements.lock'], env=env)
+    run([interpreter, '-m', 'pip', 'install', '--no-deps', '--no-build-isolation', '-e', root], env=env)
+    run([interpreter, '-m', 'pip', 'check'], env=env)
+    run(['/usr/bin/npm', 'ci', '--no-audit', '--no-fund'], cwd=root / 'desktop', env=env)
+    run([interpreter, '-B', root / 'tools/setup_files.py'], cwd=root, env=env)
+    if browser_policy:
+        receipt = root / '.state/source-install/web-prepared.json'
+        run([interpreter, '-B', root / 'tools/setup_web.py', '--prepare-only', '--receipt', receipt], cwd=root, env=env)
+        _apparmor.ensure(root, receipt, run, allow_system=allow_system, env=env)
+    run([interpreter, '-B', root / 'tools/setup_web.py'], cwd=root, env=env)
     install_craft(root, lock)
     if media:
         media_python = venv(root, root / '.state/video-tools', python)
-        run([media_python, '-m', 'pip', 'install', '--disable-pip-version-check', '-r', root / 'ops/private-video-requirements.lock'])
-        run([media_python, '-m', 'pip', 'check'])
-    run(['/usr/bin/npm', 'run', 'check'], cwd=root / 'desktop')
-    run(['/usr/bin/npm', 'run', 'build'], cwd=root / 'desktop')
-    env = os.environ.copy()
+        run([media_python, '-m', 'pip', 'install', '--disable-pip-version-check', '-r', root / 'ops/private-video-requirements.lock'], env=env)
+        run([media_python, '-m', 'pip', 'check'], env=env)
+    run(['/usr/bin/npm', 'run', 'check'], cwd=root / 'desktop', env=env)
+    run(['/usr/bin/npm', 'run', 'build'], cwd=root / 'desktop', env=env)
     env['CARGO_TARGET_DIR'] = str(root / '.state/build/rust')
     env['CARGO_BUILD_JOBS'] = str(jobs)
-    run(['cargo', 'build', '--locked', '--manifest-path', root / 'desktop/src-tauri/Cargo.toml'], cwd=root, env=env)
+    run([env['CARGO'], 'build', '--locked', '--manifest-path', root / 'desktop/src-tauri/Cargo.toml'], cwd=root, env=env)
 
 
 def main(argv=None):
@@ -405,14 +409,17 @@ def main(argv=None):
         print('Required downloads: locked Python/npm/Rust dependencies, Files, two matched Chromium engines, and Craft document runtimes (202 MB compressed).')
         print('Optional media: ' + ('mpv and locked yt-dlp environment selected.' if args.media else 'not selected; add --media for radio/video.'))
         print('No model is downloaded. GPU embeddings require the separately documented compatible Ollama/model setup.')
-        print('Only OS package commands use sudo; app files and runtimes belong to your normal user.')
+        browser_policy = _apparmor.required(distro)
+        print('OS packages and the exact-path Ubuntu browser policy use sudo; app files and runtimes belong to your normal user.')
+        if browser_policy:
+            print('Ubuntu restricts browser user namespaces. Install/verify a per-checkout AppArmor profile for the two pinned browser paths; keep the global restriction and both browser sandboxes enabled.')
         for command in package_commands(distro, missing):
             print(shlex.join(command))
         if not args.install:
             print('No changes made. Add --install to proceed from this final installation path.')
             return 0
         if os.geteuid() == 0:
-            raise InstallError('Run the installer as your desktop user, without sudo. It requests sudo only for OS packages.')
+            raise InstallError('Run the installer as your desktop user, without sudo. It requests sudo for OS packages and the Ubuntu browser policy.')
         if missing and args.no_system_packages:
             raise InstallError('Required OS packages are missing; --no-system-packages made no changes.')
         with lock_file(ROOT / '.state/source-install/install.lock'):
@@ -421,7 +428,8 @@ def main(argv=None):
                 for command in package_commands(distro, missing):
                     run(command)
                 python = check_toolchain()
-                build(ROOT, python, media=args.media, jobs=args.jobs, lock=lock)
+                build(ROOT, python, media=args.media, jobs=args.jobs, lock=lock,
+                      browser_policy=browser_policy, allow_system=not args.no_system_packages)
         print('Installation finished. Saved data, credentials and permissions were not reset.')
         print('Next: ./kejtu start' if (ROOT / '.state/runtime/core.sqlite3').is_file() else 'Next: ./kejtu initialize')
         return 0

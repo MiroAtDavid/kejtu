@@ -49,4 +49,4 @@ WEBKIT_DISABLE_DMABUF_RENDERER=${WEBKIT_DISABLE_DMABUF_RENDERER:-1}
 export GDK_BACKEND WINIT_UNIX_BACKEND WEBKIT_DISABLE_DMABUF_RENDERER
 unset WAYLAND_DISPLAY
 cd "$candidate_dir/desktop"
-exec npm run tauri dev -- --no-watch
+exec "$candidate_dir/.venv/bin/python" -B "$candidate_dir/tools/linux_toolchain.py" launch
