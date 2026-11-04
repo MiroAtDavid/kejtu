@@ -29,11 +29,11 @@
       "source_sha256": "49d81c13d0ad9a479b26a8ce16dcbdc7427f7393dc949ea4b8d486a0f31a3e24"
     },
     "README.md": {
-      "bytes": 6005,
+      "bytes": 6936,
       "mode": "100644",
-      "sha256": "7aab54b0e58bc02f104202df9a70fc1b0a862e561c5e8de1e94c9281e294bf1b",
+      "sha256": "464028820fed3d0fb75796ca0ec8f1136a8b25c80a3e33334401a70823d72596",
       "source": "packaging/source/README.md",
-      "source_sha256": "7aab54b0e58bc02f104202df9a70fc1b0a862e561c5e8de1e94c9281e294bf1b"
+      "source_sha256": "464028820fed3d0fb75796ca0ec8f1136a8b25c80a3e33334401a70823d72596"
     },
     "contracts/native-v1.json": {
       "bytes": 106784,
@@ -3308,9 +3308,9 @@
   "inclusion_manifest_sha256": "bc88248f18bf3350ef7441d3363b7654b76669554dc63a6d3634d40e1cb6952e",
   "kind": "linux-source-x86_64",
   "schema": 1,
-  "source_commit": "8ac6e9de7cdac62ae6d9e724bc66c3e6c3471e23",
-  "source_date_epoch": 1793752748,
-  "source_tree": "52a4180b148dfa0386d7cd2e1c9a11a1cd5200f6",
+  "source_commit": "0d5ebfcebc6b3541331384bb4468181be66f5320",
+  "source_date_epoch": 1793754042,
+  "source_tree": "34c410d498d111b7e6c388bb0feb4ab3522296da",
   "transformations": {
     "desktop/package-lock.json": {
       "unreachable_package_entries_removed": 84

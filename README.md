@@ -4,18 +4,21 @@ A personal workspace for conversations, notes, projects, tasks, research and
 documents. You connect the AI provider or local model you want to use.
 This is experimental software: useful already, but rough edges remain.
 
-This recipe targets **x86-64 Ubuntu 26.04 and Manjaro**. Verification of this
-release candidate is still in progress; no completed fresh-install or update
-acceptance is claimed yet. Other distributions, Windows and macOS are outside
-this source release.
+This recipe targets **x86-64 Ubuntu 26.04 and Manjaro**. Manjaro VM checks cover
+fresh installation, update, reinstall, opening/closing and preservation of saved
+records, folder permissions and keyring access. Ubuntu installation acceptance
+is still pending its browser policy check. Other distributions, Windows and macOS
+are outside this source release.
 
 ## Requirements
 
 Use a normal desktop account with an unlocked Secret Service keyring, an internet
 connection and enough disk space for a Rust build and downloaded tools. Python
-3.14+, Node/npm, Rust/Cargo, Bubblewrap, GTK/WebKit development libraries and the
-other distribution packages are checked by the installer. Missing system packages
+3.14+, Node 22.12+/npm, Rust/Cargo 1.93+, Bubblewrap, GTK/WebKit development
+libraries and the other distribution packages are checked by the installer. Missing system packages
 need `sudo`; application files and runtimes stay in this directory.
+The Manjaro build was checked with 8 GB RAM and two build jobs; its installation
+used about 5.3 GB, excluding system packages and shared toolchain caches.
 
 On Ubuntu, setup also uses `sudo` for a per-installation AppArmor profile covering
 the two downloaded browser executables. Chromium's sandbox and Ubuntu's global
@@ -108,15 +111,25 @@ disable AppArmor. The installer recreates a missing profile when needed.
 - Local conversations, notebook, projects, tasks, research, document editors and
   controlled tools are implemented. A feature being present does not establish
   that every provider, file format or device has been tested.
+- Manjaro checks exercise Files read/write and permission denials, both browser
+  tools, spreadsheet/word-processing operations and PDF creation/read-back.
+  Radio controls pass; video metadata is retrieved, but playback crashes in the
+  VM's virtual graphics stack. Actual video output and editing existing PDF
+  content still need separate acceptance.
 - Model calls and enabled web tools send selected information to their services.
   Local storage does not make remote inference private. File access still needs
   your saved folder permissions; installation does not grant folders.
 - Semantic recall needs the separately configured compatible GPU embedding
-  runtime and exact model. It is not installed automatically. CPU fallback is
+  runtime: Ollama at `http://127.0.0.1:11434` with
+  `embeddinggemma-2:270m-bf16-text` matching the exact digest in
+  [the embedding contract](src/kejtu_next/core/recall.py). It is not installed
+  automatically. CPU fallback is
   deferred; the installer does not substitute a model or rebuild the index under
   another model. The CPU-only test VMs cannot verify GPU embedding behavior.
 - Small-context model configurations can refuse a turn when required instructions
   and tool results will not fit. Kejtu does not silently truncate required material.
+  Focused release checks pass; the broader development test suite still has
+  unresolved failures. This is not a claim that the whole application is tested.
 - Account sign-in, paid APIs, GPU embeddings and audible media output require
   separate acceptance on suitable hardware/accounts. No bundled media content,
   guaranteed search results or automatic updater is provided.
