@@ -83,17 +83,24 @@ Use the same directory; do not copy another installation's private state into it
 The installer can be rerun after an interrupted download or build. It does not
 perform an automatic source downgrade or retry uncertain document operations.
 
-Conversations, settings, grants, cached runtimes and backups are under `.state/`
-in this checkout. `./kejtu backup` saves the database and selected configuration there; it is not
-a complete copy of all runtime files.
+Conversations, backend settings, grants, cached runtimes and backups are under
+`.state/` in this checkout. `./kejtu backup` saves the database and selected
+configuration there; it is not a complete application backup.
+Appearance preferences, avatars, some drafts and pending recovery records live in
+`~/.local/share/dev.kejtu.next.development/`. Window geometry lives in
+`~/.config/dev.kejtu.next.development/.window-state.json`. An absolute
+`XDG_DATA_HOME` or `XDG_CONFIG_HOME` replaces the corresponding base directory.
+Back up these desktop directories with Kejtu stopped as well; they are shared by
+source checkouts using this desktop identity.
 API keys use the desktop keyring. ChatGPT sign-in tokens are stored in private,
 permission-protected files under `.state/runtime/chatgpt/`; those files are not
 keyring-encrypted. Treat a full `.state/` backup as sensitive.
 Back up the stopped checkout's entire `.state/` and your shared documents before
 removing the application; shared documents live in the folders you chose.
 Keyring credentials need their own system backup. Removing this checkout removes
-its local data and backups, but does not uninstall system dependencies or delete
-shared documents or keyring entries. Keep the copied backup somewhere safe.
+its local archive and backups, but leaves the desktop directories, shared
+documents, keyring entries and system dependencies in place. Keep the copied
+backups somewhere safe; desktop storage can contain unsaved private text too.
 
 On Ubuntu, setup prints its exact `/etc/apparmor.d/kejtu-source-…` profile path.
 To remove that policy after stopping Kejtu, run the following with that exact
