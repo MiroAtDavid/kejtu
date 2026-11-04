@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "platform": "linux-x86_64",
+  "craft": [
+    {
+      "id": "gridcraft",
+      "version": "0.6.1",
+      "archive": "gridcraft-0.6.1-linux-x86_64.tar.gz",
+      "directory": "gridcraft-0.6.1-linux-x86_64",
+      "url": "https://github.com/storytold/gridcraft/releases/download/v0.6.1/gridcraft-0.6.1-linux-x86_64.tar.gz",
+      "bytes": 19463556,
+      "sha256": "61163b62d9faf814b864e1b255d15dc310a71a72ca03d8791fa8024420162745",
+      "unpacked_bytes": 47496489,
+      "tree_sha256": "5465967d2556e06761ab73418bbf9964974d1c0b100dfd3b7ef435a757ac121c",
+      "executable": "bin/gridcraft-cli",
+      "notices": [
+        "share/doc/gridcraft/LICENSE-APACHE",
+        "share/doc/gridcraft/LICENSE-MIT",
+        "share/doc/gridcraft/OFL-biz-ud-mincho.txt",
+        "share/doc/gridcraft/OFL-biz-ud-pgothic.txt",
+        "share/doc/gridcraft/OFL-shippori-mincho.txt"
+      ]
+    },
+    {
+      "id": "pdfcraft",
+      "version": "0.7.1",
+      "archive": "pdfcraft-0.7.1-linux-x86_64.tar.gz",
+      "directory": "pdfcraft-0.7.1-linux-x86_64",
+      "url": "https://github.com/storytold/pdfcraft/releases/download/v0.7.1/pdfcraft-0.7.1-linux-x86_64.tar.gz",
+      "bytes": 84607597,
+      "sha256": "bc7d651511273720f6a5ccbe0dd5b2c4ddccb6c576a0aff619f39d2c5667a315",
+      "unpacked_bytes": 165487215,
+      "tree_sha256": "bc1743c27e5f5c22471280c62fb7fdc5e1b99525f7c2c3ce6796f725b54185fe",
+      "executable": "bin/pdfcraft-cli",
+      "notices": [
+        "share/doc/pdfcraft/LICENSE-APACHE",
+        "share/doc/pdfcraft/LICENSE-MIT",
+        "share/doc/pdfcraft/NOTICE",
+        "share/doc/pdfcraft/OFL-biz-ud-mincho.txt",
+        "share/doc/pdfcraft/OFL-biz-ud-pgothic.txt",
+        "share/doc/pdfcraft/OFL-noto-sans-arabic.txt",
+        "share/doc/pdfcraft/OFL-noto-sans-cjk-sc.txt",
+        "share/doc/pdfcraft/OFL-noto-sans-thai.txt",
+        "share/doc/pdfcraft/OFL-shippori-mincho.txt"
+      ]
+    },
+    {
+      "id": "wordcraft",
+      "version": "0.6.1",
+      "archive": "wordcraft-0.6.1-linux-x86_64.tar.gz",
+      "directory": "wordcraft-0.6.1-linux-x86_64",
+      "url": "https://github.com/storytold/wordcraft/releases/download/v0.6.1/wordcraft-0.6.1-linux-x86_64.tar.gz",
+      "bytes": 96839306,
+      "sha256": "79bd54c81276f6ea551222432adec15e0eaab4cb5881decee38eafd7a5ca38f9",
+      "unpacked_bytes": 177715203,
+      "tree_sha256": "a91bcd4aeb86a5a4e8c159320c54485ae537c6a2423d4e2391e2b159c4727f35",
+      "executable": "bin/wordcraft-cli",
+      "notices": [
+        "share/doc/wordcraft/LICENSE-APACHE",
+        "share/doc/wordcraft/LICENSE-MIT",
+        "share/doc/wordcraft/OFL-biz-ud-mincho.txt",
+        "share/doc/wordcraft/OFL-biz-ud-pgothic.txt",
+        "share/doc/wordcraft/OFL-noto-sans-arabic.txt",
+        "share/doc/wordcraft/OFL-noto-sans-cjk-sc.txt",
+        "share/doc/wordcraft/OFL-shippori-mincho.txt"
+      ]
+    }
+  ]
+}

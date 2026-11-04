@@ -1,0 +1,21 @@
+{
+  "upstream": "https://github.com/storytold/wordcraft",
+  "version": "0.6.1",
+  "commit": "7dfa6b0",
+  "bridge_version": 2,
+  "appearance": "kejtu-compact",
+  "files": {
+    "wordcraft-web-2d9b96c6f7bfd5df.js": "f01dddab92fb4962c9dae6a2b4b0cfa8055dd7fed23eb757eeb4d124406e933b",
+    "wordcraft-web-2d9b96c6f7bfd5df_bg.wasm": "cd036835389dfba073604d40f06903dd9c6a46fdbd876668b9fb93e2e4ca607e",
+    "index.html": "0dc4d9586a98e6f742e0824d67d71fa6f4053ebbcf52fb6be6a5b96bd3fef58f",
+    "bootstrap.js": "678b156a0ad721bdbd127b7e7686af99cdd6496c36ce021e65eab2a9df98c6b3",
+    "LICENSE-MIT": "fc257de83c44ae49e4aad1cf777b886794be3ac9c8d00c010ef55935d5bbeba5",
+    "LICENSE-APACHE": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+    "NOTICE": "950b26ace0a5aa34c33358a287a22989dd40c5f4eb943be1e0f51ae3944192cc",
+    "ATTRIBUTION.md": "80304fbd8d249b80cf6951eec5c1f23d63df3674ee7ba96ee54b486b4530e2cb",
+    "THIRD-PARTY-LICENSES.txt": "85aeb6d298e000ea395e7ff0d9f8c6cd98a6bfd4c4d5f2b47dbc105fd5d85b8b",
+    "CARGO-LICENSES.txt": "89082d99eabc69e3e45b21b3c2035020a7678206a32202e903118af717e64f0b",
+    "RUST-LICENSES.html": "68129500b616d5838629e68f55ff3aed5e096dacf60ce9eb41bbe599a563afa6",
+    "LICENSE-MANIFEST.json": "064139877016dd35affb08101953f56a59e712a54170f0b2b09eeadf180e5829"
+  }
+}

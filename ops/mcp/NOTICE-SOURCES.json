@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "components": [
+    {
+      "component": "@modelcontextprotocol/server-filesystem",
+      "version": "1.0.0",
+      "file": "filesystem/LICENSE",
+      "url": "https://raw.githubusercontent.com/modelcontextprotocol/servers/c003d0d807409b22fa640d1f8e11f38f15755721/LICENSE",
+      "sha256": "0382b0057770ca05e9c350a50aa3b1c1fea84da0bc81d723bf00b9aa841be58a",
+      "source_commit": "c003d0d807409b22fa640d1f8e11f38f15755721",
+      "npm_integrity": "sha512-2fN6qhpsiPSBAe0ev1qDPk4sCWdULCZQTuYc4ZY7+BDWQ1XCxLB+7dqStF2ZflgG4G/9vTwQsjxh7pjFqrrpcg==",
+      "provenance_lookup": "npm registry published SLSA statement; artifact digest matches lockfile; signature verification was not performed"
+    },
+    {
+      "component": "@playwright/mcp",
+      "version": "0.0.80",
+      "file": "LICENSE-playwright",
+      "sha256": "9a7110fc2d2f964038e5dc49128f908f29f47a574c961cba16085914e879cbda",
+      "source": "LICENSE from the matching installed npm package",
+      "repository": "https://github.com/microsoft/playwright-mcp"
+    },
+    {
+      "component": "mcp",
+      "version": "2.2.0",
+      "file": "LICENSE-python-sdk",
+      "url": "https://raw.githubusercontent.com/modelcontextprotocol/python-sdk/v2.2.0/LICENSE",
+      "sha256": "5e13dbbc1d120fc2a03cecde7c91424ae2d7de11b63d58ded2f4431e261ee50d"
+    }
+  ]
+}

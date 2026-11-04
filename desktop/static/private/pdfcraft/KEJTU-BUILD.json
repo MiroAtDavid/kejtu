@@ -1,0 +1,22 @@
+{
+  "upstream": "https://github.com/storytold/pdfcraft",
+  "version": "0.9.0",
+  "commit": "645016a",
+  "bridge_version": 1,
+  "appearance": "kejtu-compact",
+  "files": {
+    "pdfcraft-web-f030fd1e70a40ba2.js": "a16e4581f2fd13a0d20def0ba3bda4a2d36182c191d9b2b1d21f04884562ac04",
+    "pdfcraft-web-f030fd1e70a40ba2_bg.wasm": "423373029ef16a3f506b7f62943da2e7bc35e592422879d73c88c387ea4b5c92",
+    "index.html": "4efa9e697c34732cf54c501999d474b576a4e957f437c0219387200c041c610a",
+    "bootstrap.js": "6960bf0b6f2007161c1f11915117c80751b15654b65bbc749c4da52523f4f89a",
+    "LICENSE-MIT": "cd7032ea33b71427f188e34ffb4aee9d6868a57fd196037c5c8b2be03a2a0352",
+    "LICENSE-APACHE": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+    "NOTICE": "496946cff190a3fec32fe0241ea60d40539c73a9da1865073eb0c73ee822c8d5",
+    "ATTRIBUTION.toml": "f9dd2b47ec0201c8300bc87ec5f0d02e2ee8ebc6554da0d7541d274a950485f0",
+    "ATTRIBUTION.md": "a63e1627deda938b9c201dcce0e18cecaa2393d093abe755258e875931151aa8",
+    "THIRD-PARTY-LICENSES.txt": "275df19820cda0199bae548cb7de6097e760482a54c73c622eef5b692013569f",
+    "CARGO-LICENSES.txt": "4535a1e26f3df2dee354854eae5489eddd9b6e835fac4aee9e2e63af9c8f15ef",
+    "RUST-LICENSES.html": "68129500b616d5838629e68f55ff3aed5e096dacf60ce9eb41bbe599a563afa6",
+    "LICENSE-MANIFEST.json": "ad17d4c343f70c73e1b304f1e06684bcb5adb89ac1e953a4a16c5a2687e0153a"
+  }
+}

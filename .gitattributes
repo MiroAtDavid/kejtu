@@ -1,0 +1,10 @@
+# Preserve sealed assets and original third-party license bytes on checkout.
+desktop/static/private/pdfcraft/** -text
+desktop/static/private/wordcraft/** -text
+
+# Upstream notice whitespace is retained verbatim; authored code keeps normal checks.
+desktop/static/private/*/*LICENSE* -whitespace
+desktop/static/private/*/NOTICE -whitespace
+ops/private/license-inputs/*/* -text -whitespace
+ops/mcp/LICENSE* -text -whitespace
+ops/mcp/filesystem/LICENSE -text -whitespace

@@ -1,0 +1,82 @@
+/** Stable category colours; labels/values remain necessary alongside colour. */
+export const PIE_COLORS = [
+  "#86a9b9",
+  "#b5b49a",
+  "#c99a84",
+  "#a5a2bc",
+  "#9cb7a4",
+  "#d4ba85",
+  "#b793a5",
+  "#8fb6b0",
+  "#b1adc7",
+  "#b0bcc5",
+  "#c0af98",
+  "#b5c39b",
+];
+
+export function diagramTheme(dark: boolean) {
+  const ink = dark ? "#e5eaf0" : "#25323b";
+  const line = dark ? "#91a1ae" : "#637580";
+  const surface = dark ? "#25282b" : "#ffffff";
+  return {
+    darkMode: dark,
+    fontFamily: "system-ui, sans-serif",
+    fontSize: "14px",
+    background: surface,
+    primaryColor: dark ? "#303e46" : "#e6eef2",
+    primaryTextColor: ink,
+    primaryBorderColor: line,
+    secondaryColor: dark ? "#37433d" : "#e8eee8",
+    secondaryTextColor: ink,
+    secondaryBorderColor: line,
+    tertiaryColor: dark ? "#45403a" : "#f0eae1",
+    tertiaryTextColor: ink,
+    tertiaryBorderColor: line,
+    textColor: ink,
+    lineColor: line,
+    edgeLabelBackground: surface,
+    noteBkgColor: dark ? "#45403a" : "#f0eae1",
+    noteTextColor: ink,
+    noteBorderColor: line,
+    treeView: { labelFontSize: "14px", labelColor: ink, lineColor: line },
+    // Mindmap branches and Venn sets share the existing quiet category colours.
+    // Text on those filled branches stays dark in either app theme.
+    ...Object.fromEntries(PIE_COLORS.map((color, i) => [`cScale${i}`, color])),
+    ...Object.fromEntries(
+      PIE_COLORS.map((_, i) => [`cScaleLabel${i}`, "#202b33"]),
+    ),
+    ...Object.fromEntries(
+      PIE_COLORS.slice(0, 8).map((color, i) => [`venn${i + 1}`, color]),
+    ),
+    vennTitleTextColor: ink,
+    vennSetTextColor: ink,
+    git0: PIE_COLORS[0],
+    gitBranchLabel0: "#202b33",
+    titleColor: ink,
+    sectionBkgColor: dark ? "#303e46" : "#e6eef2",
+    sectionBkgColor2: surface,
+    sectionTitleColor: ink,
+    taskBkgColor: PIE_COLORS[0],
+    taskBorderColor: line,
+    taskTextColor: "#202b33",
+    taskTextLightColor: "#202b33",
+    taskTextDarkColor: ink,
+    taskTextOutsideColor: ink,
+    activeTaskBkgColor: dark ? "#37433d" : PIE_COLORS[4],
+    activeTaskBorderColor: line,
+    doneTaskBkgColor: dark ? "#303e46" : PIE_COLORS[9],
+    doneTaskBorderColor: line,
+    ...Object.fromEntries(PIE_COLORS.map((color, i) => [`pie${i + 1}`, color])),
+    pieTitleTextColor: ink,
+    pieTitleTextSize: "16px",
+    pieLegendTextColor: ink,
+    pieLegendTextSize: "14px",
+    pieSectionTextColor: "#202b33",
+    pieSectionTextSize: "14px",
+    pieStrokeColor: surface,
+    pieStrokeWidth: "2px",
+    pieOuterStrokeColor: surface,
+    pieOuterStrokeWidth: "0px",
+    pieOpacity: "1",
+  };
+}

@@ -1,0 +1,15 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Existing application commands and the frameless journal's window controls. Native image input is limited to explicit clipboard paste and short-lived, single-use tokens for files received through an OS drop. No general filesystem reader or model tool permission is added.",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-close",
+    "core:window:allow-minimize",
+    "core:window:allow-toggle-maximize",
+    "core:window:allow-start-dragging",
+    "core:window:allow-start-resize-dragging",
+    "core:window:allow-destroy"
+  ]
+}

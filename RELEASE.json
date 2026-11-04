@@ -1,0 +1,3360 @@
+{
+  "exporter_sha256": "746cc683a9f10cc9497bf859336a5df2935e2465719cd755f7f9a927ea2831b4",
+  "files": {
+    ".gitattributes": {
+      "bytes": 467,
+      "mode": "100644",
+      "sha256": "2d7e66ef8fbfb4b8c67f2141eed57c7883c37f47176e12ec624a2cb6f2000612",
+      "source": ".gitattributes",
+      "source_sha256": "2d7e66ef8fbfb4b8c67f2141eed57c7883c37f47176e12ec624a2cb6f2000612"
+    },
+    ".gitignore": {
+      "bytes": 333,
+      "generated": true,
+      "mode": "100644",
+      "sha256": "409583b77b411d32bca7ad1d57f4118a9328be9570f63be66273c17d82b5171f"
+    },
+    "CREDITS.md": {
+      "bytes": 2408,
+      "mode": "100644",
+      "sha256": "ceb408847f153971776da6a35ff19340ae90a4d64f498d5afda09253e008bc1b",
+      "source": "packaging/source/CREDITS.md",
+      "source_sha256": "ceb408847f153971776da6a35ff19340ae90a4d64f498d5afda09253e008bc1b"
+    },
+    "LICENSE": {
+      "bytes": 1091,
+      "mode": "100644",
+      "sha256": "49d81c13d0ad9a479b26a8ce16dcbdc7427f7393dc949ea4b8d486a0f31a3e24",
+      "source": "LICENSE",
+      "source_sha256": "49d81c13d0ad9a479b26a8ce16dcbdc7427f7393dc949ea4b8d486a0f31a3e24"
+    },
+    "README.md": {
+      "bytes": 5013,
+      "mode": "100644",
+      "sha256": "7e4d7ac00d0cdd1a11caa0ee9ac7c64d9c5aff3969aa0c09a5a44a86dd6990d0",
+      "source": "packaging/source/README.md",
+      "source_sha256": "7e4d7ac00d0cdd1a11caa0ee9ac7c64d9c5aff3969aa0c09a5a44a86dd6990d0"
+    },
+    "contracts/native-v1.json": {
+      "bytes": 106784,
+      "mode": "100644",
+      "sha256": "e0207689041993883c55f7e6f3411acfab87b497ce7ea1b778af4b042181ac5f",
+      "source": "contracts/native-v1.json",
+      "source_sha256": "e0207689041993883c55f7e6f3411acfab87b497ce7ea1b778af4b042181ac5f"
+    },
+    "desktop/package-lock.json": {
+      "bytes": 119181,
+      "mode": "100644",
+      "sha256": "76b4e5560275d6fc2e5f97757505690e0d91bb401e3432b86e55a0fb6c806882",
+      "source": "desktop/package-lock.json",
+      "source_sha256": "0c9e1b35f6059968833fa94948b48ebe1e5f6904b9eed1aa5a8798cde929426b"
+    },
+    "desktop/package.json": {
+      "bytes": 904,
+      "mode": "100644",
+      "sha256": "31c0696d61a045a0f44dd2cd8e6a327c987da3fdc0c702aa95cbe4e58cdc1fcb",
+      "source": "desktop/package.json",
+      "source_sha256": "7f9ee17e779bdee3a0a6a03f314b9f851e53c70c6179db18d1bdbacbdefeb56e"
+    },
+    "desktop/src-tauri/Cargo.lock": {
+      "bytes": 109012,
+      "mode": "100644",
+      "sha256": "cd97ed37c7c55516ef44b4e9f2691ee93315cbd709f05295cf5d6e5a7423abe1",
+      "source": "desktop/src-tauri/Cargo.lock",
+      "source_sha256": "84a37e793ed9609af7c1e639ba0e224a20500f32e5564a402ad771625bd01464"
+    },
+    "desktop/src-tauri/Cargo.toml": {
+      "bytes": 1103,
+      "mode": "100644",
+      "sha256": "35ac78bd2150cbcd9c6cfafb0dc4e4e468845b8632860d723b45cb540eb9c9c0",
+      "source": "desktop/src-tauri/Cargo.toml",
+      "source_sha256": "2db37057b7698cdb786b03d08d6c5835fc0564750391136e89a0aabaeba55f31"
+    },
+    "desktop/src-tauri/build.rs": {
+      "bytes": 2496,
+      "mode": "100644",
+      "sha256": "0dbccf0097537eaa60946f5cbc97c83d3557aa86ec8d63c4416e9e186191c216",
+      "source": "desktop/src-tauri/build.rs",
+      "source_sha256": "0dbccf0097537eaa60946f5cbc97c83d3557aa86ec8d63c4416e9e186191c216"
+    },
+    "desktop/src-tauri/capabilities/default.json": {
+      "bytes": 664,
+      "mode": "100644",
+      "sha256": "5407b8a769f2757128154c182a6b1b3ed39a6bd0b07b631ab1f945792c3f7913",
+      "source": "desktop/src-tauri/capabilities/default.json",
+      "source_sha256": "5407b8a769f2757128154c182a6b1b3ed39a6bd0b07b631ab1f945792c3f7913"
+    },
+    "desktop/src-tauri/icons/README.md": {
+      "bytes": 466,
+      "mode": "100644",
+      "sha256": "11af13481df9639da677c0c73bf0b3678d521c44cef2b2ca0547e38a57200a9e",
+      "source": "desktop/src-tauri/icons/README.md",
+      "source_sha256": "11af13481df9639da677c0c73bf0b3678d521c44cef2b2ca0547e38a57200a9e"
+    },
+    "desktop/src-tauri/icons/icon.ico": {
+      "bytes": 370070,
+      "mode": "100644",
+      "sha256": "e15ed9df34495892c798dfb6b3a5fb5d1aed11806028fcbca378031f421a81cd",
+      "source": "desktop/src-tauri/icons/icon.ico",
+      "source_sha256": "e15ed9df34495892c798dfb6b3a5fb5d1aed11806028fcbca378031f421a81cd"
+    },
+    "desktop/src-tauri/icons/icon.png": {
+      "bytes": 16705,
+      "mode": "100644",
+      "sha256": "31fbb4f55f88715b47f57ff3b60cd9fc664bf0204101b74ff9ab4395034cf4ad",
+      "source": "desktop/src-tauri/icons/icon.png",
+      "source_sha256": "31fbb4f55f88715b47f57ff3b60cd9fc664bf0204101b74ff9ab4395034cf4ad"
+    },
+    "desktop/src-tauri/icons/icon.svg": {
+      "bytes": 406,
+      "mode": "100644",
+      "sha256": "032df124484455d4016c273693888a58a9daae8ce41afba0cdd6aa234f14e13b",
+      "source": "desktop/src-tauri/icons/icon.svg",
+      "source_sha256": "032df124484455d4016c273693888a58a9daae8ce41afba0cdd6aa234f14e13b"
+    },
+    "desktop/src-tauri/src/backend.rs": {
+      "bytes": 33739,
+      "mode": "100644",
+      "sha256": "08628f40b57a8625abd050ee5cd06a09ac276a2ecd335219d442debce6f36f54",
+      "source": "desktop/src-tauri/src/backend.rs",
+      "source_sha256": "db4d74812404429a723703dc4c6f168995a7696d9939fd5595aafea7a8fa56b0"
+    },
+    "desktop/src-tauri/src/backend_process.rs": {
+      "bytes": 25141,
+      "mode": "100644",
+      "sha256": "615bb83d3d163e86b3079c1ca10d7ffca9f8dc6c6694c61025f103553694823e",
+      "source": "desktop/src-tauri/src/backend_process.rs",
+      "source_sha256": "12fbcfddaff4b7aaa625902c449f8973581688af1ae183c519f3fc0d7cc76b16"
+    },
+    "desktop/src-tauri/src/files.rs": {
+      "bytes": 3623,
+      "mode": "100644",
+      "sha256": "2c5136ae6e4a7be9d95ed3b9bb10d885b2e7ce8655e6ceac20259f805cace84c",
+      "source": "desktop/src-tauri/src/files.rs",
+      "source_sha256": "3c5a9b6b4d3a1614834f82ab3c5a1148ff7f31868c8cde0f829db2c46602bca9"
+    },
+    "desktop/src-tauri/src/image_input.rs": {
+      "bytes": 8112,
+      "mode": "100644",
+      "sha256": "befe2b4045f6f52266cb50d0af777d99d3c5943a98baf8f19f2fc62248c46742",
+      "source": "desktop/src-tauri/src/image_input.rs",
+      "source_sha256": "977eb5211e31314650f04f5c8bc850590cc301db169813d1d7d73ed949bf1141"
+    },
+    "desktop/src-tauri/src/lib.rs": {
+      "bytes": 8680,
+      "mode": "100644",
+      "sha256": "45c2bd029ea60749f9db28c2c94d8327344fa1b2bf48baf3dd357e1f28a853c1",
+      "source": "desktop/src-tauri/src/lib.rs",
+      "source_sha256": "45c2bd029ea60749f9db28c2c94d8327344fa1b2bf48baf3dd357e1f28a853c1"
+    },
+    "desktop/src-tauri/src/main.rs": {
+      "bytes": 52,
+      "mode": "100644",
+      "sha256": "614b9af4ce4acc0e374fd1adf8e469bd406af17b2c485ad4714da01ec1e99315",
+      "source": "desktop/src-tauri/src/main.rs",
+      "source_sha256": "614b9af4ce4acc0e374fd1adf8e469bd406af17b2c485ad4714da01ec1e99315"
+    },
+    "desktop/src-tauri/src/package_startup.rs": {
+      "bytes": 7527,
+      "mode": "100644",
+      "sha256": "1b30288679b9e9ad4b73590155fcb20e77b7b85832629d797d8b8f44bbaf7299",
+      "source": "desktop/src-tauri/src/package_startup.rs",
+      "source_sha256": "a1016a150becd949a54e2e3d46d5cf1dcb7c80a173f737182c6aa7c89e1e805d"
+    },
+    "desktop/src-tauri/src/pdf_copy.rs": {
+      "bytes": 9148,
+      "mode": "100644",
+      "sha256": "223632c84cb7e93f9ac6217215d2cb0f36a2416b2a3322b879d7c00c4551a5b5",
+      "source": "desktop/src-tauri/src/pdf_copy.rs",
+      "source_sha256": "9341bc96c9c70ce03acda4766b7720d79d492430fe7c20b04b71efd551207f68"
+    },
+    "desktop/src-tauri/src/private_file.rs": {
+      "bytes": 14750,
+      "mode": "100644",
+      "sha256": "2d597117b764e52d4ad573bfa1c7be4440bfa82e0cf75794feb77be1e144e47e",
+      "source": "desktop/src-tauri/src/private_file.rs",
+      "source_sha256": "36d593fa678c8ba6122e94fc1c046754fb512e5a7c3c2d5f3a9a8a7114d0c36f"
+    },
+    "desktop/src-tauri/src/transport.rs": {
+      "bytes": 2656,
+      "mode": "100644",
+      "sha256": "de9b4dff763b330881be767ea627b69940a53c8a64eb8afcab8b902ff05d1707",
+      "source": "desktop/src-tauri/src/transport.rs",
+      "source_sha256": "de9b4dff763b330881be767ea627b69940a53c8a64eb8afcab8b902ff05d1707"
+    },
+    "desktop/src-tauri/src/web_links.rs": {
+      "bytes": 1867,
+      "mode": "100644",
+      "sha256": "879fa64b8cf81272b2925517bb96de6df2d3e8ad3560e96a720286cd40f72a6a",
+      "source": "desktop/src-tauri/src/web_links.rs",
+      "source_sha256": "1536a1d5afe42d2697bf6ea3cdc79d25d64bb9f4daf82d014c2fc45c6152ed28"
+    },
+    "desktop/src-tauri/src/wire.rs": {
+      "bytes": 60988,
+      "mode": "100644",
+      "sha256": "b8e651df4f7e399e2097a41c989a5221673de8db914ad33c9803b4b4c6a46640",
+      "source": "desktop/src-tauri/src/wire.rs",
+      "source_sha256": "b8e651df4f7e399e2097a41c989a5221673de8db914ad33c9803b4b4c6a46640"
+    },
+    "desktop/src-tauri/tauri.conf.json": {
+      "bytes": 885,
+      "mode": "100644",
+      "sha256": "afc44db84ca4a8355181046bfb3db0fb33058bd943c7e6118a3096ad3f30407a",
+      "source": "desktop/src-tauri/tauri.conf.json",
+      "source_sha256": "afc44db84ca4a8355181046bfb3db0fb33058bd943c7e6118a3096ad3f30407a"
+    },
+    "desktop/src/app.html": {
+      "bytes": 281,
+      "mode": "100644",
+      "sha256": "c05cf555b247874a8042f3fef5892a559170a60aaeabfd30aeda027cb115f679",
+      "source": "desktop/src/app.html",
+      "source_sha256": "c05cf555b247874a8042f3fef5892a559170a60aaeabfd30aeda027cb115f679"
+    },
+    "desktop/src/lib/api/client.ts": {
+      "bytes": 4155,
+      "mode": "100644",
+      "sha256": "86dbfc0e4fcf5f7fd0315f03b4a0447b19f1b3698e1e716eb630c0e480035121",
+      "source": "desktop/src/lib/api/client.ts",
+      "source_sha256": "86dbfc0e4fcf5f7fd0315f03b4a0447b19f1b3698e1e716eb630c0e480035121"
+    },
+    "desktop/src/lib/api/image-input.ts": {
+      "bytes": 992,
+      "mode": "100644",
+      "sha256": "86728f2fe594852e1af9aafef3e8cf728fe69e3902947865450ce9683dfd2317",
+      "source": "desktop/src/lib/api/image-input.ts",
+      "source_sha256": "86728f2fe594852e1af9aafef3e8cf728fe69e3902947865450ce9683dfd2317"
+    },
+    "desktop/src/lib/api/web-links.ts": {
+      "bytes": 754,
+      "mode": "100644",
+      "sha256": "6bf088d448e2c91a87e63006c18e9e12a0c95061ec075109e0ecc10bb9b4cbf8",
+      "source": "desktop/src/lib/api/web-links.ts",
+      "source_sha256": "6bf088d448e2c91a87e63006c18e9e12a0c95061ec075109e0ecc10bb9b4cbf8"
+    },
+    "desktop/src/lib/api/wire.generated.ts": {
+      "bytes": 129028,
+      "mode": "100644",
+      "sha256": "2d0338d12e7aa3f94333e3cb43e37f0cd257d6e4d78f9f495fb8f33d56271773",
+      "source": "desktop/src/lib/api/wire.generated.ts",
+      "source_sha256": "2d0338d12e7aa3f94333e3cb43e37f0cd257d6e4d78f9f495fb8f33d56271773"
+    },
+    "desktop/src/lib/design/ChatAvatar.svelte": {
+      "bytes": 1832,
+      "mode": "100644",
+      "sha256": "4f2be1665c66137e13b29145439729dc8d362acab92c8bc5f779c94fee8f87f1",
+      "source": "desktop/src/lib/design/ChatAvatar.svelte",
+      "source_sha256": "4f2be1665c66137e13b29145439729dc8d362acab92c8bc5f779c94fee8f87f1"
+    },
+    "desktop/src/lib/design/ChoicePicker.svelte": {
+      "bytes": 10882,
+      "mode": "100644",
+      "sha256": "34ff1657efb1bcf322578e849f6c83cc439933114ed7fdacc42f10bdf772f374",
+      "source": "desktop/src/lib/design/ChoicePicker.svelte",
+      "source_sha256": "34ff1657efb1bcf322578e849f6c83cc439933114ed7fdacc42f10bdf772f374"
+    },
+    "desktop/src/lib/design/ChoiceSelect.svelte": {
+      "bytes": 934,
+      "mode": "100644",
+      "sha256": "2fadd36c0da3c241ee8ac28c6dd429212c0b67e5f85124b99289fa9cc69f5fbe",
+      "source": "desktop/src/lib/design/ChoiceSelect.svelte",
+      "source_sha256": "2fadd36c0da3c241ee8ac28c6dd429212c0b67e5f85124b99289fa9cc69f5fbe"
+    },
+    "desktop/src/lib/design/Icon.svelte": {
+      "bytes": 1934,
+      "mode": "100644",
+      "sha256": "b3ddb98669aba772685f6ee288c56698573b36320e7aa98489b718fa23dbaec5",
+      "source": "desktop/src/lib/design/Icon.svelte",
+      "source_sha256": "b3ddb98669aba772685f6ee288c56698573b36320e7aa98489b718fa23dbaec5"
+    },
+    "desktop/src/lib/design/PageHeading.svelte": {
+      "bytes": 799,
+      "mode": "100644",
+      "sha256": "2fbaea5d2012ae7ddabb3ce0244177c076be0c834d43c929a29ddf3cd8e1efdd",
+      "source": "desktop/src/lib/design/PageHeading.svelte",
+      "source_sha256": "2fbaea5d2012ae7ddabb3ce0244177c076be0c834d43c929a29ddf3cd8e1efdd"
+    },
+    "desktop/src/lib/design/SidebarIdentity.svelte": {
+      "bytes": 1221,
+      "mode": "100644",
+      "sha256": "f7b5516b41258e46c26fe4397273c0ce0ab2669a5dd248da80532c4d27be6ec7",
+      "source": "desktop/src/lib/design/SidebarIdentity.svelte",
+      "source_sha256": "f7b5516b41258e46c26fe4397273c0ce0ab2669a5dd248da80532c4d27be6ec7"
+    },
+    "desktop/src/lib/design/Timeline.svelte": {
+      "bytes": 5631,
+      "mode": "100644",
+      "sha256": "83d450dbe5640f11739a8a00a6bba2d60c0f3993ba62558cff1aea1d2dd8cc94",
+      "source": "desktop/src/lib/design/Timeline.svelte",
+      "source_sha256": "83d450dbe5640f11739a8a00a6bba2d60c0f3993ba62558cff1aea1d2dd8cc94"
+    },
+    "desktop/src/lib/design/Wordmark.svelte": {
+      "bytes": 452,
+      "mode": "100644",
+      "sha256": "074c332f7c904549cf81edb250b19d8c965ea703e4384fc5f0504e54209da847",
+      "source": "desktop/src/lib/design/Wordmark.svelte",
+      "source_sha256": "074c332f7c904549cf81edb250b19d8c965ea703e4384fc5f0504e54209da847"
+    },
+    "desktop/src/lib/design/chat.css": {
+      "bytes": 4419,
+      "mode": "100644",
+      "sha256": "8311502b12e2a5b54df06c9cd5ec91be24d6de2c2455e1a1e26db20c69119d0e",
+      "source": "desktop/src/lib/design/chat.css",
+      "source_sha256": "8311502b12e2a5b54df06c9cd5ec91be24d6de2c2455e1a1e26db20c69119d0e"
+    },
+    "desktop/src/lib/design/choice-select.ts": {
+      "bytes": 6423,
+      "mode": "100644",
+      "sha256": "bcb58605cbe085a78a20c993e7129f943c8671199de2aac08d13f455dab1fe1b",
+      "source": "desktop/src/lib/design/choice-select.ts",
+      "source_sha256": "bcb58605cbe085a78a20c993e7129f943c8671199de2aac08d13f455dab1fe1b"
+    },
+    "desktop/src/lib/design/page-fade.ts": {
+      "bytes": 1017,
+      "mode": "100644",
+      "sha256": "bf84dff687daca2afdd81cab93055a910b274b077f15599f7f82ef0ae4124355",
+      "source": "desktop/src/lib/design/page-fade.ts",
+      "source_sha256": "bf84dff687daca2afdd81cab93055a910b274b077f15599f7f82ef0ae4124355"
+    },
+    "desktop/src/lib/design/quiet-scrollbar.ts": {
+      "bytes": 1595,
+      "mode": "100644",
+      "sha256": "1d532d501210e01b6f6b80807f7ba84427ba2e8502c60c2fffdd7e30007fa13d",
+      "source": "desktop/src/lib/design/quiet-scrollbar.ts",
+      "source_sha256": "1d532d501210e01b6f6b80807f7ba84427ba2e8502c60c2fffdd7e30007fa13d"
+    },
+    "desktop/src/lib/design/theme.ts": {
+      "bytes": 4036,
+      "mode": "100644",
+      "sha256": "55460594e912e1f589518919b1795589d564382d535ca790617aaf37fb29ac15",
+      "source": "desktop/src/lib/design/theme.ts",
+      "source_sha256": "55460594e912e1f589518919b1795589d564382d535ca790617aaf37fb29ac15"
+    },
+    "desktop/src/lib/design/timezones.json": {
+      "bytes": 8989,
+      "mode": "100644",
+      "sha256": "1167b7f78351c86bf1333bdb49c4503c00850e949f7478c015d666b54e7007ee",
+      "source": "desktop/src/lib/design/timezones.json",
+      "source_sha256": "1167b7f78351c86bf1333bdb49c4503c00850e949f7478c015d666b54e7007ee"
+    },
+    "desktop/src/lib/design/tokens.css": {
+      "bytes": 15097,
+      "mode": "100644",
+      "sha256": "40d9028d50d9e583f4467a5a5742a177f40982bd10e88e012f3fcc3c36736f5c",
+      "source": "desktop/src/lib/design/tokens.css",
+      "source_sha256": "40d9028d50d9e583f4467a5a5742a177f40982bd10e88e012f3fcc3c36736f5c"
+    },
+    "desktop/src/lib/design/user-avatar.ts": {
+      "bytes": 3181,
+      "mode": "100644",
+      "sha256": "73282898e2fb307beb854f32690f6a444a0482345c534cb28b318a6829975f6a",
+      "source": "desktop/src/lib/design/user-avatar.ts",
+      "source_sha256": "73282898e2fb307beb854f32690f6a444a0482345c534cb28b318a6829975f6a"
+    },
+    "desktop/src/lib/features/background/Background.svelte": {
+      "bytes": 2828,
+      "mode": "100644",
+      "sha256": "9038781e62f2a8444d46badf0ce2b2dd43751eb7be4b132a6c85aa7363175024",
+      "source": "desktop/src/lib/features/background/Background.svelte",
+      "source_sha256": "9038781e62f2a8444d46badf0ce2b2dd43751eb7be4b132a6c85aa7363175024"
+    },
+    "desktop/src/lib/features/background/Care.svelte": {
+      "bytes": 18929,
+      "mode": "100644",
+      "sha256": "0a6211b0a4a62b1a04a2ff6baa0b94e5ae603692fb1e3022d31133ac94bcffe0",
+      "source": "desktop/src/lib/features/background/Care.svelte",
+      "source_sha256": "0a6211b0a4a62b1a04a2ff6baa0b94e5ae603692fb1e3022d31133ac94bcffe0"
+    },
+    "desktop/src/lib/features/background/Jobs.svelte": {
+      "bytes": 54332,
+      "mode": "100644",
+      "sha256": "f9b5baf9d912b01ff040c7dad899395adf03639a091101e00463e7f4580715f7",
+      "source": "desktop/src/lib/features/background/Jobs.svelte",
+      "source_sha256": "f9b5baf9d912b01ff040c7dad899395adf03639a091101e00463e7f4580715f7"
+    },
+    "desktop/src/lib/features/background/Reflection.svelte": {
+      "bytes": 11503,
+      "mode": "100644",
+      "sha256": "711bbe0672e00f360f713d6e5cfcc1be1906aaa0bf7fea6bdcb5f9b4c195b51c",
+      "source": "desktop/src/lib/features/background/Reflection.svelte",
+      "source_sha256": "711bbe0672e00f360f713d6e5cfcc1be1906aaa0bf7fea6bdcb5f9b4c195b51c"
+    },
+    "desktop/src/lib/features/background/activity.ts": {
+      "bytes": 3989,
+      "mode": "100644",
+      "sha256": "cb796935ff6678068919d0f11647451f772ca7f20cfecb5d1b7914b6bd7e2f0e",
+      "source": "desktop/src/lib/features/background/activity.ts",
+      "source_sha256": "cb796935ff6678068919d0f11647451f772ca7f20cfecb5d1b7914b6bd7e2f0e"
+    },
+    "desktop/src/lib/features/background/editor.ts": {
+      "bytes": 8433,
+      "mode": "100644",
+      "sha256": "e42754bcc130e64213e8f651acdbf22cf3357ac3b76204037eb30ebb67146ac3",
+      "source": "desktop/src/lib/features/background/editor.ts",
+      "source_sha256": "e42754bcc130e64213e8f651acdbf22cf3357ac3b76204037eb30ebb67146ac3"
+    },
+    "desktop/src/lib/features/background/journal.ts": {
+      "bytes": 5485,
+      "mode": "100644",
+      "sha256": "f2c1fda1f34ed8ba6319a6b90ae2c11f7cefc272e1601e28cba1922ee6e93882",
+      "source": "desktop/src/lib/features/background/journal.ts",
+      "source_sha256": "f2c1fda1f34ed8ba6319a6b90ae2c11f7cefc272e1601e28cba1922ee6e93882"
+    },
+    "desktop/src/lib/features/chat/Activity.svelte": {
+      "bytes": 3406,
+      "mode": "100644",
+      "sha256": "baf3ca27cd941ea8584e8df85b9b6beec608b4cd3b47fc140b25abcdeb7ba9d2",
+      "source": "desktop/src/lib/features/chat/Activity.svelte",
+      "source_sha256": "baf3ca27cd941ea8584e8df85b9b6beec608b4cd3b47fc140b25abcdeb7ba9d2"
+    },
+    "desktop/src/lib/features/chat/AnswerDetails.svelte": {
+      "bytes": 11995,
+      "mode": "100644",
+      "sha256": "d19e0c117ca9dabe86a24de9882959128e1076aab754fdf9d5d4835b0e54e2bc",
+      "source": "desktop/src/lib/features/chat/AnswerDetails.svelte",
+      "source_sha256": "d19e0c117ca9dabe86a24de9882959128e1076aab754fdf9d5d4835b0e54e2bc"
+    },
+    "desktop/src/lib/features/chat/AppShell.svelte": {
+      "bytes": 7136,
+      "mode": "100644",
+      "sha256": "e5880df4106e865f9519e33e2e712496bd9c7c4f2e708a7b91f01e52dfc51e98",
+      "source": "desktop/src/lib/features/chat/AppShell.svelte",
+      "source_sha256": "e5880df4106e865f9519e33e2e712496bd9c7c4f2e708a7b91f01e52dfc51e98"
+    },
+    "desktop/src/lib/features/chat/CodeBlock.svelte": {
+      "bytes": 1493,
+      "mode": "100644",
+      "sha256": "ea2bf9d732ee0858d9104f7e4925be4abbf04703d7b48ef628a3a89fa2b9c745",
+      "source": "desktop/src/lib/features/chat/CodeBlock.svelte",
+      "source_sha256": "ea2bf9d732ee0858d9104f7e4925be4abbf04703d7b48ef628a3a89fa2b9c745"
+    },
+    "desktop/src/lib/features/chat/Composer.svelte": {
+      "bytes": 21499,
+      "mode": "100644",
+      "sha256": "e37f71ff9c19116b5da5d6a19becc267ef3331789b7c6680cf23f2edf3cba389",
+      "source": "desktop/src/lib/features/chat/Composer.svelte",
+      "source_sha256": "e37f71ff9c19116b5da5d6a19becc267ef3331789b7c6680cf23f2edf3cba389"
+    },
+    "desktop/src/lib/features/chat/ContextLine.svelte": {
+      "bytes": 1512,
+      "mode": "100644",
+      "sha256": "f96f6d43b2419d515f1007a153d661e58d24ce90a37e56f04be14a3332e26e44",
+      "source": "desktop/src/lib/features/chat/ContextLine.svelte",
+      "source_sha256": "f96f6d43b2419d515f1007a153d661e58d24ce90a37e56f04be14a3332e26e44"
+    },
+    "desktop/src/lib/features/chat/ConversationChooser.svelte": {
+      "bytes": 8276,
+      "mode": "100644",
+      "sha256": "e2edd3947b890ca654883d210abc52b1b5d49f3ba741c64b277e13a1951915d2",
+      "source": "desktop/src/lib/features/chat/ConversationChooser.svelte",
+      "source_sha256": "e2edd3947b890ca654883d210abc52b1b5d49f3ba741c64b277e13a1951915d2"
+    },
+    "desktop/src/lib/features/chat/CopyButton.svelte": {
+      "bytes": 1743,
+      "mode": "100644",
+      "sha256": "4c3c5869dd21ee5be02210adf18c59b796afc4f474606ec5d5d78ace71376e05",
+      "source": "desktop/src/lib/features/chat/CopyButton.svelte",
+      "source_sha256": "4c3c5869dd21ee5be02210adf18c59b796afc4f474606ec5d5d78ace71376e05"
+    },
+    "desktop/src/lib/features/chat/DocumentEditCard.svelte": {
+      "bytes": 1765,
+      "mode": "100644",
+      "sha256": "94bb50f96391b077ccf47c293fe14f66bbb304557160294574bc69bcce3d77b7",
+      "source": "desktop/src/lib/features/chat/DocumentEditCard.svelte",
+      "source_sha256": "94bb50f96391b077ccf47c293fe14f66bbb304557160294574bc69bcce3d77b7"
+    },
+    "desktop/src/lib/features/chat/DocumentSessionCard.svelte": {
+      "bytes": 3083,
+      "mode": "100644",
+      "sha256": "f9542a01db336f9ea2233f41953d7afb862664e410b0a9186863a677f37ef9d7",
+      "source": "desktop/src/lib/features/chat/DocumentSessionCard.svelte",
+      "source_sha256": "f9542a01db336f9ea2233f41953d7afb862664e410b0a9186863a677f37ef9d7"
+    },
+    "desktop/src/lib/features/chat/ImageGallery.svelte": {
+      "bytes": 4080,
+      "mode": "100644",
+      "sha256": "add2b990c1363399cd8145586312f674c2d1fd112b551e84460b4735b086e627",
+      "source": "desktop/src/lib/features/chat/ImageGallery.svelte",
+      "source_sha256": "add2b990c1363399cd8145586312f674c2d1fd112b551e84460b4735b086e627"
+    },
+    "desktop/src/lib/features/chat/ImageTile.svelte": {
+      "bytes": 2320,
+      "mode": "100644",
+      "sha256": "6c3b691ef24d03b02a078ad61b7ef596030946260dd43fcc92bde8b33128854d",
+      "source": "desktop/src/lib/features/chat/ImageTile.svelte",
+      "source_sha256": "6c3b691ef24d03b02a078ad61b7ef596030946260dd43fcc92bde8b33128854d"
+    },
+    "desktop/src/lib/features/chat/ImageViewer.svelte": {
+      "bytes": 8799,
+      "mode": "100644",
+      "sha256": "410d7b28de77329a411c101b2584d567570b615a38bb07761fed7b6afa51825c",
+      "source": "desktop/src/lib/features/chat/ImageViewer.svelte",
+      "source_sha256": "410d7b28de77329a411c101b2584d567570b615a38bb07761fed7b6afa51825c"
+    },
+    "desktop/src/lib/features/chat/JournalIndex.svelte": {
+      "bytes": 7064,
+      "mode": "100644",
+      "sha256": "33779439916aa6b1a78abd980f33c15f168ad26550a7404ecd7219708b14b718",
+      "source": "desktop/src/lib/features/chat/JournalIndex.svelte",
+      "source_sha256": "33779439916aa6b1a78abd980f33c15f168ad26550a7404ecd7219708b14b718"
+    },
+    "desktop/src/lib/features/chat/Latest.svelte": {
+      "bytes": 821,
+      "mode": "100644",
+      "sha256": "fa2ad822d1eaf5863a5453b1bd45afb90910cfba74b3e37a4b1dbb6b88b112f6",
+      "source": "desktop/src/lib/features/chat/Latest.svelte",
+      "source_sha256": "fa2ad822d1eaf5863a5453b1bd45afb90910cfba74b3e37a4b1dbb6b88b112f6"
+    },
+    "desktop/src/lib/features/chat/MainNavigation.svelte": {
+      "bytes": 476,
+      "mode": "100644",
+      "sha256": "e4bcf12b5b95261bf218b0c49b05710429415f6b11c61a3416e6fb57dd38e71d",
+      "source": "desktop/src/lib/features/chat/MainNavigation.svelte",
+      "source_sha256": "e4bcf12b5b95261bf218b0c49b05710429415f6b11c61a3416e6fb57dd38e71d"
+    },
+    "desktop/src/lib/features/chat/MessageActions.svelte": {
+      "bytes": 9099,
+      "mode": "100644",
+      "sha256": "74799c9e1b6cd8872a7304ffde7179e19bbe45a35de73b59e766bad366031c4e",
+      "source": "desktop/src/lib/features/chat/MessageActions.svelte",
+      "source_sha256": "74799c9e1b6cd8872a7304ffde7179e19bbe45a35de73b59e766bad366031c4e"
+    },
+    "desktop/src/lib/features/chat/MessageBody.svelte": {
+      "bytes": 6024,
+      "mode": "100644",
+      "sha256": "de9a64e36ba2690cb26bf7cc7033baf939aa5e2b6d426a6286a025d487717df4",
+      "source": "desktop/src/lib/features/chat/MessageBody.svelte",
+      "source_sha256": "de9a64e36ba2690cb26bf7cc7033baf939aa5e2b6d426a6286a025d487717df4"
+    },
+    "desktop/src/lib/features/chat/Operations.svelte": {
+      "bytes": 24262,
+      "mode": "100644",
+      "sha256": "ca3dbf15bbd5fc8ca9dcbbecade1b4246873f8e3734720a647c4aea653dea190",
+      "source": "desktop/src/lib/features/chat/Operations.svelte",
+      "source_sha256": "ca3dbf15bbd5fc8ca9dcbbecade1b4246873f8e3734720a647c4aea653dea190"
+    },
+    "desktop/src/lib/features/chat/ReplyInformation.svelte": {
+      "bytes": 2293,
+      "mode": "100644",
+      "sha256": "a8f72bbc722a2947cdc403fb6536b4b546bc723c649d31357dfdef39ae06ee6a",
+      "source": "desktop/src/lib/features/chat/ReplyInformation.svelte",
+      "source_sha256": "a8f72bbc722a2947cdc403fb6536b4b546bc723c649d31357dfdef39ae06ee6a"
+    },
+    "desktop/src/lib/features/chat/RichText.svelte": {
+      "bytes": 3327,
+      "mode": "100644",
+      "sha256": "59319ce3a97adc53b84628c2aa459f0c2b4a209163b22820c77d53a7a0f47531",
+      "source": "desktop/src/lib/features/chat/RichText.svelte",
+      "source_sha256": "59319ce3a97adc53b84628c2aa459f0c2b4a209163b22820c77d53a7a0f47531"
+    },
+    "desktop/src/lib/features/chat/SkillChooser.svelte": {
+      "bytes": 8581,
+      "mode": "100644",
+      "sha256": "631426aa5db0ca6d46b322030c871fd754fccd07c35d3c139ab92b1ff2d8b206",
+      "source": "desktop/src/lib/features/chat/SkillChooser.svelte",
+      "source_sha256": "631426aa5db0ca6d46b322030c871fd754fccd07c35d3c139ab92b1ff2d8b206"
+    },
+    "desktop/src/lib/features/chat/SourceLink.svelte": {
+      "bytes": 1004,
+      "mode": "100644",
+      "sha256": "60e989111f500c0a8fe3604539d309d4634bd65696da3b509363921347c511b6",
+      "source": "desktop/src/lib/features/chat/SourceLink.svelte",
+      "source_sha256": "60e989111f500c0a8fe3604539d309d4634bd65696da3b509363921347c511b6"
+    },
+    "desktop/src/lib/features/chat/StudyRequestCard.svelte": {
+      "bytes": 4600,
+      "mode": "100644",
+      "sha256": "946700445001ce6f582e91490d5be7db67211c53ef24e7b8af6763b8536bfda7",
+      "source": "desktop/src/lib/features/chat/StudyRequestCard.svelte",
+      "source_sha256": "946700445001ce6f582e91490d5be7db67211c53ef24e7b8af6763b8536bfda7"
+    },
+    "desktop/src/lib/features/chat/StudyRequestText.svelte": {
+      "bytes": 756,
+      "mode": "100644",
+      "sha256": "3dafa655ab26a340c461ea1800fc9473c010c0504714a24e62025583b431c1d3",
+      "source": "desktop/src/lib/features/chat/StudyRequestText.svelte",
+      "source_sha256": "3dafa655ab26a340c461ea1800fc9473c010c0504714a24e62025583b431c1d3"
+    },
+    "desktop/src/lib/features/chat/Transcript.svelte": {
+      "bytes": 40108,
+      "mode": "100644",
+      "sha256": "c91c4520bab1afd8c4a23963216c7562b552be63697dc0badea0340cc05f5d34",
+      "source": "desktop/src/lib/features/chat/Transcript.svelte",
+      "source_sha256": "c91c4520bab1afd8c4a23963216c7562b552be63697dc0badea0340cc05f5d34"
+    },
+    "desktop/src/lib/features/chat/TranscriptBatch.svelte": {
+      "bytes": 4825,
+      "mode": "100644",
+      "sha256": "25b0e34278a9354e84ff699fdaf24e4129c62c76018c063df245d8a6e5f0d6bb",
+      "source": "desktop/src/lib/features/chat/TranscriptBatch.svelte",
+      "source_sha256": "25b0e34278a9354e84ff699fdaf24e4129c62c76018c063df245d8a6e5f0d6bb"
+    },
+    "desktop/src/lib/features/chat/WindowControls.svelte": {
+      "bytes": 6129,
+      "mode": "100644",
+      "sha256": "fa6f595b8a0ca8b6d521de0da60f3bd9e5f44e2abf26118d336255e680115449",
+      "source": "desktop/src/lib/features/chat/WindowControls.svelte",
+      "source_sha256": "fa6f595b8a0ca8b6d521de0da60f3bd9e5f44e2abf26118d336255e680115449"
+    },
+    "desktop/src/lib/features/chat/conversation-label.ts": {
+      "bytes": 1557,
+      "mode": "100644",
+      "sha256": "78c29559391c97fdb301c134ad6d2474d34ce6f4748be465b249f49ed027f517",
+      "source": "desktop/src/lib/features/chat/conversation-label.ts",
+      "source_sha256": "78c29559391c97fdb301c134ad6d2474d34ce6f4748be465b249f49ed027f517"
+    },
+    "desktop/src/lib/features/chat/history-batches.ts": {
+      "bytes": 795,
+      "mode": "100644",
+      "sha256": "fd1733b5f2528e6a569061f145e32a250aa6fc726c59e0a9a4dd231ee0a16330",
+      "source": "desktop/src/lib/features/chat/history-batches.ts",
+      "source_sha256": "fd1733b5f2528e6a569061f145e32a250aa6fc726c59e0a9a4dd231ee0a16330"
+    },
+    "desktop/src/lib/features/chat/images.ts": {
+      "bytes": 7975,
+      "mode": "100644",
+      "sha256": "f2cdc8d6da6cedd2abef636b32113d26ee658479b24a4a12b292d535a85dca66",
+      "source": "desktop/src/lib/features/chat/images.ts",
+      "source_sha256": "f2cdc8d6da6cedd2abef636b32113d26ee658479b24a4a12b292d535a85dca66"
+    },
+    "desktop/src/lib/features/chat/index-rows.ts": {
+      "bytes": 267,
+      "mode": "100644",
+      "sha256": "5116ad0ab0e1c2b2f93d517f14c90f113d5cfc100743a3535af01d910e999047",
+      "source": "desktop/src/lib/features/chat/index-rows.ts",
+      "source_sha256": "5116ad0ab0e1c2b2f93d517f14c90f113d5cfc100743a3535af01d910e999047"
+    },
+    "desktop/src/lib/features/chat/keys.ts": {
+      "bytes": 2651,
+      "mode": "100644",
+      "sha256": "c1efebd11e71d2e87a17a3765996d89430c4d3af1beefb2dffd726f7404110e5",
+      "source": "desktop/src/lib/features/chat/keys.ts",
+      "source_sha256": "c1efebd11e71d2e87a17a3765996d89430c4d3af1beefb2dffd726f7404110e5"
+    },
+    "desktop/src/lib/features/chat/reading-position.ts": {
+      "bytes": 2106,
+      "mode": "100644",
+      "sha256": "3143167f339bcf8c7b291407c44c177477a235e1d85fb2005bff2c7088ea9488",
+      "source": "desktop/src/lib/features/chat/reading-position.ts",
+      "source_sha256": "3143167f339bcf8c7b291407c44c177477a235e1d85fb2005bff2c7088ea9488"
+    },
+    "desktop/src/lib/features/chat/scroll.ts": {
+      "bytes": 1781,
+      "mode": "100644",
+      "sha256": "3117173c8660f3d2044ba50d07500a530affe141a5119cfc8c11edbdfb906a1c",
+      "source": "desktop/src/lib/features/chat/scroll.ts",
+      "source_sha256": "3117173c8660f3d2044ba50d07500a530affe141a5119cfc8c11edbdfb906a1c"
+    },
+    "desktop/src/lib/features/chat/shell.css": {
+      "bytes": 8649,
+      "mode": "100644",
+      "sha256": "f83744b73e4557445104d014934942bccdb6bd8843273c318d900a3471cdd69c",
+      "source": "desktop/src/lib/features/chat/shell.css",
+      "source_sha256": "f83744b73e4557445104d014934942bccdb6bd8843273c318d900a3471cdd69c"
+    },
+    "desktop/src/lib/features/chat/stream.ts": {
+      "bytes": 2757,
+      "mode": "100644",
+      "sha256": "bd3180bbd26264ff4af924d44b41ade55f99fbaa4219d2bf95baa115b937729f",
+      "source": "desktop/src/lib/features/chat/stream.ts",
+      "source_sha256": "bd3180bbd26264ff4af924d44b41ade55f99fbaa4219d2bf95baa115b937729f"
+    },
+    "desktop/src/lib/features/chat/study-requests.ts": {
+      "bytes": 4320,
+      "mode": "100644",
+      "sha256": "9dc6862b802fdf50b73818a1d9cda1a6b97f9132cef7f5432f52a825dfbb19eb",
+      "source": "desktop/src/lib/features/chat/study-requests.ts",
+      "source_sha256": "9dc6862b802fdf50b73818a1d9cda1a6b97f9132cef7f5432f52a825dfbb19eb"
+    },
+    "desktop/src/lib/features/chat/window-resize.ts": {
+      "bytes": 811,
+      "mode": "100644",
+      "sha256": "85806b130c13c09de6bb3f2912193eb5480c7aa3b5f3bc24681c775b4d53f3b7",
+      "source": "desktop/src/lib/features/chat/window-resize.ts",
+      "source_sha256": "85806b130c13c09de6bb3f2912193eb5480c7aa3b5f3bc24681c775b4d53f3b7"
+    },
+    "desktop/src/lib/features/development/ContextAccounting.svelte": {
+      "bytes": 1665,
+      "mode": "100644",
+      "sha256": "1ac7caf0ba76b54b6553e694f49f21e65a4977ec6ce5e04a32173e0713d48574",
+      "source": "desktop/src/lib/features/development/ContextAccounting.svelte",
+      "source_sha256": "1ac7caf0ba76b54b6553e694f49f21e65a4977ec6ce5e04a32173e0713d48574"
+    },
+    "desktop/src/lib/features/development/NativePipeline.svelte": {
+      "bytes": 71977,
+      "mode": "100644",
+      "sha256": "0f55a7654af4032243b52ace6d295c421af50cbd446b309f38a8d7372759e095",
+      "source": "desktop/src/lib/features/development/NativePipeline.svelte",
+      "source_sha256": "0f55a7654af4032243b52ace6d295c421af50cbd446b309f38a8d7372759e095"
+    },
+    "desktop/src/lib/features/help/Help.svelte": {
+      "bytes": 8031,
+      "mode": "100644",
+      "sha256": "037a491e5e029b5455a7e3edcb916346e2051ac3af4ece1d2174de4d57317b71",
+      "source": "desktop/src/lib/features/help/Help.svelte",
+      "source_sha256": "037a491e5e029b5455a7e3edcb916346e2051ac3af4ece1d2174de4d57317b71"
+    },
+    "desktop/src/lib/features/help/Welcome.svelte": {
+      "bytes": 2698,
+      "mode": "100644",
+      "sha256": "0bc81e01b7ab5b0f929742fdb0ce1eb6b22ff95d5b3606fe806faed87cac7c07",
+      "source": "desktop/src/lib/features/help/Welcome.svelte",
+      "source_sha256": "0bc81e01b7ab5b0f929742fdb0ce1eb6b22ff95d5b3606fe806faed87cac7c07"
+    },
+    "desktop/src/lib/features/help/guide.ts": {
+      "bytes": 2333,
+      "mode": "100644",
+      "sha256": "0e7a2bbcba17984006a5046dca2d40f87c1d05fd6b36e51f35f1341bd4888cd4",
+      "source": "desktop/src/lib/features/help/guide.ts",
+      "source_sha256": "0e7a2bbcba17984006a5046dca2d40f87c1d05fd6b36e51f35f1341bd4888cd4"
+    },
+    "desktop/src/lib/features/notebook/Notebook.svelte": {
+      "bytes": 19573,
+      "mode": "100644",
+      "sha256": "a5d65ec016269de0fc6b42ec94825aab25a3869bb5f9c99a1aa1cef000a8d721",
+      "source": "desktop/src/lib/features/notebook/Notebook.svelte",
+      "source_sha256": "a5d65ec016269de0fc6b42ec94825aab25a3869bb5f9c99a1aa1cef000a8d721"
+    },
+    "desktop/src/lib/features/notebook/PreferenceRecall.svelte": {
+      "bytes": 3837,
+      "mode": "100644",
+      "sha256": "a6b309e33a394d147311a4c2362ac7640420fc4c7526f56bd1cd8dafadaa4fae",
+      "source": "desktop/src/lib/features/notebook/PreferenceRecall.svelte",
+      "source_sha256": "a6b309e33a394d147311a4c2362ac7640420fc4c7526f56bd1cd8dafadaa4fae"
+    },
+    "desktop/src/lib/features/people/PeopleAccess.svelte": {
+      "bytes": 4404,
+      "mode": "100644",
+      "sha256": "5485a58cea4e0916287512c28b52511c3c7ea75f49c7d3de413a77821b5ef241",
+      "source": "desktop/src/lib/features/people/PeopleAccess.svelte",
+      "source_sha256": "5485a58cea4e0916287512c28b52511c3c7ea75f49c7d3de413a77821b5ef241"
+    },
+    "desktop/src/lib/features/people/access.ts": {
+      "bytes": 5495,
+      "mode": "100644",
+      "sha256": "d52376d22c1acf3a66dfefbb556a97631bfff46a51ce4f8420417d06ee1943d0",
+      "source": "desktop/src/lib/features/people/access.ts",
+      "source_sha256": "d52376d22c1acf3a66dfefbb556a97631bfff46a51ce4f8420417d06ee1943d0"
+    },
+    "desktop/src/lib/features/reminders/ReminderAccess.svelte": {
+      "bytes": 4806,
+      "mode": "100644",
+      "sha256": "44bbc7c59d3e4e5728e8552b15554b9e374fd0cdd791914dd75cd826818f764a",
+      "source": "desktop/src/lib/features/reminders/ReminderAccess.svelte",
+      "source_sha256": "44bbc7c59d3e4e5728e8552b15554b9e374fd0cdd791914dd75cd826818f764a"
+    },
+    "desktop/src/lib/features/reminders/access.ts": {
+      "bytes": 5530,
+      "mode": "100644",
+      "sha256": "14ff8dfbe2748ae63a3c10c30c988cc8f03cde05fd77ddc8ccb459631890f93c",
+      "source": "desktop/src/lib/features/reminders/access.ts",
+      "source_sha256": "14ff8dfbe2748ae63a3c10c30c988cc8f03cde05fd77ddc8ccb459631890f93c"
+    },
+    "desktop/src/lib/features/replies/Chart.svelte": {
+      "bytes": 7787,
+      "mode": "100644",
+      "sha256": "01fc6206b2366a66cbbe2652572cd6329befa3a25544815452b762a665be361c",
+      "source": "desktop/src/lib/features/replies/Chart.svelte",
+      "source_sha256": "01fc6206b2366a66cbbe2652572cd6329befa3a25544815452b762a665be361c"
+    },
+    "desktop/src/lib/features/replies/ChartBlock.svelte": {
+      "bytes": 520,
+      "mode": "100644",
+      "sha256": "4e18e6e2a2a5593ca53782aa0304062946a49c1f1c41a46901bd9d8222c49593",
+      "source": "desktop/src/lib/features/replies/ChartBlock.svelte",
+      "source_sha256": "4e18e6e2a2a5593ca53782aa0304062946a49c1f1c41a46901bd9d8222c49593"
+    },
+    "desktop/src/lib/features/replies/ChartSources.svelte": {
+      "bytes": 1124,
+      "mode": "100644",
+      "sha256": "61c224bcbdc25e9125d27228041d61ff13ec32f0c99011b3944289c71d6a5764",
+      "source": "desktop/src/lib/features/replies/ChartSources.svelte",
+      "source_sha256": "61c224bcbdc25e9125d27228041d61ff13ec32f0c99011b3944289c71d6a5764"
+    },
+    "desktop/src/lib/features/replies/Diagram.svelte": {
+      "bytes": 2348,
+      "mode": "100644",
+      "sha256": "d81d526c9531e8eb83a0250996a0fd84cc94ee3e43ef627af52d78c8b4ca98d7",
+      "source": "desktop/src/lib/features/replies/Diagram.svelte",
+      "source_sha256": "d81d526c9531e8eb83a0250996a0fd84cc94ee3e43ef627af52d78c8b4ca98d7"
+    },
+    "desktop/src/lib/features/replies/Math.svelte": {
+      "bytes": 568,
+      "mode": "100644",
+      "sha256": "3464b2207e6c5c913ae60533f445bb7799cde7d77567984da0eb406ec0d63dc4",
+      "source": "desktop/src/lib/features/replies/Math.svelte",
+      "source_sha256": "3464b2207e6c5c913ae60533f445bb7799cde7d77567984da0eb406ec0d63dc4"
+    },
+    "desktop/src/lib/features/replies/chart.ts": {
+      "bytes": 3352,
+      "mode": "100644",
+      "sha256": "ab3408c0df8fb6c195079e1a831a1e5e64ffa5e0b2453fa5b58a0fde0f50573a",
+      "source": "desktop/src/lib/features/replies/chart.ts",
+      "source_sha256": "ab3408c0df8fb6c195079e1a831a1e5e64ffa5e0b2453fa5b58a0fde0f50573a"
+    },
+    "desktop/src/lib/features/replies/context.ts": {
+      "bytes": 278,
+      "mode": "100644",
+      "sha256": "04404c1b12007cf11e303c934db1b20341bfff549885ffd4892eb1eef277db12",
+      "source": "desktop/src/lib/features/replies/context.ts",
+      "source_sha256": "04404c1b12007cf11e303c934db1b20341bfff549885ffd4892eb1eef277db12"
+    },
+    "desktop/src/lib/features/replies/diagram.ts": {
+      "bytes": 2477,
+      "mode": "100644",
+      "sha256": "ac89911a29d0edf8d57dddd467a6b0191a317055a9e8d37623f282b563570be7",
+      "source": "desktop/src/lib/features/replies/diagram.ts",
+      "source_sha256": "ac89911a29d0edf8d57dddd467a6b0191a317055a9e8d37623f282b563570be7"
+    },
+    "desktop/src/lib/features/replies/palette.ts": {
+      "bytes": 2602,
+      "mode": "100644",
+      "sha256": "c3b0732f730971fc9d0b4fc29b33bd692d4992c4d6b9ac6ef57f0fe96ca36161",
+      "source": "desktop/src/lib/features/replies/palette.ts",
+      "source_sha256": "c3b0732f730971fc9d0b4fc29b33bd692d4992c4d6b9ac6ef57f0fe96ca36161"
+    },
+    "desktop/src/lib/features/replies/visuals.css": {
+      "bytes": 4156,
+      "mode": "100644",
+      "sha256": "2d16c918db1ef5ba159309bf235758c7198033d131ac1191e8adf56bd492dd17",
+      "source": "desktop/src/lib/features/replies/visuals.css",
+      "source_sha256": "2d16c918db1ef5ba159309bf235758c7198033d131ac1191e8adf56bd492dd17"
+    },
+    "desktop/src/lib/features/settings/AccessRecovery.svelte": {
+      "bytes": 2263,
+      "mode": "100644",
+      "sha256": "53452363e1af7d96c4cbd481160a62ce52fde5e896bae6390783bc87e7d3a250",
+      "source": "desktop/src/lib/features/settings/AccessRecovery.svelte",
+      "source_sha256": "53452363e1af7d96c4cbd481160a62ce52fde5e896bae6390783bc87e7d3a250"
+    },
+    "desktop/src/lib/features/settings/Appearance.svelte": {
+      "bytes": 6510,
+      "mode": "100644",
+      "sha256": "1ea934f3f1e7a23c8818f363eb7b6afe3bac462355bbf6bec071acbfdc7671d1",
+      "source": "desktop/src/lib/features/settings/Appearance.svelte",
+      "source_sha256": "1ea934f3f1e7a23c8818f363eb7b6afe3bac462355bbf6bec071acbfdc7671d1"
+    },
+    "desktop/src/lib/features/settings/ChatGPTConnection.svelte": {
+      "bytes": 6834,
+      "mode": "100644",
+      "sha256": "ff884937d3ca0a2fd095e7ba5f309471dd85e3c35da1792e9e3d8b355194ba1f",
+      "source": "desktop/src/lib/features/settings/ChatGPTConnection.svelte",
+      "source_sha256": "ff884937d3ca0a2fd095e7ba5f309471dd85e3c35da1792e9e3d8b355194ba1f"
+    },
+    "desktop/src/lib/features/settings/ConnectionResults.svelte": {
+      "bytes": 2383,
+      "mode": "100644",
+      "sha256": "703a83a93e64b2623a3ea52ebe6a523284384831f2dcbe73a0e80723e037f87f",
+      "source": "desktop/src/lib/features/settings/ConnectionResults.svelte",
+      "source_sha256": "703a83a93e64b2623a3ea52ebe6a523284384831f2dcbe73a0e80723e037f87f"
+    },
+    "desktop/src/lib/features/settings/Connections.svelte": {
+      "bytes": 21328,
+      "mode": "100644",
+      "sha256": "98837ace8b7a0434ce69012d4e281cc28a928a1adf60cb5e9973e3f7ef9ea8ce",
+      "source": "desktop/src/lib/features/settings/Connections.svelte",
+      "source_sha256": "98837ace8b7a0434ce69012d4e281cc28a928a1adf60cb5e9973e3f7ef9ea8ce"
+    },
+    "desktop/src/lib/features/settings/Execution.svelte": {
+      "bytes": 4083,
+      "mode": "100644",
+      "sha256": "6aea1b45f376c38fe93937a2081bc324ea99ee2624342e73f8505b63f68f2eb9",
+      "source": "desktop/src/lib/features/settings/Execution.svelte",
+      "source_sha256": "6aea1b45f376c38fe93937a2081bc324ea99ee2624342e73f8505b63f68f2eb9"
+    },
+    "desktop/src/lib/features/settings/Files.svelte": {
+      "bytes": 21438,
+      "mode": "100644",
+      "sha256": "07129c127371018102afa6015560ee090db9969ba30d0e49669ebe0c5bc99089",
+      "source": "desktop/src/lib/features/settings/Files.svelte",
+      "source_sha256": "07129c127371018102afa6015560ee090db9969ba30d0e49669ebe0c5bc99089"
+    },
+    "desktop/src/lib/features/settings/Models.svelte": {
+      "bytes": 17613,
+      "mode": "100644",
+      "sha256": "56ea153ba5e4c514c338f6f6af37ea764d5bba3d44e8b567fa88ebbc0dfe683e",
+      "source": "desktop/src/lib/features/settings/Models.svelte",
+      "source_sha256": "56ea153ba5e4c514c338f6f6af37ea764d5bba3d44e8b567fa88ebbc0dfe683e"
+    },
+    "desktop/src/lib/features/settings/PrivacyAccess.svelte": {
+      "bytes": 9922,
+      "mode": "100644",
+      "sha256": "503794990ef230f76d4d4f16c71e1afc3f5b55752636586069d56d13676d0f1a",
+      "source": "desktop/src/lib/features/settings/PrivacyAccess.svelte",
+      "source_sha256": "503794990ef230f76d4d4f16c71e1afc3f5b55752636586069d56d13676d0f1a"
+    },
+    "desktop/src/lib/features/settings/Skills.svelte": {
+      "bytes": 13292,
+      "mode": "100644",
+      "sha256": "4ca51e39a7ada3f9da8d0c53490ab673b1c15683a007a2d97b1708800eafd3b3",
+      "source": "desktop/src/lib/features/settings/Skills.svelte",
+      "source_sha256": "4ca51e39a7ada3f9da8d0c53490ab673b1c15683a007a2d97b1708800eafd3b3"
+    },
+    "desktop/src/lib/features/settings/UserThumbnail.svelte": {
+      "bytes": 2874,
+      "mode": "100644",
+      "sha256": "55f39400625fe567d139e2154dc0fc58d6223a4b9a3a4f23cabab9bad13f82ac",
+      "source": "desktop/src/lib/features/settings/UserThumbnail.svelte",
+      "source_sha256": "55f39400625fe567d139e2154dc0fc58d6223a4b9a3a4f23cabab9bad13f82ac"
+    },
+    "desktop/src/lib/features/settings/connections.ts": {
+      "bytes": 2925,
+      "mode": "100644",
+      "sha256": "67fe104b4e6cf60b07b0d5bdd5e627697ea71c963fefc0e46ca815972d25bb41",
+      "source": "desktop/src/lib/features/settings/connections.ts",
+      "source_sha256": "67fe104b4e6cf60b07b0d5bdd5e627697ea71c963fefc0e46ca815972d25bb41"
+    },
+    "desktop/src/lib/features/settings/settings.css": {
+      "bytes": 9907,
+      "mode": "100644",
+      "sha256": "17e3c25a3fc1db326393a90b72e37636bff118ce8b1a4a2a8fd5db6607b3e674",
+      "source": "desktop/src/lib/features/settings/settings.css",
+      "source_sha256": "17e3c25a3fc1db326393a90b72e37636bff118ce8b1a4a2a8fd5db6607b3e674"
+    },
+    "desktop/src/lib/features/tasks/FindingCard.svelte": {
+      "bytes": 5323,
+      "mode": "100644",
+      "sha256": "ee295ebe1841bfaa8844ded6f5a9a441238ea352013469875bdd8e8e0a218873",
+      "source": "desktop/src/lib/features/tasks/FindingCard.svelte",
+      "source_sha256": "ee295ebe1841bfaa8844ded6f5a9a441238ea352013469875bdd8e8e0a218873"
+    },
+    "desktop/src/lib/features/tasks/Research.svelte": {
+      "bytes": 26609,
+      "mode": "100644",
+      "sha256": "6e8ff4f45df179a2cb9963457ed08d0b680d6b358fac9364b44e434946b9c378",
+      "source": "desktop/src/lib/features/tasks/Research.svelte",
+      "source_sha256": "6e8ff4f45df179a2cb9963457ed08d0b680d6b358fac9364b44e434946b9c378"
+    },
+    "desktop/src/lib/features/tasks/TaskAccess.svelte": {
+      "bytes": 6237,
+      "mode": "100644",
+      "sha256": "b4af661cd72171d30d15ad4a6a690417d9fea7a486ae6495cb2eb05ed2e5521b",
+      "source": "desktop/src/lib/features/tasks/TaskAccess.svelte",
+      "source_sha256": "b4af661cd72171d30d15ad4a6a690417d9fea7a486ae6495cb2eb05ed2e5521b"
+    },
+    "desktop/src/lib/features/tasks/TaskDescription.svelte": {
+      "bytes": 7088,
+      "mode": "100644",
+      "sha256": "23412d75f9235f7fbca292de8b0e45b5574ebd935a98413390ea25d346a963d8",
+      "source": "desktop/src/lib/features/tasks/TaskDescription.svelte",
+      "source_sha256": "23412d75f9235f7fbca292de8b0e45b5574ebd935a98413390ea25d346a963d8"
+    },
+    "desktop/src/lib/features/tasks/TaskRows.svelte": {
+      "bytes": 4171,
+      "mode": "100644",
+      "sha256": "5c85f2e29b8edce42cc0d23ded6a37ce7b2c7c8bb11ce9dfb08452a0d85e10d4",
+      "source": "desktop/src/lib/features/tasks/TaskRows.svelte",
+      "source_sha256": "5c85f2e29b8edce42cc0d23ded6a37ce7b2c7c8bb11ce9dfb08452a0d85e10d4"
+    },
+    "desktop/src/lib/features/tasks/Tasks.svelte": {
+      "bytes": 38402,
+      "mode": "100644",
+      "sha256": "3cd4019fa62d2884ad96124e2bb48a3f54af6d8da4582dd0e4445b4051cda223",
+      "source": "desktop/src/lib/features/tasks/Tasks.svelte",
+      "source_sha256": "3cd4019fa62d2884ad96124e2bb48a3f54af6d8da4582dd0e4445b4051cda223"
+    },
+    "desktop/src/lib/features/tasks/planning.css": {
+      "bytes": 3166,
+      "mode": "100644",
+      "sha256": "49bbd9d1ae695caf94647397d8bb53768416560646df37984a768b369a5a5e50",
+      "source": "desktop/src/lib/features/tasks/planning.css",
+      "source_sha256": "49bbd9d1ae695caf94647397d8bb53768416560646df37984a768b369a5a5e50"
+    },
+    "desktop/src/lib/features/tasks/research-view.ts": {
+      "bytes": 1656,
+      "mode": "100644",
+      "sha256": "817210b1b443c1cc66c676a574158c3ce650cce716178ee544987effc56e790c",
+      "source": "desktop/src/lib/features/tasks/research-view.ts",
+      "source_sha256": "817210b1b443c1cc66c676a574158c3ce650cce716178ee544987effc56e790c"
+    },
+    "desktop/src/lib/features/tasks/task-description.ts": {
+      "bytes": 2719,
+      "mode": "100644",
+      "sha256": "16249b6ffc096c4533b95b0d3792ea1cdc62e16aee546862141b3ed36bd6c67e",
+      "source": "desktop/src/lib/features/tasks/task-description.ts",
+      "source_sha256": "16249b6ffc096c4533b95b0d3792ea1cdc62e16aee546862141b3ed36bd6c67e"
+    },
+    "desktop/src/lib/features/web/WebSettings.svelte": {
+      "bytes": 12204,
+      "mode": "100644",
+      "sha256": "d147513e77a1c462e0b138ff5bd2143a04ba086aea8c5ce37840633f33b9855a",
+      "source": "desktop/src/lib/features/web/WebSettings.svelte",
+      "source_sha256": "d147513e77a1c462e0b138ff5bd2143a04ba086aea8c5ce37840633f33b9855a"
+    },
+    "desktop/src/lib/features/web/WebSources.svelte": {
+      "bytes": 4239,
+      "mode": "100644",
+      "sha256": "27c0ba69156b7efd071a2ae4f366a699dfd08de5008729ff19da3b6d939dcd64",
+      "source": "desktop/src/lib/features/web/WebSources.svelte",
+      "source_sha256": "27c0ba69156b7efd071a2ae4f366a699dfd08de5008729ff19da3b6d939dcd64"
+    },
+    "desktop/src/lib/features/web/settings.ts": {
+      "bytes": 5154,
+      "mode": "100644",
+      "sha256": "c90b9646b206a1068af8b7b8f4f8ea6be0f61ecd2700777c0f3d1d324ab2f0df",
+      "source": "desktop/src/lib/features/web/settings.ts",
+      "source_sha256": "c90b9646b206a1068af8b7b8f4f8ea6be0f61ecd2700777c0f3d1d324ab2f0df"
+    },
+    "desktop/src/lib/features/workspace/Course.svelte": {
+      "bytes": 19088,
+      "mode": "100644",
+      "sha256": "b9e0481600508620a728dfbceb2b72691e00a32a60fdb8bbf0b02482fa337727",
+      "source": "desktop/src/lib/features/workspace/Course.svelte",
+      "source_sha256": "b9e0481600508620a728dfbceb2b72691e00a32a60fdb8bbf0b02482fa337727"
+    },
+    "desktop/src/lib/features/workspace/CraftReader.svelte": {
+      "bytes": 17766,
+      "mode": "100644",
+      "sha256": "33f8cb36f8e3c3c872bdf22aca57c8e00288e2bb32d3d3f95ee21fe24cb12080",
+      "source": "desktop/src/lib/features/workspace/CraftReader.svelte",
+      "source_sha256": "33f8cb36f8e3c3c872bdf22aca57c8e00288e2bb32d3d3f95ee21fe24cb12080"
+    },
+    "desktop/src/lib/features/workspace/DocumentActivity.svelte": {
+      "bytes": 2882,
+      "mode": "100644",
+      "sha256": "e6525b634499a61a53da756089c8f7ae9058e9c27634255f8ced45d688bc521c",
+      "source": "desktop/src/lib/features/workspace/DocumentActivity.svelte",
+      "source_sha256": "e6525b634499a61a53da756089c8f7ae9058e9c27634255f8ced45d688bc521c"
+    },
+    "desktop/src/lib/features/workspace/DocumentImage.svelte": {
+      "bytes": 301,
+      "mode": "100644",
+      "sha256": "1565303d1d4f290ef8e54a3205bd12f690c533901f3ef81501cf1cb361ab9679",
+      "source": "desktop/src/lib/features/workspace/DocumentImage.svelte",
+      "source_sha256": "1565303d1d4f290ef8e54a3205bd12f690c533901f3ef81501cf1cb361ab9679"
+    },
+    "desktop/src/lib/features/workspace/DocumentPopover.svelte": {
+      "bytes": 6165,
+      "mode": "100644",
+      "sha256": "c88403c42067845e59f557165fef3b135d3ec0edb7841e1d40678fd84b8f2752",
+      "source": "desktop/src/lib/features/workspace/DocumentPopover.svelte",
+      "source_sha256": "c88403c42067845e59f557165fef3b135d3ec0edb7841e1d40678fd84b8f2752"
+    },
+    "desktop/src/lib/features/workspace/DocumentPreview.svelte": {
+      "bytes": 2396,
+      "mode": "100644",
+      "sha256": "d6315e3826814ee48440505066a902d7c3ff12bcabe4a35f18c2afa8edc4d289",
+      "source": "desktop/src/lib/features/workspace/DocumentPreview.svelte",
+      "source_sha256": "d6315e3826814ee48440505066a902d7c3ff12bcabe4a35f18c2afa8edc4d289"
+    },
+    "desktop/src/lib/features/workspace/EventEditor.svelte": {
+      "bytes": 12245,
+      "mode": "100644",
+      "sha256": "7289112ede6289e3505231a3f0497ba47ccb51f7351697ce2e736e5ee41e7ded",
+      "source": "desktop/src/lib/features/workspace/EventEditor.svelte",
+      "source_sha256": "7289112ede6289e3505231a3f0497ba47ccb51f7351697ce2e736e5ee41e7ded"
+    },
+    "desktop/src/lib/features/workspace/Home.svelte": {
+      "bytes": 23206,
+      "mode": "100644",
+      "sha256": "caf168830690a37ffcf40be971f3193766a06de75644af68c0f5a8eb57d90091",
+      "source": "desktop/src/lib/features/workspace/Home.svelte",
+      "source_sha256": "caf168830690a37ffcf40be971f3193766a06de75644af68c0f5a8eb57d90091"
+    },
+    "desktop/src/lib/features/workspace/HomeArtwork.svelte": {
+      "bytes": 1439,
+      "mode": "100644",
+      "sha256": "1f0d5bad6635d0428f941556a8f73b8c695a2fa31ff9674b9479b0df3df105f9",
+      "source": "desktop/src/lib/features/workspace/HomeArtwork.svelte",
+      "source_sha256": "1f0d5bad6635d0428f941556a8f73b8c695a2fa31ff9674b9479b0df3df105f9"
+    },
+    "desktop/src/lib/features/workspace/HomeResearch.svelte": {
+      "bytes": 7555,
+      "mode": "100644",
+      "sha256": "d32a180106467deef46cd178e3b7c052a771f907cbc80ca41ca9b0cc66c58181",
+      "source": "desktop/src/lib/features/workspace/HomeResearch.svelte",
+      "source_sha256": "d32a180106467deef46cd178e3b7c052a771f907cbc80ca41ca9b0cc66c58181"
+    },
+    "desktop/src/lib/features/workspace/MarkdownEditor.svelte": {
+      "bytes": 47140,
+      "mode": "100644",
+      "sha256": "ceabb7c4bf39698c36aaf7d0e883c57585b58eadca906cbdfd0e62903c5641d2",
+      "source": "desktop/src/lib/features/workspace/MarkdownEditor.svelte",
+      "source_sha256": "ceabb7c4bf39698c36aaf7d0e883c57585b58eadca906cbdfd0e62903c5641d2"
+    },
+    "desktop/src/lib/features/workspace/Material.svelte": {
+      "bytes": 27235,
+      "mode": "100644",
+      "sha256": "f5a72562e8619a4d9ada7273744208ee65a8973a96cc23c4cb6d032e523211fd",
+      "source": "desktop/src/lib/features/workspace/Material.svelte",
+      "source_sha256": "f5a72562e8619a4d9ada7273744208ee65a8973a96cc23c4cb6d032e523211fd"
+    },
+    "desktop/src/lib/features/workspace/MaterialFiles.svelte": {
+      "bytes": 2804,
+      "mode": "100644",
+      "sha256": "f21aaff356b26912ecaf333cab7247294b2eb53f97747106274896a86d9a2aaf",
+      "source": "desktop/src/lib/features/workspace/MaterialFiles.svelte",
+      "source_sha256": "f21aaff356b26912ecaf333cab7247294b2eb53f97747106274896a86d9a2aaf"
+    },
+    "desktop/src/lib/features/workspace/MaterialFolder.svelte": {
+      "bytes": 5267,
+      "mode": "100644",
+      "sha256": "dc5b11ae5a1a8626f4521324ef9e8137fb11a324ad077a7cc46edcd0ce935668",
+      "source": "desktop/src/lib/features/workspace/MaterialFolder.svelte",
+      "source_sha256": "dc5b11ae5a1a8626f4521324ef9e8137fb11a324ad077a7cc46edcd0ce935668"
+    },
+    "desktop/src/lib/features/workspace/MaterialReader.svelte": {
+      "bytes": 24636,
+      "mode": "100644",
+      "sha256": "a5ad67754f42ab0404568ff62aeae76ad3d04649b2180deceb5602907e859a25",
+      "source": "desktop/src/lib/features/workspace/MaterialReader.svelte",
+      "source_sha256": "a5ad67754f42ab0404568ff62aeae76ad3d04649b2180deceb5602907e859a25"
+    },
+    "desktop/src/lib/features/workspace/Media.svelte": {
+      "bytes": 14689,
+      "mode": "100644",
+      "sha256": "5ad9e0f3932469f2c36e3c04e9749a94a175cdbbd36beca5dcc7d43ae7c5fe91",
+      "source": "desktop/src/lib/features/workspace/Media.svelte",
+      "source_sha256": "5ad9e0f3932469f2c36e3c04e9749a94a175cdbbd36beca5dcc7d43ae7c5fe91"
+    },
+    "desktop/src/lib/features/workspace/NoteOriginal.svelte": {
+      "bytes": 5333,
+      "mode": "100644",
+      "sha256": "a535949f1d9f3643ed0124b2358dd2308d337a295aefc3d8fca53784c1dcf00b",
+      "source": "desktop/src/lib/features/workspace/NoteOriginal.svelte",
+      "source_sha256": "a535949f1d9f3643ed0124b2358dd2308d337a295aefc3d8fca53784c1dcf00b"
+    },
+    "desktop/src/lib/features/workspace/PdfReader.svelte": {
+      "bytes": 8455,
+      "mode": "100644",
+      "sha256": "79fc91e0616ba480fa6cf4773670d036f6bc6e4d76aa125d004b9c68aa71f5c2",
+      "source": "desktop/src/lib/features/workspace/PdfReader.svelte",
+      "source_sha256": "79fc91e0616ba480fa6cf4773670d036f6bc6e4d76aa125d004b9c68aa71f5c2"
+    },
+    "desktop/src/lib/features/workspace/Practice.svelte": {
+      "bytes": 6286,
+      "mode": "100644",
+      "sha256": "c26c0be45e95c4e0a3166f35bdc3c63c885afd1e0c3a1c655798b3c07dd57cc2",
+      "source": "desktop/src/lib/features/workspace/Practice.svelte",
+      "source_sha256": "c26c0be45e95c4e0a3166f35bdc3c63c885afd1e0c3a1c655798b3c07dd57cc2"
+    },
+    "desktop/src/lib/features/workspace/ProjectFolderPicker.svelte": {
+      "bytes": 4264,
+      "mode": "100644",
+      "sha256": "4047fe8acb3a2fb259c83c38fe554ac2839b7fa41179a69f3e7af1c463130b36",
+      "source": "desktop/src/lib/features/workspace/ProjectFolderPicker.svelte",
+      "source_sha256": "4047fe8acb3a2fb259c83c38fe554ac2839b7fa41179a69f3e7af1c463130b36"
+    },
+    "desktop/src/lib/features/workspace/ProjectSaveLocation.svelte": {
+      "bytes": 5093,
+      "mode": "100644",
+      "sha256": "840925c9a01d5612e7a4c88a52dd0b0321fb8cc76647ede7b6cb9312973c5e10",
+      "source": "desktop/src/lib/features/workspace/ProjectSaveLocation.svelte",
+      "source_sha256": "840925c9a01d5612e7a4c88a52dd0b0321fb8cc76647ede7b6cb9312973c5e10"
+    },
+    "desktop/src/lib/features/workspace/Radio.svelte": {
+      "bytes": 11740,
+      "mode": "100644",
+      "sha256": "2475499cbc237bbb035eb96b2fb4227dcebf6d091ebaf3bdaf3af8f82e13332b",
+      "source": "desktop/src/lib/features/workspace/Radio.svelte",
+      "source_sha256": "2475499cbc237bbb035eb96b2fb4227dcebf6d091ebaf3bdaf3af8f82e13332b"
+    },
+    "desktop/src/lib/features/workspace/RadioIllustration.svelte": {
+      "bytes": 3692,
+      "mode": "100644",
+      "sha256": "94cb106783d538dbed6b1bf804369e905184ea599ecc403fbbf927f8a909f4c8",
+      "source": "desktop/src/lib/features/workspace/RadioIllustration.svelte",
+      "source_sha256": "94cb106783d538dbed6b1bf804369e905184ea599ecc403fbbf927f8a909f4c8"
+    },
+    "desktop/src/lib/features/workspace/ReaderNotice.svelte": {
+      "bytes": 1156,
+      "mode": "100644",
+      "sha256": "44ffaa630ff0e788a236bbee5e4ee99fc60311fe95b0b1080c54b4559c17faeb",
+      "source": "desktop/src/lib/features/workspace/ReaderNotice.svelte",
+      "source_sha256": "44ffaa630ff0e788a236bbee5e4ee99fc60311fe95b0b1080c54b4559c17faeb"
+    },
+    "desktop/src/lib/features/workspace/Semesters.svelte": {
+      "bytes": 18078,
+      "mode": "100644",
+      "sha256": "164c86dba0c7b7722c8e7a6df82174239ec3541c782d303428b86a9093c5c38f",
+      "source": "desktop/src/lib/features/workspace/Semesters.svelte",
+      "source_sha256": "164c86dba0c7b7722c8e7a6df82174239ec3541c782d303428b86a9093c5c38f"
+    },
+    "desktop/src/lib/features/workspace/StudyNav.svelte": {
+      "bytes": 2820,
+      "mode": "100644",
+      "sha256": "f2dcc7e80501649bc7f8e54a44608469cf64e28eb895162291b6087621a50331",
+      "source": "desktop/src/lib/features/workspace/StudyNav.svelte",
+      "source_sha256": "f2dcc7e80501649bc7f8e54a44608469cf64e28eb895162291b6087621a50331"
+    },
+    "desktop/src/lib/features/workspace/UniversityNav.svelte": {
+      "bytes": 1423,
+      "mode": "100644",
+      "sha256": "6ccbe63066c6266613e99560b2e899530eba8aaf63c21094a215ab1750ae6997",
+      "source": "desktop/src/lib/features/workspace/UniversityNav.svelte",
+      "source_sha256": "6ccbe63066c6266613e99560b2e899530eba8aaf63c21094a215ab1750ae6997"
+    },
+    "desktop/src/lib/features/workspace/Upcoming.svelte": {
+      "bytes": 3988,
+      "mode": "100644",
+      "sha256": "b107d5d85cbb3610eb0250add19bf626229bfc759e565792cc8cbd2d71190976",
+      "source": "desktop/src/lib/features/workspace/Upcoming.svelte",
+      "source_sha256": "b107d5d85cbb3610eb0250add19bf626229bfc759e565792cc8cbd2d71190976"
+    },
+    "desktop/src/lib/features/workspace/Week.svelte": {
+      "bytes": 26293,
+      "mode": "100644",
+      "sha256": "68db4e38a44251378b73613353bbbf190b640af9d951f32b6a069299ab9cd6b0",
+      "source": "desktop/src/lib/features/workspace/Week.svelte",
+      "source_sha256": "68db4e38a44251378b73613353bbbf190b640af9d951f32b6a069299ab9cd6b0"
+    },
+    "desktop/src/lib/features/workspace/WeekCalendar.svelte": {
+      "bytes": 5938,
+      "mode": "100644",
+      "sha256": "cdda44a738f66c92765b9f081bedaa9365850797ae84cfe12859e9697aea8ea3",
+      "source": "desktop/src/lib/features/workspace/WeekCalendar.svelte",
+      "source_sha256": "cdda44a738f66c92765b9f081bedaa9365850797ae84cfe12859e9697aea8ea3"
+    },
+    "desktop/src/lib/features/workspace/WidgetCard.svelte": {
+      "bytes": 8068,
+      "mode": "100644",
+      "sha256": "6502aaaf22182f27928f42dcb9ce23b1ed0741071bd9cea9548c320c177084e9",
+      "source": "desktop/src/lib/features/workspace/WidgetCard.svelte",
+      "source_sha256": "6502aaaf22182f27928f42dcb9ce23b1ed0741071bd9cea9548c320c177084e9"
+    },
+    "desktop/src/lib/features/workspace/WidgetEditor.svelte": {
+      "bytes": 10854,
+      "mode": "100644",
+      "sha256": "42bc8265b5a2a18845af7478bd14b6e321736d53c6a9a682a6f652d0720ecdff",
+      "source": "desktop/src/lib/features/workspace/WidgetEditor.svelte",
+      "source_sha256": "42bc8265b5a2a18845af7478bd14b6e321736d53c6a9a682a6f652d0720ecdff"
+    },
+    "desktop/src/lib/features/workspace/WordEditor.svelte": {
+      "bytes": 13845,
+      "mode": "100644",
+      "sha256": "b8bea16fcf9815f675f1846bb431c59cd3d2f0cc18ad139fed86614f06af3e43",
+      "source": "desktop/src/lib/features/workspace/WordEditor.svelte",
+      "source_sha256": "b8bea16fcf9815f675f1846bb431c59cd3d2f0cc18ad139fed86614f06af3e43"
+    },
+    "desktop/src/lib/features/workspace/WorkspaceNotice.svelte": {
+      "bytes": 6361,
+      "mode": "100644",
+      "sha256": "8e29d857b9b0da62aee2ac4b6c8c5b8da19db71857286dcfd19e489716803695",
+      "source": "desktop/src/lib/features/workspace/WorkspaceNotice.svelte",
+      "source_sha256": "8e29d857b9b0da62aee2ac4b6c8c5b8da19db71857286dcfd19e489716803695"
+    },
+    "desktop/src/lib/features/workspace/WorkspaceSettings.svelte": {
+      "bytes": 10817,
+      "mode": "100644",
+      "sha256": "e7020274d01ef64cf536ce6928aac889ff6d87b1a64bbf4516b4d6769041a7ba",
+      "source": "desktop/src/lib/features/workspace/WorkspaceSettings.svelte",
+      "source_sha256": "e7020274d01ef64cf536ce6928aac889ff6d87b1a64bbf4516b4d6769041a7ba"
+    },
+    "desktop/src/lib/features/workspace/WorkspaceView.svelte": {
+      "bytes": 5740,
+      "mode": "100644",
+      "sha256": "ae0fc4ae7cfb9bb5377d1b3a272da463852a24f8d7e90cb7a22467fc497125b0",
+      "source": "desktop/src/lib/features/workspace/WorkspaceView.svelte",
+      "source_sha256": "ae0fc4ae7cfb9bb5377d1b3a272da463852a24f8d7e90cb7a22467fc497125b0"
+    },
+    "desktop/src/lib/features/workspace/calendar-view.ts": {
+      "bytes": 1730,
+      "mode": "100644",
+      "sha256": "725f0f8e5b5d90f3bbbaac310fb30c8b3aaa6c54e80e0719df7a28ba89bbf62f",
+      "source": "desktop/src/lib/features/workspace/calendar-view.ts",
+      "source_sha256": "725f0f8e5b5d90f3bbbaac310fb30c8b3aaa6c54e80e0719df7a28ba89bbf62f"
+    },
+    "desktop/src/lib/features/workspace/course-timeline.ts": {
+      "bytes": 3875,
+      "mode": "100644",
+      "sha256": "5824141889bea21fdd486f2a1085bdddaeddc1f143933be02db8451c4442010d",
+      "source": "desktop/src/lib/features/workspace/course-timeline.ts",
+      "source_sha256": "5824141889bea21fdd486f2a1085bdddaeddc1f143933be02db8451c4442010d"
+    },
+    "desktop/src/lib/features/workspace/craft-document.ts": {
+      "bytes": 3382,
+      "mode": "100644",
+      "sha256": "bfc8be39191dcdd972340247ece5f0b3f2e718016986282aaab6b635a749515e",
+      "source": "desktop/src/lib/features/workspace/craft-document.ts",
+      "source_sha256": "bfc8be39191dcdd972340247ece5f0b3f2e718016986282aaab6b635a749515e"
+    },
+    "desktop/src/lib/features/workspace/document-assist.ts": {
+      "bytes": 19077,
+      "mode": "100644",
+      "sha256": "885a663f20b8911ddaef4326ea6c10b233f8dc79dec1363abb5a4d19b1019ca9",
+      "source": "desktop/src/lib/features/workspace/document-assist.ts",
+      "source_sha256": "885a663f20b8911ddaef4326ea6c10b233f8dc79dec1363abb5a4d19b1019ca9"
+    },
+    "desktop/src/lib/features/workspace/document-chrome.css": {
+      "bytes": 3277,
+      "mode": "100644",
+      "sha256": "92aee3546e1f6c63fe35fa276a6ef7b4b0c19899668cf21a0c41dde47fca7366",
+      "source": "desktop/src/lib/features/workspace/document-chrome.css",
+      "source_sha256": "92aee3546e1f6c63fe35fa276a6ef7b4b0c19899668cf21a0c41dde47fca7366"
+    },
+    "desktop/src/lib/features/workspace/document-conversation.ts": {
+      "bytes": 4399,
+      "mode": "100644",
+      "sha256": "8120fd8dbef6a24a7b0887505e9afa10f6e6131e2cc3b77396e4961ba92b3560",
+      "source": "desktop/src/lib/features/workspace/document-conversation.ts",
+      "source_sha256": "8120fd8dbef6a24a7b0887505e9afa10f6e6131e2cc3b77396e4961ba92b3560"
+    },
+    "desktop/src/lib/features/workspace/document-format.ts": {
+      "bytes": 1695,
+      "mode": "100644",
+      "sha256": "05615491bd32813905a538879621aa59cb93c138b9835696b4eb6fa8330e7661",
+      "source": "desktop/src/lib/features/workspace/document-format.ts",
+      "source_sha256": "05615491bd32813905a538879621aa59cb93c138b9835696b4eb6fa8330e7661"
+    },
+    "desktop/src/lib/features/workspace/document-html.ts": {
+      "bytes": 1221,
+      "mode": "100644",
+      "sha256": "a8b5ec8dc8fb79689da0757f7881f3286410eccca39e3e8e9495a4589b45eb68",
+      "source": "desktop/src/lib/features/workspace/document-html.ts",
+      "source_sha256": "a8b5ec8dc8fb79689da0757f7881f3286410eccca39e3e8e9495a4589b45eb68"
+    },
+    "desktop/src/lib/features/workspace/document-patches.ts": {
+      "bytes": 1937,
+      "mode": "100644",
+      "sha256": "eb1d1784a0a430f2f4b6ba062501e38c6b6699292f26313db3253ce0300e2b8c",
+      "source": "desktop/src/lib/features/workspace/document-patches.ts",
+      "source_sha256": "eb1d1784a0a430f2f4b6ba062501e38c6b6699292f26313db3253ce0300e2b8c"
+    },
+    "desktop/src/lib/features/workspace/document-preview.ts": {
+      "bytes": 3084,
+      "mode": "100644",
+      "sha256": "800275d33ed157fb25214d615303adeefd7ee1324e47b293dd9049c1b95a44de",
+      "source": "desktop/src/lib/features/workspace/document-preview.ts",
+      "source_sha256": "800275d33ed157fb25214d615303adeefd7ee1324e47b293dd9049c1b95a44de"
+    },
+    "desktop/src/lib/features/workspace/document-progress.ts": {
+      "bytes": 3279,
+      "mode": "100644",
+      "sha256": "8eeca251e2d6d6b1b76d0178c6b63b95959aef6a9075251a803b833c2ff957a4",
+      "source": "desktop/src/lib/features/workspace/document-progress.ts",
+      "source_sha256": "8eeca251e2d6d6b1b76d0178c6b63b95959aef6a9075251a803b833c2ff957a4"
+    },
+    "desktop/src/lib/features/workspace/document-scrollbars.ts": {
+      "bytes": 1080,
+      "mode": "100644",
+      "sha256": "16201020521cf690b91d855581a624c5fc6fb824d09d67984351781ad651cdb8",
+      "source": "desktop/src/lib/features/workspace/document-scrollbars.ts",
+      "source_sha256": "16201020521cf690b91d855581a624c5fc6fb824d09d67984351781ad651cdb8"
+    },
+    "desktop/src/lib/features/workspace/document-source.ts": {
+      "bytes": 2660,
+      "mode": "100644",
+      "sha256": "849dba61ffdf56ec89daa96fd6555bde62d89ba3442542a2bfa9c0cb57c67a7a",
+      "source": "desktop/src/lib/features/workspace/document-source.ts",
+      "source_sha256": "849dba61ffdf56ec89daa96fd6555bde62d89ba3442542a2bfa9c0cb57c67a7a"
+    },
+    "desktop/src/lib/features/workspace/document-tabs.ts": {
+      "bytes": 2934,
+      "mode": "100644",
+      "sha256": "43e0943472034b9000b170bf59f7bb698f0f011af89046055ff035b4068acd1c",
+      "source": "desktop/src/lib/features/workspace/document-tabs.ts",
+      "source_sha256": "43e0943472034b9000b170bf59f7bb698f0f011af89046055ff035b4068acd1c"
+    },
+    "desktop/src/lib/features/workspace/document-work-progress.ts": {
+      "bytes": 4806,
+      "mode": "100644",
+      "sha256": "a480b41be27433deeda12a36d75b24e41b815643eb8ddb57c74821f3593ef56f",
+      "source": "desktop/src/lib/features/workspace/document-work-progress.ts",
+      "source_sha256": "a480b41be27433deeda12a36d75b24e41b815643eb8ddb57c74821f3593ef56f"
+    },
+    "desktop/src/lib/features/workspace/drawer.ts": {
+      "bytes": 1402,
+      "mode": "100644",
+      "sha256": "e8b7a92b67446f0e8fe895bb8b8c392085613c28e1a53486d1d7fd4c72eb9975",
+      "source": "desktop/src/lib/features/workspace/drawer.ts",
+      "source_sha256": "e8b7a92b67446f0e8fe895bb8b8c392085613c28e1a53486d1d7fd4c72eb9975"
+    },
+    "desktop/src/lib/features/workspace/markdown-bundle.ts": {
+      "bytes": 210,
+      "mode": "100644",
+      "sha256": "da9587e4acc8d292aed03cc1fdd251594bc2ea11a3888cc9a65ef0b62f6e184c",
+      "source": "desktop/src/lib/features/workspace/markdown-bundle.ts",
+      "source_sha256": "da9587e4acc8d292aed03cc1fdd251594bc2ea11a3888cc9a65ef0b62f6e184c"
+    },
+    "desktop/src/lib/features/workspace/markdown-editor.ts": {
+      "bytes": 2870,
+      "mode": "100644",
+      "sha256": "3f29bc3301b4b5119eb9b6bdb125d1df05549331aba64ecbcf528db1132e2520",
+      "source": "desktop/src/lib/features/workspace/markdown-editor.ts",
+      "source_sha256": "3f29bc3301b4b5119eb9b6bdb125d1df05549331aba64ecbcf528db1132e2520"
+    },
+    "desktop/src/lib/features/workspace/material-portal.ts": {
+      "bytes": 648,
+      "mode": "100644",
+      "sha256": "0ca54bd2485118626a3ceed453d3c8a1c87e6a63c18d3cd7c2cc593ef0d0cf09",
+      "source": "desktop/src/lib/features/workspace/material-portal.ts",
+      "source_sha256": "0ca54bd2485118626a3ceed453d3c8a1c87e6a63c18d3cd7c2cc593ef0d0cf09"
+    },
+    "desktop/src/lib/features/workspace/material-reader.ts": {
+      "bytes": 2552,
+      "mode": "100644",
+      "sha256": "532b8ca81be43979ee0c994f7877a00e7371bb8877d831b364c03f713ef88710",
+      "source": "desktop/src/lib/features/workspace/material-reader.ts",
+      "source_sha256": "532b8ca81be43979ee0c994f7877a00e7371bb8877d831b364c03f713ef88710"
+    },
+    "desktop/src/lib/features/workspace/project-brief.ts": {
+      "bytes": 1836,
+      "mode": "100644",
+      "sha256": "493944f5465c0c623258ad47ad5704abd94060c359d3f02b23855852f8cfee47",
+      "source": "desktop/src/lib/features/workspace/project-brief.ts",
+      "source_sha256": "493944f5465c0c623258ad47ad5704abd94060c359d3f02b23855852f8cfee47"
+    },
+    "desktop/src/lib/features/workspace/reader-drafts.ts": {
+      "bytes": 802,
+      "mode": "100644",
+      "sha256": "a81563801bf726d00a8b92566a7620bf6164746408bf13c586f555d76d8c8733",
+      "source": "desktop/src/lib/features/workspace/reader-drafts.ts",
+      "source_sha256": "a81563801bf726d00a8b92566a7620bf6164746408bf13c586f555d76d8c8733"
+    },
+    "desktop/src/lib/features/workspace/upcoming.ts": {
+      "bytes": 1747,
+      "mode": "100644",
+      "sha256": "a0fec465a8cba07f0cc18490d10d3b17cde70916cd2526a86576afe548dcf6a6",
+      "source": "desktop/src/lib/features/workspace/upcoming.ts",
+      "source_sha256": "a0fec465a8cba07f0cc18490d10d3b17cde70916cd2526a86576afe548dcf6a6"
+    },
+    "desktop/src/lib/features/workspace/widgets.css": {
+      "bytes": 5433,
+      "mode": "100644",
+      "sha256": "6b70744f7fa72ef3d7fd644e29d7698d7d7a14eeb6a38e54bbf75b18bb1f560f",
+      "source": "desktop/src/lib/features/workspace/widgets.css",
+      "source_sha256": "6b70744f7fa72ef3d7fd644e29d7698d7d7a14eeb6a38e54bbf75b18bb1f560f"
+    },
+    "desktop/src/lib/features/workspace/widgets.ts": {
+      "bytes": 731,
+      "mode": "100644",
+      "sha256": "50797e1aba716fd8957b49207ec2f5aea6fb0a3567791e0c0f07848c47b15a18",
+      "source": "desktop/src/lib/features/workspace/widgets.ts",
+      "source_sha256": "50797e1aba716fd8957b49207ec2f5aea6fb0a3567791e0c0f07848c47b15a18"
+    },
+    "desktop/src/lib/features/workspace/workspace.css": {
+      "bytes": 3991,
+      "mode": "100644",
+      "sha256": "c40021300cdf04fc5403fd081e8e05879a1b348df401b7f2e5ec73d3b4361c2d",
+      "source": "desktop/src/lib/features/workspace/workspace.css",
+      "source_sha256": "c40021300cdf04fc5403fd081e8e05879a1b348df401b7f2e5ec73d3b4361c2d"
+    },
+    "desktop/src/lib/features/workspace/workspace.ts": {
+      "bytes": 11490,
+      "mode": "100644",
+      "sha256": "3f86dd9dbd1c4fd50601b97c529b4236c8f1b823405be714ba41a68a4f4a4333",
+      "source": "desktop/src/lib/features/workspace/workspace.ts",
+      "source_sha256": "3f86dd9dbd1c4fd50601b97c529b4236c8f1b823405be714ba41a68a4f4a4333"
+    },
+    "desktop/src/routes/+layout.ts": {
+      "bytes": 57,
+      "mode": "100644",
+      "sha256": "06a4922721ddcaf5392a3190d061bc836eefd44073ff935b179ac0a6ec7ed9fd",
+      "source": "desktop/src/routes/+layout.ts",
+      "source_sha256": "06a4922721ddcaf5392a3190d061bc836eefd44073ff935b179ac0a6ec7ed9fd"
+    },
+    "desktop/src/routes/+page.svelte": {
+      "bytes": 405,
+      "mode": "100644",
+      "sha256": "258c1385f3714b637feec4d9db735a41359ba67586c6d23c4df7eae1f95704b7",
+      "source": "desktop/src/routes/+page.svelte",
+      "source_sha256": "258c1385f3714b637feec4d9db735a41359ba67586c6d23c4df7eae1f95704b7"
+    },
+    "desktop/static/private/markdown/KEJTU-BUILD.json": {
+      "bytes": 352,
+      "mode": "100644",
+      "sha256": "4fd82856bb82d93cda5fb3a91d7bb65d17170d3e28f64fd8afce9b600f17d1cc",
+      "source": "desktop/static/private/markdown/KEJTU-BUILD.json",
+      "source_sha256": "4fd82856bb82d93cda5fb3a91d7bb65d17170d3e28f64fd8afce9b600f17d1cc"
+    },
+    "desktop/static/private/markdown/LICENSES.txt": {
+      "bytes": 286488,
+      "mode": "100644",
+      "sha256": "f60bf908fbda7d03efd20a25d6bac89739793ba0a46fdf8bba9b2dfcfc784bb2",
+      "source": "desktop/static/private/markdown/LICENSES.txt",
+      "source_sha256": "f60bf908fbda7d03efd20a25d6bac89739793ba0a46fdf8bba9b2dfcfc784bb2"
+    },
+    "desktop/static/private/markdown/editor-292015ee2cb667fc.css": {
+      "bytes": 58647,
+      "mode": "100644",
+      "sha256": "292015ee2cb667fc280b8375a166fd32037d23bb3bcd4d2144e1d5bac6f57659",
+      "source": "desktop/static/private/markdown/editor-292015ee2cb667fc.css",
+      "source_sha256": "292015ee2cb667fc280b8375a166fd32037d23bb3bcd4d2144e1d5bac6f57659"
+    },
+    "desktop/static/private/markdown/editor-d5e87993de9635a0.js": {
+      "bytes": 2938108,
+      "mode": "100644",
+      "sha256": "d5e87993de9635a0dbfcfaa742a64cfa5cd438baa36789bd7914254e93349ade",
+      "source": "desktop/static/private/markdown/editor-d5e87993de9635a0.js",
+      "source_sha256": "d5e87993de9635a0dbfcfaa742a64cfa5cd438baa36789bd7914254e93349ade"
+    },
+    "desktop/static/private/pdfcraft/ATTRIBUTION.md": {
+      "bytes": 88183,
+      "mode": "100644",
+      "sha256": "a63e1627deda938b9c201dcce0e18cecaa2393d093abe755258e875931151aa8",
+      "source": "desktop/static/private/pdfcraft/ATTRIBUTION.md",
+      "source_sha256": "a63e1627deda938b9c201dcce0e18cecaa2393d093abe755258e875931151aa8"
+    },
+    "desktop/static/private/pdfcraft/ATTRIBUTION.toml": {
+      "bytes": 153238,
+      "mode": "100644",
+      "sha256": "f9dd2b47ec0201c8300bc87ec5f0d02e2ee8ebc6554da0d7541d274a950485f0",
+      "source": "desktop/static/private/pdfcraft/ATTRIBUTION.toml",
+      "source_sha256": "f9dd2b47ec0201c8300bc87ec5f0d02e2ee8ebc6554da0d7541d274a950485f0"
+    },
+    "desktop/static/private/pdfcraft/CARGO-LICENSES.txt": {
+      "bytes": 3885897,
+      "mode": "100644",
+      "sha256": "4535a1e26f3df2dee354854eae5489eddd9b6e835fac4aee9e2e63af9c8f15ef",
+      "source": "desktop/static/private/pdfcraft/CARGO-LICENSES.txt",
+      "source_sha256": "4535a1e26f3df2dee354854eae5489eddd9b6e835fac4aee9e2e63af9c8f15ef"
+    },
+    "desktop/static/private/pdfcraft/KEJTU-BUILD.json": {
+      "bytes": 1397,
+      "mode": "100644",
+      "sha256": "58d5c8873a9398f4959662052d5ba2c78900e85ca8c8aeae2b8f8a54c1ad7faa",
+      "source": "desktop/static/private/pdfcraft/KEJTU-BUILD.json",
+      "source_sha256": "58d5c8873a9398f4959662052d5ba2c78900e85ca8c8aeae2b8f8a54c1ad7faa"
+    },
+    "desktop/static/private/pdfcraft/LICENSE-APACHE": {
+      "bytes": 10174,
+      "mode": "100644",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "source": "desktop/static/private/pdfcraft/LICENSE-APACHE",
+      "source_sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+    },
+    "desktop/static/private/pdfcraft/LICENSE-MANIFEST.json": {
+      "bytes": 227557,
+      "mode": "100644",
+      "sha256": "ad17d4c343f70c73e1b304f1e06684bcb5adb89ac1e953a4a16c5a2687e0153a",
+      "source": "desktop/static/private/pdfcraft/LICENSE-MANIFEST.json",
+      "source_sha256": "ad17d4c343f70c73e1b304f1e06684bcb5adb89ac1e953a4a16c5a2687e0153a"
+    },
+    "desktop/static/private/pdfcraft/LICENSE-MIT": {
+      "bytes": 1100,
+      "mode": "100644",
+      "sha256": "cd7032ea33b71427f188e34ffb4aee9d6868a57fd196037c5c8b2be03a2a0352",
+      "source": "desktop/static/private/pdfcraft/LICENSE-MIT",
+      "source_sha256": "cd7032ea33b71427f188e34ffb4aee9d6868a57fd196037c5c8b2be03a2a0352"
+    },
+    "desktop/static/private/pdfcraft/NOTICE": {
+      "bytes": 4184,
+      "mode": "100644",
+      "sha256": "496946cff190a3fec32fe0241ea60d40539c73a9da1865073eb0c73ee822c8d5",
+      "source": "desktop/static/private/pdfcraft/NOTICE",
+      "source_sha256": "496946cff190a3fec32fe0241ea60d40539c73a9da1865073eb0c73ee822c8d5"
+    },
+    "desktop/static/private/pdfcraft/RUST-LICENSES.html": {
+      "bytes": 1512520,
+      "mode": "100644",
+      "sha256": "68129500b616d5838629e68f55ff3aed5e096dacf60ce9eb41bbe599a563afa6",
+      "source": "desktop/static/private/pdfcraft/RUST-LICENSES.html",
+      "source_sha256": "68129500b616d5838629e68f55ff3aed5e096dacf60ce9eb41bbe599a563afa6"
+    },
+    "desktop/static/private/pdfcraft/THIRD-PARTY-LICENSES.txt": {
+      "bytes": 160465,
+      "mode": "100644",
+      "sha256": "275df19820cda0199bae548cb7de6097e760482a54c73c622eef5b692013569f",
+      "source": "desktop/static/private/pdfcraft/THIRD-PARTY-LICENSES.txt",
+      "source_sha256": "275df19820cda0199bae548cb7de6097e760482a54c73c622eef5b692013569f"
+    },
+    "desktop/static/private/pdfcraft/bootstrap.js": {
+      "bytes": 493,
+      "mode": "100644",
+      "sha256": "6960bf0b6f2007161c1f11915117c80751b15654b65bbc749c4da52523f4f89a",
+      "source": "desktop/static/private/pdfcraft/bootstrap.js",
+      "source_sha256": "6960bf0b6f2007161c1f11915117c80751b15654b65bbc749c4da52523f4f89a"
+    },
+    "desktop/static/private/pdfcraft/index.html": {
+      "bytes": 748,
+      "mode": "100644",
+      "sha256": "4efa9e697c34732cf54c501999d474b576a4e957f437c0219387200c041c610a",
+      "source": "desktop/static/private/pdfcraft/index.html",
+      "source_sha256": "4efa9e697c34732cf54c501999d474b576a4e957f437c0219387200c041c610a"
+    },
+    "desktop/static/private/pdfcraft/pdfcraft-web-f030fd1e70a40ba2.js": {
+      "bytes": 164348,
+      "mode": "100644",
+      "sha256": "a16e4581f2fd13a0d20def0ba3bda4a2d36182c191d9b2b1d21f04884562ac04",
+      "source": "desktop/static/private/pdfcraft/pdfcraft-web-f030fd1e70a40ba2.js",
+      "source_sha256": "a16e4581f2fd13a0d20def0ba3bda4a2d36182c191d9b2b1d21f04884562ac04"
+    },
+    "desktop/static/private/pdfcraft/pdfcraft-web-f030fd1e70a40ba2_bg.wasm": {
+      "bytes": 42718724,
+      "mode": "100644",
+      "sha256": "423373029ef16a3f506b7f62943da2e7bc35e592422879d73c88c387ea4b5c92",
+      "source": "desktop/static/private/pdfcraft/pdfcraft-web-f030fd1e70a40ba2_bg.wasm",
+      "source_sha256": "423373029ef16a3f506b7f62943da2e7bc35e592422879d73c88c387ea4b5c92"
+    },
+    "desktop/static/private/wordcraft/ATTRIBUTION.md": {
+      "bytes": 18524,
+      "mode": "100644",
+      "sha256": "80304fbd8d249b80cf6951eec5c1f23d63df3674ee7ba96ee54b486b4530e2cb",
+      "source": "desktop/static/private/wordcraft/ATTRIBUTION.md",
+      "source_sha256": "80304fbd8d249b80cf6951eec5c1f23d63df3674ee7ba96ee54b486b4530e2cb"
+    },
+    "desktop/static/private/wordcraft/CARGO-LICENSES.txt": {
+      "bytes": 2482395,
+      "mode": "100644",
+      "sha256": "89082d99eabc69e3e45b21b3c2035020a7678206a32202e903118af717e64f0b",
+      "source": "desktop/static/private/wordcraft/CARGO-LICENSES.txt",
+      "source_sha256": "89082d99eabc69e3e45b21b3c2035020a7678206a32202e903118af717e64f0b"
+    },
+    "desktop/static/private/wordcraft/KEJTU-BUILD.json": {
+      "bytes": 1308,
+      "mode": "100644",
+      "sha256": "8e459e5e74e32ad4b737cd495ce420ee8e348de06d4f772fb98477dbb5bb8769",
+      "source": "desktop/static/private/wordcraft/KEJTU-BUILD.json",
+      "source_sha256": "8e459e5e74e32ad4b737cd495ce420ee8e348de06d4f772fb98477dbb5bb8769"
+    },
+    "desktop/static/private/wordcraft/LICENSE-APACHE": {
+      "bytes": 10174,
+      "mode": "100644",
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+      "source": "desktop/static/private/wordcraft/LICENSE-APACHE",
+      "source_sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+    },
+    "desktop/static/private/wordcraft/LICENSE-MANIFEST.json": {
+      "bytes": 135558,
+      "mode": "100644",
+      "sha256": "064139877016dd35affb08101953f56a59e712a54170f0b2b09eeadf180e5829",
+      "source": "desktop/static/private/wordcraft/LICENSE-MANIFEST.json",
+      "source_sha256": "064139877016dd35affb08101953f56a59e712a54170f0b2b09eeadf180e5829"
+    },
+    "desktop/static/private/wordcraft/LICENSE-MIT": {
+      "bytes": 1101,
+      "mode": "100644",
+      "sha256": "fc257de83c44ae49e4aad1cf777b886794be3ac9c8d00c010ef55935d5bbeba5",
+      "source": "desktop/static/private/wordcraft/LICENSE-MIT",
+      "source_sha256": "fc257de83c44ae49e4aad1cf777b886794be3ac9c8d00c010ef55935d5bbeba5"
+    },
+    "desktop/static/private/wordcraft/NOTICE": {
+      "bytes": 4133,
+      "mode": "100644",
+      "sha256": "950b26ace0a5aa34c33358a287a22989dd40c5f4eb943be1e0f51ae3944192cc",
+      "source": "desktop/static/private/wordcraft/NOTICE",
+      "source_sha256": "950b26ace0a5aa34c33358a287a22989dd40c5f4eb943be1e0f51ae3944192cc"
+    },
+    "desktop/static/private/wordcraft/RUST-LICENSES.html": {
+      "bytes": 1512520,
+      "mode": "100644",
+      "sha256": "68129500b616d5838629e68f55ff3aed5e096dacf60ce9eb41bbe599a563afa6",
+      "source": "desktop/static/private/wordcraft/RUST-LICENSES.html",
+      "source_sha256": "68129500b616d5838629e68f55ff3aed5e096dacf60ce9eb41bbe599a563afa6"
+    },
+    "desktop/static/private/wordcraft/THIRD-PARTY-LICENSES.txt": {
+      "bytes": 70207,
+      "mode": "100644",
+      "sha256": "85aeb6d298e000ea395e7ff0d9f8c6cd98a6bfd4c4d5f2b47dbc105fd5d85b8b",
+      "source": "desktop/static/private/wordcraft/THIRD-PARTY-LICENSES.txt",
+      "source_sha256": "85aeb6d298e000ea395e7ff0d9f8c6cd98a6bfd4c4d5f2b47dbc105fd5d85b8b"
+    },
+    "desktop/static/private/wordcraft/bootstrap.js": {
+      "bytes": 500,
+      "mode": "100644",
+      "sha256": "678b156a0ad721bdbd127b7e7686af99cdd6496c36ce021e65eab2a9df98c6b3",
+      "source": "desktop/static/private/wordcraft/bootstrap.js",
+      "source_sha256": "678b156a0ad721bdbd127b7e7686af99cdd6496c36ce021e65eab2a9df98c6b3"
+    },
+    "desktop/static/private/wordcraft/index.html": {
+      "bytes": 993,
+      "mode": "100644",
+      "sha256": "0dc4d9586a98e6f742e0824d67d71fa6f4053ebbcf52fb6be6a5b96bd3fef58f",
+      "source": "desktop/static/private/wordcraft/index.html",
+      "source_sha256": "0dc4d9586a98e6f742e0824d67d71fa6f4053ebbcf52fb6be6a5b96bd3fef58f"
+    },
+    "desktop/static/private/wordcraft/wordcraft-web-2d9b96c6f7bfd5df.js": {
+      "bytes": 167508,
+      "mode": "100644",
+      "sha256": "f01dddab92fb4962c9dae6a2b4b0cfa8055dd7fed23eb757eeb4d124406e933b",
+      "source": "desktop/static/private/wordcraft/wordcraft-web-2d9b96c6f7bfd5df.js",
+      "source_sha256": "f01dddab92fb4962c9dae6a2b4b0cfa8055dd7fed23eb757eeb4d124406e933b"
+    },
+    "desktop/static/private/wordcraft/wordcraft-web-2d9b96c6f7bfd5df_bg.wasm": {
+      "bytes": 44301643,
+      "mode": "100644",
+      "sha256": "cd036835389dfba073604d40f06903dd9c6a46fdbd876668b9fb93e2e4ca607e",
+      "source": "desktop/static/private/wordcraft/wordcraft-web-2d9b96c6f7bfd5df_bg.wasm",
+      "source_sha256": "cd036835389dfba073604d40f06903dd9c6a46fdbd876668b9fb93e2e4ca607e"
+    },
+    "desktop/svelte.config.js": {
+      "bytes": 235,
+      "mode": "100644",
+      "sha256": "ef7c728045ab6c4f9e497d4709b5fa740595cd3eee6d6de06593adb4a46e708a",
+      "source": "desktop/svelte.config.js",
+      "source_sha256": "ef7c728045ab6c4f9e497d4709b5fa740595cd3eee6d6de06593adb4a46e708a"
+    },
+    "desktop/tsconfig.json": {
+      "bytes": 249,
+      "mode": "100644",
+      "sha256": "dba0d4743343669f1bf17db02f72176fb504285c6917e8495f8aa078e9b75183",
+      "source": "desktop/tsconfig.json",
+      "source_sha256": "cf0beaa922c0261466a896d6a186919074504c1fdf481d74aa61b3e48f0e6f04"
+    },
+    "desktop/vite.config.ts": {
+      "bytes": 911,
+      "mode": "100644",
+      "sha256": "bad46af2fa91a00ec75d32658c2338c471c0d86844a99941a3c54b2740ec31d0",
+      "source": "desktop/vite.config.ts",
+      "source_sha256": "bad46af2fa91a00ec75d32658c2338c471c0d86844a99941a3c54b2740ec31d0"
+    },
+    "docs/licenses/chatgpt/PyJWT-2.15.1/AUTHORS.rst": {
+      "bytes": 322,
+      "mode": "100644",
+      "sha256": "925ce43461029eedbf558ec0b7cf7fc4b045def5120ebb97937c70814071cf07",
+      "source": "docs/licenses/chatgpt/PyJWT-2.15.1/AUTHORS.rst",
+      "source_sha256": "925ce43461029eedbf558ec0b7cf7fc4b045def5120ebb97937c70814071cf07"
+    },
+    "docs/licenses/chatgpt/PyJWT-2.15.1/LICENSE": {
+      "bytes": 1085,
+      "mode": "100644",
+      "sha256": "797a7a20231d4c433e9f1911db1731d06b5828b98f499819a034f7c0f56f5ce5",
+      "source": "docs/licenses/chatgpt/PyJWT-2.15.1/LICENSE",
+      "source_sha256": "797a7a20231d4c433e9f1911db1731d06b5828b98f499819a034f7c0f56f5ce5"
+    },
+    "docs/licenses/chatgpt/README.md": {
+      "bytes": 322,
+      "mode": "100644",
+      "sha256": "b788965c639725686520095039d63de265b7bd455852cef4217e253c860a307d",
+      "source": "docs/licenses/chatgpt/README.md",
+      "source_sha256": "b788965c639725686520095039d63de265b7bd455852cef4217e253c860a307d"
+    },
+    "docs/licenses/chatgpt/cffi-2.1.1/LICENSE": {
+      "bytes": 1123,
+      "mode": "100644",
+      "sha256": "5ba24ddc57067f9249add644c3afc41a5d6dc37e23433ef759d95df370b0af63",
+      "source": "docs/licenses/chatgpt/cffi-2.1.1/LICENSE",
+      "source_sha256": "5ba24ddc57067f9249add644c3afc41a5d6dc37e23433ef759d95df370b0af63"
+    },
+    "docs/licenses/chatgpt/cryptography-50.0.2/LICENSE": {
+      "bytes": 197,
+      "mode": "100644",
+      "sha256": "3e0c7c091a948b82533ba98fd7cbb40432d6f1a9acbf85f5922d2f99a93ae6bb",
+      "source": "docs/licenses/chatgpt/cryptography-50.0.2/LICENSE",
+      "source_sha256": "3e0c7c091a948b82533ba98fd7cbb40432d6f1a9acbf85f5922d2f99a93ae6bb"
+    },
+    "docs/licenses/chatgpt/cryptography-50.0.2/LICENSE.APACHE": {
+      "bytes": 11360,
+      "mode": "100644",
+      "sha256": "aac73b3148f6d1d7111dbca32099f68d26c644c6813ae1e4f05f6579aa2663fe",
+      "source": "docs/licenses/chatgpt/cryptography-50.0.2/LICENSE.APACHE",
+      "source_sha256": "aac73b3148f6d1d7111dbca32099f68d26c644c6813ae1e4f05f6579aa2663fe"
+    },
+    "docs/licenses/chatgpt/cryptography-50.0.2/LICENSE.BSD": {
+      "bytes": 1532,
+      "mode": "100644",
+      "sha256": "602c4c7482de6479dd2e9793cda275e5e63d773dacd1eca689232ab7008fb4fb",
+      "source": "docs/licenses/chatgpt/cryptography-50.0.2/LICENSE.BSD",
+      "source_sha256": "602c4c7482de6479dd2e9793cda275e5e63d773dacd1eca689232ab7008fb4fb"
+    },
+    "docs/licenses/chatgpt/pycparser-3.12/LICENSE": {
+      "bytes": 1543,
+      "mode": "100644",
+      "sha256": "0a9e78156ae8b96caf1b4f11ac2df424b83de29736f9e757630548a6272fdf90",
+      "source": "docs/licenses/chatgpt/pycparser-3.12/LICENSE",
+      "source_sha256": "0a9e78156ae8b96caf1b4f11ac2df424b83de29736f9e757630548a6272fdf90"
+    },
+    "kejtu": {
+      "bytes": 144,
+      "mode": "100755",
+      "sha256": "7ed6408721be8ecdb59328d12c1d835a37f333c4cf6461fcfed5859df2891bf7",
+      "source": "kejtu",
+      "source_sha256": "7ed6408721be8ecdb59328d12c1d835a37f333c4cf6461fcfed5859df2891bf7"
+    },
+    "ops/control.py": {
+      "bytes": 8883,
+      "mode": "100644",
+      "sha256": "8027959752959327fc6488cbc351452fd39ea487fd320e01ce0536ca719991e6",
+      "source": "ops/control.py",
+      "source_sha256": "8027959752959327fc6488cbc351452fd39ea487fd320e01ce0536ca719991e6"
+    },
+    "ops/mcp/LICENSE-playwright": {
+      "bytes": 11552,
+      "mode": "100644",
+      "sha256": "9a7110fc2d2f964038e5dc49128f908f29f47a574c961cba16085914e879cbda",
+      "source": "ops/mcp/LICENSE-playwright",
+      "source_sha256": "9a7110fc2d2f964038e5dc49128f908f29f47a574c961cba16085914e879cbda"
+    },
+    "ops/mcp/LICENSE-python-sdk": {
+      "bytes": 1071,
+      "mode": "100644",
+      "sha256": "5e13dbbc1d120fc2a03cecde7c91424ae2d7de11b63d58ded2f4431e261ee50d",
+      "source": "ops/mcp/LICENSE-python-sdk",
+      "source_sha256": "5e13dbbc1d120fc2a03cecde7c91424ae2d7de11b63d58ded2f4431e261ee50d"
+    },
+    "ops/mcp/NOTICE-SOURCES.json": {
+      "bytes": 1333,
+      "mode": "100644",
+      "sha256": "f81c8671b63dc89069c40b80ada8080758861cacd228ea16f4f4b7320e957204",
+      "source": "ops/mcp/NOTICE-SOURCES.json",
+      "source_sha256": "f81c8671b63dc89069c40b80ada8080758861cacd228ea16f4f4b7320e957204"
+    },
+    "ops/mcp/filesystem/LICENSE": {
+      "bytes": 12227,
+      "mode": "100644",
+      "sha256": "0382b0057770ca05e9c350a50aa3b1c1fea84da0bc81d723bf00b9aa841be58a",
+      "source": "ops/mcp/filesystem/LICENSE",
+      "source_sha256": "0382b0057770ca05e9c350a50aa3b1c1fea84da0bc81d723bf00b9aa841be58a"
+    },
+    "ops/mcp/filesystem/package-lock.json": {
+      "bytes": 46921,
+      "mode": "100644",
+      "sha256": "cd497a3468cc8823060890050650b9084bfc08703b85ad593cd22a7d8ec27fef",
+      "source": "ops/mcp/filesystem/package-lock.json",
+      "source_sha256": "cd497a3468cc8823060890050650b9084bfc08703b85ad593cd22a7d8ec27fef"
+    },
+    "ops/mcp/filesystem/package.json": {
+      "bytes": 157,
+      "mode": "100644",
+      "sha256": "cf27b1f342401f23d15ba07442bbc79eedfabaf238cd2baf4d8103394eb3f397",
+      "source": "ops/mcp/filesystem/package.json",
+      "source_sha256": "cf27b1f342401f23d15ba07442bbc79eedfabaf238cd2baf4d8103394eb3f397"
+    },
+    "ops/mcp/package-lock.json": {
+      "bytes": 1714,
+      "mode": "100644",
+      "sha256": "19e4611cf424a84c5fee239977ef1e8d5d110c80c5f5df57436223458b3e387e",
+      "source": "ops/mcp/package-lock.json",
+      "source_sha256": "19e4611cf424a84c5fee239977ef1e8d5d110c80c5f5df57436223458b3e387e"
+    },
+    "ops/mcp/package.json": {
+      "bytes": 60,
+      "mode": "100644",
+      "sha256": "be993eb3694cd01f24ef59fabf37fe9455fecc7c5a6191f8ca79a85e843b9fad",
+      "source": "ops/mcp/package.json",
+      "source_sha256": "be993eb3694cd01f24ef59fabf37fe9455fecc7c5a6191f8ca79a85e843b9fad"
+    },
+    "ops/mcp/requirements.lock": {
+      "bytes": 606,
+      "mode": "100644",
+      "sha256": "e5e421906c5abf8c8a5ec1ec7e69cebf79d063d795ed2ce077a841cfa2c416c4",
+      "source": "ops/mcp/requirements.lock",
+      "source_sha256": "e5e421906c5abf8c8a5ec1ec7e69cebf79d063d795ed2ce077a841cfa2c416c4"
+    },
+    "ops/private-video-requirements.lock": {
+      "bytes": 117,
+      "mode": "100644",
+      "sha256": "dbe57a2be52269cea740577117da6617be82c6951bcf77ce385c2c55ade4aa85",
+      "source": "ops/private-video-requirements.lock",
+      "source_sha256": "dbe57a2be52269cea740577117da6617be82c6951bcf77ce385c2c55ade4aa85"
+    },
+    "ops/requirements.lock": {
+      "bytes": 615,
+      "mode": "100644",
+      "sha256": "0e03cb1d96c246ec263c12d8518b810c870c62fc081b2f28931a04fe9230d68a",
+      "source": "ops/requirements.lock",
+      "source_sha256": "0e03cb1d96c246ec263c12d8518b810c870c62fc081b2f28931a04fe9230d68a"
+    },
+    "packaging/source/install.py": {
+      "bytes": 20867,
+      "mode": "100644",
+      "sha256": "497100fb60dd918abd30451b477f9b281f5121723b56c3ecb9fb484b7a399552",
+      "source": "packaging/source/install.py",
+      "source_sha256": "497100fb60dd918abd30451b477f9b281f5121723b56c3ecb9fb484b7a399552"
+    },
+    "packaging/source/runtime.lock.json": {
+      "bytes": 2879,
+      "mode": "100644",
+      "sha256": "d51415a5edb47dc6c8e826572fc95d50c04b52a6297bb9ac292f19cfa61cde3d",
+      "source": "packaging/source/runtime.lock.json",
+      "source_sha256": "d51415a5edb47dc6c8e826572fc95d50c04b52a6297bb9ac292f19cfa61cde3d"
+    },
+    "pyproject.toml": {
+      "bytes": 1164,
+      "mode": "100644",
+      "sha256": "7a995cce33a6ec47af8be9089e2989bdb137387a570627f791d14a3985c85077",
+      "source": "pyproject.toml",
+      "source_sha256": "7a995cce33a6ec47af8be9089e2989bdb137387a570627f791d14a3985c85077"
+    },
+    "run-development.sh": {
+      "bytes": 2994,
+      "mode": "100755",
+      "sha256": "82d12d4be7940b3dbdfc5c62fdf8813d62d860a73e0428d2f8e84717ebb917cc",
+      "source": "run-development.sh",
+      "source_sha256": "82d12d4be7940b3dbdfc5c62fdf8813d62d860a73e0428d2f8e84717ebb917cc"
+    },
+    "src/kejtu_next/__init__.py": {
+      "bytes": 384,
+      "mode": "100644",
+      "sha256": "b6f4dd55bae228782429c8aedd6890bcfdb1f9feab228dbd4a4e3ac781d7a47e",
+      "source": "src/kejtu_next/__init__.py",
+      "source_sha256": "b6f4dd55bae228782429c8aedd6890bcfdb1f9feab228dbd4a4e3ac781d7a47e"
+    },
+    "src/kejtu_next/__main__.py": {
+      "bytes": 643,
+      "mode": "100644",
+      "sha256": "ee0b96e0cdd35c8cb3d34ab8fb63564b585eac176aea63f5775f7d3948ffe0fc",
+      "source": "src/kejtu_next/__main__.py",
+      "source_sha256": "ee0b96e0cdd35c8cb3d34ab8fb63564b585eac176aea63f5775f7d3948ffe0fc"
+    },
+    "src/kejtu_next/adapters/__init__.py": {
+      "bytes": 44,
+      "mode": "100644",
+      "sha256": "17ec98440e1fb233b2d7a718d5f7228922b286d739220b0aee4658d605c9f7dc",
+      "source": "src/kejtu_next/adapters/__init__.py",
+      "source_sha256": "17ec98440e1fb233b2d7a718d5f7228922b286d739220b0aee4658d605c9f7dc"
+    },
+    "src/kejtu_next/adapters/mcp/__init__.py": {
+      "bytes": 73,
+      "mode": "100644",
+      "sha256": "12b83740885972cd1b34478de7a92193588bb9b7c6432f61814b1b2fbd0ddaed",
+      "source": "src/kejtu_next/adapters/mcp/__init__.py",
+      "source_sha256": "12b83740885972cd1b34478de7a92193588bb9b7c6432f61814b1b2fbd0ddaed"
+    },
+    "src/kejtu_next/adapters/mcp/client.py": {
+      "bytes": 6750,
+      "mode": "100644",
+      "sha256": "1039d17b9732fbe2a98160c457b00b01a795b404691937397d3bf656854a07a5",
+      "source": "src/kejtu_next/adapters/mcp/client.py",
+      "source_sha256": "1039d17b9732fbe2a98160c457b00b01a795b404691937397d3bf656854a07a5"
+    },
+    "src/kejtu_next/adapters/mcp/config.py": {
+      "bytes": 10430,
+      "mode": "100644",
+      "sha256": "6e4c494468c3cb2595ea985815940dca7f516c10506a9d3593e5214c69366c15",
+      "source": "src/kejtu_next/adapters/mcp/config.py",
+      "source_sha256": "6e4c494468c3cb2595ea985815940dca7f516c10506a9d3593e5214c69366c15"
+    },
+    "src/kejtu_next/adapters/mcp/course_material.py": {
+      "bytes": 21064,
+      "mode": "100644",
+      "sha256": "c95befd94e2aac1db5f57cd3b896e7c75b7e432b0cd5f9aeb413d12a1d2325ee",
+      "source": "src/kejtu_next/adapters/mcp/course_material.py",
+      "source_sha256": "c95befd94e2aac1db5f57cd3b896e7c75b7e432b0cd5f9aeb413d12a1d2325ee"
+    },
+    "src/kejtu_next/adapters/mcp/files.py": {
+      "bytes": 15158,
+      "mode": "100644",
+      "sha256": "55da21b1c13e21941029482fb3837ae0ef79961e377765ea3d3047276d35ee54",
+      "source": "src/kejtu_next/adapters/mcp/files.py",
+      "source_sha256": "55da21b1c13e21941029482fb3837ae0ef79961e377765ea3d3047276d35ee54"
+    },
+    "src/kejtu_next/adapters/mcp/host.py": {
+      "bytes": 13141,
+      "mode": "100644",
+      "sha256": "ad0b5b81cc6c6efb8f7e9b9d9b2b0b85c3a059246364c3fa6c3a8cf9a2bd2c05",
+      "source": "src/kejtu_next/adapters/mcp/host.py",
+      "source_sha256": "ad0b5b81cc6c6efb8f7e9b9d9b2b0b85c3a059246364c3fa6c3a8cf9a2bd2c05"
+    },
+    "src/kejtu_next/adapters/mcp/presets.py": {
+      "bytes": 2298,
+      "mode": "100644",
+      "sha256": "2e513a33eaffcfb0d9338d81792011792c3b1b5e526bc3357087527032d26f8a",
+      "source": "src/kejtu_next/adapters/mcp/presets.py",
+      "source_sha256": "2e513a33eaffcfb0d9338d81792011792c3b1b5e526bc3357087527032d26f8a"
+    },
+    "src/kejtu_next/adapters/mcp/windows_connections.py": {
+      "bytes": 2186,
+      "mode": "100644",
+      "sha256": "1a5a58ad5d0803458907b15f7f16cff078b75f5f8faf736eada21ae0f58f3d83",
+      "source": "src/kejtu_next/adapters/mcp/windows_connections.py",
+      "source_sha256": "1a5a58ad5d0803458907b15f7f16cff078b75f5f8faf736eada21ae0f58f3d83"
+    },
+    "src/kejtu_next/adapters/mcp/windows_files_server.mjs": {
+      "bytes": 25535,
+      "mode": "100644",
+      "sha256": "3d83bcf34daa04b18b390e473dea2c4d41126a762ca1c720ea55f1371b345997",
+      "source": "src/kejtu_next/adapters/mcp/windows_files_server.mjs",
+      "source_sha256": "3d83bcf34daa04b18b390e473dea2c4d41126a762ca1c720ea55f1371b345997"
+    },
+    "src/kejtu_next/adapters/mcp/windows_runtime.py": {
+      "bytes": 4759,
+      "mode": "100644",
+      "sha256": "24674f88bbbc198b9bf83443ca32121a9e70cb5ddbf5f8d508c0b72184c3ae9b",
+      "source": "src/kejtu_next/adapters/mcp/windows_runtime.py",
+      "source_sha256": "24674f88bbbc198b9bf83443ca32121a9e70cb5ddbf5f8d508c0b72184c3ae9b"
+    },
+    "src/kejtu_next/adapters/mcp/worker.py": {
+      "bytes": 11832,
+      "mode": "100644",
+      "sha256": "1f5d25d7ffe3ad441b664ae8e14ce1508198fa5a590c39ceab2946bbb9c9d50d",
+      "source": "src/kejtu_next/adapters/mcp/worker.py",
+      "source_sha256": "1f5d25d7ffe3ad441b664ae8e14ce1508198fa5a590c39ceab2946bbb9c9d50d"
+    },
+    "src/kejtu_next/adapters/models/__init__.py": {
+      "bytes": 57,
+      "mode": "100644",
+      "sha256": "1406ce69b04bb35bb4887f273c58469ecd96ad470c39c50ed04acb4163bca6d3",
+      "source": "src/kejtu_next/adapters/models/__init__.py",
+      "source_sha256": "1406ce69b04bb35bb4887f273c58469ecd96ad470c39c50ed04acb4163bca6d3"
+    },
+    "src/kejtu_next/adapters/models/_ollama_context.py": {
+      "bytes": 3312,
+      "mode": "100644",
+      "sha256": "93dae6a9eb4ab2d7ae4a12b200d71c694672972d207655d1262a4dd43abab0eb",
+      "source": "src/kejtu_next/adapters/models/_ollama_context.py",
+      "source_sha256": "93dae6a9eb4ab2d7ae4a12b200d71c694672972d207655d1262a4dd43abab0eb"
+    },
+    "src/kejtu_next/adapters/models/_responses_output.py": {
+      "bytes": 3789,
+      "mode": "100644",
+      "sha256": "3d94aa957f8818b72126f8384319f0ad8100f135cd7cee85edff240255393102",
+      "source": "src/kejtu_next/adapters/models/_responses_output.py",
+      "source_sha256": "3d94aa957f8818b72126f8384319f0ad8100f135cd7cee85edff240255393102"
+    },
+    "src/kejtu_next/adapters/models/_secrets.py": {
+      "bytes": 2185,
+      "mode": "100644",
+      "sha256": "68cda156612d687424aea083a99344a97b83f7ab62d82c773a5fe74b238e9661",
+      "source": "src/kejtu_next/adapters/models/_secrets.py",
+      "source_sha256": "68cda156612d687424aea083a99344a97b83f7ab62d82c773a5fe74b238e9661"
+    },
+    "src/kejtu_next/adapters/models/_streaming.py": {
+      "bytes": 8772,
+      "mode": "100644",
+      "sha256": "2523e32e786420a944bbd2bc4a9ad21ef1ceac9d18b767487e25acfad708c978",
+      "source": "src/kejtu_next/adapters/models/_streaming.py",
+      "source_sha256": "2523e32e786420a944bbd2bc4a9ad21ef1ceac9d18b767487e25acfad708c978"
+    },
+    "src/kejtu_next/adapters/models/_tools.py": {
+      "bytes": 6293,
+      "mode": "100644",
+      "sha256": "d43d1ec9623589edb1a98b4b06e86fb3bdde11e579a02ce5c1a85e6c400e9a49",
+      "source": "src/kejtu_next/adapters/models/_tools.py",
+      "source_sha256": "d43d1ec9623589edb1a98b4b06e86fb3bdde11e579a02ce5c1a85e6c400e9a49"
+    },
+    "src/kejtu_next/adapters/models/_transport.py": {
+      "bytes": 12454,
+      "mode": "100644",
+      "sha256": "d2d01e744675aa54f7352fed0627c2baa23026e76df2505d8f0dca770a8ef7e7",
+      "source": "src/kejtu_next/adapters/models/_transport.py",
+      "source_sha256": "d2d01e744675aa54f7352fed0627c2baa23026e76df2505d8f0dca770a8ef7e7"
+    },
+    "src/kejtu_next/adapters/models/_windows_transport_deadline.py": {
+      "bytes": 9906,
+      "mode": "100644",
+      "sha256": "d59f6de153eee6a80f4296b57ca25d66e8531d76a9eb1bc940deaaf4fb76e5df",
+      "source": "src/kejtu_next/adapters/models/_windows_transport_deadline.py",
+      "source_sha256": "d59f6de153eee6a80f4296b57ca25d66e8531d76a9eb1bc940deaaf4fb76e5df"
+    },
+    "src/kejtu_next/adapters/models/chat_completions.py": {
+      "bytes": 13482,
+      "mode": "100644",
+      "sha256": "8dde0a9481c4c120db9b965335d1cc681949444f12db394e6b7cfada53ae0a57",
+      "source": "src/kejtu_next/adapters/models/chat_completions.py",
+      "source_sha256": "8dde0a9481c4c120db9b965335d1cc681949444f12db394e6b7cfada53ae0a57"
+    },
+    "src/kejtu_next/adapters/models/chatgpt.py": {
+      "bytes": 754,
+      "mode": "100644",
+      "sha256": "ef69c0038b36de82f37b9fc19b1e5702d1cf9267dfb9308210babe19da0a0cb4",
+      "source": "src/kejtu_next/adapters/models/chatgpt.py",
+      "source_sha256": "ef69c0038b36de82f37b9fc19b1e5702d1cf9267dfb9308210babe19da0a0cb4"
+    },
+    "src/kejtu_next/adapters/models/chatgpt_accounts.py": {
+      "bytes": 22027,
+      "mode": "100644",
+      "sha256": "777659a1b8140f922cafc2c43a9e1bd8623d7ebe34482bbdf747b96ac5ff94ba",
+      "source": "src/kejtu_next/adapters/models/chatgpt_accounts.py",
+      "source_sha256": "777659a1b8140f922cafc2c43a9e1bd8623d7ebe34482bbdf747b96ac5ff94ba"
+    },
+    "src/kejtu_next/adapters/models/chatgpt_oauth.py": {
+      "bytes": 9065,
+      "mode": "100644",
+      "sha256": "ad0cb54eec7fdf616364af39f5693bb1eb1aa6035f8f5b5e888be854de267cda",
+      "source": "src/kejtu_next/adapters/models/chatgpt_oauth.py",
+      "source_sha256": "ad0cb54eec7fdf616364af39f5693bb1eb1aa6035f8f5b5e888be854de267cda"
+    },
+    "src/kejtu_next/adapters/models/credentials.py": {
+      "bytes": 3770,
+      "mode": "100644",
+      "sha256": "e94b2ab947c8bd704b0b53dba0cb648009e9f8ce8c45723117edeaa767460a58",
+      "source": "src/kejtu_next/adapters/models/credentials.py",
+      "source_sha256": "e94b2ab947c8bd704b0b53dba0cb648009e9f8ce8c45723117edeaa767460a58"
+    },
+    "src/kejtu_next/adapters/models/deepseek.py": {
+      "bytes": 978,
+      "mode": "100644",
+      "sha256": "130c777936d1e68d28b4b0320a52948e452a182ac21ab6b4d7686f2d79a34377",
+      "source": "src/kejtu_next/adapters/models/deepseek.py",
+      "source_sha256": "130c777936d1e68d28b4b0320a52948e452a182ac21ab6b4d7686f2d79a34377"
+    },
+    "src/kejtu_next/adapters/models/development.py": {
+      "bytes": 1431,
+      "mode": "100644",
+      "sha256": "9c0cf3d72faa445d2e73bba73996c35dd596ee528cee61a061d8bed5df215cd5",
+      "source": "src/kejtu_next/adapters/models/development.py",
+      "source_sha256": "9c0cf3d72faa445d2e73bba73996c35dd596ee528cee61a061d8bed5df215cd5"
+    },
+    "src/kejtu_next/adapters/models/embedding.py": {
+      "bytes": 6522,
+      "mode": "100644",
+      "sha256": "f78f33601fbe365f46ec1539e0e85512be68a406d952e36fcda609dc7b874f15",
+      "source": "src/kejtu_next/adapters/models/embedding.py",
+      "source_sha256": "f78f33601fbe365f46ec1539e0e85512be68a406d952e36fcda609dc7b874f15"
+    },
+    "src/kejtu_next/adapters/models/ollama.py": {
+      "bytes": 9873,
+      "mode": "100644",
+      "sha256": "66031253b9ed8ecfdafa282863a992291e39aa08fa94b7ad01cd8dc7f576f4fe",
+      "source": "src/kejtu_next/adapters/models/ollama.py",
+      "source_sha256": "66031253b9ed8ecfdafa282863a992291e39aa08fa94b7ad01cd8dc7f576f4fe"
+    },
+    "src/kejtu_next/adapters/models/openai.py": {
+      "bytes": 23686,
+      "mode": "100644",
+      "sha256": "cf0432bdfc73af8350e246fdf7cf4446cf5fb524f77fc7fdb31c22b78076582f",
+      "source": "src/kejtu_next/adapters/models/openai.py",
+      "source_sha256": "cf0432bdfc73af8350e246fdf7cf4446cf5fb524f77fc7fdb31c22b78076582f"
+    },
+    "src/kejtu_next/adapters/models/session.py": {
+      "bytes": 7900,
+      "mode": "100644",
+      "sha256": "6a600b7c512cc0544df4a659501168c0040bfb2331ba10878272678ca106bc18",
+      "source": "src/kejtu_next/adapters/models/session.py",
+      "source_sha256": "6a600b7c512cc0544df4a659501168c0040bfb2331ba10878272678ca106bc18"
+    },
+    "src/kejtu_next/adapters/models/windows_credentials.py": {
+      "bytes": 6297,
+      "mode": "100644",
+      "sha256": "140a608e57e0d2418be0bb0582131d0d34f3a85280aebcbb21f129f7277c9d77",
+      "source": "src/kejtu_next/adapters/models/windows_credentials.py",
+      "source_sha256": "140a608e57e0d2418be0bb0582131d0d34f3a85280aebcbb21f129f7277c9d77"
+    },
+    "src/kejtu_next/adapters/skills/__init__.py": {
+      "bytes": 85,
+      "mode": "100644",
+      "sha256": "37aa23d60014a872cea905622a7e7c8c687394819d535248ab4038a8dcb95606",
+      "source": "src/kejtu_next/adapters/skills/__init__.py",
+      "source_sha256": "37aa23d60014a872cea905622a7e7c8c687394819d535248ab4038a8dcb95606"
+    },
+    "src/kejtu_next/adapters/skills/packages.py": {
+      "bytes": 8071,
+      "mode": "100644",
+      "sha256": "300f2a7d37b2b59167520107de36d37502857852eec04392c8e9f6e475cf9739",
+      "source": "src/kejtu_next/adapters/skills/packages.py",
+      "source_sha256": "300f2a7d37b2b59167520107de36d37502857852eec04392c8e9f6e475cf9739"
+    },
+    "src/kejtu_next/adapters/skills/starter.py": {
+      "bytes": 845,
+      "mode": "100644",
+      "sha256": "c8b241c365da81d21dcd6b9d756474ae21293b7ff5205db144d3f4edf08b4086",
+      "source": "src/kejtu_next/adapters/skills/starter.py",
+      "source_sha256": "c8b241c365da81d21dcd6b9d756474ae21293b7ff5205db144d3f4edf08b4086"
+    },
+    "src/kejtu_next/adapters/storage/__init__.py": {
+      "bytes": 33,
+      "mode": "100644",
+      "sha256": "79d2f17dfd7e84ed073131d2fed977fb49b9bd0b95f2dcf1f5f98776fd30d3cd",
+      "source": "src/kejtu_next/adapters/storage/__init__.py",
+      "source_sha256": "79d2f17dfd7e84ed073131d2fed977fb49b9bd0b95f2dcf1f5f98776fd30d3cd"
+    },
+    "src/kejtu_next/adapters/storage/access_settings.py": {
+      "bytes": 3599,
+      "mode": "100644",
+      "sha256": "a744db2f460eab8733286bf4f889691dd725e7bb6744825c651f8b99ee83cde4",
+      "source": "src/kejtu_next/adapters/storage/access_settings.py",
+      "source_sha256": "a744db2f460eab8733286bf4f889691dd725e7bb6744825c651f8b99ee83cde4"
+    },
+    "src/kejtu_next/adapters/storage/care.py": {
+      "bytes": 20090,
+      "mode": "100644",
+      "sha256": "ea7dc1d8482e2863962190d9f1312cc6262dc996885b7c3be8283c37b7beb14f",
+      "source": "src/kejtu_next/adapters/storage/care.py",
+      "source_sha256": "ea7dc1d8482e2863962190d9f1312cc6262dc996885b7c3be8283c37b7beb14f"
+    },
+    "src/kejtu_next/adapters/storage/conversation_import.py": {
+      "bytes": 15357,
+      "mode": "100644",
+      "sha256": "7f23ffe796700bf3736d1465d2dc7ae3e0835edbb4b123e543fdaa81b67a254d",
+      "source": "src/kejtu_next/adapters/storage/conversation_import.py",
+      "source_sha256": "7f23ffe796700bf3736d1465d2dc7ae3e0835edbb4b123e543fdaa81b67a254d"
+    },
+    "src/kejtu_next/adapters/storage/conversation_titles.py": {
+      "bytes": 3498,
+      "mode": "100644",
+      "sha256": "11894b47e96a724f42d5a3374678a028517ea3ff93dbbe2f0b4f1b9443611825",
+      "source": "src/kejtu_next/adapters/storage/conversation_titles.py",
+      "source_sha256": "11894b47e96a724f42d5a3374678a028517ea3ff93dbbe2f0b4f1b9443611825"
+    },
+    "src/kejtu_next/adapters/storage/deliveries.py": {
+      "bytes": 21578,
+      "mode": "100644",
+      "sha256": "6bdaf49a8deb8d25dee778985ce7b5b2d973e22b48a231a350d0dab95912d83a",
+      "source": "src/kejtu_next/adapters/storage/deliveries.py",
+      "source_sha256": "6bdaf49a8deb8d25dee778985ce7b5b2d973e22b48a231a350d0dab95912d83a"
+    },
+    "src/kejtu_next/adapters/storage/exchanges.py": {
+      "bytes": 18383,
+      "mode": "100644",
+      "sha256": "5aa47b35c5b78a6098db30b03c6a789e7fec69d381032ebd3ee6f1fea85f0298",
+      "source": "src/kejtu_next/adapters/storage/exchanges.py",
+      "source_sha256": "5aa47b35c5b78a6098db30b03c6a789e7fec69d381032ebd3ee6f1fea85f0298"
+    },
+    "src/kejtu_next/adapters/storage/execution.py": {
+      "bytes": 4196,
+      "mode": "100644",
+      "sha256": "318676d3cacbdccc9e01a5a39938e211676a56b97bd0eb0fcfc9b2aafeb92504",
+      "source": "src/kejtu_next/adapters/storage/execution.py",
+      "source_sha256": "318676d3cacbdccc9e01a5a39938e211676a56b97bd0eb0fcfc9b2aafeb92504"
+    },
+    "src/kejtu_next/adapters/storage/files.py": {
+      "bytes": 22033,
+      "mode": "100644",
+      "sha256": "d17a44a85208d743bd25b5c73d9d4597139e518a8aae14a125a770f8cb72937b",
+      "source": "src/kejtu_next/adapters/storage/files.py",
+      "source_sha256": "d17a44a85208d743bd25b5c73d9d4597139e518a8aae14a125a770f8cb72937b"
+    },
+    "src/kejtu_next/adapters/storage/historical_notes.py": {
+      "bytes": 18776,
+      "mode": "100644",
+      "sha256": "b1a03c80cf9152898d98922a945ac0a58038078590696a22a0ff22f336ef85a3",
+      "source": "src/kejtu_next/adapters/storage/historical_notes.py",
+      "source_sha256": "b1a03c80cf9152898d98922a945ac0a58038078590696a22a0ff22f336ef85a3"
+    },
+    "src/kejtu_next/adapters/storage/history.py": {
+      "bytes": 23127,
+      "mode": "100644",
+      "sha256": "7446fb3bcf8931d10f0e7011cde43131fb1ae3c423557705596fea361f10b087",
+      "source": "src/kejtu_next/adapters/storage/history.py",
+      "source_sha256": "7446fb3bcf8931d10f0e7011cde43131fb1ae3c423557705596fea361f10b087"
+    },
+    "src/kejtu_next/adapters/storage/image_views.py": {
+      "bytes": 6112,
+      "mode": "100644",
+      "sha256": "e34f1f8620e182611b84109f3784364c5c23e0c972b5abb3b1ac0f820376de38",
+      "source": "src/kejtu_next/adapters/storage/image_views.py",
+      "source_sha256": "e34f1f8620e182611b84109f3784364c5c23e0c972b5abb3b1ac0f820376de38"
+    },
+    "src/kejtu_next/adapters/storage/jobs.py": {
+      "bytes": 47954,
+      "mode": "100644",
+      "sha256": "2b3efc9e5d91329fd34b70500610be4326244ea1e1b01b40d8dc047737f6d307",
+      "source": "src/kejtu_next/adapters/storage/jobs.py",
+      "source_sha256": "2b3efc9e5d91329fd34b70500610be4326244ea1e1b01b40d8dc047737f6d307"
+    },
+    "src/kejtu_next/adapters/storage/locking.py": {
+      "bytes": 1574,
+      "mode": "100644",
+      "sha256": "cd904ead91f10e5e47904b7a4cfd9bffa2b13c2fcd16f6d6607bcce09bce45db",
+      "source": "src/kejtu_next/adapters/storage/locking.py",
+      "source_sha256": "cd904ead91f10e5e47904b7a4cfd9bffa2b13c2fcd16f6d6607bcce09bce45db"
+    },
+    "src/kejtu_next/adapters/storage/mcp.py": {
+      "bytes": 4576,
+      "mode": "100644",
+      "sha256": "d7d8b3f41a98a0b12b156cf7a452d32815d77f68d8840fe38c19b3948b4c2b73",
+      "source": "src/kejtu_next/adapters/storage/mcp.py",
+      "source_sha256": "d7d8b3f41a98a0b12b156cf7a452d32815d77f68d8840fe38c19b3948b4c2b73"
+    },
+    "src/kejtu_next/adapters/storage/memory.py": {
+      "bytes": 32892,
+      "mode": "100644",
+      "sha256": "5e264a6e55a01ef67a179748e7b300de0facd8947a43c3abdfceaca1a162046a",
+      "source": "src/kejtu_next/adapters/storage/memory.py",
+      "source_sha256": "5e264a6e55a01ef67a179748e7b300de0facd8947a43c3abdfceaca1a162046a"
+    },
+    "src/kejtu_next/adapters/storage/memory_refs.py": {
+      "bytes": 4095,
+      "mode": "100644",
+      "sha256": "20bef8f5af00cf0c09f9c42ec975e2a0ee0ff79761413e63e82036d8cb4b64a0",
+      "source": "src/kejtu_next/adapters/storage/memory_refs.py",
+      "source_sha256": "20bef8f5af00cf0c09f9c42ec975e2a0ee0ff79761413e63e82036d8cb4b64a0"
+    },
+    "src/kejtu_next/adapters/storage/model_settings.py": {
+      "bytes": 3625,
+      "mode": "100644",
+      "sha256": "4f15899e2c99038521a49ff1b5792e89d4db66061906cfa2b16076a91f785be5",
+      "source": "src/kejtu_next/adapters/storage/model_settings.py",
+      "source_sha256": "4f15899e2c99038521a49ff1b5792e89d4db66061906cfa2b16076a91f785be5"
+    },
+    "src/kejtu_next/adapters/storage/note_care.py": {
+      "bytes": 14449,
+      "mode": "100644",
+      "sha256": "1fb051e92ab2abe035ede2d3cd4c60e993a39d43b8950d82eef95ad3e2bee1b4",
+      "source": "src/kejtu_next/adapters/storage/note_care.py",
+      "source_sha256": "1fb051e92ab2abe035ede2d3cd4c60e993a39d43b8950d82eef95ad3e2bee1b4"
+    },
+    "src/kejtu_next/adapters/storage/note_inventory.py": {
+      "bytes": 7726,
+      "mode": "100644",
+      "sha256": "65f8049ee619dd60d8e50386c9719bafa8f24a8c731b10d9a4f7b9418c130b21",
+      "source": "src/kejtu_next/adapters/storage/note_inventory.py",
+      "source_sha256": "65f8049ee619dd60d8e50386c9719bafa8f24a8c731b10d9a4f7b9418c130b21"
+    },
+    "src/kejtu_next/adapters/storage/note_metadata.py": {
+      "bytes": 7298,
+      "mode": "100644",
+      "sha256": "c9594cbbcdd1432ff05aed94d9a4627c2740ddd063886277fbb2c1545dd4ebde",
+      "source": "src/kejtu_next/adapters/storage/note_metadata.py",
+      "source_sha256": "c9594cbbcdd1432ff05aed94d9a4627c2740ddd063886277fbb2c1545dd4ebde"
+    },
+    "src/kejtu_next/adapters/storage/note_removal.py": {
+      "bytes": 31407,
+      "mode": "100644",
+      "sha256": "69539beeedd990e5a12761fe59f1373bcbf56496f4912818fa4f27b9323ba860",
+      "source": "src/kejtu_next/adapters/storage/note_removal.py",
+      "source_sha256": "69539beeedd990e5a12761fe59f1373bcbf56496f4912818fa4f27b9323ba860"
+    },
+    "src/kejtu_next/adapters/storage/note_topics.py": {
+      "bytes": 5727,
+      "mode": "100644",
+      "sha256": "d3906a450c1ef419e386b2ccf0fbe28f9bc2c87401a2d7ee1f549f87f87c4d8d",
+      "source": "src/kejtu_next/adapters/storage/note_topics.py",
+      "source_sha256": "d3906a450c1ef419e386b2ccf0fbe28f9bc2c87401a2d7ee1f549f87f87c4d8d"
+    },
+    "src/kejtu_next/adapters/storage/notebook.py": {
+      "bytes": 6510,
+      "mode": "100644",
+      "sha256": "9f25cdde93c60d03c2ff14e706aed059a3c3ac28f36eec43f26de35466e07033",
+      "source": "src/kejtu_next/adapters/storage/notebook.py",
+      "source_sha256": "9f25cdde93c60d03c2ff14e706aed059a3c3ac28f36eec43f26de35466e07033"
+    },
+    "src/kejtu_next/adapters/storage/notes.py": {
+      "bytes": 57450,
+      "mode": "100644",
+      "sha256": "5f11dbc28d30d634bee9c4cb13b4edf9a3f1773a34d95c8aef8c3f09ff1845c2",
+      "source": "src/kejtu_next/adapters/storage/notes.py",
+      "source_sha256": "5f11dbc28d30d634bee9c4cb13b4edf9a3f1773a34d95c8aef8c3f09ff1845c2"
+    },
+    "src/kejtu_next/adapters/storage/onboarding.py": {
+      "bytes": 4068,
+      "mode": "100644",
+      "sha256": "aad22f0a88a89716e487aa19b8f95f3a44cfc3eb340b468272c8dbf959ca11b4",
+      "source": "src/kejtu_next/adapters/storage/onboarding.py",
+      "source_sha256": "aad22f0a88a89716e487aa19b8f95f3a44cfc3eb340b468272c8dbf959ca11b4"
+    },
+    "src/kejtu_next/adapters/storage/people.py": {
+      "bytes": 35763,
+      "mode": "100644",
+      "sha256": "4b81a9d9543866b113304de3836b51b9936776173346b5e885fcbbc90febacb6",
+      "source": "src/kejtu_next/adapters/storage/people.py",
+      "source_sha256": "4b81a9d9543866b113304de3836b51b9936776173346b5e885fcbbc90febacb6"
+    },
+    "src/kejtu_next/adapters/storage/planner.py": {
+      "bytes": 33920,
+      "mode": "100644",
+      "sha256": "31256ceccdde29976a381dcb9539d07c21970c61800687abe4e3e03ffe9ca505",
+      "source": "src/kejtu_next/adapters/storage/planner.py",
+      "source_sha256": "31256ceccdde29976a381dcb9539d07c21970c61800687abe4e3e03ffe9ca505"
+    },
+    "src/kejtu_next/adapters/storage/preference_settings.py": {
+      "bytes": 2644,
+      "mode": "100644",
+      "sha256": "23fa53995c6bf8b6f70af19256c2b9cd84886d8ce0c9211ba88e076e61ef3da1",
+      "source": "src/kejtu_next/adapters/storage/preference_settings.py",
+      "source_sha256": "23fa53995c6bf8b6f70af19256c2b9cd84886d8ce0c9211ba88e076e61ef3da1"
+    },
+    "src/kejtu_next/adapters/storage/private_records.py": {
+      "bytes": 3241,
+      "mode": "100644",
+      "sha256": "bdd866ac51c8cf94603960ed9402d13607f3c5d5fe6127f2120ce9bebb52294e",
+      "source": "src/kejtu_next/adapters/storage/private_records.py",
+      "source_sha256": "bdd866ac51c8cf94603960ed9402d13607f3c5d5fe6127f2120ce9bebb52294e"
+    },
+    "src/kejtu_next/adapters/storage/recall.py": {
+      "bytes": 54747,
+      "mode": "100644",
+      "sha256": "3fdf872d7491012bea836ee2d0d9c6568e45a08e9f34d99d94ded818eb489057",
+      "source": "src/kejtu_next/adapters/storage/recall.py",
+      "source_sha256": "3fdf872d7491012bea836ee2d0d9c6568e45a08e9f34d99d94ded818eb489057"
+    },
+    "src/kejtu_next/adapters/storage/reminder_access.py": {
+      "bytes": 17224,
+      "mode": "100644",
+      "sha256": "78f6066b964f669171b1b63a5df62e955a8652a52c1c0aab3fd62e28aa4cc899",
+      "source": "src/kejtu_next/adapters/storage/reminder_access.py",
+      "source_sha256": "78f6066b964f669171b1b63a5df62e955a8652a52c1c0aab3fd62e28aa4cc899"
+    },
+    "src/kejtu_next/adapters/storage/reminders.py": {
+      "bytes": 27318,
+      "mode": "100644",
+      "sha256": "ba881de967b3ea4be3bf04ab7498962c87c4de3e69d00b60f3d366edfccd03d9",
+      "source": "src/kejtu_next/adapters/storage/reminders.py",
+      "source_sha256": "ba881de967b3ea4be3bf04ab7498962c87c4de3e69d00b60f3d366edfccd03d9"
+    },
+    "src/kejtu_next/adapters/storage/research.py": {
+      "bytes": 45044,
+      "mode": "100644",
+      "sha256": "2208b472957f3ea537c5164ca8c22f5a16312b96430c263ebc9247b61aa3879e",
+      "source": "src/kejtu_next/adapters/storage/research.py",
+      "source_sha256": "2208b472957f3ea537c5164ca8c22f5a16312b96430c263ebc9247b61aa3879e"
+    },
+    "src/kejtu_next/adapters/storage/skills.py": {
+      "bytes": 8200,
+      "mode": "100644",
+      "sha256": "f64b97ec8de4788c17d310463f22518a5eb1d6d84235cff330640d106ed9361f",
+      "source": "src/kejtu_next/adapters/storage/skills.py",
+      "source_sha256": "f64b97ec8de4788c17d310463f22518a5eb1d6d84235cff330640d106ed9361f"
+    },
+    "src/kejtu_next/adapters/storage/sqlite.py": {
+      "bytes": 64152,
+      "mode": "100644",
+      "sha256": "7cb68730e64417812ace38f2fd48e64921a505d37b27e40d204c35882963c66c",
+      "source": "src/kejtu_next/adapters/storage/sqlite.py",
+      "source_sha256": "7cb68730e64417812ace38f2fd48e64921a505d37b27e40d204c35882963c66c"
+    },
+    "src/kejtu_next/adapters/storage/tasks.py": {
+      "bytes": 28468,
+      "mode": "100644",
+      "sha256": "c8d2eae01b4791d8076aa9974d2942bbeaf5b3f0e07860924093eafa80585236",
+      "source": "src/kejtu_next/adapters/storage/tasks.py",
+      "source_sha256": "c8d2eae01b4791d8076aa9974d2942bbeaf5b3f0e07860924093eafa80585236"
+    },
+    "src/kejtu_next/adapters/storage/upgrade.py": {
+      "bytes": 22044,
+      "mode": "100644",
+      "sha256": "b5ee91a6254f0f9e99e746f9c8b95521584efb960ed4a22228bac9508651c597",
+      "source": "src/kejtu_next/adapters/storage/upgrade.py",
+      "source_sha256": "b5ee91a6254f0f9e99e746f9c8b95521584efb960ed4a22228bac9508651c597"
+    },
+    "src/kejtu_next/adapters/storage/web.py": {
+      "bytes": 8781,
+      "mode": "100644",
+      "sha256": "a603876b33dfe6195c08d63c317b33a30b5e8c7ae1d4b9d6a2f8204548764a6a",
+      "source": "src/kejtu_next/adapters/storage/web.py",
+      "source_sha256": "a603876b33dfe6195c08d63c317b33a30b5e8c7ae1d4b9d6a2f8204548764a6a"
+    },
+    "src/kejtu_next/adapters/storage/web_usage.py": {
+      "bytes": 2114,
+      "mode": "100644",
+      "sha256": "54e4e86f5fe3c6c63839c00162327028372370c890aaddce17cf30adba0557c9",
+      "source": "src/kejtu_next/adapters/storage/web_usage.py",
+      "source_sha256": "54e4e86f5fe3c6c63839c00162327028372370c890aaddce17cf30adba0557c9"
+    },
+    "src/kejtu_next/adapters/web/__init__.py": {
+      "bytes": 67,
+      "mode": "100644",
+      "sha256": "553a84cd4a83e49b2901588ca68f98ce3e6dcd1941ed44839cd07269ae20d369",
+      "source": "src/kejtu_next/adapters/web/__init__.py",
+      "source_sha256": "553a84cd4a83e49b2901588ca68f98ce3e6dcd1941ed44839cd07269ae20d369"
+    },
+    "src/kejtu_next/adapters/web/brave.py": {
+      "bytes": 10849,
+      "mode": "100644",
+      "sha256": "89ca76cc655e5944c68381afb4f56b9318cd3d5479fbb2c50480eeb8c9e95a05",
+      "source": "src/kejtu_next/adapters/web/brave.py",
+      "source_sha256": "89ca76cc655e5944c68381afb4f56b9318cd3d5479fbb2c50480eeb8c9e95a05"
+    },
+    "src/kejtu_next/adapters/web/brave_results.py": {
+      "bytes": 4387,
+      "mode": "100644",
+      "sha256": "4c457f02379f008dec83394ec7b549c4dc2570e22188f68f39be7b14c5f85156",
+      "source": "src/kejtu_next/adapters/web/brave_results.py",
+      "source_sha256": "4c457f02379f008dec83394ec7b549c4dc2570e22188f68f39be7b14c5f85156"
+    },
+    "src/kejtu_next/adapters/web/listings.py": {
+      "bytes": 9837,
+      "mode": "100644",
+      "sha256": "9bf517e17ec16c7b9749df908f03f802c485ffbba45c7fc51b298eee20cdb305",
+      "source": "src/kejtu_next/adapters/web/listings.py",
+      "source_sha256": "9bf517e17ec16c7b9749df908f03f802c485ffbba45c7fc51b298eee20cdb305"
+    },
+    "src/kejtu_next/adapters/web/mcp_browser.py": {
+      "bytes": 5659,
+      "mode": "100644",
+      "sha256": "7cfb40ee7f32edca637549e70d3c43798b6cadf5caa1b67d545ddf9fcb095095",
+      "source": "src/kejtu_next/adapters/web/mcp_browser.py",
+      "source_sha256": "7cfb40ee7f32edca637549e70d3c43798b6cadf5caa1b67d545ddf9fcb095095"
+    },
+    "src/kejtu_next/adapters/web/media/__init__.py": {
+      "bytes": 47,
+      "mode": "100644",
+      "sha256": "570e070992c7b91cd2dd33aa658f6ba1b2bf14103aa224c9cc70d49967907c31",
+      "source": "src/kejtu_next/adapters/web/media/__init__.py",
+      "source_sha256": "570e070992c7b91cd2dd33aa658f6ba1b2bf14103aa224c9cc70d49967907c31"
+    },
+    "src/kejtu_next/adapters/web/media/calendars.py": {
+      "bytes": 8956,
+      "mode": "100644",
+      "sha256": "ad582d59fcbaa8db8144cb4086bb62c4842115a40ca43fc84eaae7be39902df9",
+      "source": "src/kejtu_next/adapters/web/media/calendars.py",
+      "source_sha256": "ad582d59fcbaa8db8144cb4086bb62c4842115a40ca43fc84eaae7be39902df9"
+    },
+    "src/kejtu_next/adapters/web/media/errors.py": {
+      "bytes": 147,
+      "mode": "100644",
+      "sha256": "41dc1fdafb9cf94eb3f033d752cec7c4b8aff844e3a34792b170a51ccbc12201",
+      "source": "src/kejtu_next/adapters/web/media/errors.py",
+      "source_sha256": "41dc1fdafb9cf94eb3f033d752cec7c4b8aff844e3a34792b170a51ccbc12201"
+    },
+    "src/kejtu_next/adapters/web/media/mpv.py": {
+      "bytes": 8434,
+      "mode": "100644",
+      "sha256": "04135348d5109cbae38118618ebcbd89769367d76ddc3a7b97e6675d996a1e71",
+      "source": "src/kejtu_next/adapters/web/media/mpv.py",
+      "source_sha256": "04135348d5109cbae38118618ebcbd89769367d76ddc3a7b97e6675d996a1e71"
+    },
+    "src/kejtu_next/adapters/web/media/radio.py": {
+      "bytes": 12541,
+      "mode": "100644",
+      "sha256": "5a1a2cf2477554ffb233bd279574d8aa96316d84703f73d815445e979963ade7",
+      "source": "src/kejtu_next/adapters/web/media/radio.py",
+      "source_sha256": "5a1a2cf2477554ffb233bd279574d8aa96316d84703f73d815445e979963ade7"
+    },
+    "src/kejtu_next/adapters/web/media/runtime.py": {
+      "bytes": 4699,
+      "mode": "100644",
+      "sha256": "6e58184d843647b68966d24fb3558500474f0ff2fef4d80bbba9fed6f9487a1d",
+      "source": "src/kejtu_next/adapters/web/media/runtime.py",
+      "source_sha256": "6e58184d843647b68966d24fb3558500474f0ff2fef4d80bbba9fed6f9487a1d"
+    },
+    "src/kejtu_next/adapters/web/media/video.py": {
+      "bytes": 13297,
+      "mode": "100644",
+      "sha256": "1a72933103d16975f60b4a89b18fec62f65bb39ec8e77b6b393beb1175c61e43",
+      "source": "src/kejtu_next/adapters/web/media/video.py",
+      "source_sha256": "1a72933103d16975f60b4a89b18fec62f65bb39ec8e77b6b393beb1175c61e43"
+    },
+    "src/kejtu_next/adapters/web/media/video_extract.py": {
+      "bytes": 5828,
+      "mode": "100644",
+      "sha256": "7b3da9abf3c414c985a88bdc7788c837be3b7820d6487417208f084e03afaa33",
+      "source": "src/kejtu_next/adapters/web/media/video_extract.py",
+      "source_sha256": "7b3da9abf3c414c985a88bdc7788c837be3b7820d6487417208f084e03afaa33"
+    },
+    "src/kejtu_next/adapters/web/media/video_sites.py": {
+      "bytes": 2318,
+      "mode": "100644",
+      "sha256": "fa9d975a8c8e11e39fba7121ab6edeaaedc1e77317e3ed090de62efb0e5ba05c",
+      "source": "src/kejtu_next/adapters/web/media/video_sites.py",
+      "source_sha256": "fa9d975a8c8e11e39fba7121ab6edeaaedc1e77317e3ed090de62efb0e5ba05c"
+    },
+    "src/kejtu_next/adapters/web/network.py": {
+      "bytes": 7401,
+      "mode": "100644",
+      "sha256": "d7cadff6938769be43977f8da902d61b327f46ebd18cce7c560ed9300bfa2fbf",
+      "source": "src/kejtu_next/adapters/web/network.py",
+      "source_sha256": "d7cadff6938769be43977f8da902d61b327f46ebd18cce7c560ed9300bfa2fbf"
+    },
+    "src/kejtu_next/adapters/web/providers.py": {
+      "bytes": 5036,
+      "mode": "100644",
+      "sha256": "9fc244c9b1ef8fae4bb1029654f5836e26a43f1a353e995e289d4e9095f33981",
+      "source": "src/kejtu_next/adapters/web/providers.py",
+      "source_sha256": "9fc244c9b1ef8fae4bb1029654f5836e26a43f1a353e995e289d4e9095f33981"
+    },
+    "src/kejtu_next/adapters/web/reader.py": {
+      "bytes": 4025,
+      "mode": "100644",
+      "sha256": "80ccc8200ec84d123436d1415d3a2e7b224eb0e2f76859a40fe7ad8ba8f286d8",
+      "source": "src/kejtu_next/adapters/web/reader.py",
+      "source_sha256": "80ccc8200ec84d123436d1415d3a2e7b224eb0e2f76859a40fe7ad8ba8f286d8"
+    },
+    "src/kejtu_next/adapters/web/reader_backend.py": {
+      "bytes": 14158,
+      "mode": "100644",
+      "sha256": "6a154b998093fdf175de1fa19dc715848cb4b665a45e98955166e2f3042297c2",
+      "source": "src/kejtu_next/adapters/web/reader_backend.py",
+      "source_sha256": "6a154b998093fdf175de1fa19dc715848cb4b665a45e98955166e2f3042297c2"
+    },
+    "src/kejtu_next/adapters/web/searxng.py": {
+      "bytes": 12783,
+      "mode": "100644",
+      "sha256": "cc0a5a7455e9330293ce766c49045c170e7ad14ce9a00354e98945f41535c4e1",
+      "source": "src/kejtu_next/adapters/web/searxng.py",
+      "source_sha256": "cc0a5a7455e9330293ce766c49045c170e7ad14ce9a00354e98945f41535c4e1"
+    },
+    "src/kejtu_next/adapters/web/skill_github.py": {
+      "bytes": 8789,
+      "mode": "100644",
+      "sha256": "c993abb78c5411c0728e6f33a798628b0147ca1ee69e819f051ee3795f7ca786",
+      "source": "src/kejtu_next/adapters/web/skill_github.py",
+      "source_sha256": "c993abb78c5411c0728e6f33a798628b0147ca1ee69e819f051ee3795f7ca786"
+    },
+    "src/kejtu_next/adapters/web/tavily.py": {
+      "bytes": 9378,
+      "mode": "100644",
+      "sha256": "e1629d0e832073be875df429d0f0503187832c83fcfe1d0a42173ec8a469ed35",
+      "source": "src/kejtu_next/adapters/web/tavily.py",
+      "source_sha256": "e1629d0e832073be875df429d0f0503187832c83fcfe1d0a42173ec8a469ed35"
+    },
+    "src/kejtu_next/adapters/web/tls.py": {
+      "bytes": 892,
+      "mode": "100644",
+      "sha256": "81e6c7f9830d91b4164678c635adf8c06a353fe8bb79307414246b53309ba33c",
+      "source": "src/kejtu_next/adapters/web/tls.py",
+      "source_sha256": "81e6c7f9830d91b4164678c635adf8c06a353fe8bb79307414246b53309ba33c"
+    },
+    "src/kejtu_next/adapters/web/windows_reader.py": {
+      "bytes": 5761,
+      "mode": "100644",
+      "sha256": "5dbe2ba78b9bbe939792615e00d978be35b7d92960442ee7868057f9b2c930d5",
+      "source": "src/kejtu_next/adapters/web/windows_reader.py",
+      "source_sha256": "5dbe2ba78b9bbe939792615e00d978be35b7d92960442ee7868057f9b2c930d5"
+    },
+    "src/kejtu_next/adapters/web/worker.py": {
+      "bytes": 1758,
+      "mode": "100644",
+      "sha256": "be1f20349d974700cf56e85da4954019a19d36dc3921654d9a4c14a49c7e3936",
+      "source": "src/kejtu_next/adapters/web/worker.py",
+      "source_sha256": "be1f20349d974700cf56e85da4954019a19d36dc3921654d9a4c14a49c7e3936"
+    },
+    "src/kejtu_next/application/__init__.py": {
+      "bytes": 55,
+      "mode": "100644",
+      "sha256": "a11759f6b611a57249c8fccda02a631f62e0ceb838fb95b7e05b6c85b8e9033d",
+      "source": "src/kejtu_next/application/__init__.py",
+      "source_sha256": "a11759f6b611a57249c8fccda02a631f62e0ceb838fb95b7e05b6c85b8e9033d"
+    },
+    "src/kejtu_next/application/background.py": {
+      "bytes": 27949,
+      "mode": "100644",
+      "sha256": "c7e9dcdff63b27d2137b1c8d1d581eabaf5303259ad64211b14bb03fe911dc94",
+      "source": "src/kejtu_next/application/background.py",
+      "source_sha256": "c7e9dcdff63b27d2137b1c8d1d581eabaf5303259ad64211b14bb03fe911dc94"
+    },
+    "src/kejtu_next/application/care.py": {
+      "bytes": 5009,
+      "mode": "100644",
+      "sha256": "fdce9d2f350f1cfd05556108b89676420788aed405a198d706c052f2b8fc9253",
+      "source": "src/kejtu_next/application/care.py",
+      "source_sha256": "fdce9d2f350f1cfd05556108b89676420788aed405a198d706c052f2b8fc9253"
+    },
+    "src/kejtu_next/application/clock.py": {
+      "bytes": 2351,
+      "mode": "100644",
+      "sha256": "af1110dd2edba38d92b3f9339031c93b5df5fddfa49f4ea58b25ed233b6badac",
+      "source": "src/kejtu_next/application/clock.py",
+      "source_sha256": "af1110dd2edba38d92b3f9339031c93b5df5fddfa49f4ea58b25ed233b6badac"
+    },
+    "src/kejtu_next/application/context.py": {
+      "bytes": 11645,
+      "mode": "100644",
+      "sha256": "0a974b130d2f8bf9019e504d3c19c536c0dbaf13cee09474f889e860a2f7514e",
+      "source": "src/kejtu_next/application/context.py",
+      "source_sha256": "0a974b130d2f8bf9019e504d3c19c536c0dbaf13cee09474f889e860a2f7514e"
+    },
+    "src/kejtu_next/application/conversation_titles.py": {
+      "bytes": 5850,
+      "mode": "100644",
+      "sha256": "000483218862ee8e45c46c6481e9fa5319ebcb0e868e1bcce2ac9a1d5ed28b5f",
+      "source": "src/kejtu_next/application/conversation_titles.py",
+      "source_sha256": "000483218862ee8e45c46c6481e9fa5319ebcb0e868e1bcce2ac9a1d5ed28b5f"
+    },
+    "src/kejtu_next/application/delivery_controls.py": {
+      "bytes": 2301,
+      "mode": "100644",
+      "sha256": "ccdc3dc62ef2eafb9b133c976b95301505212309ac7b19eff71a5bef79b8da17",
+      "source": "src/kejtu_next/application/delivery_controls.py",
+      "source_sha256": "ccdc3dc62ef2eafb9b133c976b95301505212309ac7b19eff71a5bef79b8da17"
+    },
+    "src/kejtu_next/application/history.py": {
+      "bytes": 15708,
+      "mode": "100644",
+      "sha256": "fea1e576b3a740661f567181a5a5aa580e8f9b9ae5b558368488e0b093f6b413",
+      "source": "src/kejtu_next/application/history.py",
+      "source_sha256": "fea1e576b3a740661f567181a5a5aa580e8f9b9ae5b558368488e0b093f6b413"
+    },
+    "src/kejtu_next/application/job_controls.py": {
+      "bytes": 8777,
+      "mode": "100644",
+      "sha256": "51a7945497bbaffc70e65389ac4daea10c53f25c898202e0f3a446ed4dcac06f",
+      "source": "src/kejtu_next/application/job_controls.py",
+      "source_sha256": "51a7945497bbaffc70e65389ac4daea10c53f25c898202e0f3a446ed4dcac06f"
+    },
+    "src/kejtu_next/application/mcp.py": {
+      "bytes": 14126,
+      "mode": "100644",
+      "sha256": "3e327d2935923a43e20ecdb89029b97a5633fc295d1f493fe0b8e86398b8251f",
+      "source": "src/kejtu_next/application/mcp.py",
+      "source_sha256": "3e327d2935923a43e20ecdb89029b97a5633fc295d1f493fe0b8e86398b8251f"
+    },
+    "src/kejtu_next/application/media.py": {
+      "bytes": 10100,
+      "mode": "100644",
+      "sha256": "021a21e15e1d89c8e03e596cb6fb634746ab0da4f5a359239380ed5083e366cd",
+      "source": "src/kejtu_next/application/media.py",
+      "source_sha256": "021a21e15e1d89c8e03e596cb6fb634746ab0da4f5a359239380ed5083e366cd"
+    },
+    "src/kejtu_next/application/memory.py": {
+      "bytes": 5585,
+      "mode": "100644",
+      "sha256": "1d279ff7ec05be67d5594746b9cbb1277fb3dec2a9de9a57851d314d8efc7faa",
+      "source": "src/kejtu_next/application/memory.py",
+      "source_sha256": "1d279ff7ec05be67d5594746b9cbb1277fb3dec2a9de9a57851d314d8efc7faa"
+    },
+    "src/kejtu_next/application/model_controls.py": {
+      "bytes": 3613,
+      "mode": "100644",
+      "sha256": "0c689be7390d7452ffb4f5c0aff59674c30aeba3de697cda38eacb24628048b9",
+      "source": "src/kejtu_next/application/model_controls.py",
+      "source_sha256": "0c689be7390d7452ffb4f5c0aff59674c30aeba3de697cda38eacb24628048b9"
+    },
+    "src/kejtu_next/application/native.py": {
+      "bytes": 40294,
+      "mode": "100644",
+      "sha256": "aaa5ef409841265d319566f36d643a68c74089d137494f14eb3f8fc175713263",
+      "source": "src/kejtu_next/application/native.py",
+      "source_sha256": "aaa5ef409841265d319566f36d643a68c74089d137494f14eb3f8fc175713263"
+    },
+    "src/kejtu_next/application/notes.py": {
+      "bytes": 7157,
+      "mode": "100644",
+      "sha256": "8a7f4bc5c2ca3d33884b84334855558f86ae2d0c3ea463d68143022d1e72e7aa",
+      "source": "src/kejtu_next/application/notes.py",
+      "source_sha256": "8a7f4bc5c2ca3d33884b84334855558f86ae2d0c3ea463d68143022d1e72e7aa"
+    },
+    "src/kejtu_next/application/operations.py": {
+      "bytes": 38607,
+      "mode": "100644",
+      "sha256": "512a6b894b2392ed937b1808efbcdb70b8c2a7430b09be0902ded759333a85fe",
+      "source": "src/kejtu_next/application/operations.py",
+      "source_sha256": "512a6b894b2392ed937b1808efbcdb70b8c2a7430b09be0902ded759333a85fe"
+    },
+    "src/kejtu_next/application/people.py": {
+      "bytes": 2819,
+      "mode": "100644",
+      "sha256": "cc215ac3119963e4c4773a5d91ee0a330fcd13f084d031f5ddb5a65f451c5c05",
+      "source": "src/kejtu_next/application/people.py",
+      "source_sha256": "cc215ac3119963e4c4773a5d91ee0a330fcd13f084d031f5ddb5a65f451c5c05"
+    },
+    "src/kejtu_next/application/reminder_controls.py": {
+      "bytes": 4875,
+      "mode": "100644",
+      "sha256": "f2e6bb342abb24e4e3839e76bc56d0d1e0bc4fa21ed2b5ddacdb7e45f048015b",
+      "source": "src/kejtu_next/application/reminder_controls.py",
+      "source_sha256": "f2e6bb342abb24e4e3839e76bc56d0d1e0bc4fa21ed2b5ddacdb7e45f048015b"
+    },
+    "src/kejtu_next/application/reminders.py": {
+      "bytes": 2433,
+      "mode": "100644",
+      "sha256": "0de77921490d31d91f999542b5490702f5e6e66aff53ebd1112779b4d03ec3d2",
+      "source": "src/kejtu_next/application/reminders.py",
+      "source_sha256": "0de77921490d31d91f999542b5490702f5e6e66aff53ebd1112779b4d03ec3d2"
+    },
+    "src/kejtu_next/application/research.py": {
+      "bytes": 14909,
+      "mode": "100644",
+      "sha256": "58341c97bcd4bfb9c5ab33eeca41de7d7f23f17a1053443e03c8227df419d2a3",
+      "source": "src/kejtu_next/application/research.py",
+      "source_sha256": "58341c97bcd4bfb9c5ab33eeca41de7d7f23f17a1053443e03c8227df419d2a3"
+    },
+    "src/kejtu_next/application/research_pause.py": {
+      "bytes": 2375,
+      "mode": "100644",
+      "sha256": "c715131eb3991c674c480d75f320401be815e09199808b3cb6f7489762536e3f",
+      "source": "src/kejtu_next/application/research_pause.py",
+      "source_sha256": "c715131eb3991c674c480d75f320401be815e09199808b3cb6f7489762536e3f"
+    },
+    "src/kejtu_next/application/review.py": {
+      "bytes": 6815,
+      "mode": "100644",
+      "sha256": "1538f3870a9fd01e8c56e937354cefa86ffa0a849b3a4141fbd45fe75b55f6c1",
+      "source": "src/kejtu_next/application/review.py",
+      "source_sha256": "1538f3870a9fd01e8c56e937354cefa86ffa0a849b3a4141fbd45fe75b55f6c1"
+    },
+    "src/kejtu_next/application/skills.py": {
+      "bytes": 12212,
+      "mode": "100644",
+      "sha256": "bed48ba66aa804ec8e6d65e819c82507a0624b80185247ec796fd81c0763542c",
+      "source": "src/kejtu_next/application/skills.py",
+      "source_sha256": "bed48ba66aa804ec8e6d65e819c82507a0624b80185247ec796fd81c0763542c"
+    },
+    "src/kejtu_next/application/streaming.py": {
+      "bytes": 8439,
+      "mode": "100644",
+      "sha256": "f0e162a0437b7ee97de220ffc88f48e14d723d03ce750b3eeb4cf18b11c45fc4",
+      "source": "src/kejtu_next/application/streaming.py",
+      "source_sha256": "f0e162a0437b7ee97de220ffc88f48e14d723d03ce750b3eeb4cf18b11c45fc4"
+    },
+    "src/kejtu_next/application/tasks.py": {
+      "bytes": 2339,
+      "mode": "100644",
+      "sha256": "9d954898b0396a840264bf4494e87c55e647a1b9c9cb1056e48af70b65f87097",
+      "source": "src/kejtu_next/application/tasks.py",
+      "source_sha256": "9d954898b0396a840264bf4494e87c55e647a1b9c9cb1056e48af70b65f87097"
+    },
+    "src/kejtu_next/application/turn.py": {
+      "bytes": 30798,
+      "mode": "100644",
+      "sha256": "9e9e89a095ca5084cd198ee646145b056698ba4b6f2d2155d81ff92b35e39f40",
+      "source": "src/kejtu_next/application/turn.py",
+      "source_sha256": "9e9e89a095ca5084cd198ee646145b056698ba4b6f2d2155d81ff92b35e39f40"
+    },
+    "src/kejtu_next/application/turn_failure.py": {
+      "bytes": 1075,
+      "mode": "100644",
+      "sha256": "1eed8495592a5b8b3dddca9081ee3f47aa7e1ffba53acdb0d7f02e0e33155098",
+      "source": "src/kejtu_next/application/turn_failure.py",
+      "source_sha256": "1eed8495592a5b8b3dddca9081ee3f47aa7e1ffba53acdb0d7f02e0e33155098"
+    },
+    "src/kejtu_next/application/web.py": {
+      "bytes": 7318,
+      "mode": "100644",
+      "sha256": "58ca24053e45b22eb65d66d3ab12974ffd136570db0a9c4f05105f28ac90116b",
+      "source": "src/kejtu_next/application/web.py",
+      "source_sha256": "58ca24053e45b22eb65d66d3ab12974ffd136570db0a9c4f05105f28ac90116b"
+    },
+    "src/kejtu_next/application/workspace.py": {
+      "bytes": 15233,
+      "mode": "100644",
+      "sha256": "b0d9f8066b89c9b784949d4bb7325eacf81ac7ff8f8ea8a35557f8f520d4688b",
+      "source": "src/kejtu_next/application/workspace.py",
+      "source_sha256": "b0d9f8066b89c9b784949d4bb7325eacf81ac7ff8f8ea8a35557f8f520d4688b"
+    },
+    "src/kejtu_next/application/workspace_session.py": {
+      "bytes": 15120,
+      "mode": "100644",
+      "sha256": "5b1f49b97bdc3774e7c753b5d88e8c73a7ad6fcd9af799b40fe36ba2e88ccf49",
+      "source": "src/kejtu_next/application/workspace_session.py",
+      "source_sha256": "5b1f49b97bdc3774e7c753b5d88e8c73a7ad6fcd9af799b40fe36ba2e88ccf49"
+    },
+    "src/kejtu_next/bootstrap.py": {
+      "bytes": 19499,
+      "mode": "100644",
+      "sha256": "230bbc25a678fc4e549d3858003ceef93062e2589372db73b830646f919d8ca0",
+      "source": "src/kejtu_next/bootstrap.py",
+      "source_sha256": "230bbc25a678fc4e549d3858003ceef93062e2589372db73b830646f919d8ca0"
+    },
+    "src/kejtu_next/core/__init__.py": {
+      "bytes": 50,
+      "mode": "100644",
+      "sha256": "556dcd3f6fcb63c124dd7a3540fc8d94951a304c559829cbe5ce51037aae24de",
+      "source": "src/kejtu_next/core/__init__.py",
+      "source_sha256": "556dcd3f6fcb63c124dd7a3540fc8d94951a304c559829cbe5ce51037aae24de"
+    },
+    "src/kejtu_next/core/app_help.py": {
+      "bytes": 1041,
+      "mode": "100644",
+      "sha256": "f119573ee9488cd6fdfa8438d4837eacbd844b1830dcc4e2afa873065315cd7b",
+      "source": "src/kejtu_next/core/app_help.py",
+      "source_sha256": "f119573ee9488cd6fdfa8438d4837eacbd844b1830dcc4e2afa873065315cd7b"
+    },
+    "src/kejtu_next/core/background.py": {
+      "bytes": 8990,
+      "mode": "100644",
+      "sha256": "4e81dceef583859582172f471ea0d14a47d4aedc8b1e3b7552435703bb9c2042",
+      "source": "src/kejtu_next/core/background.py",
+      "source_sha256": "4e81dceef583859582172f471ea0d14a47d4aedc8b1e3b7552435703bb9c2042"
+    },
+    "src/kejtu_next/core/brave_search.py": {
+      "bytes": 11661,
+      "mode": "100644",
+      "sha256": "e4c1f6956913a472970e2c53f77ad54027e27e45fc4464a7e710b5ed03b9f210",
+      "source": "src/kejtu_next/core/brave_search.py",
+      "source_sha256": "e4c1f6956913a472970e2c53f77ad54027e27e45fc4464a7e710b5ed03b9f210"
+    },
+    "src/kejtu_next/core/budget.py": {
+      "bytes": 41633,
+      "mode": "100644",
+      "sha256": "0cea436d10579838a115064e885f8cffa53a809cca06aff05255c6f4399892a1",
+      "source": "src/kejtu_next/core/budget.py",
+      "source_sha256": "0cea436d10579838a115064e885f8cffa53a809cca06aff05255c6f4399892a1"
+    },
+    "src/kejtu_next/core/care.py": {
+      "bytes": 4504,
+      "mode": "100644",
+      "sha256": "7ee94d0f2b72910dcd56b08fb71668cfa4f8966162b60646311952d250fbaeca",
+      "source": "src/kejtu_next/core/care.py",
+      "source_sha256": "7ee94d0f2b72910dcd56b08fb71668cfa4f8966162b60646311952d250fbaeca"
+    },
+    "src/kejtu_next/core/context.py": {
+      "bytes": 5245,
+      "mode": "100644",
+      "sha256": "1aad5857431576bfe11e7036f3133497884215613c56e7a9d979698c3d293d9f",
+      "source": "src/kejtu_next/core/context.py",
+      "source_sha256": "1aad5857431576bfe11e7036f3133497884215613c56e7a9d979698c3d293d9f"
+    },
+    "src/kejtu_next/core/credentials.py": {
+      "bytes": 1221,
+      "mode": "100644",
+      "sha256": "6c41a9565d25d5b161cee0b36c9249cc32543211d0c2bf6f1d3a577e336f1360",
+      "source": "src/kejtu_next/core/credentials.py",
+      "source_sha256": "6c41a9565d25d5b161cee0b36c9249cc32543211d0c2bf6f1d3a577e336f1360"
+    },
+    "src/kejtu_next/core/execution.py": {
+      "bytes": 2443,
+      "mode": "100644",
+      "sha256": "d410b916249e7358655f5b434daf24e74267924e1820d0c6c9f5929bfde800e1",
+      "source": "src/kejtu_next/core/execution.py",
+      "source_sha256": "d410b916249e7358655f5b434daf24e74267924e1820d0c6c9f5929bfde800e1"
+    },
+    "src/kejtu_next/core/history.py": {
+      "bytes": 2138,
+      "mode": "100644",
+      "sha256": "09fe2bdf98da7c9d287aca46674abe70bc6f4a1eb5957b0a8cc0436ed8b6c0b9",
+      "source": "src/kejtu_next/core/history.py",
+      "source_sha256": "09fe2bdf98da7c9d287aca46674abe70bc6f4a1eb5957b0a8cc0436ed8b6c0b9"
+    },
+    "src/kejtu_next/core/jobs.py": {
+      "bytes": 7587,
+      "mode": "100644",
+      "sha256": "57ef71bb5b196c5a9f3ccc08b37495b6aa568773d3d27104bf5920e929f6fdd5",
+      "source": "src/kejtu_next/core/jobs.py",
+      "source_sha256": "57ef71bb5b196c5a9f3ccc08b37495b6aa568773d3d27104bf5920e929f6fdd5"
+    },
+    "src/kejtu_next/core/mcp.py": {
+      "bytes": 5790,
+      "mode": "100644",
+      "sha256": "8cff4268bdb4c847109f38c806cba1a1f5a8e7028bce37bc561efc5cdffb8692",
+      "source": "src/kejtu_next/core/mcp.py",
+      "source_sha256": "8cff4268bdb4c847109f38c806cba1a1f5a8e7028bce37bc561efc5cdffb8692"
+    },
+    "src/kejtu_next/core/memory.py": {
+      "bytes": 10482,
+      "mode": "100644",
+      "sha256": "6e4240dae50ad7935db9a785769cccfa4f391d135f19b74111b70d65f78ea88d",
+      "source": "src/kejtu_next/core/memory.py",
+      "source_sha256": "6e4240dae50ad7935db9a785769cccfa4f391d135f19b74111b70d65f78ea88d"
+    },
+    "src/kejtu_next/core/note_fields.py": {
+      "bytes": 5024,
+      "mode": "100644",
+      "sha256": "70c7082b43e22490620d11a41ada59d7938e52afe44c45592f35cc30966be36b",
+      "source": "src/kejtu_next/core/note_fields.py",
+      "source_sha256": "70c7082b43e22490620d11a41ada59d7938e52afe44c45592f35cc30966be36b"
+    },
+    "src/kejtu_next/core/notebook_guidance.py": {
+      "bytes": 7751,
+      "mode": "100644",
+      "sha256": "a0d29d7c8596d99b9dc0643f4227319a64964aee9cac8b06a82ba9cdb5671704",
+      "source": "src/kejtu_next/core/notebook_guidance.py",
+      "source_sha256": "a0d29d7c8596d99b9dc0643f4227319a64964aee9cac8b06a82ba9cdb5671704"
+    },
+    "src/kejtu_next/core/notes.py": {
+      "bytes": 10848,
+      "mode": "100644",
+      "sha256": "69a303464dcdacd304dfcb33fc69725fa64c874bc2fd54f067c53f28ff7b8ce5",
+      "source": "src/kejtu_next/core/notes.py",
+      "source_sha256": "69a303464dcdacd304dfcb33fc69725fa64c874bc2fd54f067c53f28ff7b8ce5"
+    },
+    "src/kejtu_next/core/onboarding.py": {
+      "bytes": 1103,
+      "mode": "100644",
+      "sha256": "b79b2a301b39e3803796e22ba406ca64344f0b91e45c483557f079dd0b18ebcc",
+      "source": "src/kejtu_next/core/onboarding.py",
+      "source_sha256": "b79b2a301b39e3803796e22ba406ca64344f0b91e45c483557f079dd0b18ebcc"
+    },
+    "src/kejtu_next/core/people.py": {
+      "bytes": 13732,
+      "mode": "100644",
+      "sha256": "7ef5ffadb5082b786420dbdccd348277ab3c30f225737281e1b4708d0d9a8ae5",
+      "source": "src/kejtu_next/core/people.py",
+      "source_sha256": "7ef5ffadb5082b786420dbdccd348277ab3c30f225737281e1b4708d0d9a8ae5"
+    },
+    "src/kejtu_next/core/planner.py": {
+      "bytes": 13833,
+      "mode": "100644",
+      "sha256": "f1076e74ff7fb0d03ef9c42710c09c767c329b794535a02175498b147ef68d9d",
+      "source": "src/kejtu_next/core/planner.py",
+      "source_sha256": "f1076e74ff7fb0d03ef9c42710c09c767c329b794535a02175498b147ef68d9d"
+    },
+    "src/kejtu_next/core/preferences.py": {
+      "bytes": 1231,
+      "mode": "100644",
+      "sha256": "40be12f492b6959bc555c6b7a4c7bb4e41cca174f565004fd5d61a2fdc3ae01d",
+      "source": "src/kejtu_next/core/preferences.py",
+      "source_sha256": "40be12f492b6959bc555c6b7a4c7bb4e41cca174f565004fd5d61a2fdc3ae01d"
+    },
+    "src/kejtu_next/core/prompt.py": {
+      "bytes": 4317,
+      "mode": "100644",
+      "sha256": "0f45bbf06b0510d9e8287657d60b1a2f130d12830642b83eaa1cbc8faad3720f",
+      "source": "src/kejtu_next/core/prompt.py",
+      "source_sha256": "0f45bbf06b0510d9e8287657d60b1a2f130d12830642b83eaa1cbc8faad3720f"
+    },
+    "src/kejtu_next/core/providers.py": {
+      "bytes": 5725,
+      "mode": "100644",
+      "sha256": "05be9eb361994ae6ef2deb2d04d3660ad604b7f1e0a238626891fa8cc41fb933",
+      "source": "src/kejtu_next/core/providers.py",
+      "source_sha256": "05be9eb361994ae6ef2deb2d04d3660ad604b7f1e0a238626891fa8cc41fb933"
+    },
+    "src/kejtu_next/core/recall.py": {
+      "bytes": 5104,
+      "mode": "100644",
+      "sha256": "8c40d85cf9d36f8f1e3d12ccd51c67f972226b48f41ee06fffceff146e1d25a4",
+      "source": "src/kejtu_next/core/recall.py",
+      "source_sha256": "8c40d85cf9d36f8f1e3d12ccd51c67f972226b48f41ee06fffceff146e1d25a4"
+    },
+    "src/kejtu_next/core/records.py": {
+      "bytes": 5175,
+      "mode": "100644",
+      "sha256": "4703bed104c7c5e3d7be41a6cfa5741f867702d0ba7375bb075a4cbfd8329222",
+      "source": "src/kejtu_next/core/records.py",
+      "source_sha256": "4703bed104c7c5e3d7be41a6cfa5741f867702d0ba7375bb075a4cbfd8329222"
+    },
+    "src/kejtu_next/core/reference.py": {
+      "bytes": 3898,
+      "mode": "100644",
+      "sha256": "90d6692979d45552078757cc93f6527a423f3a6ef70f7693b687e68697aafe52",
+      "source": "src/kejtu_next/core/reference.py",
+      "source_sha256": "90d6692979d45552078757cc93f6527a423f3a6ef70f7693b687e68697aafe52"
+    },
+    "src/kejtu_next/core/reminder_tools.py": {
+      "bytes": 7008,
+      "mode": "100644",
+      "sha256": "692951a6ccb49afb347ad4fec1d3ef6f94ca20d7bed17122614063572b86c257",
+      "source": "src/kejtu_next/core/reminder_tools.py",
+      "source_sha256": "692951a6ccb49afb347ad4fec1d3ef6f94ca20d7bed17122614063572b86c257"
+    },
+    "src/kejtu_next/core/reminders.py": {
+      "bytes": 3930,
+      "mode": "100644",
+      "sha256": "327d31e0a12d00de134e14510307d2690bf61e2c3a02015b7add43859cd27a0d",
+      "source": "src/kejtu_next/core/reminders.py",
+      "source_sha256": "327d31e0a12d00de134e14510307d2690bf61e2c3a02015b7add43859cd27a0d"
+    },
+    "src/kejtu_next/core/reply_format.py": {
+      "bytes": 3366,
+      "mode": "100644",
+      "sha256": "01549b80600df90b694f9e534b0a5eaa3b7123abfd87229b5e231c0a2933c3d9",
+      "source": "src/kejtu_next/core/reply_format.py",
+      "source_sha256": "01549b80600df90b694f9e534b0a5eaa3b7123abfd87229b5e231c0a2933c3d9"
+    },
+    "src/kejtu_next/core/research.py": {
+      "bytes": 11761,
+      "mode": "100644",
+      "sha256": "d7bd9db5ffbf2a39caae32907e993352d6abea4943cb385a69c9709a5bd26636",
+      "source": "src/kejtu_next/core/research.py",
+      "source_sha256": "d7bd9db5ffbf2a39caae32907e993352d6abea4943cb385a69c9709a5bd26636"
+    },
+    "src/kejtu_next/core/schedules.py": {
+      "bytes": 10863,
+      "mode": "100644",
+      "sha256": "1c069884891f4cfb4e190a7e82b87383af87632019d9068778b5c529c44d550e",
+      "source": "src/kejtu_next/core/schedules.py",
+      "source_sha256": "1c069884891f4cfb4e190a7e82b87383af87632019d9068778b5c529c44d550e"
+    },
+    "src/kejtu_next/core/search_providers.py": {
+      "bytes": 983,
+      "mode": "100644",
+      "sha256": "c87d4df3428e7606025b913587e69951b261ba6608f1bbfe1e65d60ab06faba3",
+      "source": "src/kejtu_next/core/search_providers.py",
+      "source_sha256": "c87d4df3428e7606025b913587e69951b261ba6608f1bbfe1e65d60ab06faba3"
+    },
+    "src/kejtu_next/core/skills.py": {
+      "bytes": 4961,
+      "mode": "100644",
+      "sha256": "64b591e72cc01c656f0a58b2a93686655ecd183525c277bbf33fa1d36ae3cd87",
+      "source": "src/kejtu_next/core/skills.py",
+      "source_sha256": "64b591e72cc01c656f0a58b2a93686655ecd183525c277bbf33fa1d36ae3cd87"
+    },
+    "src/kejtu_next/core/study_skills.py": {
+      "bytes": 9937,
+      "mode": "100644",
+      "sha256": "1b22c2a32736e71d05cd87a07364438a3feb4267fd0eb8197015c0604ebce350",
+      "source": "src/kejtu_next/core/study_skills.py",
+      "source_sha256": "1b22c2a32736e71d05cd87a07364438a3feb4267fd0eb8197015c0604ebce350"
+    },
+    "src/kejtu_next/core/tasks.py": {
+      "bytes": 9636,
+      "mode": "100644",
+      "sha256": "fc296e00922e41899404cceac9953bf0eca7ef3c8bedf9554c6fd422ca41f999",
+      "source": "src/kejtu_next/core/tasks.py",
+      "source_sha256": "fc296e00922e41899404cceac9953bf0eca7ef3c8bedf9554c6fd422ca41f999"
+    },
+    "src/kejtu_next/core/tavily_search.py": {
+      "bytes": 3890,
+      "mode": "100644",
+      "sha256": "c82b56d344f105ac97acc085f4ab8e632f9a39dc0a06c8214aab981d2ae5554f",
+      "source": "src/kejtu_next/core/tavily_search.py",
+      "source_sha256": "c82b56d344f105ac97acc085f4ab8e632f9a39dc0a06c8214aab981d2ae5554f"
+    },
+    "src/kejtu_next/core/tools.py": {
+      "bytes": 11924,
+      "mode": "100644",
+      "sha256": "646ac8f156f8e1abcc10f7cfb787cc65bd7bb5a9c0eb1e1969c7ccef65785c72",
+      "source": "src/kejtu_next/core/tools.py",
+      "source_sha256": "646ac8f156f8e1abcc10f7cfb787cc65bd7bb5a9c0eb1e1969c7ccef65785c72"
+    },
+    "src/kejtu_next/core/vision.py": {
+      "bytes": 9283,
+      "mode": "100644",
+      "sha256": "60f06f82389f36377fc8d6e2f3902b0454fe5e8ac888d784f93d81f93cc77fb2",
+      "source": "src/kejtu_next/core/vision.py",
+      "source_sha256": "60f06f82389f36377fc8d6e2f3902b0454fe5e8ac888d784f93d81f93cc77fb2"
+    },
+    "src/kejtu_next/core/web.py": {
+      "bytes": 12659,
+      "mode": "100644",
+      "sha256": "7aa4430384b390dc15545836beefc00416ab351e40858e0fcb4efa77b894e6bf",
+      "source": "src/kejtu_next/core/web.py",
+      "source_sha256": "7aa4430384b390dc15545836beefc00416ab351e40858e0fcb4efa77b894e6bf"
+    },
+    "src/kejtu_next/core/workspace.py": {
+      "bytes": 4097,
+      "mode": "100644",
+      "sha256": "63b66ec1f4fabe4fcaca6e44d211f441634087de0d9c0fad24c35a8d69308053",
+      "source": "src/kejtu_next/core/workspace.py",
+      "source_sha256": "63b66ec1f4fabe4fcaca6e44d211f441634087de0d9c0fad24c35a8d69308053"
+    },
+    "src/kejtu_next/help/01-start.md": {
+      "bytes": 6106,
+      "mode": "100644",
+      "sha256": "c0623f5becc2acdecd4b55c0ada458c8fb098a00c8da9ec33373f558f459d7b0",
+      "source": "src/kejtu_next/help/01-start.md",
+      "source_sha256": "c0623f5becc2acdecd4b55c0ada458c8fb098a00c8da9ec33373f558f459d7b0"
+    },
+    "src/kejtu_next/help/02-capabilities.md": {
+      "bytes": 3964,
+      "mode": "100644",
+      "sha256": "a53ab05a725fa0cd3daf67f8d5ac6292b9d03a215b9fa5e5e97baf8cf224499b",
+      "source": "src/kejtu_next/help/02-capabilities.md",
+      "source_sha256": "a53ab05a725fa0cd3daf67f8d5ac6292b9d03a215b9fa5e5e97baf8cf224499b"
+    },
+    "src/kejtu_next/help/03-memory.md": {
+      "bytes": 2816,
+      "mode": "100644",
+      "sha256": "7bd2de4ef4a3b52a453c079f005eff762e545395c2f8e03db4cb573a1024e462",
+      "source": "src/kejtu_next/help/03-memory.md",
+      "source_sha256": "7bd2de4ef4a3b52a453c079f005eff762e545395c2f8e03db4cb573a1024e462"
+    },
+    "src/kejtu_next/help/04-web-files-skills.md": {
+      "bytes": 7317,
+      "mode": "100644",
+      "sha256": "47f07bd21174c9a57da61267c2dce94c2c1fde2de4d166547e6181aae203ae0f",
+      "source": "src/kejtu_next/help/04-web-files-skills.md",
+      "source_sha256": "47f07bd21174c9a57da61267c2dce94c2c1fde2de4d166547e6181aae203ae0f"
+    },
+    "src/kejtu_next/help/05-projects-documents.md": {
+      "bytes": 7375,
+      "mode": "100644",
+      "sha256": "b5d673b4007b23455283566e261417cf59e4742759521a5e3c1aa5e322a8a8db",
+      "source": "src/kejtu_next/help/05-projects-documents.md",
+      "source_sha256": "b5d673b4007b23455283566e261417cf59e4742759521a5e3c1aa5e322a8a8db"
+    },
+    "src/kejtu_next/help/06-tasks-background.md": {
+      "bytes": 7184,
+      "mode": "100644",
+      "sha256": "cac2fefa6e7e31fb7f8278daa03727d3533a121e1c36a3f80cec294dbc32bf00",
+      "source": "src/kejtu_next/help/06-tasks-background.md",
+      "source_sha256": "cac2fefa6e7e31fb7f8278daa03727d3533a121e1c36a3f80cec294dbc32bf00"
+    },
+    "src/kejtu_next/help/07-settings-troubleshooting.md": {
+      "bytes": 4875,
+      "mode": "100644",
+      "sha256": "2bd6599d35e168e34a9e98a9eecf08d7f0cc8b1775cddda4d5efb2f44ca3a4d7",
+      "source": "src/kejtu_next/help/07-settings-troubleshooting.md",
+      "source_sha256": "2bd6599d35e168e34a9e98a9eecf08d7f0cc8b1775cddda4d5efb2f44ca3a4d7"
+    },
+    "src/kejtu_next/help/08-privacy-limits.md": {
+      "bytes": 3193,
+      "mode": "100644",
+      "sha256": "f3bdf3679cd69f50b83d1a7b61a1feecb85b917354c6012668953b71998a9899",
+      "source": "src/kejtu_next/help/08-privacy-limits.md",
+      "source_sha256": "f3bdf3679cd69f50b83d1a7b61a1feecb85b917354c6012668953b71998a9899"
+    },
+    "src/kejtu_next/help/SKILL.md": {
+      "bytes": 2510,
+      "mode": "100644",
+      "sha256": "36456504e5b31144df5482c356bdffa0250e5c84897743b9f2df67fa3dfda5d9",
+      "source": "src/kejtu_next/help/SKILL.md",
+      "source_sha256": "36456504e5b31144df5482c356bdffa0250e5c84897743b9f2df67fa3dfda5d9"
+    },
+    "src/kejtu_next/interfaces/__init__.py": {
+      "bytes": 81,
+      "mode": "100644",
+      "sha256": "d0d2a06c9b795fa4f46ea6984f9ec2f8cdfef35db5cb9f55efd527ef0f66da6e",
+      "source": "src/kejtu_next/interfaces/__init__.py",
+      "source_sha256": "d0d2a06c9b795fa4f46ea6984f9ec2f8cdfef35db5cb9f55efd527ef0f66da6e"
+    },
+    "src/kejtu_next/interfaces/cli.py": {
+      "bytes": 10104,
+      "mode": "100644",
+      "sha256": "ae09badbdd6e86b0ece584c5a9c509c93b84c9e6fe7603973a7ae1b86508a90e",
+      "source": "src/kejtu_next/interfaces/cli.py",
+      "source_sha256": "ae09badbdd6e86b0ece584c5a9c509c93b84c9e6fe7603973a7ae1b86508a90e"
+    },
+    "src/kejtu_next/interfaces/native_api.py": {
+      "bytes": 6857,
+      "mode": "100644",
+      "sha256": "ca9ed636d029ae9dc3490d20550595009ac7cac51efbc80ad9684de33b57e572",
+      "source": "src/kejtu_next/interfaces/native_api.py",
+      "source_sha256": "ca9ed636d029ae9dc3490d20550595009ac7cac51efbc80ad9684de33b57e572"
+    },
+    "src/kejtu_next/interfaces/native_lifetime.py": {
+      "bytes": 2864,
+      "mode": "100644",
+      "sha256": "7a522bc6e720ad6f313efd5990dd122f61653071ce4e4391ac4a42b8ce71b81f",
+      "source": "src/kejtu_next/interfaces/native_lifetime.py",
+      "source_sha256": "7a522bc6e720ad6f313efd5990dd122f61653071ce4e4391ac4a42b8ce71b81f"
+    },
+    "src/kejtu_next/interfaces/native_server.py": {
+      "bytes": 2355,
+      "mode": "100644",
+      "sha256": "2ee5592ef69adc89b2e00cbaf926b80aac8c04ca7aa7a9026f5f96e289f06100",
+      "source": "src/kejtu_next/interfaces/native_server.py",
+      "source_sha256": "2ee5592ef69adc89b2e00cbaf926b80aac8c04ca7aa7a9026f5f96e289f06100"
+    },
+    "src/kejtu_next/interfaces/native_wire.py": {
+      "bytes": 63475,
+      "mode": "100644",
+      "sha256": "30dbddba966eafc8dd5ad0eeced60357a6af79de4adff3bee09b642b4eebbf39",
+      "source": "src/kejtu_next/interfaces/native_wire.py",
+      "source_sha256": "30dbddba966eafc8dd5ad0eeced60357a6af79de4adff3bee09b642b4eebbf39"
+    },
+    "src/kejtu_next/ports/__init__.py": {
+      "bytes": 48,
+      "mode": "100644",
+      "sha256": "43c2fd062a65efc495e640f1d4cce81c369fdabe2fda18d1cdbcb8c940f688cd",
+      "source": "src/kejtu_next/ports/__init__.py",
+      "source_sha256": "43c2fd062a65efc495e640f1d4cce81c369fdabe2fda18d1cdbcb8c940f688cd"
+    },
+    "src/kejtu_next/ports/background.py": {
+      "bytes": 1020,
+      "mode": "100644",
+      "sha256": "e08507d7e8027e96b6e9cb08cffaacecb78d1ffb0eb04389997807ea531163c7",
+      "source": "src/kejtu_next/ports/background.py",
+      "source_sha256": "e08507d7e8027e96b6e9cb08cffaacecb78d1ffb0eb04389997807ea531163c7"
+    },
+    "src/kejtu_next/ports/embedding.py": {
+      "bytes": 233,
+      "mode": "100644",
+      "sha256": "4542722ee861c53c7351ea1978e761ae9120406b475c2425941099751f62bc03",
+      "source": "src/kejtu_next/ports/embedding.py",
+      "source_sha256": "4542722ee861c53c7351ea1978e761ae9120406b475c2425941099751f62bc03"
+    },
+    "src/kejtu_next/ports/memory.py": {
+      "bytes": 1018,
+      "mode": "100644",
+      "sha256": "7e11e045c2e56e973648070fe9fc210bd66346ea7252eaadfe09ff8f3023954a",
+      "source": "src/kejtu_next/ports/memory.py",
+      "source_sha256": "7e11e045c2e56e973648070fe9fc210bd66346ea7252eaadfe09ff8f3023954a"
+    },
+    "src/kejtu_next/ports/model.py": {
+      "bytes": 1310,
+      "mode": "100644",
+      "sha256": "fad3630bc4dc5545bf74933e64d408b6e0e085ec6f0582eaf878d2caaa8f50d3",
+      "source": "src/kejtu_next/ports/model.py",
+      "source_sha256": "fad3630bc4dc5545bf74933e64d408b6e0e085ec6f0582eaf878d2caaa8f50d3"
+    },
+    "src/kejtu_next/ports/notes.py": {
+      "bytes": 1218,
+      "mode": "100644",
+      "sha256": "7356fdf2957783a31db6c78288b8cfc25c9cc4c09fae09e39b20d97caae541d7",
+      "source": "src/kejtu_next/ports/notes.py",
+      "source_sha256": "7356fdf2957783a31db6c78288b8cfc25c9cc4c09fae09e39b20d97caae541d7"
+    },
+    "src/kejtu_next/ports/people.py": {
+      "bytes": 444,
+      "mode": "100644",
+      "sha256": "1eedd4d51dccbc7dd55b26e68e2368706fe632d230dde99dea21f08a2c42057d",
+      "source": "src/kejtu_next/ports/people.py",
+      "source_sha256": "1eedd4d51dccbc7dd55b26e68e2368706fe632d230dde99dea21f08a2c42057d"
+    },
+    "src/kejtu_next/ports/private_records.py": {
+      "bytes": 681,
+      "mode": "100644",
+      "sha256": "653eb5ba8e31bf93770f9ec2e707d1c18aac7cb7c14884462e01cc3e3ea29446",
+      "source": "src/kejtu_next/ports/private_records.py",
+      "source_sha256": "653eb5ba8e31bf93770f9ec2e707d1c18aac7cb7c14884462e01cc3e3ea29446"
+    },
+    "src/kejtu_next/ports/reminders.py": {
+      "bytes": 369,
+      "mode": "100644",
+      "sha256": "139bd234b68a2e0187e6dbc0e51f58e892fdd6f0cc87ac44590aba0776fc8d32",
+      "source": "src/kejtu_next/ports/reminders.py",
+      "source_sha256": "139bd234b68a2e0187e6dbc0e51f58e892fdd6f0cc87ac44590aba0776fc8d32"
+    },
+    "src/kejtu_next/ports/research.py": {
+      "bytes": 306,
+      "mode": "100644",
+      "sha256": "6629d29240fd423a9220ece92494f913286f5953166476d4a521efbd88c707e4",
+      "source": "src/kejtu_next/ports/research.py",
+      "source_sha256": "6629d29240fd423a9220ece92494f913286f5953166476d4a521efbd88c707e4"
+    },
+    "src/kejtu_next/ports/store.py": {
+      "bytes": 5149,
+      "mode": "100644",
+      "sha256": "0b15ffb1528f41712181f65a41733ba40977bd988b96cc6763ae2cf7f07ca87a",
+      "source": "src/kejtu_next/ports/store.py",
+      "source_sha256": "0b15ffb1528f41712181f65a41733ba40977bd988b96cc6763ae2cf7f07ca87a"
+    },
+    "src/kejtu_next/ports/tasks.py": {
+      "bytes": 404,
+      "mode": "100644",
+      "sha256": "7b4f54033088c3423add44cdf7902cf63a9597373ebca8b39f9128c6991146df",
+      "source": "src/kejtu_next/ports/tasks.py",
+      "source_sha256": "7b4f54033088c3423add44cdf7902cf63a9597373ebca8b39f9128c6991146df"
+    },
+    "src/kejtu_next/ports/web.py": {
+      "bytes": 1023,
+      "mode": "100644",
+      "sha256": "37ae9948ba3e12a9654ac75a007df5eca18316b3c4e41517d66984273838f012",
+      "source": "src/kejtu_next/ports/web.py",
+      "source_sha256": "37ae9948ba3e12a9654ac75a007df5eca18316b3c4e41517d66984273838f012"
+    },
+    "src/kejtu_next/starter_skills/topic-research/SKILL.md": {
+      "bytes": 2570,
+      "mode": "100644",
+      "sha256": "d8b32feb8dfbc6a66d5cb63a8f9fe7856d55087c4e82048d731e1378ef6cad58",
+      "source": "src/kejtu_next/starter_skills/topic-research/SKILL.md",
+      "source_sha256": "d8b32feb8dfbc6a66d5cb63a8f9fe7856d55087c4e82048d731e1378ef6cad58"
+    },
+    "tools/prepare_first_run.py": {
+      "bytes": 3272,
+      "mode": "100644",
+      "sha256": "8694f4ffbfa548aaf975eca327f6103772e97b874537f36a793cf2c05add1c9c",
+      "source": "tools/prepare_first_run.py",
+      "source_sha256": "8694f4ffbfa548aaf975eca327f6103772e97b874537f36a793cf2c05add1c9c"
+    },
+    "tools/setup_files.py": {
+      "bytes": 3624,
+      "mode": "100644",
+      "sha256": "2f988fd77d7bdbe97748543093eea1f643cbb79e97aa66836bcd66ed11b776ff",
+      "source": "tools/setup_files.py",
+      "source_sha256": "2f988fd77d7bdbe97748543093eea1f643cbb79e97aa66836bcd66ed11b776ff"
+    },
+    "tools/setup_runtime.py": {
+      "bytes": 3153,
+      "mode": "100644",
+      "sha256": "a5e17ba56d63f0bd29ada4fc1af128f998346881c51e97ead33414a2133e6088",
+      "source": "tools/setup_runtime.py",
+      "source_sha256": "a5e17ba56d63f0bd29ada4fc1af128f998346881c51e97ead33414a2133e6088"
+    },
+    "tools/setup_web.py": {
+      "bytes": 5375,
+      "mode": "100644",
+      "sha256": "c7f89e7d409c0787cca1643ea886198f20d5ab32938b6b9b4cf3dae7f05f78a4",
+      "source": "tools/setup_web.py",
+      "source_sha256": "c7f89e7d409c0787cca1643ea886198f20d5ab32938b6b9b4cf3dae7f05f78a4"
+    }
+  },
+  "inclusion_manifest_sha256": "6da10ad6e747c058c5d3b34272262822676f4193de1a59d10462439eeedd6844",
+  "kind": "linux-source-x86_64",
+  "schema": 1,
+  "source_commit": "02550e5f577b3117c29d6eb3c6b89a6ca538c7c9",
+  "source_date_epoch": 1793751311,
+  "source_tree": "fc9f2e8af35875736e41330f54dafaf0a935d1ec",
+  "transformations": {
+    "desktop/package-lock.json": {
+      "unreachable_package_entries_removed": 84
+    },
+    "desktop/package.json": {
+      "removed_dev_dependencies": [
+        "@testing-library/svelte",
+        "jsdom",
+        "prettier",
+        "prettier-plugin-svelte",
+        "vitest"
+      ],
+      "removed_scripts": [
+        "test",
+        "format",
+        "format:write"
+      ]
+    },
+    "desktop/src-tauri/Cargo.lock": {
+      "removed_test_dependency": {
+        "dev_features": [
+          "macros",
+          "rt-multi-thread"
+        ],
+        "package": "tokio-macros",
+        "parent": "tokio",
+        "version": "2.7.2"
+      }
+    },
+    "desktop/src-tauri/Cargo.toml": {
+      "dev_dependency_sections_removed": 1
+    },
+    "desktop/src-tauri/src/backend.rs": {
+      "rust_test_items_removed": 7
+    },
+    "desktop/src-tauri/src/backend_process.rs": {
+      "rust_test_items_removed": 2
+    },
+    "desktop/src-tauri/src/files.rs": {
+      "rust_test_items_removed": 1
+    },
+    "desktop/src-tauri/src/image_input.rs": {
+      "rust_test_items_removed": 1
+    },
+    "desktop/src-tauri/src/package_startup.rs": {
+      "rust_test_items_removed": 1
+    },
+    "desktop/src-tauri/src/pdf_copy.rs": {
+      "rust_test_items_removed": 1
+    },
+    "desktop/src-tauri/src/private_file.rs": {
+      "rust_test_items_removed": 2
+    },
+    "desktop/src-tauri/src/web_links.rs": {
+      "rust_test_items_removed": 1
+    },
+    "desktop/tsconfig.json": {
+      "test_glob_removed": true
+    }
+  }
+}

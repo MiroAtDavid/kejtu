@@ -1,0 +1,264 @@
+/* Journal margin language, kept separate from the workspace's form controls. */
+.journal-widget {
+  border-top: 1px solid var(--ke-border);
+  padding: 16px 0 0;
+  margin: 24px 0 26px;
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+  color: var(--ke-text-primary);
+}
+.widget-heading,
+.widget-edit-heading,
+.journal-widget-editor header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.widget-heading {
+  margin-bottom: 14px;
+}
+.widget-heading h3,
+.journal-widget-editor .eyebrow {
+  font: 9px/1.7 var(--ke-font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0;
+  color: var(--ke-text-tertiary);
+}
+.widget-icon,
+.widget-link {
+  border: 0;
+  background: none;
+  color: var(--ke-text-secondary);
+  cursor: pointer;
+  font: inherit;
+}
+.widget-icon {
+  color: var(--ke-text-tertiary);
+  font-size: 18px;
+  width: 28px;
+  min-height: 28px;
+  padding: 0;
+  flex-shrink: 0;
+}
+.widget-link {
+  display: inline-block;
+  text-align: left;
+  font-size: 11px;
+  padding: 2px 0;
+  line-height: 1.7;
+}
+.widget-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.widget-icon:hover {
+  color: var(--ke-text-primary);
+}
+.widget-muted {
+  color: var(--ke-text-secondary);
+  font-size: 11px;
+  line-height: 1.8;
+  margin: 8px 0 12px;
+}
+.widget-error {
+  color: var(--ke-danger);
+  font-size: 12px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.widget-icon:disabled,
+.widget-link:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.widget-icon:focus-visible,
+.widget-link:focus-visible,
+.journal-widget-editor :is(button, input, select):focus-visible {
+  outline: 2px solid var(--ke-text-secondary);
+  outline-offset: 3px;
+}
+/* Keep restored keyboard focus inside the icon's hit area. The outer ring
+   was clipped by the Widgets panel after closing its editor. */
+.journal-widget .widget-icon:focus-visible {
+  outline: 1px solid var(--ke-text-secondary);
+  outline-offset: -4px;
+  border-radius: var(--ke-radius-sm);
+}
+.margin-add {
+  display: flex;
+  justify-content: flex-start;
+  margin: 14px 0;
+}
+.journal-widget-editor {
+  box-sizing: border-box;
+  color: var(--ke-text-primary);
+  background: var(--ke-surface);
+  border: 1px solid var(--ke-border);
+  border-radius: 6px;
+  padding: 26px;
+  max-width: 660px;
+  width: calc(100vw - 36px);
+  max-height: calc(100vh - 56px);
+  overflow: auto;
+  box-shadow: var(--ke-shadow-panel, 0 12px 40px #0003);
+}
+.journal-widget-editor::backdrop {
+  background: rgb(0 0 0 / 0.35);
+}
+.journal-widget-editor header {
+  align-items: start;
+}
+.journal-widget-editor h2 {
+  font:
+    400 26px/1.4 Georgia,
+    serif;
+  letter-spacing: -0.4px;
+  margin: 8px 0 15px;
+}
+.journal-widget-editor h3 {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+}
+.journal-widget-editor fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.widget-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 24px 0;
+}
+.widget-picker button {
+  padding: 13px;
+  text-align: left;
+  border: 1px solid var(--ke-border);
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: var(--ke-text-primary);
+}
+.widget-picker button:hover {
+  background: var(--ke-surface-inset);
+}
+.widget-picker strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+}
+.widget-picker span {
+  display: block;
+  font-size: 11px;
+  color: var(--ke-text-secondary);
+  line-height: 1.7;
+  margin-top: 5px;
+}
+.widget-editor-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.widget-editor-list > li {
+  border-top: 1px solid var(--ke-border);
+  padding: 18px 0;
+}
+.widget-edit-heading > div {
+  display: flex;
+  gap: 12px;
+}
+.widget-edit-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 13px;
+}
+.journal-widget-editor label {
+  font-size: 11px;
+  color: var(--ke-text-secondary);
+}
+.journal-widget-editor input:not([type="checkbox"]),
+.journal-widget-editor select {
+  display: block;
+  width: 100%;
+  padding: 7px;
+  margin-top: 5px;
+  border: 1px solid var(--ke-border);
+  background: var(--ke-surface);
+  border-radius: 3px;
+  color: var(--ke-text-primary);
+  font: inherit;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+.widget-fold {
+  display: block;
+  margin: 12px 0;
+}
+.widget-fold input {
+  margin: 0 6px 0 0;
+}
+.widget-note-options {
+  display: flex;
+  flex-direction: column;
+  max-height: 240px;
+  overflow: auto;
+  margin: 12px 0;
+  gap: 6px;
+}
+.widget-bookmark-edit {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0;
+}
+.widget-savebar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  border-top: 1px solid var(--ke-border);
+  padding-top: 18px;
+  margin-top: 12px;
+}
+.widget-savebar span {
+  font-size: 11px;
+  color: var(--ke-text-tertiary);
+}
+.widget-savebar > div {
+  display: flex;
+  gap: 10px;
+}
+.widget-savebar button {
+  background: transparent;
+  border: 1px solid var(--ke-border);
+  border-radius: 4px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--ke-text-primary);
+  padding: 7px 12px;
+  cursor: pointer;
+}
+.journal-widget-editor button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+@media (max-width: 500px) {
+  .journal-widget-editor {
+    padding: 18px;
+    width: calc(100vw - 20px);
+    max-height: calc(100vh - 24px);
+  }
+  .widget-picker {
+    gap: 8px;
+  }
+  .widget-picker button {
+    padding: 10px;
+  }
+}

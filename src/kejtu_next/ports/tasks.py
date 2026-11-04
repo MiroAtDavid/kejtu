@@ -1,0 +1,9 @@
+"""Task lifecycle persistence through the existing turn's limits."""
+from typing import Protocol
+
+
+class TasksPort(Protocol):
+    def epoch(self) -> int: ...
+    def history_actions(self, turn_id, ledger) -> list[dict]: ...
+    def execute(self, args, *, conversation_id=None, turn_id=None, operation_key=None,
+                ledger=None, maximum=65536, budget=None, read_refs=frozenset()) -> dict: ...

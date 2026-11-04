@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+kejtu_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+exec "$kejtu_dir/.venv/bin/python" -B "$kejtu_dir/ops/control.py" "$@"

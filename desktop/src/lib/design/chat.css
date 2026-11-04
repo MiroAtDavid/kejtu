@@ -1,0 +1,159 @@
+/*
+ * Global rules for the replacement chat surface.
+ *
+ * Adapted from the old desktop design foundation (desktop/src/lib/design/
+ * global.css, lines 1-174). Only the rules this surface needs are carried over:
+ * the box-sizing reset, body typography, control font inheritance, scrollbar
+ * and quiet-scrollbar styling, keyboard focus, and the reduced-motion gate.
+ *
+ * Deliberately NOT carried over: the old native-shell window frame
+ * (`[data-native-window]`, `.shell` padding and the `body::after` client edge)
+ * and the radio-input appearance overrides. Those encode assumptions about the
+ * old window chrome and its form controls, which this surface does not have.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--ke-font-ui);
+  font-size: var(--ke-text-base);
+  line-height: var(--ke-leading-body);
+  color: var(--ke-text-primary);
+  background: var(--ke-surface);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+textarea,
+input,
+select {
+  font: inherit;
+}
+
+input[type="checkbox"],
+progress {
+  accent-color: var(--ke-accent);
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: var(--ke-accent-soft);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ke-border-strong) transparent;
+}
+
+/* WebKitGTK can otherwise reveal a dark GTK scrollbar on hover/drag even when
+   the resting overlay follows scrollbar-color. Keep every state in our theme. */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  min-height: 24px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-color: var(--ke-border-strong);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:active {
+  background-color: var(--ke-text-tertiary);
+}
+
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* Keep visibility local to the scrollbar. Animating an inherited custom color
+   restyles the entire transcript on every fade frame, delaying scroll input. */
+[data-quiet-scrollbar] {
+  scrollbar-color: transparent transparent;
+}
+
+[data-quiet-scrollbar][data-scrollbar-visible] {
+  scrollbar-color: var(--ke-border-strong) transparent;
+}
+
+[data-quiet-scrollbar]::-webkit-scrollbar-thumb {
+  background-color: transparent;
+}
+
+[data-quiet-scrollbar][data-scrollbar-visible]::-webkit-scrollbar-thumb {
+  background-color: var(--ke-border-strong);
+}
+
+[data-quiet-scrollbar][data-scrollbar-visible]::-webkit-scrollbar-thumb:hover,
+[data-quiet-scrollbar][data-scrollbar-visible]::-webkit-scrollbar-thumb:active {
+  background-color: var(--ke-text-tertiary);
+}
+
+@supports selector(::-webkit-scrollbar) {
+  /* Avoid mixing the native overlay with the custom WebKit scrollbar parts. */
+  *,
+  [data-quiet-scrollbar],
+  [data-quiet-scrollbar][data-scrollbar-visible] {
+    /* Match the visible rule's specificity too: a non-auto scrollbar-color
+       switches Chromium back to native parts, changing the gutter on scroll. */
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+}
+
+/* The `hidden` attribute must actually hide.
+ *
+ * A UA rule `[hidden] { display: none }` loses to ANY author `display` declaration
+ * on the same element, so `hidden` silently did nothing wherever we also set
+ * `display: grid` or `display: flex`. That has now caused three separate bugs:
+ * the conversation list would not collapse, the journal grid kept its `flex: 1`
+ * and split the window with the settings surface, and a hidden textarea stayed in
+ * the DOM. One rule with `!important` retires the whole class of them.
+ *
+ * `[hidden]` is only ever set deliberately in this surface, so there is nothing to
+ * override it for. */
+[hidden] {
+  display: none !important;
+}
+
+/* Visible, consistent keyboard focus everywhere. */
+:focus-visible {
+  outline: 2px solid var(--ke-focus-ring);
+  outline-offset: 2px;
+  border-radius: var(--ke-radius-sm);
+}
+
+/* All purposeful motion is gated on the OS reduced-motion preference. No state
+   in this surface is conveyed by animation alone. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

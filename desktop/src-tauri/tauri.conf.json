@@ -1,0 +1,32 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Kejtu Next DEVELOPMENT",
+  "version": "0.0.1",
+  "identifier": "dev.kejtu.next.development",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:1431",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../build"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Kejtu Next \u2014 DEVELOPMENT",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 600,
+        "minHeight": 460,
+        "decorations": false,
+        "dragDropEnabled": true,
+        "visible": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data: blob:; worker-src 'self' blob:; frame-src 'self'"
+    }
+  },
+  "bundle": {
+    "active": false
+  }
+}

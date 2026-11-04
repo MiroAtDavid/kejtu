@@ -1,0 +1,195 @@
+.rich-chart {
+  margin: 24px 0;
+  padding: 18px 0 0;
+  border-top: 1px solid var(--ke-border);
+  --color-primary: var(--ke-accent);
+  --color-surface-100: var(--ke-surface-raised);
+  --color-surface-200: var(--ke-surface-inset);
+  --color-surface-300: var(--ke-border);
+  --color-surface-content: var(--ke-text-primary);
+}
+.rich-chart figcaption strong {
+  font-weight: 550;
+}
+.rich-chart figcaption span {
+  display: block;
+  font-size: 12px;
+  color: var(--ke-text-secondary);
+  margin: 3px 0 16px;
+}
+.rich-chart-controls {
+  padding: 0;
+  border: 0;
+  margin: 0 0 20px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-width: 0;
+}
+.rich-choice-group {
+  display: flex;
+  gap: 4px;
+}
+.rich-choice-group button {
+  font: inherit;
+  font-size: 12px;
+  padding: 4px 10px;
+  color: var(--ke-text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.rich-choice-group button[aria-pressed="true"] {
+  border-color: var(--ke-border-strong);
+}
+.rich-visuals .rich-axis-caption {
+  font-size: 12px;
+  margin: 0;
+  color: var(--ke-text-secondary);
+}
+.rich-plot {
+  height: 280px;
+  width: 100%;
+  color: var(--ke-text-secondary);
+  font-size: 11px;
+}
+.rich-visuals .rich-scale-note {
+  min-height: 22px;
+  font-size: 12px;
+  color: var(--ke-text-secondary);
+  margin: 10px 0 16px;
+}
+.rich-point-inspector {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.rich-point-inspector input {
+  min-width: 100px;
+  max-width: 260px;
+  flex: 1;
+  accent-color: var(--ke-accent);
+}
+.rich-point-inspector output {
+  min-width: 130px;
+}
+.rich-chart-footer {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  font-size: 12px;
+  margin-top: 12px;
+}
+.rich-values {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 12px;
+  margin-top: 12px;
+}
+.rich-values caption {
+  text-align: left;
+  color: var(--ke-text-secondary);
+  margin-bottom: 8px;
+}
+.rich-values th,
+.rich-values td {
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--ke-border);
+  text-align: left;
+}
+.rich-values th {
+  font-weight: 500;
+}
+.rich-values .selected {
+  background: var(--ke-surface-inset);
+}
+.rich-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.rich-diagram {
+  margin: 22px 0;
+}
+.rich-diagram-scroll {
+  overflow-x: auto;
+}
+.rich-diagram-scroll svg {
+  display: block;
+  margin: auto;
+  min-width: 420px;
+  max-width: 100%;
+  height: auto;
+}
+.rich-diagram-scroll svg.mindmapDiagram,
+.rich-diagram-scroll svg[aria-roledescription="treeView"],
+.rich-diagram-scroll svg[aria-roledescription="treemap"],
+.rich-diagram-scroll svg[aria-roledescription="gantt"] {
+  min-width: 0;
+  max-width: none;
+}
+/* Treemap text uses the shared dark category-label colour. Keep the matching
+   pastel fills opaque so nested regions stay legible in either app theme. */
+.rich-diagram-scroll .treemapSection > rect.treemapSection,
+.rich-diagram-scroll .treemapLeaf {
+  fill-opacity: 1;
+}
+.rich-diagram-scroll .treemapLeaf {
+  stroke: #202b33;
+  stroke-width: 1px;
+  stroke-opacity: 0.5;
+}
+/* Mermaid's SVG-only circle labels are positioned at the centre but retain
+   start alignment. Other mind-map shapes already offset their label group. */
+.rich-diagram-scroll .mindmap-node:has(> circle) .label text {
+  text-anchor: middle;
+}
+.rich-diagram details {
+  font-size: 12px;
+  color: var(--ke-text-secondary);
+  margin-top: 10px;
+}
+.rich-visuals .katex-display {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 8px 0;
+}
+.rich-visuals .katex {
+  font-size: 1.15em;
+}
+@media (max-width: 480px) {
+  .rich-chart-controls {
+    gap: 8px;
+  }
+  .rich-point-inspector {
+    gap: 10px;
+  }
+  .rich-point-inspector output {
+    width: 100%;
+  }
+}
+
+.rich-choice-group button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.rich-text-button {
+  font: inherit;
+  color: var(--ke-text-secondary);
+  background: none;
+  border: 0;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.rich-pending {
+  color: var(--ke-text-secondary);
+}

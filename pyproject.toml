@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kejtu-next"
+description = "Kejtu private local companion"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.14"
+# The core uses only the standard library. Application clock context uses tzlocal.
+# Web extraction is an optional extra;
+# importing adapters never launches a browser or makes a network request.
+dependencies = ["tzlocal==5.4.4", "PyJWT[crypto]==2.15.1", "cryptography==50.0.2"]
+# Single version owner: `kejtu_next.__version__`. Packaging references it instead
+# of defining a second independent version.
+dynamic = ["version"]
+
+[project.optional-dependencies]
+web = ["playwright==1.62.0", "trafilatura==2.2.0", "lxml==6.1.3"]
+mcp = ["mcp==2.2.0", "jsonschema==4.26.0"]
+skills = ["PyYAML==6.0.3"]
+# No development dependencies beyond the standard library `unittest` runner.
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+kejtu_next = ["help/*.md", "starter_skills/*/SKILL.md"]
+
+[tool.setuptools.dynamic]
+version = { attr = "kejtu_next.__version__" }

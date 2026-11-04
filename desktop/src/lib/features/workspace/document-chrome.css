@@ -1,0 +1,108 @@
+/* Keep document controls above the generic Study button rules, independent of
+ * route CSS import order. The embedded PDF uses the same 32px control row. */
+/* Reader geometry: 70px page gutters, 14px palette inset and a 44px rail.
+ * A 14px paper inset separates the Markdown surface from surrounding controls. */
+.workspace {
+  --document-page-side: 70px;
+  --document-page-top: 14px;
+  --document-rail-width: 44px;
+  --document-tool-inset: 14px;
+  --document-paper-shadow: 0 2px 8px rgb(0 0 0 / 0.055);
+}
+.workspace .document-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 2px;
+  height: 32px;
+  min-height: 32px;
+  margin-bottom: 8px;
+}
+.workspace .document-toolbar button {
+  border: 0;
+  background: transparent;
+  color: var(--ke-text-secondary);
+  border-radius: 4px;
+  font: 11px var(--ke-font-ui);
+  min-height: 32px;
+  height: 32px;
+  flex: none;
+  white-space: nowrap;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.workspace .document-toolbar button:hover:not(:disabled),
+.workspace .document-toolbar button[aria-pressed="true"] {
+  background: var(--ke-surface-inset);
+  color: var(--ke-text-primary);
+}
+.workspace .document-toolbar button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.workspace .document-toolbar button:focus-visible {
+  outline: 2px solid var(--ke-focus-ring);
+  outline-offset: -2px;
+}
+.workspace .document-toolbar button.icon,
+.workspace .document-toolbar button.tool {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 32px;
+  padding: 0;
+}
+.workspace .document-toolbar .state,
+.workspace .document-toolbar .status {
+  font-size: 11px;
+  color: var(--ke-text-tertiary);
+  margin-left: 8px;
+}
+
+.workspace .document-toolbar .state,
+.workspace .document-toolbar .status,
+.workspace .document-toolbar .page-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+:root[data-theme="dark"] .workspace {
+  --document-paper-shadow: 0 2px 8px rgb(0 0 0 / 0.235);
+}
+
+/* The document owns its gutter. Do not opt these panes back into native overlay
+ * scrollbars after the shared WebKit custom-part rules have selected auto. */
+@supports selector(::-webkit-scrollbar) {
+  .markdown-editor .surface .cm-scroller,
+  .markdown-editor .surface .mdxeditor-root-contenteditable,
+  .markdown-editor .surface .preview {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+}
+.markdown-editor .surface ::-webkit-scrollbar,
+.markdown-editor .surface .preview::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.markdown-editor .surface ::-webkit-scrollbar-thumb,
+.markdown-editor .surface .preview::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: padding-box;
+}
+/* MDXEditor's diff plugin inserts two wrappers with auto height. Both must carry
+ * the workbench height through to the rich scroller, or long documents expand
+ * behind the clipped pane and Write mode can never scroll. */
+.markdown-editor .rich-writing .mdxeditor-diff-source-wrapper,
+.markdown-editor .rich-writing .mdxeditor-rich-text-editor {
+  height: 100%;
+  min-height: 0;
+}
+.markdown-editor .surface .mdxeditor-root-contenteditable,
+.markdown-editor .surface .cm-scroller,
+.markdown-editor .surface .preview {
+  overscroll-behavior: contain;
+}

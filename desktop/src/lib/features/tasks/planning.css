@@ -1,0 +1,127 @@
+/* Main-workspace presentation only. Background/Settings retain their own
+   presentation; the mounted task/research controllers still own all state. */
+.main-task-page .planning-page {
+  min-width: 0;
+  color: var(--ke-text-primary);
+  font-size: 12px;
+  line-height: 1.65;
+}
+.main-task-page .tasks.planning-page {
+  max-width: none;
+}
+.main-task-page .planning-page .planning-title {
+  margin: 0;
+  font:
+    400 32px/1.25 Georgia,
+    "Times New Roman",
+    serif;
+  letter-spacing: -0.7px;
+  color: var(--ke-text-primary);
+}
+.main-task-page .planning-page .panel-intro {
+  margin: 12px 0 28px;
+  color: var(--ke-text-secondary);
+}
+.main-task-page .planning-page :where(label) {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ke-text-secondary);
+}
+.main-task-page .planning-page :where(button, input, select, textarea) {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  font-family: var(--ke-font-ui);
+}
+/* Selection cards, task rows and the shared radio picker retain component
+   presentation. In particular, completion remains a native checkbox. */
+.main-task-page
+  .planning-page
+  :where(
+    button:not(
+      .assignment,
+      .task-row,
+      .choice-trigger,
+      .choice-option,
+      .text-action,
+      .filters button
+    )
+  ) {
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  border: 1px solid transparent;
+  border-radius: var(--ke-radius-sm);
+  background: var(--ke-surface-inset);
+  color: var(--ke-text-secondary);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.main-task-page
+  .planning-page
+  :where(
+    button:not(
+      .assignment,
+      .task-row,
+      .choice-trigger,
+      .choice-option,
+      .text-action,
+      .filters button
+    )
+  ):hover:not(:disabled) {
+  color: var(--ke-text-primary);
+  background: var(--ke-surface-sidebar);
+}
+.main-task-page .planning-page :where(button:disabled) {
+  opacity: 0.5;
+  cursor: default;
+}
+.main-task-page
+  .planning-page
+  :where(
+    input:not([type="checkbox"], [type="radio"], [type="range"]),
+    select,
+    textarea
+  ) {
+  min-height: 36px;
+  padding: 7px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  border: 1px solid var(--ke-border);
+  border-radius: var(--ke-radius-sm);
+  background: var(--ke-surface-raised);
+  color: var(--ke-text-primary);
+}
+.main-task-page .planning-page :where(input, textarea)::placeholder {
+  color: var(--ke-text-tertiary);
+  opacity: 1;
+}
+.main-task-page
+  .planning-page
+  :where(input[type="checkbox"], input[type="radio"]) {
+  accent-color: var(--ke-accent);
+}
+.main-task-page
+  .planning-page
+  :where(button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--ke-focus-ring);
+  outline-offset: 3px;
+}
+.main-task-page .planning-page .task-editor-heading h3 {
+  font-weight: 500;
+  line-height: 1.4;
+}
+.main-task-page .planning-page button.save {
+  background: var(--ke-accent);
+  color: var(--ke-on-accent);
+}
+.main-task-page .planning-page .modes button[aria-pressed="true"] {
+  background: var(--ke-accent-soft);
+  color: var(--ke-text-primary);
+}
+@media (max-width: 650px) {
+  .main-task-page .planning-page .planning-title {
+    font-size: 27px;
+  }
+}

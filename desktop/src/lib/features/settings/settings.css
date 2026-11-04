@@ -1,0 +1,369 @@
+/* Settings owns presentation, while each mounted panel owns its controls and
+   recovery state. The page scope deliberately outranks component defaults;
+   it never reaches Journal, Study or standalone versions of these controls. */
+.operations-content .settings-page {
+  font-size: 12px;
+  line-height: 1.65;
+  min-width: 0;
+}
+.operations-content .settings-page > :is(section, div) {
+  max-width: none;
+  margin: 0;
+}
+.operations-content .settings-page .settings-title {
+  margin: 0 0 10px;
+  font:
+    400 28px/1.25 Georgia,
+    "Times New Roman",
+    serif;
+  letter-spacing: -0.6px;
+  color: var(--ke-text-primary);
+}
+/* A task controller can also appear inside Background; it is then a section. */
+.operations-content .background > div .settings-title,
+.operations-content .settings-page h2:not(.settings-title) {
+  font: 500 16px/1.4 var(--ke-font-ui);
+  letter-spacing: 0;
+  margin: 0 0 10px;
+}
+.operations-content .settings-page p {
+  max-width: 68ch;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.operations-content
+  .settings-page
+  :is(.settings-title + p, .panel-intro, .intro) {
+  margin: 0 0 28px;
+  color: var(--ke-text-secondary);
+  font-size: 12px;
+}
+.operations-content .settings-page h3 {
+  margin: 28px 0 12px;
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ke-text-primary);
+}
+.operations-content .settings-page label {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--ke-text-secondary);
+}
+.operations-content
+  .settings-page
+  :is(
+    button:where(:not(.choice-trigger, .choice-option)),
+    input,
+    select,
+    textarea
+  ) {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  font-family: var(--ke-font-ui);
+  font-size: 12px;
+  color: var(--ke-text-primary);
+}
+.operations-content
+  .settings-page
+  button:where(:not(.choice-trigger, .choice-option)) {
+  min-height: 32px;
+  padding: 6px 10px;
+  line-height: 1.5;
+  border: 1px solid transparent;
+  border-radius: var(--ke-radius-sm);
+  background: var(--ke-surface-inset);
+  color: var(--ke-text-secondary);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.operations-content
+  .settings-page
+  button:where(:not(.choice-trigger, .choice-option)):hover:not(:disabled) {
+  color: var(--ke-text-primary);
+  background: var(--ke-surface-sidebar);
+}
+.operations-content .settings-page button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.operations-content
+  .settings-page
+  :is(button.selected, button[aria-pressed="true"]) {
+  background: var(--ke-accent-soft);
+  border-color: var(--ke-border-strong);
+  color: var(--ke-text-primary);
+}
+.operations-content
+  .settings-page
+  :is(
+    input:where(
+      :not([type="checkbox"]):not([type="radio"]):not([type="range"])
+    ),
+    select,
+    textarea
+  ) {
+  min-height: 36px;
+  padding: 7px 10px;
+  line-height: 1.5;
+  border: 1px solid var(--ke-border);
+  border-radius: var(--ke-radius-sm);
+  background: var(--ke-surface-raised);
+}
+.operations-content .settings-page select {
+  appearance: none;
+  padding-right: 30px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 20 20' fill='none' stroke='%23888888' stroke-width='1.3'%3E%3Cpath d='m5 8 5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+}
+.operations-content .settings-page :is(input, textarea)::placeholder {
+  color: var(--ke-text-tertiary);
+  opacity: 1;
+}
+/* One switch treatment for every binary setting. Keep native inputs, labels,
+   keyboard behavior and each panel's existing save/recovery owner. */
+.operations-content .settings-page input[type="radio"] {
+  accent-color: var(--ke-accent);
+  flex: none;
+}
+.operations-content .settings-page input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  display: inline-block;
+  box-sizing: border-box;
+  flex: 0 0 40px;
+  width: 40px;
+  min-width: 40px;
+  max-width: 40px;
+  height: 22px;
+  min-height: 22px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 12px;
+  background: var(--ke-border-strong);
+  cursor: pointer;
+}
+.operations-content .settings-page input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ke-surface);
+}
+.operations-content .settings-page input[type="checkbox"]:checked {
+  background: var(--ke-accent);
+}
+.operations-content .settings-page input[type="checkbox"]:checked::before {
+  transform: translateX(18px);
+  background: var(--ke-on-accent);
+}
+.operations-content .settings-page input[type="checkbox"]:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.operations-content .settings-page label:has(> input[type="checkbox"]) {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 32px;
+  padding: 5px 0;
+  box-sizing: border-box;
+  line-height: 22px;
+  cursor: pointer;
+}
+@media (forced-colors: active) {
+  .operations-content .settings-page input[type="checkbox"] {
+    border: 1px solid ButtonText;
+  }
+  .operations-content .settings-page input[type="checkbox"]::before {
+    background: ButtonText;
+    top: 1px;
+    left: 1px;
+  }
+  .operations-content .settings-page input[type="checkbox"]:checked {
+    background: Highlight;
+    border-color: Highlight;
+  }
+  .operations-content .settings-page input[type="checkbox"]:checked::before {
+    background: HighlightText;
+  }
+}
+.operations-content .settings-page textarea {
+  resize: vertical;
+}
+/* Task completion and checklist items are checkmarks, not preference switches. */
+.operations-content .settings-page .tasks input[type="checkbox"] {
+  appearance: auto;
+  -webkit-appearance: auto;
+  accent-color: var(--ke-accent);
+  flex: 0 0 17px;
+  width: 17px;
+  min-width: 17px;
+  max-width: 17px;
+  height: 17px;
+  min-height: 17px;
+  margin: 0;
+  vertical-align: middle;
+}
+.operations-content .settings-page .tasks input[type="checkbox"]::before {
+  display: none;
+}
+.operations-content .settings-page .tasks .task-row,
+.operations-content .settings-page .tasks .task-row:hover:not(:disabled) {
+  padding: 15px 2px;
+  background: transparent;
+  border: 0;
+  color: var(--ke-text-primary);
+  font-size: 14px;
+}
+.operations-content .settings-page .tasks .preview input[type="checkbox"] {
+  margin-right: 7px;
+}
+.operations-content
+  .settings-page
+  :is(button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--ke-focus-ring);
+  outline-offset: 3px;
+}
+.operations-content .settings-page fieldset {
+  border: 0;
+  padding: 0;
+  margin: 24px 0;
+  min-width: 0;
+}
+.operations-content .settings-page legend {
+  padding: 0;
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ke-text-primary);
+}
+.operations-content .settings-page :is(.settings-card, .editor, .credential) {
+  padding: 24px 0 0;
+  border: 0;
+  border-top: 1px solid var(--ke-border);
+  border-radius: 0;
+  background: transparent;
+  margin: 24px 0;
+}
+.operations-content
+  .settings-page
+  :is(.settings-card, .editor, .credential)
+  > h3 {
+  margin-top: 0;
+}
+.operations-content .settings-page .actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 20px 0;
+}
+.operations-content .settings-page :is(small, .hint, .muted, .help) {
+  color: var(--ke-text-secondary);
+  font-size: 12px;
+}
+.operations-content
+  .settings-page
+  :is([role="status"], [role="alert"], [role="note"]) {
+  padding: 10px 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font-size: 12px;
+}
+.operations-content .settings-page [role="alert"] {
+  color: var(--ke-danger);
+}
+.operations-content .settings-page .status-label {
+  color: var(--ke-text-secondary);
+  padding: 0;
+}
+.operations-content .settings-page details {
+  margin: 16px 0;
+}
+.operations-content .settings-page summary {
+  color: var(--ke-text-secondary);
+  padding: 8px 0;
+  font-size: 12px;
+  cursor: pointer;
+}
+.operations-content .settings-page .settings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  border-bottom: 1px solid var(--ke-border);
+  margin: 24px 0;
+  padding-bottom: 10px;
+}
+.operations-content .settings-page .settings-tabs button {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 5px 10px;
+}
+.operations-content .settings-page .settings-tabs button.selected {
+  color: var(--ke-text-primary);
+  background: var(--ke-accent-soft);
+}
+/* Preserve specialised choices and readable lists within the common controls. */
+.operations-content .settings-page button:is(.palette, .skill-row, .server),
+.operations-content .settings-page .notes > li > button {
+  text-align: left;
+  padding: 12px;
+  background: transparent;
+  border-color: var(--ke-border);
+}
+.operations-content .settings-page button.palette {
+  border-color: transparent;
+}
+.operations-content
+  .settings-page
+  :is(.palette[aria-pressed="true"], .skill-row.selected, .server.selected) {
+  border-color: var(--ke-border-strong);
+  background: var(--ke-accent-soft);
+}
+.operations-content .settings-page .overview-group button {
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid var(--ke-border);
+  border-radius: 0;
+  background: transparent;
+}
+.operations-content .settings-page .overview-group h3 {
+  margin: 0 0 8px;
+}
+.operations-content .settings-page :is(.reload, button.plain) {
+  background: transparent;
+}
+.operations-content .settings-page .uni form {
+  gap: 0;
+}
+.operations-content .settings-page .uni fieldset + fieldset {
+  border-top: 1px solid var(--ke-border);
+  padding-top: 24px;
+}
+.operations-content .settings-page .uni .row {
+  margin: 12px 0;
+  align-items: end;
+}
+@media (max-width: 760px) {
+  .operations-content .settings-page .settings-title {
+    font-size: 26px;
+  }
+}
+
+.operations-content .settings-page .uni fieldset p {
+  margin: 0;
+}
+.operations-content .settings-page .uni form > fieldset:first-child {
+  margin-top: 0;
+}
