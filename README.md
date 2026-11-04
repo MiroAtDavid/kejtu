@@ -4,12 +4,10 @@ A personal workspace for conversations, notes, projects, tasks, research and
 documents. You connect the AI provider or local model you want to use.
 This is experimental software: useful already, but rough edges remain.
 
-This recipe targets **x86-64 Ubuntu 26.04 and Manjaro**. Manjaro VM checks cover
-fresh installation, update, reinstall, opening/closing and preservation of saved
-records, folder permissions and keyring access on the earlier candidate. Ubuntu
-installation, Files/document checks and desktop opening/closing pass, but browser
-tools hit an AppArmor restriction. The current sandbox correction is reviewed;
-acceptance of this version is still in progress. Other distributions, Windows and macOS are
+This recipe targets **x86-64 Ubuntu 26.04 and Manjaro**. Both VMs passed
+fresh installation, updates, first launch, the offline Help view and close/reopen, plus
+Files permissions, browser and document checks. Saved data survived Ubuntu's
+populated upgrade and reinstall. Other distributions, Windows and macOS are
 outside this source release.
 
 ## Requirements
@@ -124,11 +122,15 @@ disable AppArmor. The installer recreates a missing profile when needed.
 - Local conversations, notebook, projects, tasks, research, document editors and
   controlled tools are implemented. A feature being present does not establish
   that every provider, file format or device has been tested.
-- Manjaro checks exercise Files read/write and permission denials, both browser
-  tools, spreadsheet/word-processing operations and PDF creation/read-back.
-  Earlier media checks passed radio controls and retrieved video metadata, but
-  playback crashed in the VM's virtual graphics stack. Actual video output and editing existing PDF
-  content still need separate acceptance.
+- Both VMs passed Files read/write and permission denials, private desktop-data
+  protection, both browser tools, spreadsheet/word-processing operations and PDF
+  creation/read-back. Editing existing PDF content remains unverified here.
+- The Manjaro keyring remained locked after reboot; credential access in that
+  session is unverified. Ubuntu could read the existing test credential. Use an
+  unlocked desktop keyring; installation does not reset or bypass it.
+- Earlier radio control checks passed. Video metadata was retrieved on Manjaro,
+  but playback crashed in its virtual graphics stack; Ubuntu's video request
+  timed out. Actual video and audible output need suitable-hardware testing.
 - Model calls and enabled web tools send selected information to their services.
   Local storage does not make remote inference private. File access still needs
   your saved folder permissions; installation does not grant folders.
