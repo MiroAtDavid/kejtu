@@ -29,11 +29,11 @@
       "source_sha256": "49d81c13d0ad9a479b26a8ce16dcbdc7427f7393dc949ea4b8d486a0f31a3e24"
     },
     "README.md": {
-      "bytes": 8147,
+      "bytes": 9252,
       "mode": "100644",
-      "sha256": "335c37ac5b3ff2aa8ba92a2033e2d100041f130fd2f8320d9b123710e56b5f58",
+      "sha256": "f9c95c4c8289c3fd4e4c062adb99129b1af40e3e54f2fa8e8c384b5f270e0bc1",
       "source": "packaging/source/README.md",
-      "source_sha256": "335c37ac5b3ff2aa8ba92a2033e2d100041f130fd2f8320d9b123710e56b5f58"
+      "source_sha256": "f9c95c4c8289c3fd4e4c062adb99129b1af40e3e54f2fa8e8c384b5f270e0bc1"
     },
     "contracts/native-v1.json": {
       "bytes": 106784,
@@ -1002,11 +1002,11 @@
       "source_sha256": "b9e0481600508620a728dfbceb2b72691e00a32a60fdb8bbf0b02482fa337727"
     },
     "desktop/src/lib/features/workspace/CraftReader.svelte": {
-      "bytes": 17766,
+      "bytes": 17959,
       "mode": "100644",
-      "sha256": "33f8cb36f8e3c3c872bdf22aca57c8e00288e2bb32d3d3f95ee21fe24cb12080",
+      "sha256": "40abca3b7c5b654ef38de16e657668c818dcad29a7ba9d0df69ba5c290c45fe0",
       "source": "desktop/src/lib/features/workspace/CraftReader.svelte",
-      "source_sha256": "33f8cb36f8e3c3c872bdf22aca57c8e00288e2bb32d3d3f95ee21fe24cb12080"
+      "source_sha256": "40abca3b7c5b654ef38de16e657668c818dcad29a7ba9d0df69ba5c290c45fe0"
     },
     "desktop/src/lib/features/workspace/DocumentActivity.svelte": {
       "bytes": 2882,
@@ -1065,11 +1065,11 @@
       "source_sha256": "d32a180106467deef46cd178e3b7c052a771f907cbc80ca41ca9b0cc66c58181"
     },
     "desktop/src/lib/features/workspace/MarkdownEditor.svelte": {
-      "bytes": 47140,
+      "bytes": 47334,
       "mode": "100644",
-      "sha256": "ceabb7c4bf39698c36aaf7d0e883c57585b58eadca906cbdfd0e62903c5641d2",
+      "sha256": "f0c9c14e80353f4927c2ba790f385e5689440093eb296dd6fe662d88b28cd42c",
       "source": "desktop/src/lib/features/workspace/MarkdownEditor.svelte",
-      "source_sha256": "ceabb7c4bf39698c36aaf7d0e883c57585b58eadca906cbdfd0e62903c5641d2"
+      "source_sha256": "f0c9c14e80353f4927c2ba790f385e5689440093eb296dd6fe662d88b28cd42c"
     },
     "desktop/src/lib/features/workspace/Material.svelte": {
       "bytes": 27235,
@@ -1219,11 +1219,11 @@
       "source_sha256": "42bc8265b5a2a18845af7478bd14b6e321736d53c6a9a682a6f652d0720ecdff"
     },
     "desktop/src/lib/features/workspace/WordEditor.svelte": {
-      "bytes": 13845,
+      "bytes": 14081,
       "mode": "100644",
-      "sha256": "b8bea16fcf9815f675f1846bb431c59cd3d2f0cc18ad139fed86614f06af3e43",
+      "sha256": "6ad18c08b35bd10cf4c8328380c029c375f9f40353dcb56a0d1c3bfff8e6c9eb",
       "source": "desktop/src/lib/features/workspace/WordEditor.svelte",
-      "source_sha256": "b8bea16fcf9815f675f1846bb431c59cd3d2f0cc18ad139fed86614f06af3e43"
+      "source_sha256": "6ad18c08b35bd10cf4c8328380c029c375f9f40353dcb56a0d1c3bfff8e6c9eb"
     },
     "desktop/src/lib/features/workspace/WorkspaceNotice.svelte": {
       "bytes": 6361,
@@ -1323,6 +1323,13 @@
       "source": "desktop/src/lib/features/workspace/document-progress.ts",
       "source_sha256": "8eeca251e2d6d6b1b76d0178c6b63b95959aef6a9075251a803b833c2ff957a4"
     },
+    "desktop/src/lib/features/workspace/document-save.ts": {
+      "bytes": 819,
+      "mode": "100644",
+      "sha256": "e400b261e112d445b38dbc4432e559633ac2a09fa0474daa69ebaa4bad4f54ba",
+      "source": "desktop/src/lib/features/workspace/document-save.ts",
+      "source_sha256": "e400b261e112d445b38dbc4432e559633ac2a09fa0474daa69ebaa4bad4f54ba"
+    },
     "desktop/src/lib/features/workspace/document-scrollbars.ts": {
       "bytes": 1080,
       "mode": "100644",
@@ -1408,11 +1415,11 @@
       "source_sha256": "a0fec465a8cba07f0cc18490d10d3b17cde70916cd2526a86576afe548dcf6a6"
     },
     "desktop/src/lib/features/workspace/widgets.css": {
-      "bytes": 5433,
+      "bytes": 5473,
       "mode": "100644",
-      "sha256": "6b70744f7fa72ef3d7fd644e29d7698d7d7a14eeb6a38e54bbf75b18bb1f560f",
+      "sha256": "f7592349431f57cc7fcefd4cc4f55705c24c3d878dce3b08730d66878fcb2da0",
       "source": "desktop/src/lib/features/workspace/widgets.css",
-      "source_sha256": "6b70744f7fa72ef3d7fd644e29d7698d7d7a14eeb6a38e54bbf75b18bb1f560f"
+      "source_sha256": "f7592349431f57cc7fcefd4cc4f55705c24c3d878dce3b08730d66878fcb2da0"
     },
     "desktop/src/lib/features/workspace/widgets.ts": {
       "bytes": 731,
@@ -1841,12 +1848,19 @@
       "source": "packaging/source/apparmor.py",
       "source_sha256": "0d8421d856b0e3ed8e9199ac83467350288d411bb56d6a8516680ca13b41fcd7"
     },
-    "packaging/source/install.py": {
-      "bytes": 27117,
+    "packaging/source/desktop.py": {
+      "bytes": 7807,
       "mode": "100644",
-      "sha256": "704b0fb2b90afb7afc7cb42ffd0d992e9c917e7260e479f66dc19c54f9296969",
+      "sha256": "d41e3806eae39acd353e23e40f15093ef0517473a609dcc73770c86a0989a42f",
+      "source": "packaging/source/desktop.py",
+      "source_sha256": "d41e3806eae39acd353e23e40f15093ef0517473a609dcc73770c86a0989a42f"
+    },
+    "packaging/source/install.py": {
+      "bytes": 27803,
+      "mode": "100644",
+      "sha256": "f749f5b4ecb2778b845f1fa5fb76bba9af2574de2c3e31781f3492be3398768b",
       "source": "packaging/source/install.py",
-      "source_sha256": "704b0fb2b90afb7afc7cb42ffd0d992e9c917e7260e479f66dc19c54f9296969"
+      "source_sha256": "f749f5b4ecb2778b845f1fa5fb76bba9af2574de2c3e31781f3492be3398768b"
     },
     "packaging/source/runtime.lock.json": {
       "bytes": 3451,
@@ -3319,12 +3333,12 @@
       "source_sha256": "8d8667dc0c7c8edb40c21b0a2f893744035496ffc4631cdb35f44a71c49e0c05"
     }
   },
-  "inclusion_manifest_sha256": "bc88248f18bf3350ef7441d3363b7654b76669554dc63a6d3634d40e1cb6952e",
+  "inclusion_manifest_sha256": "61dfd09b099dac542f7c64785fcf51f5e05ec7f97d4080627c6a2e468b7155c7",
   "kind": "linux-source-x86_64",
   "schema": 1,
-  "source_commit": "8a96e4cff011c9fdd9e79716cf67e52dc324a9f1",
-  "source_date_epoch": 1793821737,
-  "source_tree": "f90bfaaa040b90101caaa23ecfddbf4ad76b881c",
+  "source_commit": "0ad3d13d571cc692b796a7bf03736f04a5a03b27",
+  "source_date_epoch": 1793824039,
+  "source_tree": "2e4c5f824614fac214c8897cc7038e7e74cbbf78",
   "transformations": {
     "desktop/package-lock.json": {
       "unreachable_package_entries_removed": 84

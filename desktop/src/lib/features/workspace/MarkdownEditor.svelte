@@ -19,6 +19,7 @@
   let preparingSource = false;
   import ReaderNotice from "./ReaderNotice.svelte";
   import { readCourseDocument } from "./craft-document";
+  import { documentDirectory } from "./document-save";
   import { registerReader, refreshReaderDrafts } from "./reader-drafts";
   import {
     mountMarkdown,
@@ -534,7 +535,7 @@
   export let courseId: string;
   export let chooseSaveFolder: () => Promise<
     string | null | undefined
-  > = async () => null;
+  > = async () => courseFolder;
   export let file = "";
   export let initialContent = "";
   export let initialName = "";
@@ -562,6 +563,7 @@
     error = "",
     notice = "";
   let name = file.split("/").pop() || initialName || "Untitled.md";
+  let documentPath: string | null = null;
   let timer: ReturnType<typeof setTimeout>;
   let paint = 0;
   $: dirty = text !== saved;
@@ -649,15 +651,17 @@
     error = "";
     notice = "";
     try {
-      const initial = await chooseSaveFolder();
+      const initial =
+        documentDirectory(documentPath) ?? (await chooseSaveFolder());
       if (initial === undefined || disposed) return;
       const path = await invoke<string | null>("save_markdown_copy", {
         name,
         data: markdownBytes(snapshot),
-        initial: initial ?? courseFolder,
+        initial,
       });
       if (disposed) return;
       if (path) {
+        documentPath = path;
         // A delayed chooser receipt acknowledges only the bytes it actually saved.
         saved = snapshot;
         name = path.split("/").pop() || name;
@@ -694,6 +698,7 @@
             () => !disposed,
           );
           if (disposed) return;
+          documentPath = original.path;
           text = new TextDecoder("utf-8", {
             fatal: true,
             ignoreBOM: true,

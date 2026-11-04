@@ -33,6 +33,9 @@ _spec.loader.exec_module(_apparmor)
 _spec = importlib.util.spec_from_file_location('kejtu_linux_sandbox', ROOT / 'src/kejtu_next/adapters/linux_sandbox.py')
 _sandbox = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_sandbox)
+_spec = importlib.util.spec_from_file_location('kejtu_source_desktop', ROOT / 'packaging/source/desktop.py')
+_desktop = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_desktop)
 SYSTEM_PATH = _toolchain.SYSTEM_PATH
 # Native packages follow Tauri's Linux prerequisites; Chromium uses the libraries
 # listed by Playwright. Package managers remain the authority for transitive deps.
@@ -482,6 +485,7 @@ def main(argv=None):
     parser.add_argument('--install', action='store_true', help='Install missing packages and build; otherwise print a read-only plan.')
     parser.add_argument('--media', action='store_true', help='Also install mpv and the pinned video extraction environment.')
     parser.add_argument('--no-system-packages', action='store_true', help='Require system dependencies to be installed already; never call sudo.')
+    parser.add_argument('--no-desktop-entry', action='store_true', help='Do not register this checkout in the application menu (useful for a second test copy).')
     parser.add_argument('--jobs', type=int, default=2, help='Concurrent native build jobs (default: 2).')
     args = parser.parse_args(argv)
     def interrupted(_signum, _frame):
@@ -506,6 +510,8 @@ def main(argv=None):
             print('Ubuntu restricts user namespaces. Install/verify per-checkout AppArmor profiles for two managed browser paths and two role copies of one pinned Bubblewrap build; keep global restrictions and Chromium sandboxes enabled.')
         for command in package_commands(distro, missing):
             print(shlex.join(command))
+        if not args.no_desktop_entry:
+            print('Desktop entry: ' + str(_desktop.description(ROOT)[0]))
         if not args.install:
             print('No changes made. Add --install to proceed from this final installation path.')
             return 0
@@ -516,11 +522,15 @@ def main(argv=None):
         with lock_file(ROOT / '.state/source-install/install.lock'):
             with lock_file(ROOT / '.state/operations/control.lock'):
                 require_stopped(ROOT)
+                if not args.no_desktop_entry:
+                    _desktop.check(ROOT)
                 for command in package_commands(distro, missing):
                     run(command)
                 python = check_toolchain()
                 build(ROOT, python, media=args.media, jobs=args.jobs, lock=lock,
                       browser_policy=browser_policy, allow_system=not args.no_system_packages)
+                if not args.no_desktop_entry:
+                    print("Desktop entry installed: " + str(_desktop.install(ROOT)))
         print('Installation finished. Saved data, credentials and permissions were not reset.')
         print('Next: ./kejtu start' if (ROOT / '.state/runtime/core.sqlite3').is_file() else 'Next: ./kejtu initialize')
         return 0

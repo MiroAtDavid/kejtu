@@ -83,7 +83,8 @@
 }
 /* Keep restored keyboard focus inside the icon's hit area. The outer ring
    was clipped by the Widgets panel after closing its editor. */
-.journal-widget .widget-icon:focus-visible {
+.journal-widget .widget-icon:focus-visible,
+.margin-add .widget-icon:focus-visible {
   outline: 1px solid var(--ke-text-secondary);
   outline-offset: -4px;
   border-radius: var(--ke-radius-sm);

@@ -8,6 +8,7 @@
   import Icon from "$lib/design/Icon.svelte";
   import { readCourseDocument, MAX_PDF_BYTES } from "./craft-document";
   import { registerReader, refreshReaderDrafts } from "./reader-drafts";
+  import { documentDirectory } from "./document-save";
   export let courseId: string;
   export let chooseSaveFolder: () => Promise<
     string | null | undefined
@@ -54,6 +55,7 @@
   let error = "",
     notice = "";
   let input: ArrayBuffer | null | undefined = file ? undefined : null;
+  let documentPath: string | null = null;
   let pending: {
     id: number;
     name: string;
@@ -188,7 +190,8 @@
     error = "";
     notice = "";
     try {
-      const initial = await chooseSaveFolder();
+      const initial =
+        documentDirectory(documentPath) ?? (await chooseSaveFolder());
       if (initial === undefined || disposed) return;
       const bytes = new Uint8Array(copy.bytes);
       let binary = "";
@@ -207,6 +210,7 @@
         },
       );
       if (path) {
+        if (copy.format === "docx") documentPath = path;
         // Only the editor can clear dirty: it compares the saved revision with today's edits.
         post({ type: "wordcraft:saved", id: copy.id });
         if (pending === copy) pending = null;
@@ -326,6 +330,7 @@
     if (file)
       void readCourseDocument(courseId, file, () => !disposed)
         .then((value) => {
+          documentPath = value.path;
           input = value.bytes;
           send();
         })

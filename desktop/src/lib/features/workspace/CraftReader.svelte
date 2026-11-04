@@ -14,6 +14,7 @@
     type DocumentBytes,
   } from "./craft-document";
   import { registerReader, refreshReaderDrafts } from "./reader-drafts";
+  import { documentDirectory } from "./document-save";
   import type { MaterialPage } from "./material-reader";
   export let courseId: string;
   export let chooseSaveFolder: () => Promise<
@@ -32,6 +33,7 @@
   let frame: HTMLIFrameElement;
   let container: HTMLDivElement;
   let documentBytes: DocumentBytes | null = null;
+  let savedPath: string | null = null;
   let state: ReaderState | null = null;
   let ready = false,
     loaded = false,
@@ -197,7 +199,9 @@
     notice = "";
     const copy = pending;
     try {
-      const initial = await chooseSaveFolder();
+      const initial =
+        documentDirectory(savedPath ?? documentBytes?.path) ??
+        (await chooseSaveFolder());
       if (initial === undefined || disposed) return;
       const array = new Uint8Array(copy.bytes);
       let binary = "";
@@ -209,6 +213,7 @@
         initial,
       });
       if (path) {
+        savedPath = path;
         if (pending === copy) {
           pending = null;
           post({ type: "pdfcraft:saved" });

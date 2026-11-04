@@ -53,7 +53,12 @@ Add `--media` for optional playback dependencies. Use `--jobs 2` to limit parall
 build jobs. Rerunning the installer repairs missing dependencies without replacing
 your data or saved access choices. It refuses to build while this copy is running.
 
-For the first launch:
+Setup also adds **Kejtu** to your application menu, using the existing icon.
+The shortcut initializes a new workspace once and reopens it on later launches.
+It calls the same managed commands below. If Kejtu is already running, it does
+not start another copy.
+
+For the first launch from a terminal:
 
 ```sh
 ./kejtu initialize
@@ -69,6 +74,17 @@ Connect a model in Settings. Close the first window normally, then use:
 The current desktop retains its development identity and local port 1431; run one
 copy at a time. Built-in [Help](src/kejtu_next/help/01-start.md) is also available
 under Settings → Help.
+
+The shortcut is saved as
+`~/.local/share/applications/dev.kejtu.next.development.desktop`; an absolute
+`XDG_DATA_HOME` replaces `~/.local/share`. Its icon points to this checkout's
+existing PNG, so keep the checkout at its installed path. A shortcut from another
+checkout or one you edited is preserved; use `--no-desktop-entry` when installing
+a second test copy. To register an already installed copy without rebuilding:
+
+```sh
+python3 packaging/source/desktop.py install
+```
 
 ## Update, backup and remove
 
@@ -105,6 +121,16 @@ Keyring credentials need their own system backup. Removing this checkout removes
 its local archive and backups, but leaves the desktop directories, shared
 documents, keyring entries and system dependencies in place. Keep the copied
 backups somewhere safe; desktop storage can contain unsaved private text too.
+
+Before removing the checkout, remove its application-menu entry:
+
+```sh
+python3 packaging/source/desktop.py remove
+```
+
+This removes only the unchanged entry registered by this copy. It preserves an
+edited entry, the icon source, app data and credentials. The small registration
+receipt and coordination lock may remain; neither launches anything.
 
 On Ubuntu, setup prints its exact `/etc/apparmor.d/kejtu-source-…` profile path.
 To remove that policy after stopping Kejtu, run the following with that exact
