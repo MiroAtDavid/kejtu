@@ -15,7 +15,8 @@ def browser_arguments(root):
     if sys.platform == 'win32':
         from .windows_reader import arguments
         return arguments(root)
-    args = ['/usr/bin/bwrap', '--unshare-user', '--unshare-pid', '--unshare-ipc',
+    from ..linux_sandbox import command
+    args = command(root, browser=True) + ['--unshare-user', '--unshare-pid', '--unshare-ipc',
             '--unshare-uts', '--die-with-parent', '--new-session', '--cap-drop', 'ALL',
             '--ro-bind', '/usr', '/usr', '--proc', '/proc', '--dev', '/dev',
             '--tmpfs', '/tmp', '--dir', '/etc', '--setenv', 'HOME', '/tmp']

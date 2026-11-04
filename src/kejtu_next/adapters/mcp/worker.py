@@ -21,7 +21,18 @@ MAX_BYTES = 2_000_000
 def sandbox(row):
     if sys.platform == 'win32':
         raise Failure('mcp_unavailable', 'Local connected tools are not available in this Windows test build yet. No tool was started.')
-    args = ['/usr/bin/bwrap', '--unshare-user', '--unshare-pid', '--unshare-ipc',
+    from ..linux_sandbox import ROOT, browser_identity, command
+    browser = False
+    try:
+        if row.get('_browser_identity') is not None:
+            identity = browser_identity(ROOT, row)
+            if identity is None or identity != row['_browser_identity']:
+                raise ValueError('The browser launch identity changed.')
+            browser = True
+        executable = command(ROOT, browser=browser)
+    except (OSError, ValueError, KeyError, StopIteration):
+        raise Failure('mcp_sandbox_installation', 'The Linux tool sandbox or included browser setup is incomplete or changed. Repair this installation before using the connection.') from None
+    args = executable + ['--unshare-user', '--unshare-pid', '--unshare-ipc',
             '--unshare-uts', '--die-with-parent', '--new-session', '--cap-drop', 'ALL',
             '--ro-bind', '/usr', '/usr', '--proc', '/proc', '--dev', '/dev',
             '--tmpfs', '/tmp', '--dir', '/etc', '--clearenv',

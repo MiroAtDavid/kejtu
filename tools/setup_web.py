@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 import shutil
+import signal
 import subprocess
 import sys
 import tempfile
@@ -93,6 +94,66 @@ def write_receipt(path, data):
             temporary.unlink(missing_ok=True)
 
 
+def run_nested(arguments, *, env):
+    """Bound one owned Bubblewrap/browser tree, including failure and interruption."""
+    process = subprocess.Popen([str(arg) for arg in arguments], env=env,
+                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                               text=True, start_new_session=True)
+    try:
+        try:
+            output, _ = process.communicate(timeout=30)
+        except subprocess.TimeoutExpired:
+            raise ValueError('Browser startup inside the Linux tool sandbox timed out.') from None
+        if process.returncode:
+            raise ValueError('Browser startup inside the Linux tool sandbox failed: ' + output[-2000:])
+    finally:
+        # Each prefix uses --die-with-parent and its own PID namespace. Cleanup
+        # also runs after a successful helper exit to collect browser children.
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        process.communicate()
+
+
+def check_nested_browsers(root, executable, node, env):
+    """Exercise both production namespace/mount prefixes with an in-memory page.
+
+    These fixed installer payloads never visit a network URL. Full MCP/public
+    proxy behavior has separate acceptance controls; direct launch alone cannot
+    prove that Chromium's nested sandbox works under Ubuntu's AppArmor policy.
+    """
+    from kejtu_next.adapters.web.reader import browser_arguments
+    from kejtu_next.adapters.mcp.host import McpHost
+    from kejtu_next.adapters.mcp.worker import sandbox
+    python = root / '.venv/bin/python'
+    reader = browser_arguments(root)
+    reader = reader[:reader.index('--') + 1]
+    reader += [str(python), '-c',
+               'from playwright.sync_api import sync_playwright\n'
+               'with sync_playwright() as p:\n'
+               ' b=p.chromium.launch(headless=True,chromium_sandbox=True)\n'
+               ' page=b.new_page();page.set_content("<p>Kejtu sandbox check</p>")\n'
+               ' assert page.inner_text("body")=="Kejtu sandbox check";b.close()']
+    reader_env = {key: env[key] for key in ('PATH', 'LANG', 'LC_ALL') if key in env}
+    reader_env['PLAYWRIGHT_BROWSERS_PATH'] = str(root / '.state/playwright')
+    run_nested(reader, env=reader_env)
+    with tempfile.TemporaryDirectory(prefix='web-check-', dir=root / '.state') as temporary:
+        host = McpHost(Path(temporary), root=root, factory=lambda row: row)
+        host.add_browser(host.connections.read()['revision'])
+        row = host.settings()['servers']['playwright']
+        browser = sandbox(host.connection('playwright', row))
+        browser = browser[:browser.index('--') + 1]
+        script = ('const {chromium}=require(process.argv[1]);'
+                  '(async()=>{const b=await chromium.launch({executablePath:process.argv[2],'
+                  'headless:true,chromiumSandbox:true});const p=await b.newPage();'
+                  'await p.setContent("<p>Kejtu sandbox check</p>");'
+                  'if(await p.innerText("body")!=="Kejtu sandbox check")throw Error("Page mismatch");'
+                  'await b.close();})().catch(e=>{console.error(e.message);process.exit(1)});')
+        browser += ['/usr/bin/node', '-e', script, str(node / 'node_modules/playwright'), str(executable)]
+        run_nested(browser, env={'PATH': '/usr/bin:/bin', 'LANG': 'C.UTF-8'})
+
+
 def install(root=ROOT, *, prepare_only=False, receipt=None):
     if prepare_only and receipt is None:
         raise ValueError('--prepare-only requires --receipt PATH.')
@@ -172,6 +233,8 @@ def install(root=ROOT, *, prepare_only=False, receipt=None):
                 json.dump({'executable': str(executable)}, target)
                 target.write('\n')
             config.chmod(0o600)
+        print('Checking both Chromium engines inside their Linux tool sandboxes…', flush=True)
+        check_nested_browsers(root, executable, node, env)
         result = dict(page_reader=True, mcp=True, browser=str(executable))
         print('Web runtimes are ready. First launch enables Tavily and the browser connection.', flush=True)
         return result

@@ -65,5 +65,20 @@
         "share/doc/wordcraft/OFL-shippori-mincho.txt"
       ]
     }
-  ]
+  ],
+  "bubblewrap": {
+    "id": "bubblewrap",
+    "version": "0.13.1",
+    "archive": "bubblewrap-0.13.1.tar.xz",
+    "directory": "bubblewrap-0.13.1",
+    "url": "https://github.com/containers/bubblewrap/releases/download/v0.13.1/bubblewrap-0.13.1.tar.xz",
+    "bytes": 129472,
+    "sha256": "0e85c8702248b8dd64144f594147553650cdd0e4c951690345faace79c217c4d",
+    "unpacked_bytes": 456187,
+    "license_sha256": "dc626520dcd53a22f727af3ee42c770e56c97a64fe3adb063799d8ab032fe551",
+    "license_aliases": {
+      "COPYING.LIB": "COPYING",
+      "LICENSE": "COPYING"
+    }
+  }
 }

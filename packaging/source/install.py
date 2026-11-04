@@ -30,6 +30,9 @@ _spec.loader.exec_module(_toolchain)
 _spec = importlib.util.spec_from_file_location('kejtu_source_apparmor', ROOT / 'packaging/source/apparmor.py')
 _apparmor = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_apparmor)
+_spec = importlib.util.spec_from_file_location('kejtu_linux_sandbox', ROOT / 'src/kejtu_next/adapters/linux_sandbox.py')
+_sandbox = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_sandbox)
 SYSTEM_PATH = _toolchain.SYSTEM_PATH
 # Native packages follow Tauri's Linux prerequisites; Chromium uses the libraries
 # listed by Playwright. Package managers remain the authority for transitive deps.
@@ -152,6 +155,8 @@ def package_installed(distro, package):
 
 def dependencies(distro, media=False):
     packages = list(PACKAGES[distro])
+    if _sandbox.system_runtime() is None:
+        packages += ['meson', 'ninja-build', 'libcap-dev'] if distro == 'ubuntu' else ['meson', 'ninja', 'libcap']
     if media:
         packages.append('mpv')
     return packages
@@ -241,7 +246,6 @@ def check_toolchain():
         if not shutil.which(tool, path=SYSTEM_PATH):
             raise InstallError(f'The required system command {tool} is missing.')
     run(['pkg-config', '--exists', 'gtk+-3.0', 'webkit2gtk-4.1', 'openssl'])
-    run(['/usr/bin/bwrap', '--ro-bind', '/', '/', '--unshare-user', '--unshare-net', '--', '/usr/bin/true'])
     return python
 
 
@@ -361,8 +365,93 @@ def install_craft(root, lock):
             prepared.rename(destination)
 
 
+def extract_sandbox(archive, staging, item):
+    """Extract the verified upstream source, materializing only its license aliases."""
+    with tarfile.open(archive, 'r:xz') as source:
+        members = source.getmembers()
+        names, aliases, total = set(), {}, 0
+        for member in members:
+            parts = PurePosixPath(member.name).parts
+            if (not parts or parts[0] != item['directory'] or '..' in parts
+                    or PurePosixPath(member.name).is_absolute() or member.name in names):
+                raise InstallError('Unexpected sandbox source archive path.')
+            names.add(member.name)
+            relative = PurePosixPath(*parts[1:]).as_posix()
+            if member.issym():
+                if item['license_aliases'].get(relative) != member.linkname or member.linkname != 'COPYING':
+                    raise InstallError('Unexpected sandbox source link.')
+                aliases[relative] = member.linkname
+            elif not (member.isdir() or member.isfile()):
+                raise InstallError('Unexpected sandbox source entry type.')
+            total += member.size
+        if total != item['unpacked_bytes'] or aliases != item['license_aliases']:
+            raise InstallError('Sandbox source archive differs from its pinned layout.')
+        source.extractall(staging, members=[m for m in members if not m.issym()], filter='data')
+    directory = staging / item['directory']
+    for alias in aliases:
+        shutil.copyfile(directory / 'COPYING', directory / alias)
+    if file_hash(directory / 'COPYING') != item['license_sha256']:
+        raise InstallError('The upstream sandbox license failed verification.')
+    return directory
+
+
+def install_sandbox(root, lock, *, jobs=2):
+    system = _sandbox.system_runtime()
+    if system is not None:
+        print(f'Reusing compatible system Bubblewrap {system["version"]}.', flush=True)
+        return system
+    item = lock['bubblewrap']
+    parent = real_directory(root / '.state/apps/bubblewrap')
+    destination = parent / item['directory']
+    if destination.is_symlink():
+        raise InstallError('The sandbox destination is redirected; preserved without replacement.')
+    if destination.exists():
+        return _sandbox.managed_runtime(root)
+    cache = real_directory(root / '.state/source-install/downloads')
+    archive = download(cache, item)
+    print(f'Building Bubblewrap {item["version"]} once for both AppArmor launch identities…', flush=True)
+    with tempfile.TemporaryDirectory(prefix='.install-', dir=parent) as temporary:
+        staging = Path(temporary)
+        source = extract_sandbox(archive, staging, item)
+        build_dir = staging / 'build'
+        meson = shutil.which('meson', path=SYSTEM_PATH)
+        ninja = shutil.which('ninja', path=SYSTEM_PATH)
+        if not meson or not ninja:
+            raise InstallError('Meson and Ninja are required to build the pinned sandbox runtime.')
+        # Build flags/compiler/pkg-config overrides must not redirect this
+        # dependency to unrelated wrappers or introduce runtime library paths.
+        env = dict(PATH=SYSTEM_PATH, HOME=str(Path.home()), LANG='C.UTF-8')
+        run([meson, 'setup', build_dir, source, '--buildtype=release',
+             '-Dtests=false', '-Dman=disabled', '-Dselinux=auto',
+             '-Dbash_completion=disabled', '-Dzsh_completion=disabled'], env=env)
+        run([ninja, '-C', build_dir, '-j', jobs], env=env)
+        binary = build_dir / 'bwrap'
+        version = run([binary, '--version'], env=env, capture=True).stdout.strip()
+        if version != 'bubblewrap ' + item['version']:
+            raise InstallError('The compiled sandbox reported an unexpected version.')
+        published = staging / 'published'
+        (published / 'bin').mkdir(parents=True)
+        for role in _sandbox.ROLES:
+            target = published / 'bin' / ('bwrap-' + role)
+            shutil.copyfile(binary, target)
+            target.chmod(0o700)
+        shutil.copyfile(source / 'COPYING', published / 'COPYING')
+        shutil.copyfile(archive, published / item['archive'])
+        for path in (published / 'COPYING', published / item['archive']):
+            path.chmod(0o644)
+        files = {p.relative_to(published).as_posix(): dict(bytes=p.stat().st_size, sha256=file_hash(p))
+                 for p in sorted(published.rglob('*')) if p.is_file()}
+        manifest = dict(schema=1, root=str(root.resolve()), version=item['version'],
+                        source_sha256=item['sha256'], files=files)
+        (published / 'build.json').write_text(json.dumps(manifest, indent=2) + '\n')
+        (published / 'build.json').chmod(0o644)
+        published.rename(destination)
+    return _sandbox.managed_runtime(root)
+
+
 def build(root, python, *, media, jobs, lock, browser_policy=False, allow_system=True):
     env = _toolchain.environment()
+    install_sandbox(root, lock, jobs=jobs)
     interpreter = venv(root, root / '.venv', python)
     run([interpreter, '-m', 'pip', 'install', '--disable-pip-version-check', '-r', root / 'ops/requirements.lock'], env=env)
     run([interpreter, '-m', 'pip', 'install', '--no-deps', '--no-build-isolation', '-e', root], env=env)
@@ -373,6 +462,8 @@ def build(root, python, *, media, jobs, lock, browser_policy=False, allow_system
         receipt = root / '.state/source-install/web-prepared.json'
         run([interpreter, '-B', root / 'tools/setup_web.py', '--prepare-only', '--receipt', receipt], cwd=root, env=env)
         _apparmor.ensure(root, receipt, run, allow_system=allow_system, env=env)
+    run([*_sandbox.command(root), '--ro-bind', '/', '/', '--unshare-user',
+         '--unshare-net', '--cap-drop', 'ALL', '--', '/usr/bin/true'], env=env)
     run([interpreter, '-B', root / 'tools/setup_web.py'], cwd=root, env=env)
     install_craft(root, lock)
     if media:
@@ -410,9 +501,9 @@ def main(argv=None):
         print('Optional media: ' + ('mpv and locked yt-dlp environment selected.' if args.media else 'not selected; add --media for radio/video.'))
         print('No model is downloaded. GPU embeddings require the separately documented compatible Ollama/model setup.')
         browser_policy = _apparmor.required(distro)
-        print('OS packages and the exact-path Ubuntu browser policy use sudo; app files and runtimes belong to your normal user.')
+        print('OS packages and the exact-path Ubuntu sandbox/browser policy use sudo; app files and runtimes belong to your normal user.')
         if browser_policy:
-            print('Ubuntu restricts browser user namespaces. Install/verify a per-checkout AppArmor profile for the two pinned browser paths; keep the global restriction and both browser sandboxes enabled.')
+            print('Ubuntu restricts user namespaces. Install/verify per-checkout AppArmor profiles for two managed browser paths and two role copies of one pinned Bubblewrap build; keep global restrictions and Chromium sandboxes enabled.')
         for command in package_commands(distro, missing):
             print(shlex.join(command))
         if not args.install:

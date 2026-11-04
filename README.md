@@ -6,9 +6,10 @@ This is experimental software: useful already, but rough edges remain.
 
 This recipe targets **x86-64 Ubuntu 26.04 and Manjaro**. Manjaro VM checks cover
 fresh installation, update, reinstall, opening/closing and preservation of saved
-records, folder permissions and keyring access. Ubuntu builds, Files checks and
-desktop opening/closing pass; full installation and browser-tool acceptance still
-await its browser policy check. Other distributions, Windows and macOS are
+records, folder permissions and keyring access on the earlier candidate. Ubuntu
+installation, Files/document checks and desktop opening/closing pass, but browser
+tools hit an AppArmor restriction. The current sandbox correction is reviewed;
+acceptance of this version is still in progress. Other distributions, Windows and macOS are
 outside this source release.
 
 ## Requirements
@@ -18,13 +19,17 @@ connection and enough disk space for a Rust build and downloaded tools. Python
 3.14+, Node 22.12+/npm, Rust/Cargo 1.93+, Bubblewrap, GTK/WebKit development
 libraries and the other distribution packages are checked by the installer. Missing system packages
 need `sudo`; application files and runtimes stay in this directory.
+If a suitable system Bubblewrap cannot be used, setup builds a pinned version
+locally using Meson, Ninja and libcap development files, also checked by the installer.
 The Manjaro build was checked with 8 GB RAM and two build jobs; its installation
 used about 5.3 GB, excluding system packages and shared toolchain caches.
 
 On Ubuntu, setup also uses `sudo` for a per-installation AppArmor profile covering
-the two downloaded browser executables. Chromium's sandbox and Ubuntu's global
-restriction stay enabled. Custom browser selections are preserved; setup does
-not grant a policy to arbitrary browsers.
+the two downloaded browser executables and two sandbox launcher paths. Ordinary
+tools retain their restrictions; the browser launcher permits Chromium's nested
+sandbox. Ubuntu's global restrictions stay enabled. These are user-writable paths,
+and another program under the same account could invoke the browser launcher.
+Custom browser selections are preserved; setup grants no policy to arbitrary browsers.
 
 Files, page reading, the temporary browser and document tools are included in
 setup. Chromium runtimes and the pinned document tools are separate downloads;

@@ -43,6 +43,17 @@ class McpHost:
             if cache.resolve() != cache or cache.is_symlink():
                 raise Failure('mcp_cache', 'The connection cache must be a real private directory.')
             row = dict(row, cache=str(cache))
+            if sys.platform == 'linux':
+                from ..linux_sandbox import browser_identity
+                try:
+                    identity = browser_identity(self.root, row)
+                except (OSError, ValueError, KeyError, StopIteration):
+                    raise Failure('mcp_browser_installation', 'The included browser runtime or connection changed. Repair its setup before using it.') from None
+                # Internal launch metadata is never persisted or accepted from an
+                # imported connection. The worker independently checks it again.
+                row.pop('_browser_identity', None)
+                if identity is not None:
+                    row['_browser_identity'] = identity
         return self.factory(row)
 
     def add_browser(self, revision):

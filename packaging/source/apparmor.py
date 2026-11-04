@@ -6,10 +6,16 @@ import importlib.util
 import json
 import os
 from pathlib import Path
+import re
 import stat
 
 RESTRICTION = Path('/proc/sys/kernel/apparmor_restrict_unprivileged_userns')
 POLICY_DIRECTORY = Path('/etc/apparmor.d')
+UNCONFINED_RESTRICTION = Path('/proc/sys/kernel/apparmor_restrict_unprivileged_unconfined')
+
+_spec = importlib.util.spec_from_file_location('kejtu_policy_sandbox', Path(__file__).resolve().parents[2] / 'src/kejtu_next/adapters/linux_sandbox.py')
+sandbox_owner = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(sandbox_owner)
 
 # Only fixed OS programs run with privilege. Policy bytes are an argument, never
 # shell source or a user-writable Python script. Root staging closes the race
@@ -67,7 +73,7 @@ def quoted_path(path):
     return '"' + text + '"'
 
 
-def policy(root, receipt):
+def policy(root, receipt, sandbox=None):
     root = Path(root).resolve()
     if receipt.get('schema') != 1 or receipt.get('kind') != 'kejtu-web-prepared' or receipt.get('root') != str(root):
         raise ValueError('The browser receipt belongs to a different checkout; relocation is not supported.')
@@ -81,6 +87,28 @@ def policy(root, receipt):
         if not path.is_absolute() or not path.is_relative_to(directory) or '..' in path.parts:
             raise ValueError('The policy executable is outside its managed browser directory.')
         body += f'\nprofile kejtu-{identifier}-{row["role"]} {quoted_path(path)} flags=(unconfined) {{\n  userns,\n}}\n'
+    if sandbox is not None:
+        if sandbox.get('kind') != 'managed' or set(sandbox.get('executables', {})) != {'tools', 'browser'}:
+            raise ValueError('The policy needs both verified managed sandbox roles.')
+        version = sandbox.get('version', '')
+        if not re.fullmatch(r'\d+\.\d+\.\d+', version):
+            raise ValueError('Invalid sandbox version in the policy receipt.')
+        for role, value in sandbox['executables'].items():
+            expected = root / '.state/apps/bubblewrap' / ('bubblewrap-' + version) / 'bin' / ('bwrap-' + role)
+            if value != str(expected):
+                raise ValueError('Sandbox policy attachment is outside its exact managed role path.')
+        body = body.replace('abi <abi/4.0>,', 'abi <abi/5.0>,')
+        tools, child, browser = (f'kejtu-{identifier}-{name}' for name in ('tools', 'tool-child', 'browser-launch'))
+        # Preserve Ubuntu's child capability restriction for generic tools. NNP
+        # requires a stacked transition; no local/global bwrap policy is edited.
+        common = ('  allow file rwlkm /{**,},\n  allow network,\n  allow unix,\n'
+                  '  allow ptrace,\n  allow signal,\n  allow mqueue,\n  allow io_uring,\n'
+                  '  allow userns,\n  allow mount,\n  allow umount,\n  allow pivot_root,\n  allow dbus,\n')
+        body += (f'\nprofile {tools} {quoted_path(sandbox["executables"]["tools"])} flags=(attach_disconnected,mediate_deleted) {{\n'
+                 '  allow capability,\n' + common + f'  allow pix /** -> &{tools}//&{child},\n}}\n'
+                 f'\nprofile {child} flags=(attach_disconnected,mediate_deleted) {{\n' + common +
+                 f'  allow pix /** -> &{child},\n  audit deny capability,\n}}\n'
+                 f'\nprofile {browser} {quoted_path(sandbox["executables"]["browser"])} flags=(unconfined) {{\n  userns,\n}}\n')
     return POLICY_DIRECTORY / ('kejtu-source-' + identifier), body
 
 
@@ -105,36 +133,46 @@ def ensure(root, receipt_path, run, *, allow_system=True, env=None):
     receipt = json.loads(receipt_path.read_text())
     if receipt != web.prepared_browsers(root, env=env):
         raise ValueError('The prepared browser identity or content changed. Rerun preparation before granting policy.')
-    destination, body = policy(root, receipt)
+    sandbox = sandbox_owner.managed_runtime(root)
+    destination, body = policy(root, receipt, sandbox)
+    current = dict(prepared=receipt, sandbox=sandbox)
     marker = root / '.state/source-install/apparmor.json'
     previous = None
     if marker.is_symlink():
         raise ValueError('The AppArmor installation receipt must not be a symlink.')
     if marker.exists():
         saved = json.loads(marker.read_text())
-        old = saved['prepared']
-        policy(root, old)  # Reject a moved checkout before interpreting history.
-        if saved.get('previous') is not None and old != receipt:
+        old = dict(prepared=saved['prepared'], sandbox=saved.get('sandbox'))
+        policy(root, old['prepared'], old['sandbox'])  # Refuse relocation before interpreting history.
+        pending = saved.get('previous')
+        if pending is not None and saved.get('schema') != 2:
+            pending = dict(prepared=pending, sandbox=None)
+        if pending is not None and old != current:
             raise ValueError('An earlier browser policy update is unfinished. Complete that installation before changing browser versions.')
-        previous = saved.get('previous') if old == receipt else old
-    previous_body = policy(root, previous)[1] if previous is not None else None
+        previous = pending if old == current else old
+    previous_body = policy(root, previous['prepared'], previous['sandbox'])[1] if previous is not None else None
     matching = existing_policy(destination, body)
     if destination.exists() and not matching and (previous_body is None or not existing_policy(destination, previous_body)):
         raise ValueError(f'The existing AppArmor profile was changed outside the installer; preserved: {destination}')
     if not allow_system:
         if not matching:
             raise ValueError('Ubuntu requires this checkout’s browser AppArmor profile. Rerun without --no-system-packages so the installer can install it with sudo.')
-        web.write_receipt(marker, dict(prepared=receipt, previous=None))
+        web.write_receipt(marker, dict(schema=2, **current, policy_sha256=digest(body), previous=None))
         print(f'Reusing browser AppArmor policy: {destination}', flush=True)
         return
     # Save the old/new identities before sudo so interruption after atomic policy
     # publish can be repaired without treating our own new file as a conflict.
-    web.write_receipt(marker, dict(prepared=receipt, previous=previous))
-    print(f'Installing browser AppArmor policy: {destination}\nOnly the two exact managed browser paths receive user-namespace permission.', flush=True)
+    web.write_receipt(marker, dict(schema=2, **current, policy_sha256=digest(body), previous=previous))
+    before_unconfined = UNCONFINED_RESTRICTION.read_text() if UNCONFINED_RESTRICTION.exists() else None
+    print(f'Installing sandbox/browser AppArmor policy: {destination}\n'
+          'Exact attachments: two managed browsers and two role copies of one Bubblewrap build. '
+          'Ordinary tools retain the child capability restriction; the trusted browser chain can create its nested sandbox.', flush=True)
     run(['sudo', '/bin/sh', '-c', APPLY, 'kejtu-browser-policy', destination,
          digest(body), digest(previous_body) if previous_body else '-', body])
     if not existing_policy(destination, body):
         raise ValueError('The browser AppArmor policy did not match after installation.')
     if RESTRICTION.read_text().strip() != '1':
         raise ValueError('Ubuntu’s global user-namespace restriction changed during installation; it was not changed by this installer.')
-    web.write_receipt(marker, dict(prepared=receipt, previous=None))
+    if before_unconfined is not None and UNCONFINED_RESTRICTION.read_text() != before_unconfined:
+        raise ValueError('The global unconfined restriction changed during installation; it was not changed by this installer.')
+    web.write_receipt(marker, dict(schema=2, **current, policy_sha256=digest(body), previous=None))

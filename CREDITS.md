@@ -33,6 +33,13 @@ Downloaded Craft command-line tools retain their complete upstream notice files.
 Their versions differ from the embedded editors and are pinned in the
 [installer runtime manifest](packaging/source/runtime.lock.json).
 
+Linux tool isolation uses [Bubblewrap](https://github.com/containers/bubblewrap),
+by Alexander Larsson and contributors, under the LGPL. Where a compatible system
+runtime cannot be used, setup builds the pinned upstream 0.13.1 source locally.
+It retains the complete source archive, upstream `COPYING` and build manifest in
+`.state/apps/bubblewrap/bubblewrap-0.13.1/`. The two executable names select tool
+and browser policies; they are identical copies of the same build.
+
 ChatGPT sign-in uses PyJWT, cryptography, cffi and pycparser;
 [their license texts](docs/licenses/chatgpt/README.md) are included. Kejtu is
 independent of OpenAI and includes no Codex installation.
