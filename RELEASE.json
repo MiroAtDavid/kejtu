@@ -29,11 +29,11 @@
       "source_sha256": "49d81c13d0ad9a479b26a8ce16dcbdc7427f7393dc949ea4b8d486a0f31a3e24"
     },
     "README.md": {
-      "bytes": 9252,
+      "bytes": 1786,
       "mode": "100644",
-      "sha256": "f9c95c4c8289c3fd4e4c062adb99129b1af40e3e54f2fa8e8c384b5f270e0bc1",
+      "sha256": "a2dde3ef741967918dd9ecc8e598001bba0299ab24c952f2ab412e1da9b42751",
       "source": "packaging/source/README.md",
-      "source_sha256": "f9c95c4c8289c3fd4e4c062adb99129b1af40e3e54f2fa8e8c384b5f270e0bc1"
+      "source_sha256": "a2dde3ef741967918dd9ecc8e598001bba0299ab24c952f2ab412e1da9b42751"
     },
     "contracts/native-v1.json": {
       "bytes": 106784,
@@ -1694,6 +1694,27 @@
       "source": "desktop/vite.config.ts",
       "source_sha256": "bad46af2fa91a00ec75d32658c2338c471c0d86844a99941a3c54b2740ec31d0"
     },
+    "docs/README.md": {
+      "bytes": 481,
+      "mode": "100644",
+      "sha256": "a0da5648cb84235140582cf263b41f93d46b7d0d7324b32cfc5ac95db1727175",
+      "source": "docs/README.md",
+      "source_sha256": "a0da5648cb84235140582cf263b41f93d46b7d0d7324b32cfc5ac95db1727175"
+    },
+    "docs/evaluation.md": {
+      "bytes": 16115,
+      "mode": "100644",
+      "sha256": "b965fd89b27539085b07f7db14cd6fed60ee93e2a6dba59ea34f7b0a425b5aca",
+      "source": "docs/evaluation.md",
+      "source_sha256": "b965fd89b27539085b07f7db14cd6fed60ee93e2a6dba59ea34f7b0a425b5aca"
+    },
+    "docs/install.md": {
+      "bytes": 10375,
+      "mode": "100644",
+      "sha256": "ab9001e3f5c252f41fafec368d7626c00d1c8b394e1bb25a2d7340f98e732470",
+      "source": "docs/install.md",
+      "source_sha256": "ab9001e3f5c252f41fafec368d7626c00d1c8b394e1bb25a2d7340f98e732470"
+    },
     "docs/licenses/chatgpt/PyJWT-2.15.1/AUTHORS.rst": {
       "bytes": 322,
       "mode": "100644",
@@ -3333,12 +3354,12 @@
       "source_sha256": "8d8667dc0c7c8edb40c21b0a2f893744035496ffc4631cdb35f44a71c49e0c05"
     }
   },
-  "inclusion_manifest_sha256": "61dfd09b099dac542f7c64785fcf51f5e05ec7f97d4080627c6a2e468b7155c7",
+  "inclusion_manifest_sha256": "3b8e99453b5be22750a1def609fc7327b5a2d26bc872e0b9e08b82f3c9f04b15",
   "kind": "linux-source-x86_64",
   "schema": 1,
-  "source_commit": "0ad3d13d571cc692b796a7bf03736f04a5a03b27",
-  "source_date_epoch": 1793824039,
-  "source_tree": "2e4c5f824614fac214c8897cc7038e7e74cbbf78",
+  "source_commit": "4a25ebe22edcb61b133e59b84d5c5216bd815bfb",
+  "source_date_epoch": 1793902693,
+  "source_tree": "6a10d4572ec9b91dfbfdcbfbad2d301a92736273",
   "transformations": {
     "desktop/package-lock.json": {
       "unreachable_package_entries_removed": 84

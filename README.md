@@ -1,181 +1,42 @@
-# Kejtu — early Linux source release
+# Kejtu
 
-A personal workspace for conversations, notes, projects, tasks, research and
-documents. You connect the AI provider or local model you want to use.
-This is experimental software: useful already, but rough edges remain.
+Kejtu is a personal AI workspace. Chat with a model, keep notes, organise projects
+and tasks, research a topic, and work with documents in one desktop app.
 
-This recipe targets **x86-64 Ubuntu 26.04 and Manjaro**. Both VMs passed
-fresh installation, updates, first launch, the offline Help view and close/reopen, plus
-Files permissions, browser and document checks. Saved data survived Ubuntu's
-populated upgrade and reinstall. Other distributions, Windows and macOS are
-outside this source release.
+Your conversations and notes are saved on your computer. You choose which AI
+service or local model to connect. If you use an online service, it receives the
+messages and context needed to answer you. You choose which folders Kejtu can use.
 
-## Requirements
+## Install on Manjaro
 
-Use a normal desktop account with an unlocked Secret Service keyring, an internet
-connection and enough disk space for a Rust build and downloaded tools. Python
-3.14+, Node 22.12+/npm, Rust/Cargo 1.93+, Bubblewrap, GTK/WebKit development
-libraries and the other distribution packages are checked by the installer. Missing system packages
-need `sudo`; application files and runtimes stay in this directory.
-If a suitable system Bubblewrap cannot be used, setup builds a pinned version
-locally using Meson, Ninja and libcap development files, also checked by the installer.
-The Manjaro build was checked with 8 GB RAM and two build jobs; its installation
-used about 5.3 GB, excluding system packages and shared toolchain caches.
+This is an early release for 64-bit Manjaro. You install it from source, so the
+first setup takes time and needs an internet connection.
 
-On Ubuntu, setup also uses `sudo` for a per-installation AppArmor profile covering
-the two downloaded browser executables and two sandbox launcher paths. Ordinary
-tools retain their restrictions; the browser launcher permits Chromium's nested
-sandbox. Ubuntu's global restrictions stay enabled. These are user-writable paths,
-and another program under the same account could invoke the browser launcher.
-Custom browser selections are preserved; setup grants no policy to arbitrary browsers.
-
-Files, page reading, the temporary browser and document tools are included in
-setup. Chromium runtimes and the pinned document tools are separate downloads;
-no model weights or API account are included. `--media` also prepares optional
-radio/video dependencies. Your provider may charge for requests.
-
-## Install and start
-
-If Git is missing, install it first: `sudo apt-get install git` on Ubuntu, or
-`sudo pacman -S --needed git` on Manjaro. Use your distribution's normal update
-procedure if its package lists are stale.
-
-Clone the private release repository with Git into its final location. Keep this
-checkout there; environments and saved tool paths refer to it. Run the plan
-first, then install from a terminal in the desktop session:
+Download or clone this repository into the folder where you want to keep Kejtu.
+Open a terminal in that folder and run:
 
 ```sh
-python3 packaging/source/install.py
 python3 packaging/source/install.py --install
 ```
 
-Add `--media` for optional playback dependencies. Use `--jobs 2` to limit parallel
-build jobs. Rerunning the installer repairs missing dependencies without replacing
-your data or saved access choices. It refuses to build while this copy is running.
+The installer downloads the tools Kejtu needs and builds the app. It may ask for
+your password to install missing system packages. If Python or Git is missing,
+install them first with `sudo pacman -S --needed python git`.
 
-Setup also adds **Kejtu** to your application menu, using the existing icon.
-The shortcut initializes a new workspace once and reopens it on later launches.
-It calls the same managed commands below. If Kejtu is already running, it does
-not start another copy.
+When setup finishes, open **Kejtu** from your application menu. In **Settings**,
+connect your preferred AI service or local model. No model or paid account is
+included. Help is available inside the app under **Settings → Help**.
 
-For the first launch from a terminal:
+Keep the installation folder where it is. See the [installation guide](docs/install.md)
+for updates, backups and help with setup.
 
-```sh
-./kejtu initialize
-```
+## Still in development
 
-Connect a model in Settings. Close the first window normally, then use:
+Expect bugs and unfinished parts. Video playback and editing existing PDFs still
+need testing. Searching older conversations by meaning needs a separate local model setup.
+Keep backups of anything important.
 
-```sh
-./kejtu start
-./kejtu status
-```
+Manjaro is the focus of this release. Other platforms are not maintained as part
+of it. Community ports and contributions are welcome.
 
-The current desktop retains its development identity and local port 1431; run one
-copy at a time. Built-in [Help](src/kejtu_next/help/01-start.md) is also available
-under Settings → Help.
-
-The shortcut is saved as
-`~/.local/share/applications/dev.kejtu.next.development.desktop`; an absolute
-`XDG_DATA_HOME` replaces `~/.local/share`. Its icon points to this checkout's
-existing PNG, so keep the checkout at its installed path. A shortcut from another
-checkout or one you edited is preserved; use `--no-desktop-entry` when installing
-a second test copy. To register an already installed copy without rebuilding:
-
-```sh
-python3 packaging/source/desktop.py install
-```
-
-## Update, backup and remove
-
-Save all drafts and finish any running reply before updating:
-
-```sh
-./kejtu stop --composer-empty
-./kejtu backup
-git pull --ff-only
-python3 packaging/source/install.py --install
-./kejtu start
-```
-
-If you installed media dependencies, keep `--media` on the install command.
-Use the same directory; do not copy another installation's private state into it.
-The installer can be rerun after an interrupted download or build. It does not
-perform an automatic source downgrade or retry uncertain document operations.
-
-Conversations, backend settings, grants, cached runtimes and backups are under
-`.state/` in this checkout. `./kejtu backup` saves the database and selected
-configuration there; it is not a complete application backup.
-Appearance preferences, avatars, some drafts and pending recovery records live in
-`~/.local/share/dev.kejtu.next.development/`. Window geometry lives in
-`~/.config/dev.kejtu.next.development/.window-state.json`. An absolute
-`XDG_DATA_HOME` or `XDG_CONFIG_HOME` replaces the corresponding base directory.
-Back up these desktop directories with Kejtu stopped as well; they are shared by
-source checkouts using this desktop identity.
-API keys use the desktop keyring. ChatGPT sign-in tokens are stored in private,
-permission-protected files under `.state/runtime/chatgpt/`; those files are not
-keyring-encrypted. Treat a full `.state/` backup as sensitive.
-Back up the stopped checkout's entire `.state/` and your shared documents before
-removing the application; shared documents live in the folders you chose.
-Keyring credentials need their own system backup. Removing this checkout removes
-its local archive and backups, but leaves the desktop directories, shared
-documents, keyring entries and system dependencies in place. Keep the copied
-backups somewhere safe; desktop storage can contain unsaved private text too.
-
-Before removing the checkout, remove its application-menu entry:
-
-```sh
-python3 packaging/source/desktop.py remove
-```
-
-This removes only the unchanged entry registered by this copy. It preserves an
-edited entry, the icon source, app data and credentials. The small registration
-receipt and coordination lock may remain; neither launches anything.
-
-On Ubuntu, setup prints its exact `/etc/apparmor.d/kejtu-source-…` profile path.
-To remove that policy after stopping Kejtu, run the following with that exact
-path, then remove the same file with `sudo rm -- /etc/apparmor.d/kejtu-source-EXACT_HASH`:
-
-```sh
-sudo /usr/sbin/apparmor_parser --remove --skip-cache /etc/apparmor.d/kejtu-source-EXACT_HASH
-```
-
-Keep the policy when reinstalling at the same path. Do not use a wildcard or
-disable AppArmor. The installer recreates a missing profile when needed.
-
-## Limits
-
-- Local conversations, notebook, projects, tasks, research, document editors and
-  controlled tools are implemented. A feature being present does not establish
-  that every provider, file format or device has been tested.
-- Both VMs passed Files read/write and permission denials, private desktop-data
-  protection, both browser tools, spreadsheet/word-processing operations and PDF
-  creation/read-back. Editing existing PDF content remains unverified here.
-- The Manjaro keyring remained locked after reboot; credential access in that
-  session is unverified. Ubuntu could read the existing test credential. Use an
-  unlocked desktop keyring; installation does not reset or bypass it.
-- Earlier radio control checks passed. Video metadata was retrieved on Manjaro,
-  but playback crashed in its virtual graphics stack; Ubuntu's video request
-  timed out. Actual video and audible output need suitable-hardware testing.
-- Model calls and enabled web tools send selected information to their services.
-  Local storage does not make remote inference private. File access still needs
-  your saved folder permissions; installation does not grant folders.
-- Semantic recall needs the separately configured compatible GPU embedding
-  runtime: Ollama at `http://127.0.0.1:11434` with
-  `embeddinggemma-2:270m-bf16-text` matching the exact digest in
-  [the embedding contract](src/kejtu_next/core/recall.py). It is not installed
-  automatically. CPU fallback is
-  deferred; the installer does not substitute a model or rebuild the index under
-  another model. The CPU-only test VMs cannot verify GPU embedding behavior.
-- Small-context model configurations can refuse a turn when required instructions
-  and tool results will not fit. Kejtu does not silently truncate required material.
-  Focused release checks pass; the broader development test suite still has
-  unresolved failures. This is not a claim that the whole application is tested.
-- Account sign-in, paid APIs, GPU embeddings and audible media output require
-  separate acceptance on suitable hardware/accounts. No bundled media content,
-  guaranteed search results or automatic updater is provided.
-- This is a source installation, not a portable binary or a distribution package.
-  Test and development-history files are intentionally absent from this release
-  repository. `RELEASE.json` identifies the canonical source and exported files.
-
-[Credits and licenses](CREDITS.md) accompany the application.
+[Documentation](docs/README.md) · [Credits](CREDITS.md) · [MIT license](LICENSE)
