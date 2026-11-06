@@ -116,7 +116,13 @@
         if (view && liveDocument === null) {
           try {
             const range = view.workRange(liveWorkId, partial.edits);
-            target = view.markTarget(range);
+            // Keep the rich-text bookmark for an unchanged target range.
+            if (
+              !target?.valid ||
+              target.from !== range.from ||
+              target.to !== range.to
+            )
+              target = view.markTarget(range);
             liveTargetId = target.id;
           } catch {
             liveTargetId = -1;
@@ -144,19 +150,28 @@
       (target.from === text.replace(/\r\n?/g, "\n").length
         ? blocks.at(-1)
         : null);
-    if (!block)
-      return (
-        surface.querySelector(".document-page")?.getBoundingClientRect() ?? null
-      );
-    const rect = block.getBoundingClientRect();
-    return {
-      left: rect.left,
-      top:
-        target.from === Number(block.dataset.documentTo)
-          ? rect.bottom
-          : rect.top,
-      height: rect.height,
-    };
+    if (!block) return null;
+    const after = target.from === Number(block.dataset.documentTo);
+    const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) =>
+        node.textContent?.trim()
+          ? NodeFilter.FILTER_ACCEPT
+          : NodeFilter.FILTER_SKIP,
+    });
+    let node = walker.nextNode();
+    if (after) while (walker.nextNode()) node = walker.currentNode;
+    if (!node) return null;
+    const range = document.createRange();
+    range.selectNodeContents(node);
+    const rects = Array.from(range.getClientRects());
+    const rect = after ? rects.at(-1) : rects[0];
+    return rect
+      ? {
+          left: after ? rect.right : rect.left,
+          top: rect.top,
+          height: rect.height,
+        }
+      : null;
   }
   let instruction = "",
     asking = false,

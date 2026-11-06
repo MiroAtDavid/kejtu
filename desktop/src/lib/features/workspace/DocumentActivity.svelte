@@ -1,29 +1,24 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
+  import {
+    ACTIVITY_SIZE,
+    measureActivity,
+    type ActivityAnchor,
+  } from "./document-activity";
   export let surface: HTMLElement;
-  export let locate: () => { left: number; top: number; height: number } | null;
+  export let locate: () => ActivityAnchor | null;
   export let revision: unknown;
   export let label = "Kejtu is thinking…";
   export let onOpen: () => void;
   let point: { x: number; y: number } | null = null;
+  let layer: HTMLDivElement;
   let mounted = false,
     frame = 0;
   function measure() {
+    if (!mounted) return;
     cancelAnimationFrame(frame);
     frame = requestAnimationFrame(() => {
-      const rect = locate(),
-        bounds = surface.getBoundingClientRect();
-      point =
-        rect &&
-        rect.top >= bounds.top &&
-        rect.top < bounds.bottom - 8 &&
-        rect.left >= bounds.left &&
-        rect.left < bounds.right
-          ? {
-              x: rect.left - bounds.left,
-              y: Math.max(0, rect.top - bounds.top - 12),
-            }
-          : null;
+      if (mounted) point = measureActivity(locate(), layer, surface);
     });
   }
   $: {
@@ -39,6 +34,7 @@
     window.addEventListener("resize", measure);
     const observer = new ResizeObserver(measure);
     observer.observe(surface);
+    observer.observe(layer);
     measure();
     return () => {
       mounted = false;
@@ -50,21 +46,32 @@
   });
 </script>
 
-{#if point}<button
-    class="document-activity"
-    style:left={`${point.x}px`}
-    style:top={`${point.y}px`}
-    aria-label={label}
-    title={`${label} Open Ask Kejtu`}
-    on:click={onOpen}
-  >
-    <span></span><span></span><span></span>
-  </button>{/if}
+<div class="document-activity-layer" bind:this={layer}>
+  {#if point}<button
+      class="document-activity"
+      style:left={`${point.x}px`}
+      style:top={`${point.y}px`}
+      style:width={`${ACTIVITY_SIZE.width}px`}
+      style:height={`${ACTIVITY_SIZE.height}px`}
+      aria-label={label}
+      title={`${label} Open Ask Kejtu`}
+      on:click={onOpen}
+    >
+      <span></span><span></span><span></span>
+    </button>{/if}
+</div>
 
 <style>
+  .document-activity-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+  }
   .document-activity {
     position: absolute;
-    z-index: 3;
+    box-sizing: border-box;
+    pointer-events: auto;
     display: flex;
     gap: 3px;
     align-items: center;
@@ -75,8 +82,6 @@
     color: var(--ke-text-secondary);
     cursor: pointer;
     min-height: 0;
-    width: 23px;
-    height: 11px;
   }
   .document-activity span {
     width: 4px;

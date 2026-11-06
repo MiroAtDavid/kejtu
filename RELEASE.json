@@ -939,11 +939,11 @@
       "source_sha256": "23412d75f9235f7fbca292de8b0e45b5574ebd935a98413390ea25d346a963d8"
     },
     "desktop/src/lib/features/tasks/TaskRows.svelte": {
-      "bytes": 4171,
+      "bytes": 4317,
       "mode": "100644",
-      "sha256": "5c85f2e29b8edce42cc0d23ded6a37ce7b2c7c8bb11ce9dfb08452a0d85e10d4",
+      "sha256": "ee1e7bbed3946052e018ecb5b4249ac89f348b008bdfad88bc22a57cb2890241",
       "source": "desktop/src/lib/features/tasks/TaskRows.svelte",
-      "source_sha256": "5c85f2e29b8edce42cc0d23ded6a37ce7b2c7c8bb11ce9dfb08452a0d85e10d4"
+      "source_sha256": "ee1e7bbed3946052e018ecb5b4249ac89f348b008bdfad88bc22a57cb2890241"
     },
     "desktop/src/lib/features/tasks/Tasks.svelte": {
       "bytes": 38402,
@@ -1009,11 +1009,11 @@
       "source_sha256": "40abca3b7c5b654ef38de16e657668c818dcad29a7ba9d0df69ba5c290c45fe0"
     },
     "desktop/src/lib/features/workspace/DocumentActivity.svelte": {
-      "bytes": 2882,
+      "bytes": 3010,
       "mode": "100644",
-      "sha256": "e6525b634499a61a53da756089c8f7ae9058e9c27634255f8ced45d688bc521c",
+      "sha256": "38eecb8dddec8ba498b5c8c31d586617e4a6375f220e7991572c0ee5886d6805",
       "source": "desktop/src/lib/features/workspace/DocumentActivity.svelte",
-      "source_sha256": "e6525b634499a61a53da756089c8f7ae9058e9c27634255f8ced45d688bc521c"
+      "source_sha256": "38eecb8dddec8ba498b5c8c31d586617e4a6375f220e7991572c0ee5886d6805"
     },
     "desktop/src/lib/features/workspace/DocumentDiscussion.svelte": {
       "bytes": 9473,
@@ -1051,11 +1051,11 @@
       "source_sha256": "7289112ede6289e3505231a3f0497ba47ccb51f7351697ce2e736e5ee41e7ded"
     },
     "desktop/src/lib/features/workspace/Home.svelte": {
-      "bytes": 23206,
+      "bytes": 23869,
       "mode": "100644",
-      "sha256": "caf168830690a37ffcf40be971f3193766a06de75644af68c0f5a8eb57d90091",
+      "sha256": "fe355696f330ba3c246aa2613f4fe707d131514c6204b15798932a9df24f9aab",
       "source": "desktop/src/lib/features/workspace/Home.svelte",
-      "source_sha256": "caf168830690a37ffcf40be971f3193766a06de75644af68c0f5a8eb57d90091"
+      "source_sha256": "fe355696f330ba3c246aa2613f4fe707d131514c6204b15798932a9df24f9aab"
     },
     "desktop/src/lib/features/workspace/HomeArtwork.svelte": {
       "bytes": 1439,
@@ -1072,11 +1072,11 @@
       "source_sha256": "d32a180106467deef46cd178e3b7c052a771f907cbc80ca41ca9b0cc66c58181"
     },
     "desktop/src/lib/features/workspace/MarkdownEditor.svelte": {
-      "bytes": 39725,
+      "bytes": 40373,
       "mode": "100644",
-      "sha256": "e4d02ff017063e0b7ef716759f566855f95aed27528f36ac1d715e33fbc5b4e9",
+      "sha256": "1e13b52befe491f139e9fa93dac1fd05313ae75a238d23f215b87963d9b1c262",
       "source": "desktop/src/lib/features/workspace/MarkdownEditor.svelte",
-      "source_sha256": "e4d02ff017063e0b7ef716759f566855f95aed27528f36ac1d715e33fbc5b4e9"
+      "source_sha256": "1e13b52befe491f139e9fa93dac1fd05313ae75a238d23f215b87963d9b1c262"
     },
     "desktop/src/lib/features/workspace/Material.svelte": {
       "bytes": 27235,
@@ -1274,6 +1274,13 @@
       "source": "desktop/src/lib/features/workspace/craft-document.ts",
       "source_sha256": "bfc8be39191dcdd972340247ece5f0b3f2e718016986282aaab6b635a749515e"
     },
+    "desktop/src/lib/features/workspace/document-activity.ts": {
+      "bytes": 6162,
+      "mode": "100644",
+      "sha256": "ac08b1b6901f511ab5db7f73eb07e872cd6e66fdb7bac411850b9935efe07097",
+      "source": "desktop/src/lib/features/workspace/document-activity.ts",
+      "source_sha256": "ac08b1b6901f511ab5db7f73eb07e872cd6e66fdb7bac411850b9935efe07097"
+    },
     "desktop/src/lib/features/workspace/document-assist.ts": {
       "bytes": 19077,
       "mode": "100644",
@@ -1382,16 +1389,16 @@
     "desktop/src/lib/features/workspace/markdown-bundle.ts": {
       "bytes": 210,
       "mode": "100644",
-      "sha256": "da9587e4acc8d292aed03cc1fdd251594bc2ea11a3888cc9a65ef0b62f6e184c",
+      "sha256": "aa0d0348f2fc85d366e2d4f83799b246e9886489bed04dad7b20c064dffc569f",
       "source": "desktop/src/lib/features/workspace/markdown-bundle.ts",
-      "source_sha256": "da9587e4acc8d292aed03cc1fdd251594bc2ea11a3888cc9a65ef0b62f6e184c"
+      "source_sha256": "aa0d0348f2fc85d366e2d4f83799b246e9886489bed04dad7b20c064dffc569f"
     },
     "desktop/src/lib/features/workspace/markdown-editor.ts": {
-      "bytes": 2870,
+      "bytes": 2898,
       "mode": "100644",
-      "sha256": "3f29bc3301b4b5119eb9b6bdb125d1df05549331aba64ecbcf528db1132e2520",
+      "sha256": "48948072aefdaeaa7171ed53104cf22419c713b3d2f45f63b865fd3b7f171f46",
       "source": "desktop/src/lib/features/workspace/markdown-editor.ts",
-      "source_sha256": "3f29bc3301b4b5119eb9b6bdb125d1df05549331aba64ecbcf528db1132e2520"
+      "source_sha256": "48948072aefdaeaa7171ed53104cf22419c713b3d2f45f63b865fd3b7f171f46"
     },
     "desktop/src/lib/features/workspace/material-portal.ts": {
       "bytes": 648,
@@ -1480,9 +1487,9 @@
     "desktop/static/private/markdown/KEJTU-BUILD.json": {
       "bytes": 352,
       "mode": "100644",
-      "sha256": "4fd82856bb82d93cda5fb3a91d7bb65d17170d3e28f64fd8afce9b600f17d1cc",
+      "sha256": "cef38c104d6405ca5a6ec5c1e8de415a163ba7572b0c91343918ee09d5b5e060",
       "source": "desktop/static/private/markdown/KEJTU-BUILD.json",
-      "source_sha256": "4fd82856bb82d93cda5fb3a91d7bb65d17170d3e28f64fd8afce9b600f17d1cc"
+      "source_sha256": "cef38c104d6405ca5a6ec5c1e8de415a163ba7572b0c91343918ee09d5b5e060"
     },
     "desktop/static/private/markdown/LICENSES.txt": {
       "bytes": 286488,
@@ -1498,12 +1505,12 @@
       "source": "desktop/static/private/markdown/editor-292015ee2cb667fc.css",
       "source_sha256": "292015ee2cb667fc280b8375a166fd32037d23bb3bcd4d2144e1d5bac6f57659"
     },
-    "desktop/static/private/markdown/editor-d5e87993de9635a0.js": {
-      "bytes": 2938108,
+    "desktop/static/private/markdown/editor-f1f0bb2bb6b2d687.js": {
+      "bytes": 2938135,
       "mode": "100644",
-      "sha256": "d5e87993de9635a0dbfcfaa742a64cfa5cd438baa36789bd7914254e93349ade",
-      "source": "desktop/static/private/markdown/editor-d5e87993de9635a0.js",
-      "source_sha256": "d5e87993de9635a0dbfcfaa742a64cfa5cd438baa36789bd7914254e93349ade"
+      "sha256": "f1f0bb2bb6b2d687f93d10a5cee4d38818352056d0a7587f573f7b45e5727ff3",
+      "source": "desktop/static/private/markdown/editor-f1f0bb2bb6b2d687.js",
+      "source_sha256": "f1f0bb2bb6b2d687f93d10a5cee4d38818352056d0a7587f573f7b45e5727ff3"
     },
     "desktop/static/private/pdfcraft/ATTRIBUTION.md": {
       "bytes": 88183,
@@ -3165,11 +3172,11 @@
       "source_sha256": "2d449f196ef2655ae24f003e2221b2af88d02018759ecf664ca7c5fcb2daede0"
     },
     "src/kejtu_next/help/05-projects-documents.md": {
-      "bytes": 7767,
+      "bytes": 8072,
       "mode": "100644",
-      "sha256": "09a295a1fc94b39f0864d20ace6a0fc990c55423e775ce37b7968f8ffe3562cb",
+      "sha256": "3d5d23587a520edb55d6247412a970c0fb2b5ca833897b6e1deb771168a8aef7",
       "source": "src/kejtu_next/help/05-projects-documents.md",
-      "source_sha256": "09a295a1fc94b39f0864d20ace6a0fc990c55423e775ce37b7968f8ffe3562cb"
+      "source_sha256": "3d5d23587a520edb55d6247412a970c0fb2b5ca833897b6e1deb771168a8aef7"
     },
     "src/kejtu_next/help/06-tasks-background.md": {
       "bytes": 7184,
@@ -3371,9 +3378,9 @@
   "inclusion_manifest_sha256": "3b8e99453b5be22750a1def609fc7327b5a2d26bc872e0b9e08b82f3c9f04b15",
   "kind": "linux-source-x86_64",
   "schema": 1,
-  "source_commit": "4ca5721bae3a3f4b3dc71e799d5ba429ec6dc9fb",
-  "source_date_epoch": 1793987906,
-  "source_tree": "e7a52ef36301641d56dc9f60bdea5521d0e1023f",
+  "source_commit": "476f96ccf4676ba5b2d0a4b69b84cba9a6cf6f4e",
+  "source_date_epoch": 1793998420,
+  "source_tree": "10ddc402645ea63e398a2584423966f50af6cef5",
   "transformations": {
     "desktop/package-lock.json": {
       "unreachable_package_entries_removed": 84

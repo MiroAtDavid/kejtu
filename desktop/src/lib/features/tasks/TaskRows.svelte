@@ -53,12 +53,12 @@
           >
           <span
             class="date"
-            class:overdue={task.outcome === "open" &&
+            class:earlier={task.outcome === "open" &&
               !!task.due &&
               task.due < today()}
             >{#if task.due}<time datetime={task.due}>{dateLabel(task.due)}</time
               >{#if task.outcome === "open" && task.due < today()}<small
-                  >Overdue</small
+                  >Still open</small
                 >{/if}{:else}<small>No due date</small>{/if}</span
           >
         </button>
@@ -140,9 +140,10 @@
     font-size: 12px;
     color: var(--ke-text-secondary);
   }
-  .overdue,
-  .overdue small {
-    color: var(--ke-danger);
+  /* Carried-forward open work stays visible with its date, without an alarm
+     word or warning colour that makes the list feel like a backlog of failure. */
+  .earlier small {
+    font-style: italic;
   }
   .done {
     text-decoration: line-through;

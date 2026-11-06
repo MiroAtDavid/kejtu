@@ -1,5 +1,6 @@
 import type { DocumentPatch } from "./document-patches";
 import type { EditTarget } from "./document-assist";
+import type { ActivityAnchor } from "./document-activity";
 import { markdownBundle, markdownStyles } from "./markdown-bundle";
 export const MAX_MARKDOWN_BYTES = 2 * 1024 * 1024;
 export type MarkdownView = {
@@ -19,7 +20,7 @@ export type MarkdownView = {
   selection: () => { from: number; to: number };
   positionAt: (x: number, y: number) => number | null;
   target: () => EditTarget | null;
-  targetRect?: () => { left: number; top: number; height: number } | null;
+  targetRect?: () => ActivityAnchor | null;
   setLivePreview?: (id: number, replacement: string | null) => string | null;
   rearmTarget?: () => EditTarget | null;
   clearTarget: () => void;

@@ -48,6 +48,17 @@
     "UTC",
   );
   $: today = dayInZone(now, zone);
+  // A task that is still open after its day is carried forward calmly: keep
+  // its date so nothing is hidden, without an alarm word or warning colour.
+  const shortDay = (value: string) =>
+    new Intl.DateTimeFormat(undefined, {
+      month: "short",
+      day: "numeric",
+      ...(value.slice(0, 4) !== today.slice(0, 4)
+        ? { year: "numeric" as const }
+        : {}),
+      timeZone: "UTC",
+    }).format(new Date(value + "T12:00:00Z"));
   $: projects = !!$workspace.snapshot?.settings.university_enabled;
   $: courses = ($workspace.snapshot?.courses.filter((c) => !c.cancelled) ?? [])
     .slice()
@@ -297,11 +308,14 @@
                     >
                     <span
                       class="task-date"
-                      class:overdue={task.due && task.due < today}
+                      class:earlier={task.due && task.due < today}
+                      title={task.due && task.due < today
+                        ? `Still open from ${shortDay(task.due)}`
+                        : undefined}
                       >{task.due === today
                         ? "Today"
                         : task.due && task.due < today
-                          ? "Overdue"
+                          ? `From ${shortDay(task.due)}`
                           : task.due || "Anytime"}</span
                     >
                   </button>
@@ -582,8 +596,9 @@
     color: var(--ke-text-secondary);
     white-space: nowrap;
   }
-  .task-date.overdue {
-    color: var(--ke-danger);
+  .task-date.earlier {
+    color: var(--ke-text-secondary);
+    font-style: italic;
   }
   .start {
     display: flex;

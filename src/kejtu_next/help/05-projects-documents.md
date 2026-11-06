@@ -43,6 +43,11 @@ permissions, and saving a copy never replaces an existing file.
 
 ## Documents
 
+While Kejtu works on Markdown, the three activity dots sit beside the word rather
+than above it. They use clear space after or before the word, or a free line gutter
+when neighbouring text is tight. If no safe space is visible, the Ask Kejtu rail
+still shows activity. Clicking the dots opens Ask Kejtu.
+
 When editing Markdown, drag the **Ask Kejtu** panel by its heading outside the
 main window to open it as a separate desktop window. The **Open chat in separate
 window** button does the same. Your draft and live reply stay in the same document
