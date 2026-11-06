@@ -1,5 +1,6 @@
 mod backend;
 mod backend_process;
+mod document_popout;
 mod files;
 mod image_input;
 mod package_startup;
@@ -146,18 +147,39 @@ async fn native_present(window: tauri::WebviewWindow, marker: String) -> Result<
     received.await.map_err(|error| error.to_string())?
 }
 
+fn native_commands(invoke: tauri::ipc::Invoke<tauri::Wry>) -> bool {
+    let commands: fn(tauri::ipc::Invoke<tauri::Wry>) -> bool = tauri::generate_handler![
+        document_popout::close_document_chat,
+        document_popout::position_document_chat,
+        native_request,
+        native_pending,
+        native_rendered,
+        native_present,
+        files::choose_folder,
+        pdf_copy::save_pdf_copy,
+        pdf_copy::save_docx_copy,
+        pdf_copy::save_markdown_copy,
+        image_input::read_dropped_image,
+        image_input::read_clipboard_image,
+        web_links::open_web_link
+    ];
+    document_popout::main_commands(invoke, commands)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default();
     #[cfg(desktop)]
     let builder = builder.plugin(
         tauri_plugin_window_state::Builder::default()
+            .with_filter(|label| label == "main")
             .with_state_flags(window_state_flags())
             .build(),
     );
 
     builder
         .setup(|app| {
+            document_popout::create_main(app)?;
             // WebKitGTK needs a mapped window to compute its viewport and paint.
             // Map transparently: the first visible frame is the themed app (or
             // its error screen), not a small uninitialized native surface.
@@ -180,22 +202,13 @@ pub fn run() {
             app.manage(Mutex::new(backend));
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![
-            native_request,
-            native_pending,
-            native_rendered,
-            native_present,
-            files::choose_folder,
-            pdf_copy::save_pdf_copy,
-            pdf_copy::save_docx_copy,
-            pdf_copy::save_markdown_copy,
-            image_input::read_dropped_image,
-            image_input::read_clipboard_image,
-            web_links::open_web_link
-        ])
+        .invoke_handler(native_commands)
         .build(tauri::generate_context!())
         .expect("Kejtu Next development runtime failed")
         .run(|app, event| {
+            if matches!(&event, tauri::RunEvent::WindowEvent { label, event: tauri::WindowEvent::Destroyed, .. } if label == "main") {
+                document_popout::close_children(app);
+            }
             #[cfg(windows)]
             if let Some(exit) = backend_process::desktop_exit() {
                 match &event {

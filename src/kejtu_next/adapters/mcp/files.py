@@ -123,6 +123,9 @@ class Files:
             raise Failure('files_private','Kejtu’s private app data is not a connection folder. Select only the required installed program directory.')
         if any(self.is_private(Path(p)) for p in writes):
             raise Failure('files_private','Kejtu’s private app data is not a writable connection folder.')
+        if sys.platform == 'linux':
+            from .runtime_protection import validate_write_roots
+            validate_write_roots(self.host.root, writes)
 
     def runtime(self):
         if sys.platform == 'win32':
@@ -213,6 +216,10 @@ class Files:
             folders=[dict(path=self._path(row['path']),access=row['access']) for row in config['folders']])
         try:validate(config)
         except ValueError:raise Failure('files_path','These choices point to the same folder. List it only once.') from None
+        if sys.platform == 'linux' and config['enabled']:
+            from .runtime_protection import validate_write_roots
+            validate_write_roots(self.host.root, [row['path'] for row in grants(config)
+                                                if row['access'] == 'write'])
         if config['enabled'] and not grants(config):raise Failure('files_path','Choose a working folder or at least one shared folder.')
         # This is an explicit operator save. No writes occur just by opening the UI.
         if args['create_workspace']:

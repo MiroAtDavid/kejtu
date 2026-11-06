@@ -29,11 +29,11 @@
       "source_sha256": "49d81c13d0ad9a479b26a8ce16dcbdc7427f7393dc949ea4b8d486a0f31a3e24"
     },
     "README.md": {
-      "bytes": 1786,
+      "bytes": 1908,
       "mode": "100644",
-      "sha256": "a2dde3ef741967918dd9ecc8e598001bba0299ab24c952f2ab412e1da9b42751",
+      "sha256": "b2b30cd7ea6bbb67fce3cb2a5b21ade1cc0304237a5283a6024442acbd1ebdc3",
       "source": "packaging/source/README.md",
-      "source_sha256": "a2dde3ef741967918dd9ecc8e598001bba0299ab24c952f2ab412e1da9b42751"
+      "source_sha256": "b2b30cd7ea6bbb67fce3cb2a5b21ade1cc0304237a5283a6024442acbd1ebdc3"
     },
     "contracts/native-v1.json": {
       "bytes": 106784,
@@ -126,6 +126,13 @@
       "source": "desktop/src-tauri/src/backend_process.rs",
       "source_sha256": "12fbcfddaff4b7aaa625902c449f8973581688af1ae183c519f3fc0d7cc76b16"
     },
+    "desktop/src-tauri/src/document_popout.rs": {
+      "bytes": 5606,
+      "mode": "100644",
+      "sha256": "9a6a5ce8e7b3ada9b8ca0d7eb788c00fbb952e5688981af4dd69c2406f171de3",
+      "source": "desktop/src-tauri/src/document_popout.rs",
+      "source_sha256": "949d3147490bd209d57b23c26719cb16ecf1523e33acae5a5a2d058094bfd938"
+    },
     "desktop/src-tauri/src/files.rs": {
       "bytes": 3623,
       "mode": "100644",
@@ -141,11 +148,11 @@
       "source_sha256": "977eb5211e31314650f04f5c8bc850590cc301db169813d1d7d73ed949bf1141"
     },
     "desktop/src-tauri/src/lib.rs": {
-      "bytes": 8680,
+      "bytes": 9254,
       "mode": "100644",
-      "sha256": "45c2bd029ea60749f9db28c2c94d8327344fa1b2bf48baf3dd357e1f28a853c1",
+      "sha256": "03f3342656bf251d6f091a524df7ea0af272ddb2dc064723bded5ed27690f36a",
       "source": "desktop/src-tauri/src/lib.rs",
-      "source_sha256": "45c2bd029ea60749f9db28c2c94d8327344fa1b2bf48baf3dd357e1f28a853c1"
+      "source_sha256": "03f3342656bf251d6f091a524df7ea0af272ddb2dc064723bded5ed27690f36a"
     },
     "desktop/src-tauri/src/main.rs": {
       "bytes": 52,
@@ -197,11 +204,11 @@
       "source_sha256": "b8e651df4f7e399e2097a41c989a5221673de8db914ad33c9803b4b4c6a46640"
     },
     "desktop/src-tauri/tauri.conf.json": {
-      "bytes": 885,
+      "bytes": 910,
       "mode": "100644",
-      "sha256": "afc44db84ca4a8355181046bfb3db0fb33058bd943c7e6118a3096ad3f30407a",
+      "sha256": "0ad24d507085c723a1a56aa94c51cef1e454dcca1fbfc0078eecb34cf6dfad39",
       "source": "desktop/src-tauri/tauri.conf.json",
-      "source_sha256": "afc44db84ca4a8355181046bfb3db0fb33058bd943c7e6118a3096ad3f30407a"
+      "source_sha256": "0ad24d507085c723a1a56aa94c51cef1e454dcca1fbfc0078eecb34cf6dfad39"
     },
     "desktop/src/app.html": {
       "bytes": 281,
@@ -246,11 +253,11 @@
       "source_sha256": "4f2be1665c66137e13b29145439729dc8d362acab92c8bc5f779c94fee8f87f1"
     },
     "desktop/src/lib/design/ChoicePicker.svelte": {
-      "bytes": 10882,
+      "bytes": 11135,
       "mode": "100644",
-      "sha256": "34ff1657efb1bcf322578e849f6c83cc439933114ed7fdacc42f10bdf772f374",
+      "sha256": "2086f84ba9fafb8568465d0f4d175d993251c605bd23891ab8ebc8e116aac1ba",
       "source": "desktop/src/lib/design/ChoicePicker.svelte",
-      "source_sha256": "34ff1657efb1bcf322578e849f6c83cc439933114ed7fdacc42f10bdf772f374"
+      "source_sha256": "2086f84ba9fafb8568465d0f4d175d993251c605bd23891ab8ebc8e116aac1ba"
     },
     "desktop/src/lib/design/ChoiceSelect.svelte": {
       "bytes": 934,
@@ -440,13 +447,6 @@
       "sha256": "f96f6d43b2419d515f1007a153d661e58d24ce90a37e56f04be14a3332e26e44",
       "source": "desktop/src/lib/features/chat/ContextLine.svelte",
       "source_sha256": "f96f6d43b2419d515f1007a153d661e58d24ce90a37e56f04be14a3332e26e44"
-    },
-    "desktop/src/lib/features/chat/ConversationChooser.svelte": {
-      "bytes": 8276,
-      "mode": "100644",
-      "sha256": "e2edd3947b890ca654883d210abc52b1b5d49f3ba741c64b277e13a1951915d2",
-      "source": "desktop/src/lib/features/chat/ConversationChooser.svelte",
-      "source_sha256": "e2edd3947b890ca654883d210abc52b1b5d49f3ba741c64b277e13a1951915d2"
     },
     "desktop/src/lib/features/chat/CopyButton.svelte": {
       "bytes": 1743,
@@ -1015,6 +1015,13 @@
       "source": "desktop/src/lib/features/workspace/DocumentActivity.svelte",
       "source_sha256": "e6525b634499a61a53da756089c8f7ae9058e9c27634255f8ced45d688bc521c"
     },
+    "desktop/src/lib/features/workspace/DocumentDiscussion.svelte": {
+      "bytes": 9473,
+      "mode": "100644",
+      "sha256": "1bf8dbddb3cb3fdba3f20dff9ac98ac30d60d5923533716bf2a74f02195ae5f3",
+      "source": "desktop/src/lib/features/workspace/DocumentDiscussion.svelte",
+      "source_sha256": "1bf8dbddb3cb3fdba3f20dff9ac98ac30d60d5923533716bf2a74f02195ae5f3"
+    },
     "desktop/src/lib/features/workspace/DocumentImage.svelte": {
       "bytes": 301,
       "mode": "100644",
@@ -1023,11 +1030,11 @@
       "source_sha256": "1565303d1d4f290ef8e54a3205bd12f690c533901f3ef81501cf1cb361ab9679"
     },
     "desktop/src/lib/features/workspace/DocumentPopover.svelte": {
-      "bytes": 6165,
+      "bytes": 8684,
       "mode": "100644",
-      "sha256": "c88403c42067845e59f557165fef3b135d3ec0edb7841e1d40678fd84b8f2752",
+      "sha256": "a0ac98501b21998db9fb22d42085411315e5049a3e69f33e5d1408a7fcd85a07",
       "source": "desktop/src/lib/features/workspace/DocumentPopover.svelte",
-      "source_sha256": "c88403c42067845e59f557165fef3b135d3ec0edb7841e1d40678fd84b8f2752"
+      "source_sha256": "a0ac98501b21998db9fb22d42085411315e5049a3e69f33e5d1408a7fcd85a07"
     },
     "desktop/src/lib/features/workspace/DocumentPreview.svelte": {
       "bytes": 2396,
@@ -1065,11 +1072,11 @@
       "source_sha256": "d32a180106467deef46cd178e3b7c052a771f907cbc80ca41ca9b0cc66c58181"
     },
     "desktop/src/lib/features/workspace/MarkdownEditor.svelte": {
-      "bytes": 47334,
+      "bytes": 39725,
       "mode": "100644",
-      "sha256": "f0c9c14e80353f4927c2ba790f385e5689440093eb296dd6fe662d88b28cd42c",
+      "sha256": "e4d02ff017063e0b7ef716759f566855f95aed27528f36ac1d715e33fbc5b4e9",
       "source": "desktop/src/lib/features/workspace/MarkdownEditor.svelte",
-      "source_sha256": "f0c9c14e80353f4927c2ba790f385e5689440093eb296dd6fe662d88b28cd42c"
+      "source_sha256": "e4d02ff017063e0b7ef716759f566855f95aed27528f36ac1d715e33fbc5b4e9"
     },
     "desktop/src/lib/features/workspace/Material.svelte": {
       "bytes": 27235,
@@ -1288,6 +1295,13 @@
       "source": "desktop/src/lib/features/workspace/document-conversation.ts",
       "source_sha256": "8120fd8dbef6a24a7b0887505e9afa10f6e6131e2cc3b77396e4961ba92b3560"
     },
+    "desktop/src/lib/features/workspace/document-discussion.ts": {
+      "bytes": 1287,
+      "mode": "100644",
+      "sha256": "e5b49d39f2a238c9a98cb7cb55c1e0bac5dcfda7cf4766e520598b09f72f3720",
+      "source": "desktop/src/lib/features/workspace/document-discussion.ts",
+      "source_sha256": "e5b49d39f2a238c9a98cb7cb55c1e0bac5dcfda7cf4766e520598b09f72f3720"
+    },
     "desktop/src/lib/features/workspace/document-format.ts": {
       "bytes": 1695,
       "mode": "100644",
@@ -1309,19 +1323,19 @@
       "source": "desktop/src/lib/features/workspace/document-patches.ts",
       "source_sha256": "eb1d1784a0a430f2f4b6ba062501e38c6b6699292f26313db3253ce0300e2b8c"
     },
+    "desktop/src/lib/features/workspace/document-popout.ts": {
+      "bytes": 6012,
+      "mode": "100644",
+      "sha256": "795f42dd0386c464a5e20b38df57e5135d4e9173740c292eb7863ffe68006c2f",
+      "source": "desktop/src/lib/features/workspace/document-popout.ts",
+      "source_sha256": "795f42dd0386c464a5e20b38df57e5135d4e9173740c292eb7863ffe68006c2f"
+    },
     "desktop/src/lib/features/workspace/document-preview.ts": {
       "bytes": 3084,
       "mode": "100644",
       "sha256": "800275d33ed157fb25214d615303adeefd7ee1324e47b293dd9049c1b95a44de",
       "source": "desktop/src/lib/features/workspace/document-preview.ts",
       "source_sha256": "800275d33ed157fb25214d615303adeefd7ee1324e47b293dd9049c1b95a44de"
-    },
-    "desktop/src/lib/features/workspace/document-progress.ts": {
-      "bytes": 3279,
-      "mode": "100644",
-      "sha256": "8eeca251e2d6d6b1b76d0178c6b63b95959aef6a9075251a803b833c2ff957a4",
-      "source": "desktop/src/lib/features/workspace/document-progress.ts",
-      "source_sha256": "8eeca251e2d6d6b1b76d0178c6b63b95959aef6a9075251a803b833c2ff957a4"
     },
     "desktop/src/lib/features/workspace/document-save.ts": {
       "bytes": 819,
@@ -1455,6 +1469,13 @@
       "sha256": "258c1385f3714b637feec4d9db735a41359ba67586c6d23c4df7eae1f95704b7",
       "source": "desktop/src/routes/+page.svelte",
       "source_sha256": "258c1385f3714b637feec4d9db735a41359ba67586c6d23c4df7eae1f95704b7"
+    },
+    "desktop/static/document-chat.html": {
+      "bytes": 1509,
+      "mode": "100644",
+      "sha256": "42c16d9e1b740b7f38d1d8887e62dec3d649a990579b412591cfe8c6a2e66606",
+      "source": "desktop/static/document-chat.html",
+      "source_sha256": "42c16d9e1b740b7f38d1d8887e62dec3d649a990579b412591cfe8c6a2e66606"
     },
     "desktop/static/private/markdown/KEJTU-BUILD.json": {
       "bytes": 352,
@@ -1709,11 +1730,11 @@
       "source_sha256": "b965fd89b27539085b07f7db14cd6fed60ee93e2a6dba59ea34f7b0a425b5aca"
     },
     "docs/install.md": {
-      "bytes": 10375,
+      "bytes": 10324,
       "mode": "100644",
-      "sha256": "ab9001e3f5c252f41fafec368d7626c00d1c8b394e1bb25a2d7340f98e732470",
+      "sha256": "3930f9ed31ca2f05838f8682cebd098e3ab2d1ecad34b6c01ce97dd6851cc525",
       "source": "docs/install.md",
-      "source_sha256": "ab9001e3f5c252f41fafec368d7626c00d1c8b394e1bb25a2d7340f98e732470"
+      "source_sha256": "3930f9ed31ca2f05838f8682cebd098e3ab2d1ecad34b6c01ce97dd6851cc525"
     },
     "docs/licenses/chatgpt/PyJWT-2.15.1/AUTHORS.rst": {
       "bytes": 322,
@@ -1940,11 +1961,11 @@
       "source_sha256": "12b83740885972cd1b34478de7a92193588bb9b7c6432f61814b1b2fbd0ddaed"
     },
     "src/kejtu_next/adapters/mcp/client.py": {
-      "bytes": 6750,
+      "bytes": 8884,
       "mode": "100644",
-      "sha256": "1039d17b9732fbe2a98160c457b00b01a795b404691937397d3bf656854a07a5",
+      "sha256": "30e6c5f6a63523119fdbd3c274e9215bb47df5c9f68964df57d1658a1f2fb866",
       "source": "src/kejtu_next/adapters/mcp/client.py",
-      "source_sha256": "1039d17b9732fbe2a98160c457b00b01a795b404691937397d3bf656854a07a5"
+      "source_sha256": "30e6c5f6a63523119fdbd3c274e9215bb47df5c9f68964df57d1658a1f2fb866"
     },
     "src/kejtu_next/adapters/mcp/config.py": {
       "bytes": 10430,
@@ -1968,11 +1989,11 @@
       "source_sha256": "338e92d9b0f1170e3170415af488f40710d9ba7d40c96996cca61d208059af68"
     },
     "src/kejtu_next/adapters/mcp/files.py": {
-      "bytes": 16099,
+      "bytes": 16546,
       "mode": "100644",
-      "sha256": "3ac2674e906a76936f7ced0869ae0f30976ddc7fdb3fcc268daeaa3d73fa1ebd",
+      "sha256": "d65e86cd122fe4be221bce58e651c5f649af34354668a686596aeb2c83612024",
       "source": "src/kejtu_next/adapters/mcp/files.py",
-      "source_sha256": "3ac2674e906a76936f7ced0869ae0f30976ddc7fdb3fcc268daeaa3d73fa1ebd"
+      "source_sha256": "d65e86cd122fe4be221bce58e651c5f649af34354668a686596aeb2c83612024"
     },
     "src/kejtu_next/adapters/mcp/host.py": {
       "bytes": 13870,
@@ -1987,6 +2008,13 @@
       "sha256": "2e513a33eaffcfb0d9338d81792011792c3b1b5e526bc3357087527032d26f8a",
       "source": "src/kejtu_next/adapters/mcp/presets.py",
       "source_sha256": "2e513a33eaffcfb0d9338d81792011792c3b1b5e526bc3357087527032d26f8a"
+    },
+    "src/kejtu_next/adapters/mcp/runtime_protection.py": {
+      "bytes": 19318,
+      "mode": "100644",
+      "sha256": "aa6e394c5271b743a024895a6c88ac72dbda4e15c1668e5fd184f773527263cc",
+      "source": "src/kejtu_next/adapters/mcp/runtime_protection.py",
+      "source_sha256": "aa6e394c5271b743a024895a6c88ac72dbda4e15c1668e5fd184f773527263cc"
     },
     "src/kejtu_next/adapters/mcp/windows_connections.py": {
       "bytes": 2186,
@@ -2010,11 +2038,11 @@
       "source_sha256": "24674f88bbbc198b9bf83443ca32121a9e70cb5ddbf5f8d508c0b72184c3ae9b"
     },
     "src/kejtu_next/adapters/mcp/worker.py": {
-      "bytes": 15101,
+      "bytes": 15380,
       "mode": "100644",
-      "sha256": "4f2945506c6f2f34d142b7aafbe6e0c42680b19b93b7052e2f8e12e3c993b27c",
+      "sha256": "c0b792bb2e506fb8df041b31bee50fba52791451f0c8a68b997582faf15ba56f",
       "source": "src/kejtu_next/adapters/mcp/worker.py",
-      "source_sha256": "4f2945506c6f2f34d142b7aafbe6e0c42680b19b93b7052e2f8e12e3c993b27c"
+      "source_sha256": "c0b792bb2e506fb8df041b31bee50fba52791451f0c8a68b997582faf15ba56f"
     },
     "src/kejtu_next/adapters/models/__init__.py": {
       "bytes": 57,
@@ -2940,13 +2968,6 @@
       "source": "src/kejtu_next/core/note_fields.py",
       "source_sha256": "70c7082b43e22490620d11a41ada59d7938e52afe44c45592f35cc30966be36b"
     },
-    "src/kejtu_next/core/notebook_guidance.py": {
-      "bytes": 7751,
-      "mode": "100644",
-      "sha256": "a0d29d7c8596d99b9dc0643f4227319a64964aee9cac8b06a82ba9cdb5671704",
-      "source": "src/kejtu_next/core/notebook_guidance.py",
-      "source_sha256": "a0d29d7c8596d99b9dc0643f4227319a64964aee9cac8b06a82ba9cdb5671704"
-    },
     "src/kejtu_next/core/notes.py": {
       "bytes": 10848,
       "mode": "100644",
@@ -3137,18 +3158,18 @@
       "source_sha256": "7bd2de4ef4a3b52a453c079f005eff762e545395c2f8e03db4cb573a1024e462"
     },
     "src/kejtu_next/help/04-web-files-skills.md": {
-      "bytes": 7317,
+      "bytes": 9507,
       "mode": "100644",
-      "sha256": "47f07bd21174c9a57da61267c2dce94c2c1fde2de4d166547e6181aae203ae0f",
+      "sha256": "2d449f196ef2655ae24f003e2221b2af88d02018759ecf664ca7c5fcb2daede0",
       "source": "src/kejtu_next/help/04-web-files-skills.md",
-      "source_sha256": "47f07bd21174c9a57da61267c2dce94c2c1fde2de4d166547e6181aae203ae0f"
+      "source_sha256": "2d449f196ef2655ae24f003e2221b2af88d02018759ecf664ca7c5fcb2daede0"
     },
     "src/kejtu_next/help/05-projects-documents.md": {
-      "bytes": 7375,
+      "bytes": 7767,
       "mode": "100644",
-      "sha256": "b5d673b4007b23455283566e261417cf59e4742759521a5e3c1aa5e322a8a8db",
+      "sha256": "09a295a1fc94b39f0864d20ace6a0fc990c55423e775ce37b7968f8ffe3562cb",
       "source": "src/kejtu_next/help/05-projects-documents.md",
-      "source_sha256": "b5d673b4007b23455283566e261417cf59e4742759521a5e3c1aa5e322a8a8db"
+      "source_sha256": "09a295a1fc94b39f0864d20ace6a0fc990c55423e775ce37b7968f8ffe3562cb"
     },
     "src/kejtu_next/help/06-tasks-background.md": {
       "bytes": 7184,
@@ -3233,13 +3254,6 @@
       "sha256": "e08507d7e8027e96b6e9cb08cffaacecb78d1ffb0eb04389997807ea531163c7",
       "source": "src/kejtu_next/ports/background.py",
       "source_sha256": "e08507d7e8027e96b6e9cb08cffaacecb78d1ffb0eb04389997807ea531163c7"
-    },
-    "src/kejtu_next/ports/embedding.py": {
-      "bytes": 233,
-      "mode": "100644",
-      "sha256": "4542722ee861c53c7351ea1978e761ae9120406b475c2425941099751f62bc03",
-      "source": "src/kejtu_next/ports/embedding.py",
-      "source_sha256": "4542722ee861c53c7351ea1978e761ae9120406b475c2425941099751f62bc03"
     },
     "src/kejtu_next/ports/memory.py": {
       "bytes": 1018,
@@ -3357,9 +3371,9 @@
   "inclusion_manifest_sha256": "3b8e99453b5be22750a1def609fc7327b5a2d26bc872e0b9e08b82f3c9f04b15",
   "kind": "linux-source-x86_64",
   "schema": 1,
-  "source_commit": "4a25ebe22edcb61b133e59b84d5c5216bd815bfb",
-  "source_date_epoch": 1793902693,
-  "source_tree": "6a10d4572ec9b91dfbfdcbfbad2d301a92736273",
+  "source_commit": "4ca5721bae3a3f4b3dc71e799d5ba429ec6dc9fb",
+  "source_date_epoch": 1793987906,
+  "source_tree": "e7a52ef36301641d56dc9f60bdea5521d0e1023f",
   "transformations": {
     "desktop/package-lock.json": {
       "unreachable_package_entries_removed": 84
@@ -3397,6 +3411,9 @@
     },
     "desktop/src-tauri/src/backend_process.rs": {
       "rust_test_items_removed": 2
+    },
+    "desktop/src-tauri/src/document_popout.rs": {
+      "rust_test_items_removed": 1
     },
     "desktop/src-tauri/src/files.rs": {
       "rust_test_items_removed": 1

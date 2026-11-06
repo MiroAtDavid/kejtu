@@ -1,11 +1,22 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
   import Icon from "$lib/design/Icon.svelte";
+  import {
+    openDocumentPopout,
+    releasedOutside,
+    type DocumentPopout,
+  } from "./document-popout";
   export let x = 200;
   export let y = 200;
   export let title = "Ask Kejtu";
   export let onClose: () => void;
+  export let renderDetached: (target: HTMLElement) => () => void;
   let panel: HTMLDivElement;
+  let popout: DocumentPopout | null = null;
+  let opening = false;
+  let detachAbort: AbortController | undefined;
+  let disposed = false;
+  let popoutError = "";
   let width = 560,
     height = 240;
   let drag: {
@@ -58,9 +69,57 @@
     }
     clamp();
   }
-  function end() {
+  function end(event?: PointerEvent) {
+    const detach =
+      drag &&
+      !drag.resize &&
+      event &&
+      releasedOutside(event, innerWidth, innerHeight);
     if (drag) remember();
     drag = null;
+    if (detach) void detachChat(event);
+  }
+  async function restore() {
+    popout = null;
+    if (disposed) return;
+    await tick();
+    panel.showPopover?.();
+    panel.querySelector("textarea")?.focus();
+  }
+  async function detachChat(event?: PointerEvent) {
+    if (opening || disposed) return;
+    if (popout) {
+      popout.focus();
+      return;
+    }
+    opening = true;
+    detachAbort = new AbortController();
+    popoutError = "";
+    try {
+      const opened = await openDocumentPopout({
+        title,
+        width,
+        height: Math.max(height, 320),
+        left: event ? event.screenX - 40 : window.screenX + x,
+        top: event ? event.screenY - 20 : window.screenY + y,
+        render: renderDetached,
+        returned: () => void restore(),
+        signal: detachAbort.signal,
+        failed: (message) => {
+          if (!disposed) popoutError = message;
+        },
+      });
+      if (disposed) opened.close();
+      else {
+        popout = opened;
+        panel.hidePopover?.();
+      }
+    } catch (error) {
+      if (!disposed)
+        popoutError = error instanceof Error ? error.message : String(error);
+    } finally {
+      opening = false;
+    }
   }
   function keys(e: KeyboardEvent, resize = false) {
     if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key))
@@ -97,6 +156,11 @@
     void tick().then(() =>
       panel?.querySelector<HTMLTextAreaElement>("textarea")?.focus(),
     );
+    return () => {
+      disposed = true;
+      detachAbort?.abort();
+      popout?.close();
+    };
   });
 </script>
 
@@ -104,11 +168,12 @@
   on:resize={clamp}
   on:pointermove={move}
   on:pointerup={end}
-  on:pointercancel={end}
+  on:pointercancel={() => end()}
 />
 <div
   bind:this={panel}
   class="document-popover"
+  class:detached={!!popout}
   popover="manual"
   role="dialog"
   aria-label={title}
@@ -128,10 +193,25 @@
     <button
       class="drag"
       aria-label="Move Ask Kejtu panel"
-      title="Drag to move · arrow keys also move this panel"
+      title="Drag outside the app to open a separate window · arrow keys move this panel"
       on:pointerdown={(e) => start(e)}
       on:keydown={(e) => keys(e)}
       ><span class="grip" aria-hidden="true">⠿</span>{title}</button
+    >
+    <button
+      class="pop-out"
+      title="Open chat in separate window"
+      aria-label="Open chat in separate window"
+      disabled={opening}
+      on:click={() => void detachChat()}
+      ><svg
+        width="14"
+        height="14"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        aria-hidden="true"><path d="M8 4H4v12h12v-4M10 3h7v7M17 3l-8 8" /></svg
+      ></button
     >
     <button
       class="close"
@@ -140,6 +220,7 @@
       on:click={onClose}><Icon name="close" size={14} /></button
     >
   </div>
+  {#if popoutError}<p class="popout-error" role="alert">{popoutError}</p>{/if}
   <div class="popover-body"><slot /></div>
   <button
     class="resize"
@@ -174,6 +255,13 @@
   .document-popover::backdrop {
     background: transparent;
     pointer-events: none;
+  }
+  .document-popover.detached {
+    display: none;
+  }
+  .popout-error {
+    margin: 0 14px 8px;
+    color: var(--ke-text-secondary);
   }
   .popover-heading {
     display: flex;
@@ -215,7 +303,8 @@
     font-size: 16px;
     color: var(--ke-text-tertiary);
   }
-  .document-popover .popover-heading .close {
+  .document-popover .popover-heading .close,
+  .document-popover .popover-heading .pop-out {
     display: grid;
     place-items: center;
     width: 28px;

@@ -6,6 +6,7 @@ import signal
 import shutil
 import tempfile
 import sys
+import threading
 
 from ...core.mcp import MAX_RESULT, encode, parse
 from ...core.records import Failure
@@ -29,6 +30,20 @@ class Connection:
         try:
             async with asyncio.timeout_at(deadline):
                 if self.process is None:
+                    if sys.platform == 'linux':
+                        from .runtime_protection import validate_runtime_writes
+                        # No worker imports until preflight completes. Filesystem
+                        # calls run off the event loop so cancellation/revocation
+                        # remain responsive even when an individual call stalls.
+                        cancelled = threading.Event()
+                        try:
+                            await asyncio.to_thread(validate_runtime_writes, self.row,
+                                self.root, runtime=self.runtime, _cancelled=cancelled.is_set)
+                        finally:
+                            cancelled.set()
+                        check()
+                        if asyncio.get_running_loop().time() >= deadline:
+                            raise TimeoutError()
                     env = {'PATH': '/usr/bin:/bin', 'LANG': 'C.UTF-8', 'HOME': '/tmp',
                         'PYTHONPATH': os.pathsep.join([str(self.runtime), str(self.root/'src')]),
                         'PYTHONDONTWRITEBYTECODE': '1'}
@@ -43,7 +58,13 @@ class Connection:
                             PYTHONPATH=os.pathsep.join([str(self.runtime), str(self.root/'src')]),
                             KEJTU_MCP_RUNTIME=str(self.runtime))
                         options = {'creationflags': getattr(__import__('subprocess'), 'CREATE_NO_WINDOW', 0)}
-                    self.process = await asyncio.create_subprocess_exec(sys.executable, '-B', '-m',
+                    flags = ['-B']
+                    if sys.platform == 'linux':
+                        # Only the explicit SDK/source paths may supply imports;
+                        # writable CWD, sitecustomize and .pth files are not code.
+                        flags += ['-S', '-P']
+                        options['cwd'] = '/'
+                    self.process = await asyncio.create_subprocess_exec(sys.executable, *flags, '-m',
                         'kejtu_next.adapters.mcp.worker', stdin=asyncio.subprocess.PIPE,
                         stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL,
                         **options, env=env, limit=MAX_RESULT+2)
@@ -93,16 +114,32 @@ class Connection:
             raise Failure('mcp_unavailable', 'MCP could not complete this request. No automatic retry was sent; external completion is unknown.') from None
 
     async def close(self):
-        process, self.process = self.process, None
+        process = self.process
         if process is None:
             await self._clean_scratch()
             return
+        if sys.platform != 'win32':
+            pid = process.pid
+            # Never coerce a PID-like object: a mock's __index__ can return 1,
+            # and libc killpg(1, ...) becomes the broadcast kill(-1, ...).
+            # Keep ownership on refusal so cleanup failure cannot look complete.
+            if type(pid) is not int or pid <= 1 or pid == os.getpgrp():
+                raise Failure('mcp_cleanup', 'The MCP worker has no safe owned process group. No signal was sent.')
+            try:
+                group = os.getpgid(pid)
+            except ProcessLookupError:
+                # The leader may exit before its descendants; its original
+                # new-session process group still needs to be reaped below.
+                group = pid
+            if group != pid:
+                raise Failure('mcp_cleanup', 'The MCP worker does not own its process group. No signal was sent.')
+        self.process = None
         # Each worker owns a new process group; bwrap's PID namespace and
         # --die-with-parent also reap descendants that start separate groups.
         try:
             if sys.platform == 'win32':
                 if process.returncode is None: process.kill()
-            else: os.killpg(process.pid, signal.SIGKILL)
+            else: os.killpg(pid, signal.SIGKILL)
         except ProcessLookupError: pass
         await process.wait()
         if process.stdin:

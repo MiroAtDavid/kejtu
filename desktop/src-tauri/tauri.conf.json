@@ -12,6 +12,7 @@
   "app": {
     "windows": [
       {
+        "create": false,
         "title": "Kejtu Next \u2014 DEVELOPMENT",
         "width": 1440,
         "height": 900,

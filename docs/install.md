@@ -10,6 +10,19 @@ Other desktop environments have not been verified here. Earlier Ubuntu checks
 are retained below; Ubuntu, Windows and macOS are not maintenance commitments
 for this release. No platform implementation has been removed.
 
+## Memory search requires a separate GPU setup
+
+> **Searching older conversations by meaning (semantic recall) requires a
+> separately configured GPU embedding runtime. The installer does not set this up.**
+
+- **Runtime:** Ollama at `http://127.0.0.1:11434`.
+- **Model:** `embeddinggemma-2:270m-bf16-text`, matching the exact digest in
+  [Kejtu's embedding contract](../src/kejtu_next/core/recall.py).
+- **Hardware:** a compatible GPU. **CPU fallback is not available yet.**
+
+Kejtu does not substitute another embedding model or rebuild your index with a
+different model. The CPU-only test VMs did not verify GPU embedding behaviour.
+
 ## Requirements
 
 Run setup as yourself, without putting `sudo` before the installer command. You
@@ -146,9 +159,6 @@ disable AppArmor. The installer recreates a missing profile when needed.
 
 ## Limits
 
-- Local conversations, notebook, projects, tasks, research, document editors and
-  controlled tools are implemented. A feature being present does not establish
-  that every provider, file format or device has been tested.
 - Both VMs passed Files read/write and permission denials, private desktop-data
   protection, both browser tools, spreadsheet/word-processing operations and PDF
   creation/read-back. Editing existing PDF content remains unverified here.
@@ -161,13 +171,6 @@ disable AppArmor. The installer recreates a missing profile when needed.
 - Model calls and enabled web tools send selected information to their services.
   Local storage does not make remote inference private. File access still needs
   your saved folder permissions; installation does not grant folders.
-- Semantic recall needs the separately configured compatible GPU embedding
-  runtime: Ollama at `http://127.0.0.1:11434` with
-  `embeddinggemma-2:270m-bf16-text` matching the exact digest in
-  [the embedding contract](../src/kejtu_next/core/recall.py). It is not installed
-  automatically. CPU fallback is
-  deferred; the installer does not substitute a model or rebuild the index under
-  another model. The CPU-only test VMs cannot verify GPU embedding behavior.
 - Small-context model configurations can refuse a turn when required instructions
   and tool results will not fit. Kejtu does not silently truncate required material.
   Focused release checks pass; the broader development test suite still has

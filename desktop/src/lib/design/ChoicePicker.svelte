@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { tick } from "svelte";
+  import { onMount, tick } from "svelte";
   export let id: string;
   export let label: string;
   export let value = "";
@@ -119,24 +119,27 @@
       showActive();
     }
   }
+  function contains(target: EventTarget | null) {
+    return !!target && "nodeType" in target && root.contains(target as Node);
+  }
   function blur(event: FocusEvent) {
-    if (
-      !(event.relatedTarget instanceof Node) ||
-      !root.contains(event.relatedTarget)
-    )
-      open = false;
+    if (!contains(event.relatedTarget)) open = false;
   }
   function searchKey(event: KeyboardEvent) {
     if (["ArrowDown", "ArrowUp", "Enter", "Escape", "Tab"].includes(event.key))
       key(event);
   }
   function outside(event: PointerEvent) {
-    if (open && event.target instanceof Node && !root.contains(event.target))
-      open = false;
+    if (open && !contains(event.target)) open = false;
   }
+  onMount(() => {
+    // A document discussion may be mounted in a related desktop window.
+    const owner = root.ownerDocument.defaultView;
+    owner?.addEventListener("pointerdown", outside);
+    return () => owner?.removeEventListener("pointerdown", outside);
+  });
 </script>
 
-<svelte:window on:pointerdown={outside} />
 <div class="choice-picker" class:compact bind:this={root}>
   <span
     class="choice-label"

@@ -48,6 +48,36 @@ a share stops access after Save; it does not delete the files. A project folder
 assignment does not grant access by itself. Missing drives and revoked access
 must produce an explicit unavailable result.
 
+On Linux, share Home read-only and choose Documents or another separate folder
+for writing. Writable access cannot include application code, Python packages,
+or desktop/shell startup locations such as `.local`, `.config` and `.ssh`.
+This also applies when Kejtu is installed outside Home. A writable folder that
+could replace any symlinked import/startup component, or could create a directory
+named by an existing Python `.pth` path entry, is refused. An unsafe saved choice
+stops the connection; it does not silently change your permissions. Python startup
+files that cannot be inspected or decoded also stop the connection. `.pth` reads
+are limited to one MiB per file and eight MiB in total; oversized files are refused,
+not partially interpreted. Executable `.pth` hooks are refused, even when a
+hook's condition is currently false. The supported runtime's setuptools 80.9.0
+packaging hook is permitted only when its exact contents, shim code, package
+metadata and import location match the verified release. A matching filename or
+version alone is not enough. Other executable hooks, including benign custom
+hooks, remain unsupported. Kejtu never evaluates, deletes or rewrites a hook to
+make a connection work.
+
+Before a local tool starts, Kejtu checks writable folders and its private cache.
+Hard links are allowed only when all their file names stay within the writable
+view; cache links must stay within that connection’s cache. Links to other files
+need independent copies or read-only access. Read-only/private subfolders are
+excluded; deeper explicit writable grants are checked directly without listing
+read-only siblings. Directory entries are checked incrementally, with a limit of
+100,000 distinct writable names and a cooperative five-second budget including
+Python startup inspection. An individual filesystem operation can take longer.
+Launch checks run off the request event loop. Cancelling during preflight prevents
+worker launch, but a blocked filesystem call may continue until it returns. If a check cannot
+finish, choose a smaller accessible folder or read-only access. Kejtu does not
+delete or automatically rebuild files or caches to make a connection work.
+
 The Windows test package includes shared Files. Enter local folder paths in this
 panel; the Browse picker is currently Linux-only. No extra installation is needed.
 Linked folders and network shares are

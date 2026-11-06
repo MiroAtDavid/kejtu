@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ask Kejtu</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+      }
+      body {
+        background: var(--ke-surface-raised, #faf9f6);
+        color: var(--ke-text-primary, #292c28);
+        font: 13px var(--ke-font-ui, sans-serif);
+      }
+      main {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--ke-border, #ddd);
+      }
+      header button {
+        font: inherit;
+        padding: 6px 10px;
+        border: 1px solid var(--ke-border, #ddd);
+        border-radius: 6px;
+        color: inherit;
+        background: transparent;
+        cursor: pointer;
+      }
+      header button:focus-visible {
+        outline: 2px solid var(--ke-focus-ring);
+      }
+      #document-chat-body {
+        padding: 12px 14px 16px;
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <main aria-label="Document conversation">
+      <header>
+        <span>Ask Kejtu</span
+        ><button id="document-chat-return">Return to document</button>
+      </header>
+      <div id="document-chat-body">Opening the document chat…</div>
+    </main>
+  </body>
+</html>

@@ -43,6 +43,12 @@ permissions, and saving a copy never replaces an existing file.
 
 ## Documents
 
+When editing Markdown, drag the **Ask Kejtu** panel by its heading outside the
+main window to open it as a separate desktop window. The **Open chat in separate
+window** button does the same. Your draft and live reply stay in the same document
+conversation. Use **Return to document**, or close that window, to bring the panel
+back. Closing the document also closes its separate chat window.
+
 Resources keeps each opened document in its own tab. Open more files without
 closing earlier ones; each tab keeps its own edits and reading position. The ×
 closes that document and checks for unsaved changes. These tabs last for the

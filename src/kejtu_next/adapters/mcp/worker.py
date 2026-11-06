@@ -22,6 +22,10 @@ def sandbox(row):
     if sys.platform == 'win32':
         raise Failure('mcp_unavailable', 'Local connected tools are not available in this Windows test build yet. No tool was started.')
     from ..linux_sandbox import ROOT, browser_identity, command
+    from .runtime_protection import validate_runtime_writes
+    # The parent checked inode aliases before launch. Recheck mount authority in
+    # this process with its actual import roots before starting any local tool.
+    validate_runtime_writes(row, ROOT, check_links=False)
     browser = False
     try:
         if row.get('_browser_identity') is not None:
