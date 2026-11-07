@@ -1,5 +1,5 @@
 {
-  "exporter_sha256": "746cc683a9f10cc9497bf859336a5df2935e2465719cd755f7f9a927ea2831b4",
+  "exporter_sha256": "a803ddd4f7d4d7ac3a1be9b18dbbd2d13818df69aad397659344efd481557a7c",
   "files": {
     ".gitattributes": {
       "bytes": 467,
@@ -29,11 +29,11 @@
       "source_sha256": "49d81c13d0ad9a479b26a8ce16dcbdc7427f7393dc949ea4b8d486a0f31a3e24"
     },
     "README.md": {
-      "bytes": 1908,
+      "bytes": 4335,
       "mode": "100644",
-      "sha256": "b2b30cd7ea6bbb67fce3cb2a5b21ade1cc0304237a5283a6024442acbd1ebdc3",
+      "sha256": "9a904d41bc14837232db6bc8f3c1154c2b9d52ce74c3cbd5796aa97a48017407",
       "source": "packaging/source/README.md",
-      "source_sha256": "b2b30cd7ea6bbb67fce3cb2a5b21ade1cc0304237a5283a6024442acbd1ebdc3"
+      "source_sha256": "9a904d41bc14837232db6bc8f3c1154c2b9d52ce74c3cbd5796aa97a48017407"
     },
     "contracts/native-v1.json": {
       "bytes": 106784,
@@ -1757,6 +1757,20 @@
       "source": "docs/evaluation.md",
       "source_sha256": "b965fd89b27539085b07f7db14cd6fed60ee93e2a6dba59ea34f7b0a425b5aca"
     },
+    "docs/images/kejtu-conversation.png": {
+      "bytes": 187271,
+      "mode": "100644",
+      "sha256": "3df4bbdd78062a52f56d8100763299e93a027ab77f2048dd7d10013658528910",
+      "source": "docs/images/kejtu-conversation.png",
+      "source_sha256": "3df4bbdd78062a52f56d8100763299e93a027ab77f2048dd7d10013658528910"
+    },
+    "docs/images/kejtu-home.png": {
+      "bytes": 241559,
+      "mode": "100644",
+      "sha256": "b40c4a86b92f756335ebc275ca7a78014570569b26d7577628c874bd42d0ed70",
+      "source": "docs/images/kejtu-home.png",
+      "source_sha256": "b40c4a86b92f756335ebc275ca7a78014570569b26d7577628c874bd42d0ed70"
+    },
     "docs/install.md": {
       "bytes": 10324,
       "mode": "100644",
@@ -3396,12 +3410,12 @@
       "source_sha256": "8d8667dc0c7c8edb40c21b0a2f893744035496ffc4631cdb35f44a71c49e0c05"
     }
   },
-  "inclusion_manifest_sha256": "3b8e99453b5be22750a1def609fc7327b5a2d26bc872e0b9e08b82f3c9f04b15",
+  "inclusion_manifest_sha256": "235dfbd6c35640256f1af6852400e29332617e74b4a528a07050c73eb867aa8d",
   "kind": "linux-source-x86_64",
   "schema": 1,
-  "source_commit": "538c75acb580b62895e7f83089dcdf983c7ada70",
-  "source_date_epoch": 1794062977,
-  "source_tree": "98c51d24375862d23f8de323f90e3cb231025f36",
+  "source_commit": "83f5ef7b11ceb7041159dfd56c8e161d293b5eb5",
+  "source_date_epoch": 1794076178,
+  "source_tree": "7964b34d96cda1a5c4727af08514a9b3559dbb32",
   "transformations": {
     "desktop/package-lock.json": {
       "unreachable_package_entries_removed": 84
