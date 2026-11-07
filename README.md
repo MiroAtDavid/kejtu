@@ -7,8 +7,8 @@ research a topic and work on documents, all in one quiet desktop app. Your
 conversations and notes are stored on your computer. You choose the model.
 
 <p align="center">
-  <a href="docs/images/kejtu-conversation.png"><img src="docs/images/kejtu-conversation.png" width="48%" alt="A Kejtu conversation: episode updates with a table, sources and a checked date"></a>
-  <a href="docs/images/kejtu-home.png"><img src="docs/images/kejtu-home.png" width="48%" alt="Kejtu's Home page with research, today's schedule, projects and tasks"></a>
+  <a href="docs/images/kejtu-conversation.png"><img src="docs/images/kejtu-conversation.png" width="49%" alt="A Kejtu conversation: episode updates with a table, sources and a checked date"></a>
+  <a href="docs/images/kejtu-home.png"><img src="docs/images/kejtu-home.png" width="47%" alt="Kejtu's Home page with research, today's schedule, projects and tasks"></a>
 </p>
 
 ## What makes it different

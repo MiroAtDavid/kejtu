@@ -31,9 +31,9 @@
     "README.md": {
       "bytes": 4335,
       "mode": "100644",
-      "sha256": "9a904d41bc14837232db6bc8f3c1154c2b9d52ce74c3cbd5796aa97a48017407",
+      "sha256": "37df67caa58e20f9086eeb0e8f8a09c77766355248e7171e4956578d9c4d2373",
       "source": "packaging/source/README.md",
-      "source_sha256": "9a904d41bc14837232db6bc8f3c1154c2b9d52ce74c3cbd5796aa97a48017407"
+      "source_sha256": "37df67caa58e20f9086eeb0e8f8a09c77766355248e7171e4956578d9c4d2373"
     },
     "contracts/native-v1.json": {
       "bytes": 106784,
@@ -3413,9 +3413,9 @@
   "inclusion_manifest_sha256": "235dfbd6c35640256f1af6852400e29332617e74b4a528a07050c73eb867aa8d",
   "kind": "linux-source-x86_64",
   "schema": 1,
-  "source_commit": "83f5ef7b11ceb7041159dfd56c8e161d293b5eb5",
-  "source_date_epoch": 1794076178,
-  "source_tree": "7964b34d96cda1a5c4727af08514a9b3559dbb32",
+  "source_commit": "cf4972dc40c9177822bc8a9306c76656a8de8f9b",
+  "source_date_epoch": 1794076789,
+  "source_tree": "47bc1bc931f2e3b280c89a14e279aecd1abed56d",
   "transformations": {
     "desktop/package-lock.json": {
       "unreachable_package_entries_removed": 84
