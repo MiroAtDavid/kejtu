@@ -15,17 +15,14 @@
     margin: 0 0 calc(30px * var(--ke-density));
   }
   .page-heading h1 {
-    font:
-      400 32px/1.25 Georgia,
-      "Times New Roman",
-      serif;
-    letter-spacing: -0.7px;
+    font: var(--ke-title-page);
+    letter-spacing: var(--ke-title-page-tracking);
     margin: 0 0 10px;
   }
   .page-context,
   .page-subtitle {
     color: var(--ke-text-secondary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     line-height: 1.7;
     margin: 0;
   }

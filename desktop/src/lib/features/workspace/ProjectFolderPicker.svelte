@@ -123,7 +123,7 @@
   .folder-help {
     margin: 7px 0;
     color: var(--ke-text-secondary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     overflow-wrap: anywhere;
   }
   .browse-folder {
@@ -134,12 +134,12 @@
     border-radius: var(--ke-radius-sm);
     background: var(--ke-surface-inset);
     color: var(--ke-text-primary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
   details {
     margin-top: 10px;
     color: var(--ke-text-secondary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
   }
   summary {
     cursor: pointer;

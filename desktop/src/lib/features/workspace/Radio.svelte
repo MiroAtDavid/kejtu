@@ -229,11 +229,11 @@
     gap: 4px;
   }
   .radio button {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     padding: 4px 6px;
   }
   .track {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     overflow-wrap: anywhere;
   }
   .visually-hidden {
@@ -272,7 +272,7 @@
   .radio-volume output {
     flex: none;
     min-width: 28px;
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     text-align: right;
     font-variant-numeric: tabular-nums;
   }
@@ -345,7 +345,7 @@
   .compact button {
     background: transparent;
     border: 1px solid var(--ke-border);
-    border-radius: 4px;
+    border-radius: var(--ke-radius-sm);
     color: var(--ke-text-secondary);
     cursor: pointer;
     padding: 3px 9px;
@@ -359,7 +359,7 @@
     min-height: 28px;
     padding: 0;
     border: 0;
-    border-radius: 6px;
+    border-radius: var(--ke-radius-sm);
     background: transparent;
     color: var(--ke-text-secondary);
     cursor: pointer;
@@ -413,13 +413,13 @@
   }
   .compact .track {
     color: var(--ke-text-secondary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
   }
   .radio-error {
     padding: 10px;
-    border-radius: 8px;
+    border-radius: var(--ke-radius-md);
     background: var(--ke-accent-soft);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     overflow-wrap: anywhere;
   }
   .radio-error .row {

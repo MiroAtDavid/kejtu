@@ -1132,7 +1132,7 @@
   }
   .task-editor-heading h3 {
     margin: 0;
-    font-size: 16px;
+    font-size: var(--ke-text-lg);
   }
   .task-edit-form {
     display: grid;
@@ -1162,7 +1162,7 @@
   .hint,
   .scope {
     color: var(--ke-text-secondary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
   .completion {
     margin-top: 16px;

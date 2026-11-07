@@ -13,6 +13,7 @@
   import DocumentActivity from "./DocumentActivity.svelte";
   import { workProgress } from "./document-work-progress";
   import { phaseLabel, type Stream } from "$lib/features/chat/stream";
+  import { replyState } from "$lib/design/kejtu-state";
   import "./document-chrome.css";
   import { documentScrollbars } from "./document-scrollbars";
   import type { DocumentSource } from "./document-source";
@@ -845,6 +846,15 @@
             ? "Writing a live preview…"
             : phaseLabel($progress?.phase)
       : "",
+    kejtu: asking
+      ? stopped
+        ? "idle"
+        : preparingSource
+          ? "reading"
+          : liveDocument !== null
+            ? "writing"
+            : replyState($progress?.phase)
+      : null,
   });
   function renderDetachedDiscussion(target: HTMLElement) {
     const instance = mount(DocumentDiscussion, {
@@ -1096,7 +1106,7 @@
 <style>
   .starter-note {
     margin: 8px 12px;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     line-height: 1.5;
     color: var(--ke-text-secondary);
   }
@@ -1122,7 +1132,7 @@
     gap: 2px;
     padding: 6px;
     border: 1px solid var(--ke-border);
-    border-radius: 12px;
+    border-radius: var(--ke-radius-lg);
     background: var(--ke-surface-raised);
     box-shadow: 0 4px 16px rgb(0 0 0 / 0.11);
   }
@@ -1136,7 +1146,7 @@
     height: 32px;
     padding: 0;
     border: 1px solid transparent;
-    border-radius: 5px;
+    border-radius: var(--ke-radius-sm);
     background: transparent;
     color: var(--ke-text-secondary);
     cursor: pointer;
@@ -1250,15 +1260,17 @@
     max-width: calc(100vw - 16px);
     border: 1px solid var(--ke-border);
     background: var(--ke-surface-raised);
-    border-radius: 8px;
+    border-radius: var(--ke-radius-md);
     padding: 4px;
-    box-shadow: var(--ke-shadow-panel);
+    box-shadow: var(--ke-overlay-shadow);
+    transform-origin: bottom center;
+    animation: ke-menu-in var(--ke-motion-base) var(--ke-motion-ease);
   }
   .selection-menu button {
     border: 0;
     background: transparent;
     color: var(--ke-text-primary);
-    border-radius: 4px;
+    border-radius: var(--ke-radius-sm);
     padding: 8px;
     cursor: pointer;
     font: 12px var(--ke-font-ui);
@@ -1305,7 +1317,7 @@
   .preview :global(h2),
   .preview :global(h3) {
     line-height: 1.3;
-    font-family: var(--ke-font-serif, Georgia, serif);
+    font-family: var(--ke-font-heading);
     font-weight: 400;
   }
   .preview :global(h1) {
@@ -1319,7 +1331,7 @@
   }
   .empty {
     color: var(--ke-text-tertiary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
   [hidden] {
     display: none !important;

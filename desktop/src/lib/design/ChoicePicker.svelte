@@ -260,7 +260,7 @@
   .compact .choice-trigger {
     min-height: 32px;
     padding: 5px 8px;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     background: transparent;
   }
   .compact {
@@ -275,7 +275,7 @@
     display: block;
     margin-bottom: 7px;
     color: var(--ke-text-secondary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
   }
   .choice-trigger {
     display: flex;
@@ -290,7 +290,7 @@
     background: color-mix(in srgb, var(--ke-marker-sage) 10%, transparent);
     color: var(--ke-text-primary);
     font: inherit;
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
     text-align: left;
     cursor: pointer;
   }
@@ -330,7 +330,9 @@
     border: 1px solid var(--ke-border);
     border-radius: var(--ke-radius-md);
     background: var(--ke-surface-raised);
-    box-shadow: var(--ke-shadow-search);
+    box-shadow: var(--ke-overlay-shadow);
+    transform-origin: top left;
+    animation: ke-menu-in var(--ke-motion-base) var(--ke-motion-ease);
   }
   .choice-options {
     max-height: min(320px, 40vh);
@@ -358,7 +360,7 @@
     background: transparent;
     color: var(--ke-text-primary);
     font: inherit;
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
     text-align: left;
     cursor: pointer;
   }
@@ -369,7 +371,7 @@
     overflow-wrap: anywhere;
   }
   .option-copy small {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-tertiary);
   }
   .choice-picker .choice-option:hover:not(:disabled),

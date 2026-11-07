@@ -590,7 +590,7 @@
     margin-top: 6px;
   }
   .identity {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     overflow-wrap: anywhere;
   }
   pre {
@@ -601,11 +601,11 @@
     color: var(--ke-text-primary);
     background: var(--ke-surface-raised);
     border: 1px solid var(--ke-border);
-    border-radius: 6px;
+    border-radius: var(--ke-radius-sm);
   }
   .removal {
     border: 1px solid var(--ke-danger);
-    border-radius: 6px;
+    border-radius: var(--ke-radius-sm);
     padding: 16px;
     margin-top: 24px;
     background: var(--ke-surface-raised);

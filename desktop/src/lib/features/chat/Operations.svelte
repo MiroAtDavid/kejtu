@@ -3,6 +3,7 @@
   import Icon from "$lib/design/Icon.svelte";
   import { choiceSelect } from "$lib/design/choice-select";
   import { pageFade } from "$lib/design/page-fade";
+  import { navIndicator } from "$lib/design/nav-indicator";
   import Files from "../settings/Files.svelte";
   import Skills from "../settings/Skills.svelte";
   import Connections from "../settings/Connections.svelte";
@@ -284,7 +285,7 @@
 </script>
 
 <div class="operations">
-  <aside class="operations-nav">
+  <aside class="operations-nav" use:navIndicator={"nav button.selected"}>
     <h1>Settings</h1>
     <p class="nav-caption">Preferences and tools</p>
     <nav aria-label="Operations sections">
@@ -571,11 +572,8 @@
   }
   .operations-nav h1 {
     margin: 0 0.85rem 0.4rem;
-    font:
-      400 28px/1.25 Georgia,
-      "Times New Roman",
-      serif;
-    letter-spacing: -0.6px;
+    font: var(--ke-title-page);
+    letter-spacing: var(--ke-title-page-tracking);
   }
   .operations-nav nav {
     display: grid;
@@ -599,6 +597,13 @@
     background: var(--ke-surface-inset);
     color: var(--ke-text-primary);
     font-weight: 600;
+  }
+  .operations-nav:global(.has-nav-indicator) nav button {
+    position: relative;
+    z-index: 1;
+  }
+  .operations-nav:global(.has-nav-indicator) nav button.selected {
+    background: transparent;
   }
   .operations-nav nav button:disabled {
     opacity: 0.5;
@@ -698,7 +703,7 @@
   .overview-group {
     padding: 1.25rem 0.75rem 0.65rem;
     border: 0;
-    border-radius: 14px;
+    border-radius: var(--ke-radius-lg);
     background: var(--ke-surface-inset);
     min-width: 0;
   }
@@ -722,7 +727,7 @@
     gap: 1rem;
     text-align: left;
     border: 0;
-    border-radius: 8px;
+    border-radius: var(--ke-radius-md);
     padding: 0.8rem 0.65rem;
     background: transparent;
     color: var(--ke-text-primary);

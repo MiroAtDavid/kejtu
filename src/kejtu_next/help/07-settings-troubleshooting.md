@@ -4,7 +4,7 @@
 
 | Settings group | Panel | Purpose |
 | --- | --- | --- |
-| Everyday | Appearance | Theme, spacing, profile picture, chat thumbnails and activity rotation |
+| Everyday | Appearance | Theme, spacing, profile picture, chat thumbnails and activity animation |
 | Everyday | Models | Provider, endpoint, model, credentials, context, thinking and reply allowance |
 | Everyday | Web | Search provider, web access and search options/keys |
 | Skills & connections | Tools and time | Per-message operation and time allowances |
@@ -30,9 +30,11 @@ or uncertain operation cannot disappear behind another panel.
 
 In **Appearance → Conversation**, **Show your thumbnail** and **Show Kejtu’s
 thumbnail** control the pictures beside chat messages independently. Hiding your
-thumbnail keeps the saved picture available to show again. **Rotate Kejtu while
-working** switches the activity animation; when rotation or Kejtu’s thumbnail is
-off, three dots indicate ongoing work. These local choices apply immediately and
+thumbnail keeps the saved picture available to show again. **Animate Kejtu while
+working** switches the activity animation: Kejtu gathers its thoughts while
+preparing, then thinks, searches, reads or writes along with the reply, works at
+a laptop while using tools and blinks once when an answer is finished. When animation or Kejtu’s thumbnail is off, three dots
+indicate ongoing work. These local choices apply immediately and
 are remembered across restarts. The computer’s reduced-motion preference stops
 the animation. Turning off a picture or animation does not stop a reply.
 

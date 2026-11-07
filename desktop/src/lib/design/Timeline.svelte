@@ -109,20 +109,17 @@
     font-variant-numeric: tabular-nums;
   }
   .weekday {
-    font-size: 10px;
-    letter-spacing: 0.08em;
+    font: var(--ke-label-font);
+    letter-spacing: var(--ke-label-tracking);
     text-transform: uppercase;
   }
   .day {
-    font:
-      400 28px/1.2 Georgia,
-      "Times New Roman",
-      serif;
+    font: 400 28px/1.2 var(--ke-font-heading);
     color: var(--ke-text-primary);
     margin: 2px 0;
   }
   .month {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     white-space: nowrap;
   }
   .timeline-body {
@@ -142,7 +139,7 @@
     color: var(--ke-text-primary);
   }
   .timeline-category {
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     line-height: 1.6;
     color: var(--ke-text-secondary);
     border-radius: var(--ke-radius-sm);

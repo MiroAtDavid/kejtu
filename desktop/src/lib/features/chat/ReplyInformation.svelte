@@ -49,14 +49,18 @@
     max-height: calc(100dvh - 64px);
     padding: 22px;
     border: 1px solid var(--ke-border);
-    border-radius: 10px;
+    border-radius: var(--ke-overlay-radius);
     background: var(--ke-surface);
     color: var(--ke-text-primary);
-    box-shadow: var(--ke-shadow-panel);
+    box-shadow: var(--ke-overlay-shadow);
     overflow: auto;
+    animation: ke-dialog-in var(--ke-motion-slow) var(--ke-motion-ease);
   }
   dialog::backdrop {
-    background: rgb(0 0 0 / 22%);
+    background: var(--ke-scrim, rgb(0 0 0 / 0.32));
+    /* Older engines do not let ::backdrop inherit custom properties. */
+    animation: ke-fade-in var(--ke-motion-slow, 260ms)
+      var(--ke-motion-ease, ease-out);
   }
   header {
     display: flex;
@@ -67,17 +71,16 @@
   }
   h2 {
     margin: 0 0 6px;
-    font:
-      400 23px/1.25 Georgia,
-      serif;
+    font: var(--ke-title-section);
+    letter-spacing: var(--ke-title-section-tracking);
   }
   time {
     color: var(--ke-text-tertiary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
   }
   .close {
     border: 0;
-    border-radius: 5px;
+    border-radius: var(--ke-radius-sm);
     background: transparent;
     color: var(--ke-text-secondary);
     width: 28px;

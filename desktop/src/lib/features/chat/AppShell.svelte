@@ -3,6 +3,7 @@
   import { NATIVE_READINESS_MARKER } from "$lib/api/client";
   import { quietScrollbar } from "$lib/design/quiet-scrollbar";
   import { pageFade } from "$lib/design/page-fade";
+  import { navIndicator } from "$lib/design/nav-indicator";
   import Icon from "$lib/design/Icon.svelte";
   import { tick } from "svelte";
   import MainNavigation from "./MainNavigation.svelte";
@@ -169,6 +170,7 @@
         class="column column-left"
         aria-label="Workspace navigation"
         use:quietScrollbar
+        use:navIndicator={".sidebar-menu-row.current"}
       >
         {#if compact}<button
             class="icon-action nav-close"

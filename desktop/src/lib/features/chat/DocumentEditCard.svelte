@@ -40,7 +40,7 @@
   .document-edit {
     border-left: 2px solid var(--ke-border-strong);
     padding: 5px 12px;
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
     font-weight: 400;
     line-height: 1.6;
     white-space: normal;
@@ -50,14 +50,14 @@
     align-items: center;
     gap: 7px;
     color: var(--ke-text-secondary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
   }
   p {
     margin: 7px 0;
     white-space: pre-wrap;
   }
   details {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-tertiary);
   }
   summary {

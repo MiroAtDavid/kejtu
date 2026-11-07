@@ -22,7 +22,7 @@
   const chatChoices: { key: keyof ChatAppearance; label: string }[] = [
     { key: "userThumbnail", label: "Show your thumbnail" },
     { key: "kejtuThumbnail", label: "Show Kejtu’s thumbnail" },
-    { key: "rotateKejtu", label: "Rotate Kejtu while working" },
+    { key: "rotateKejtu", label: "Animate Kejtu while working" },
   ];
   const palettes: {
     id: PaletteChoice;
@@ -142,7 +142,7 @@
     {/each}
   </div>
   <p class="hint">
-    Three dots show activity when rotation or Kejtu’s thumbnail is off.
+    Three dots show activity when animation or Kejtu’s thumbnail is off.
   </p>
   {#if !saved}
     <p role="status">
@@ -158,14 +158,6 @@
   section {
     max-width: 560px;
   }
-  h3 {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1.4px;
-    font-weight: 500;
-    color: var(--ke-text-secondary);
-    margin: 28px 0 12px;
-  }
   .choices {
     display: flex;
     gap: 8px;
@@ -178,7 +170,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     cursor: pointer;
   }
   .chat-choices input {
@@ -187,12 +179,12 @@
   }
   button {
     border: 1px solid var(--ke-border);
-    border-radius: 6px;
+    border-radius: var(--ke-radius-sm);
     background: none;
     color: var(--ke-text-secondary);
     padding: 8px 12px;
     font: inherit;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     cursor: pointer;
   }
   button[aria-pressed="true"] {
@@ -226,12 +218,12 @@
   }
   .description strong {
     display: block;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     font-weight: 500;
   }
   .description small {
     display: block;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-secondary);
     margin-top: 5px;
   }
@@ -255,7 +247,7 @@
   }
   .hint {
     color: var(--ke-text-secondary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     line-height: 1.7;
   }
 </style>

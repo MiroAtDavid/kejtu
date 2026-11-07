@@ -74,7 +74,7 @@ button {
 ::-webkit-scrollbar-thumb {
   min-height: 24px;
   border: 2px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--ke-radius-pill);
   background-color: var(--ke-border-strong);
   background-clip: padding-box;
 }
@@ -143,6 +143,60 @@ button {
   outline: 2px solid var(--ke-focus-ring);
   outline-offset: 2px;
   border-radius: var(--ke-radius-sm);
+}
+
+/* Shared entrances. Floating surfaces open from where they were asked for:
+   menus and pickers drop in slightly, dialogs rise, side sheets slide in from
+   their edge. Individual `translate`/`scale` compose with any positioning
+   transform a surface already uses. Closing stays immediate. */
+@keyframes ke-menu-in {
+  from {
+    opacity: 0;
+    translate: 0 -4px;
+    scale: 0.98;
+  }
+}
+@keyframes ke-dialog-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+    scale: 0.99;
+  }
+}
+@keyframes ke-sheet-in {
+  from {
+    opacity: 0;
+    translate: 24px 0;
+  }
+}
+@keyframes ke-sheet-in-start {
+  from {
+    opacity: 0;
+    translate: -24px 0;
+  }
+}
+@keyframes ke-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* One sliding highlight for navigation columns (design/nav-indicator.ts). It
+   draws the current row's background, so moving between destinations shows
+   where you went. Rows stay above it and keep their own text state. */
+.nav-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+  background: var(--ke-surface-inset);
+  transition:
+    transform var(--ke-motion-slow) var(--ke-motion-ease),
+    width var(--ke-motion-slow) var(--ke-motion-ease),
+    height var(--ke-motion-slow) var(--ke-motion-ease),
+    opacity var(--ke-motion-fast) var(--ke-motion-ease);
 }
 
 /* All purposeful motion is gated on the OS reduced-motion preference. No state

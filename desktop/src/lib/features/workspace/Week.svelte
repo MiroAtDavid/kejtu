@@ -699,7 +699,7 @@
 <style>
   .calendar-options {
     margin: 0 0 12px;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-tertiary);
   }
   .calendar-options summary {
@@ -713,9 +713,9 @@
   }
 
   .eyebrow {
-    font: 9px var(--ke-font-mono);
+    font: var(--ke-label-font);
     text-transform: uppercase;
-    letter-spacing: 0.12em;
+    letter-spacing: var(--ke-label-tracking);
     color: var(--ke-text-tertiary);
     margin: 0 0 12px;
   }
@@ -736,15 +736,15 @@
   .calendar-controls input {
     width: 142px;
     flex: 0 0 142px;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     padding: 5px;
   }
   .calendar-toolbar button:not(.workspace-action) {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     padding: 5px 9px;
   }
   .date-range {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     margin-left: 10px;
   }
   .calendar-caption {
@@ -752,7 +752,7 @@
     justify-content: space-between;
     gap: 16px;
     color: var(--ke-text-tertiary);
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     padding: 10px 0 24px;
   }
   .week-bottom {
@@ -762,9 +762,8 @@
   }
   .week-bottom h2,
   .planning-panel h2 {
-    font:
-      400 22px Georgia,
-      serif;
+    font: var(--ke-title-section);
+    letter-spacing: var(--ke-title-section-tracking);
     margin: 0 0 16px;
   }
   .week-bottom .eyebrow {
@@ -788,22 +787,22 @@
     background: none;
   }
   .agenda-event strong {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     font-weight: 500;
     overflow-wrap: anywhere;
   }
   .agenda-event small {
     display: block;
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     margin-top: 4px;
     color: var(--ke-text-tertiary);
   }
   .agenda-time {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-secondary);
   }
   .empty-day {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     color: var(--ke-text-tertiary);
     padding: 12px 0;
   }
@@ -812,21 +811,21 @@
     border-bottom: 1px solid var(--ke-border);
   }
   .task-line strong {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     font-weight: 500;
   }
   .task-line p {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     margin: 5px 0;
   }
   .task-line button {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     padding: 4px 8px;
     margin-right: 8px;
   }
   .planning-panel {
     border: 1px solid var(--ke-border);
-    border-radius: 8px;
+    border-radius: var(--ke-radius-md);
     padding: 20px;
     margin: 0 0 24px;
   }
@@ -842,7 +841,7 @@
     gap: 12px;
     margin-top: 8px;
     color: var(--ke-text-tertiary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
   }
   .cutoff-help button {
     font-size: inherit;
@@ -851,14 +850,14 @@
   .slot {
     display: block;
     margin-top: 8px;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
   .calendar-notes {
     margin-top: 24px;
     color: var(--ke-text-tertiary);
   }
   .calendar-notes summary {
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
   }
   .day-agenda:focus-visible {
     outline: 2px solid var(--ke-accent);

@@ -128,19 +128,23 @@
     overflow: auto;
     box-sizing: border-box;
     border: 1px solid var(--ke-border);
-    border-radius: 12px;
+    border-radius: var(--ke-overlay-radius);
     padding: 26px;
     color: var(--ke-text-primary);
     background: var(--ke-surface);
-    box-shadow: 0 16px 60px #0003;
+    box-shadow: var(--ke-overlay-shadow);
+    animation: ke-dialog-in var(--ke-motion-slow) var(--ke-motion-ease);
   }
   dialog::backdrop {
-    background: #0006;
+    background: var(--ke-scrim, rgb(0 0 0 / 0.32));
+    /* Older engines do not let ::backdrop inherit custom properties. */
+    animation: ke-fade-in var(--ke-motion-slow, 260ms)
+      var(--ke-motion-ease, ease-out);
   }
   .eyebrow {
     margin: 0 0 8px;
     color: var(--ke-text-secondary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
   h2 {
     margin: 0;
@@ -159,7 +163,7 @@
     background: var(--ke-surface-inset);
     color: var(--ke-text-primary);
     font: inherit;
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
     cursor: pointer;
   }
   button:focus-visible {
@@ -181,8 +185,8 @@
     margin-top: 20px;
   }
   .error {
-    color: var(--ke-error, #bd4343);
-    font-size: 13px;
+    color: var(--ke-danger);
+    font-size: var(--ke-text-sm);
     line-height: 1.5;
   }
 </style>

@@ -551,7 +551,7 @@
   }
   .page-label,
   .save-status {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-tertiary);
     margin-left: 8px;
   }
@@ -571,7 +571,7 @@
     place-items: center;
     background: var(--ke-surface);
     color: var(--ke-text-tertiary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
   .reader {
     position: relative;
@@ -583,6 +583,5 @@
     height: 100%;
     border: 0;
     display: block;
-    background: var(--ke-surface-page);
   }
 </style>

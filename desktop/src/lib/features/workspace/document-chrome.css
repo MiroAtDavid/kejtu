@@ -22,7 +22,7 @@
   border: 0;
   background: transparent;
   color: var(--ke-text-secondary);
-  border-radius: 4px;
+  border-radius: var(--ke-radius-sm);
   font: 11px var(--ke-font-ui);
   min-height: 32px;
   height: 32px;
@@ -54,7 +54,7 @@
 }
 .workspace .document-toolbar .state,
 .workspace .document-toolbar .status {
-  font-size: 11px;
+  font-size: var(--ke-text-2xs);
   color: var(--ke-text-tertiary);
   margin-left: 8px;
 }
@@ -90,7 +90,7 @@
 .markdown-editor .surface ::-webkit-scrollbar-thumb,
 .markdown-editor .surface .preview::-webkit-scrollbar-thumb {
   border: 2px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--ke-radius-pill);
   background-clip: padding-box;
 }
 /* MDXEditor's diff plugin inserts two wrappers with auto height. Both must carry

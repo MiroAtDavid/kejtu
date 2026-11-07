@@ -122,7 +122,7 @@
     display: flex;
     gap: 1.15rem;
     padding: 1.5rem;
-    border-radius: 14px;
+    border-radius: var(--ke-radius-lg);
     background: var(--ke-surface-inset);
   }
   .start-icon,
@@ -156,7 +156,7 @@
   }
   .help .browse-title {
     margin: 2rem 0 0.75rem;
-    font-size: 14px;
+    font-size: var(--ke-text-base);
     font-weight: 500;
   }
   .topics {
@@ -171,21 +171,21 @@
     padding: 1rem;
     text-align: left;
     background: transparent;
-    border-radius: 10px;
+    border-radius: var(--ke-radius-lg);
   }
   .topics button > span:nth-child(2) {
     min-width: 0;
   }
   .topics strong {
     display: block;
-    font-size: 14px;
+    font-size: var(--ke-text-base);
     font-weight: 500;
   }
   .topics small {
     display: block;
     margin-top: 0.3rem;
     color: var(--ke-text-secondary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     line-height: 1.5;
   }
   .chevron {
@@ -207,7 +207,7 @@
   }
   .help .topic-title {
     margin: 0 0 1rem;
-    font-family: var(--ke-font-display);
+    font-family: var(--ke-font-heading);
     font-size: 24px;
     line-height: 1.3;
     font-weight: 400;
@@ -224,7 +224,7 @@
   summary {
     padding: 1rem 0;
     cursor: pointer;
-    font-size: 14px;
+    font-size: var(--ke-text-base);
     font-weight: 500;
   }
   details[open] summary {
@@ -237,14 +237,14 @@
     margin: 0 0 1rem;
   }
   .prose :global(h3) {
-    font-size: 14px;
+    font-size: var(--ke-text-base);
     margin: 1.25rem 0 0.6rem;
     font-weight: 600;
   }
   .prose :global(table) {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
   }
   .prose :global(th),
   .prose :global(td) {
@@ -257,7 +257,7 @@
     margin: 1rem 0;
     padding: 0.75rem 1rem;
     background: var(--ke-surface-inset);
-    border-radius: 8px;
+    border-radius: var(--ke-radius-md);
   }
   .prose :global(blockquote p:last-child) {
     margin: 0;
@@ -273,15 +273,15 @@
     padding: 1.25rem;
     margin-top: 2rem;
     background: var(--ke-surface-inset);
-    border-radius: 12px;
+    border-radius: var(--ke-radius-lg);
   }
   .ask strong {
-    font-size: 14px;
+    font-size: var(--ke-text-base);
     font-weight: 500;
   }
   .ask p {
     margin: 0.25rem 0 0;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     color: var(--ke-text-secondary);
   }
   .ask button {

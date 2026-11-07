@@ -246,25 +246,25 @@
       "source_sha256": "2d0338d12e7aa3f94333e3cb43e37f0cd257d6e4d78f9f495fb8f33d56271773"
     },
     "desktop/src/lib/design/ChatAvatar.svelte": {
-      "bytes": 1832,
+      "bytes": 1619,
       "mode": "100644",
-      "sha256": "4f2be1665c66137e13b29145439729dc8d362acab92c8bc5f779c94fee8f87f1",
+      "sha256": "e616fd345d39a31dc50303be981e473d0cf186414942c6f058534b6009d23901",
       "source": "desktop/src/lib/design/ChatAvatar.svelte",
-      "source_sha256": "4f2be1665c66137e13b29145439729dc8d362acab92c8bc5f779c94fee8f87f1"
+      "source_sha256": "e616fd345d39a31dc50303be981e473d0cf186414942c6f058534b6009d23901"
     },
     "desktop/src/lib/design/ChoicePicker.svelte": {
-      "bytes": 11135,
+      "bytes": 11307,
       "mode": "100644",
-      "sha256": "2086f84ba9fafb8568465d0f4d175d993251c605bd23891ab8ebc8e116aac1ba",
+      "sha256": "faa530a68c68b40b578bab3d8988704b89fa448f6cda3b90f3cee2a362d6e221",
       "source": "desktop/src/lib/design/ChoicePicker.svelte",
-      "source_sha256": "2086f84ba9fafb8568465d0f4d175d993251c605bd23891ab8ebc8e116aac1ba"
+      "source_sha256": "faa530a68c68b40b578bab3d8988704b89fa448f6cda3b90f3cee2a362d6e221"
     },
     "desktop/src/lib/design/ChoiceSelect.svelte": {
-      "bytes": 934,
+      "bytes": 947,
       "mode": "100644",
-      "sha256": "2fadd36c0da3c241ee8ac28c6dd429212c0b67e5f85124b99289fa9cc69f5fbe",
+      "sha256": "01fe12a837ad4b974ae94160d0e4007228b275ca5f62186cbc488cc35bceb32b",
       "source": "desktop/src/lib/design/ChoiceSelect.svelte",
-      "source_sha256": "2fadd36c0da3c241ee8ac28c6dd429212c0b67e5f85124b99289fa9cc69f5fbe"
+      "source_sha256": "01fe12a837ad4b974ae94160d0e4007228b275ca5f62186cbc488cc35bceb32b"
     },
     "desktop/src/lib/design/Icon.svelte": {
       "bytes": 1934,
@@ -273,12 +273,19 @@
       "source": "desktop/src/lib/design/Icon.svelte",
       "source_sha256": "b3ddb98669aba772685f6ee288c56698573b36320e7aa98489b718fa23dbaec5"
     },
-    "desktop/src/lib/design/PageHeading.svelte": {
-      "bytes": 799,
+    "desktop/src/lib/design/KejtuMark.svelte": {
+      "bytes": 13878,
       "mode": "100644",
-      "sha256": "2fbaea5d2012ae7ddabb3ce0244177c076be0c834d43c929a29ddf3cd8e1efdd",
+      "sha256": "4d071c3c360aec736d258dfb7197661f9dc72069ac68c520a71cc4b0d1b6a37e",
+      "source": "desktop/src/lib/design/KejtuMark.svelte",
+      "source_sha256": "4d071c3c360aec736d258dfb7197661f9dc72069ac68c520a71cc4b0d1b6a37e"
+    },
+    "desktop/src/lib/design/PageHeading.svelte": {
+      "bytes": 790,
+      "mode": "100644",
+      "sha256": "6756c7fda7a5c2e0244bd581a673d60c2f088abaa7e105b6c52501e744fdbae6",
       "source": "desktop/src/lib/design/PageHeading.svelte",
-      "source_sha256": "2fbaea5d2012ae7ddabb3ce0244177c076be0c834d43c929a29ddf3cd8e1efdd"
+      "source_sha256": "6756c7fda7a5c2e0244bd581a673d60c2f088abaa7e105b6c52501e744fdbae6"
     },
     "desktop/src/lib/design/SidebarIdentity.svelte": {
       "bytes": 1221,
@@ -288,25 +295,25 @@
       "source_sha256": "f7b5516b41258e46c26fe4397273c0ce0ab2669a5dd248da80532c4d27be6ec7"
     },
     "desktop/src/lib/design/Timeline.svelte": {
-      "bytes": 5631,
+      "bytes": 5659,
       "mode": "100644",
-      "sha256": "83d450dbe5640f11739a8a00a6bba2d60c0f3993ba62558cff1aea1d2dd8cc94",
+      "sha256": "7f6086367d1fa9f6f6430c286340c5cee3907a1114ea4915784750c1eee3e559",
       "source": "desktop/src/lib/design/Timeline.svelte",
-      "source_sha256": "83d450dbe5640f11739a8a00a6bba2d60c0f3993ba62558cff1aea1d2dd8cc94"
+      "source_sha256": "7f6086367d1fa9f6f6430c286340c5cee3907a1114ea4915784750c1eee3e559"
     },
     "desktop/src/lib/design/Wordmark.svelte": {
-      "bytes": 452,
+      "bytes": 417,
       "mode": "100644",
-      "sha256": "074c332f7c904549cf81edb250b19d8c965ea703e4384fc5f0504e54209da847",
+      "sha256": "87b84f6fe01742ca72fa3ea677940f682a0e94682fe4c1e3e9149ff63adaaa38",
       "source": "desktop/src/lib/design/Wordmark.svelte",
-      "source_sha256": "074c332f7c904549cf81edb250b19d8c965ea703e4384fc5f0504e54209da847"
+      "source_sha256": "87b84f6fe01742ca72fa3ea677940f682a0e94682fe4c1e3e9149ff63adaaa38"
     },
     "desktop/src/lib/design/chat.css": {
-      "bytes": 4419,
+      "bytes": 5763,
       "mode": "100644",
-      "sha256": "8311502b12e2a5b54df06c9cd5ec91be24d6de2c2455e1a1e26db20c69119d0e",
+      "sha256": "6120ba68f9a065eaaed7e984379c6076231f771e59c94ab57e0b35427bbda021",
       "source": "desktop/src/lib/design/chat.css",
-      "source_sha256": "8311502b12e2a5b54df06c9cd5ec91be24d6de2c2455e1a1e26db20c69119d0e"
+      "source_sha256": "6120ba68f9a065eaaed7e984379c6076231f771e59c94ab57e0b35427bbda021"
     },
     "desktop/src/lib/design/choice-select.ts": {
       "bytes": 6423,
@@ -315,12 +322,26 @@
       "source": "desktop/src/lib/design/choice-select.ts",
       "source_sha256": "bcb58605cbe085a78a20c993e7129f943c8671199de2aac08d13f455dab1fe1b"
     },
-    "desktop/src/lib/design/page-fade.ts": {
-      "bytes": 1017,
+    "desktop/src/lib/design/kejtu-state.ts": {
+      "bytes": 1480,
       "mode": "100644",
-      "sha256": "bf84dff687daca2afdd81cab93055a910b274b077f15599f7f82ef0ae4124355",
+      "sha256": "c80b87cf210625f211c039294834e422fbffd5013f6c1b8d842ab6352c1ffb94",
+      "source": "desktop/src/lib/design/kejtu-state.ts",
+      "source_sha256": "c80b87cf210625f211c039294834e422fbffd5013f6c1b8d842ab6352c1ffb94"
+    },
+    "desktop/src/lib/design/nav-indicator.ts": {
+      "bytes": 3271,
+      "mode": "100644",
+      "sha256": "d3dfc82c50089cefd05f8cb019d7f04b80eede8aa26904a9aded9a0b8b7923af",
+      "source": "desktop/src/lib/design/nav-indicator.ts",
+      "source_sha256": "d3dfc82c50089cefd05f8cb019d7f04b80eede8aa26904a9aded9a0b8b7923af"
+    },
+    "desktop/src/lib/design/page-fade.ts": {
+      "bytes": 1883,
+      "mode": "100644",
+      "sha256": "1a1ac7eb1be20dab399b207933e65b77f649013ae4092f47d68a34677517895d",
       "source": "desktop/src/lib/design/page-fade.ts",
-      "source_sha256": "bf84dff687daca2afdd81cab93055a910b274b077f15599f7f82ef0ae4124355"
+      "source_sha256": "1a1ac7eb1be20dab399b207933e65b77f649013ae4092f47d68a34677517895d"
     },
     "desktop/src/lib/design/quiet-scrollbar.ts": {
       "bytes": 1595,
@@ -344,11 +365,11 @@
       "source_sha256": "1167b7f78351c86bf1333bdb49c4503c00850e949f7478c015d666b54e7007ee"
     },
     "desktop/src/lib/design/tokens.css": {
-      "bytes": 15097,
+      "bytes": 16608,
       "mode": "100644",
-      "sha256": "40d9028d50d9e583f4467a5a5742a177f40982bd10e88e012f3fcc3c36736f5c",
+      "sha256": "77c0c71cf96f6d785e091886c3554a779c4e235b0a6acc8bc624d5f543518c6d",
       "source": "desktop/src/lib/design/tokens.css",
-      "source_sha256": "40d9028d50d9e583f4467a5a5742a177f40982bd10e88e012f3fcc3c36736f5c"
+      "source_sha256": "77c0c71cf96f6d785e091886c3554a779c4e235b0a6acc8bc624d5f543518c6d"
     },
     "desktop/src/lib/design/user-avatar.ts": {
       "bytes": 3181,
@@ -358,11 +379,11 @@
       "source_sha256": "73282898e2fb307beb854f32690f6a444a0482345c534cb28b318a6829975f6a"
     },
     "desktop/src/lib/features/background/Background.svelte": {
-      "bytes": 2828,
+      "bytes": 2841,
       "mode": "100644",
-      "sha256": "9038781e62f2a8444d46badf0ce2b2dd43751eb7be4b132a6c85aa7363175024",
+      "sha256": "4e6012db0362cfd4e7c448bf27d040fc8ae282bf1e35dbea0b5ba74f368c3cc4",
       "source": "desktop/src/lib/features/background/Background.svelte",
-      "source_sha256": "9038781e62f2a8444d46badf0ce2b2dd43751eb7be4b132a6c85aa7363175024"
+      "source_sha256": "4e6012db0362cfd4e7c448bf27d040fc8ae282bf1e35dbea0b5ba74f368c3cc4"
     },
     "desktop/src/lib/features/background/Care.svelte": {
       "bytes": 18929,
@@ -407,25 +428,25 @@
       "source_sha256": "f2c1fda1f34ed8ba6319a6b90ae2c11f7cefc272e1601e28cba1922ee6e93882"
     },
     "desktop/src/lib/features/chat/Activity.svelte": {
-      "bytes": 3406,
+      "bytes": 3551,
       "mode": "100644",
-      "sha256": "baf3ca27cd941ea8584e8df85b9b6beec608b4cd3b47fc140b25abcdeb7ba9d2",
+      "sha256": "cbb114fdcead1ee08185527ad4de5fd0680195f384d29cb3163d53913400a14f",
       "source": "desktop/src/lib/features/chat/Activity.svelte",
-      "source_sha256": "baf3ca27cd941ea8584e8df85b9b6beec608b4cd3b47fc140b25abcdeb7ba9d2"
+      "source_sha256": "cbb114fdcead1ee08185527ad4de5fd0680195f384d29cb3163d53913400a14f"
     },
     "desktop/src/lib/features/chat/AnswerDetails.svelte": {
-      "bytes": 11995,
+      "bytes": 12079,
       "mode": "100644",
-      "sha256": "d19e0c117ca9dabe86a24de9882959128e1076aab754fdf9d5d4835b0e54e2bc",
+      "sha256": "30723ff344a4ae85351052bf6a465acb65eacdbbbe1d303e9d43f12bb06f169b",
       "source": "desktop/src/lib/features/chat/AnswerDetails.svelte",
-      "source_sha256": "d19e0c117ca9dabe86a24de9882959128e1076aab754fdf9d5d4835b0e54e2bc"
+      "source_sha256": "30723ff344a4ae85351052bf6a465acb65eacdbbbe1d303e9d43f12bb06f169b"
     },
     "desktop/src/lib/features/chat/AppShell.svelte": {
-      "bytes": 7136,
+      "bytes": 7251,
       "mode": "100644",
-      "sha256": "e5880df4106e865f9519e33e2e712496bd9c7c4f2e708a7b91f01e52dfc51e98",
+      "sha256": "c1ab69874d2715f5d9d94714546cdf15b33386a7e7ab28e531ca8fa27f3a1bdc",
       "source": "desktop/src/lib/features/chat/AppShell.svelte",
-      "source_sha256": "e5880df4106e865f9519e33e2e712496bd9c7c4f2e708a7b91f01e52dfc51e98"
+      "source_sha256": "c1ab69874d2715f5d9d94714546cdf15b33386a7e7ab28e531ca8fa27f3a1bdc"
     },
     "desktop/src/lib/features/chat/CodeBlock.svelte": {
       "bytes": 1493,
@@ -435,11 +456,11 @@
       "source_sha256": "ea2bf9d732ee0858d9104f7e4925be4abbf04703d7b48ef628a3a89fa2b9c745"
     },
     "desktop/src/lib/features/chat/Composer.svelte": {
-      "bytes": 21499,
+      "bytes": 21513,
       "mode": "100644",
-      "sha256": "e37f71ff9c19116b5da5d6a19becc267ef3331789b7c6680cf23f2edf3cba389",
+      "sha256": "79e11d09b6aa34c5aac943a42083f69c1f3ab3fcef12335949b8245a0de8bf08",
       "source": "desktop/src/lib/features/chat/Composer.svelte",
-      "source_sha256": "e37f71ff9c19116b5da5d6a19becc267ef3331789b7c6680cf23f2edf3cba389"
+      "source_sha256": "79e11d09b6aa34c5aac943a42083f69c1f3ab3fcef12335949b8245a0de8bf08"
     },
     "desktop/src/lib/features/chat/ContextLine.svelte": {
       "bytes": 1512,
@@ -456,18 +477,18 @@
       "source_sha256": "4c3c5869dd21ee5be02210adf18c59b796afc4f474606ec5d5d78ace71376e05"
     },
     "desktop/src/lib/features/chat/DocumentEditCard.svelte": {
-      "bytes": 1765,
+      "bytes": 1806,
       "mode": "100644",
-      "sha256": "94bb50f96391b077ccf47c293fe14f66bbb304557160294574bc69bcce3d77b7",
+      "sha256": "cb0ea06423d1d4a8ecf440135a14177dee962ee3671ea2dc539d16ade697dfb7",
       "source": "desktop/src/lib/features/chat/DocumentEditCard.svelte",
-      "source_sha256": "94bb50f96391b077ccf47c293fe14f66bbb304557160294574bc69bcce3d77b7"
+      "source_sha256": "cb0ea06423d1d4a8ecf440135a14177dee962ee3671ea2dc539d16ade697dfb7"
     },
     "desktop/src/lib/features/chat/DocumentSessionCard.svelte": {
-      "bytes": 3083,
+      "bytes": 3124,
       "mode": "100644",
-      "sha256": "f9542a01db336f9ea2233f41953d7afb862664e410b0a9186863a677f37ef9d7",
+      "sha256": "8300256fedd2bd33587dad0cdb7011a4f4fb4a610ca5fbebcb385eef236ea4b2",
       "source": "desktop/src/lib/features/chat/DocumentSessionCard.svelte",
-      "source_sha256": "f9542a01db336f9ea2233f41953d7afb862664e410b0a9186863a677f37ef9d7"
+      "source_sha256": "8300256fedd2bd33587dad0cdb7011a4f4fb4a610ca5fbebcb385eef236ea4b2"
     },
     "desktop/src/lib/features/chat/ImageGallery.svelte": {
       "bytes": 4080,
@@ -477,25 +498,25 @@
       "source_sha256": "add2b990c1363399cd8145586312f674c2d1fd112b551e84460b4735b086e627"
     },
     "desktop/src/lib/features/chat/ImageTile.svelte": {
-      "bytes": 2320,
+      "bytes": 2336,
       "mode": "100644",
-      "sha256": "6c3b691ef24d03b02a078ad61b7ef596030946260dd43fcc92bde8b33128854d",
+      "sha256": "01fff4deee89f3f52126cd3496f4b75f3db77ae49cfd125c54031a069a71a08c",
       "source": "desktop/src/lib/features/chat/ImageTile.svelte",
-      "source_sha256": "6c3b691ef24d03b02a078ad61b7ef596030946260dd43fcc92bde8b33128854d"
+      "source_sha256": "01fff4deee89f3f52126cd3496f4b75f3db77ae49cfd125c54031a069a71a08c"
     },
     "desktop/src/lib/features/chat/ImageViewer.svelte": {
-      "bytes": 8799,
+      "bytes": 9044,
       "mode": "100644",
-      "sha256": "410d7b28de77329a411c101b2584d567570b615a38bb07761fed7b6afa51825c",
+      "sha256": "c9501a03b593637dd75b38550db1316aadda35f7351dd7b4a536188cf13b3380",
       "source": "desktop/src/lib/features/chat/ImageViewer.svelte",
-      "source_sha256": "410d7b28de77329a411c101b2584d567570b615a38bb07761fed7b6afa51825c"
+      "source_sha256": "c9501a03b593637dd75b38550db1316aadda35f7351dd7b4a536188cf13b3380"
     },
     "desktop/src/lib/features/chat/JournalIndex.svelte": {
-      "bytes": 7064,
+      "bytes": 7108,
       "mode": "100644",
-      "sha256": "33779439916aa6b1a78abd980f33c15f168ad26550a7404ecd7219708b14b718",
+      "sha256": "b9315a35d18c42ff4fb25ecefd0fe8ae3c1bb37b0ebebfdeaa0c34f7eba2e357",
       "source": "desktop/src/lib/features/chat/JournalIndex.svelte",
-      "source_sha256": "33779439916aa6b1a78abd980f33c15f168ad26550a7404ecd7219708b14b718"
+      "source_sha256": "b9315a35d18c42ff4fb25ecefd0fe8ae3c1bb37b0ebebfdeaa0c34f7eba2e357"
     },
     "desktop/src/lib/features/chat/Latest.svelte": {
       "bytes": 821,
@@ -512,11 +533,11 @@
       "source_sha256": "e4bcf12b5b95261bf218b0c49b05710429415f6b11c61a3416e6fb57dd38e71d"
     },
     "desktop/src/lib/features/chat/MessageActions.svelte": {
-      "bytes": 9099,
+      "bytes": 9425,
       "mode": "100644",
-      "sha256": "74799c9e1b6cd8872a7304ffde7179e19bbe45a35de73b59e766bad366031c4e",
+      "sha256": "fd4efc5d5dee1f01bfdf7768ff829eee7211333e5984be6975aa15406a8f4b31",
       "source": "desktop/src/lib/features/chat/MessageActions.svelte",
-      "source_sha256": "74799c9e1b6cd8872a7304ffde7179e19bbe45a35de73b59e766bad366031c4e"
+      "source_sha256": "fd4efc5d5dee1f01bfdf7768ff829eee7211333e5984be6975aa15406a8f4b31"
     },
     "desktop/src/lib/features/chat/MessageBody.svelte": {
       "bytes": 6024,
@@ -526,18 +547,18 @@
       "source_sha256": "de9a64e36ba2690cb26bf7cc7033baf939aa5e2b6d426a6286a025d487717df4"
     },
     "desktop/src/lib/features/chat/Operations.svelte": {
-      "bytes": 24262,
+      "bytes": 24574,
       "mode": "100644",
-      "sha256": "ca3dbf15bbd5fc8ca9dcbbecade1b4246873f8e3734720a647c4aea653dea190",
+      "sha256": "12c77b8930f11aee79f6956247d2b88bd4385bf4dd5a755029b293f9d9b49a71",
       "source": "desktop/src/lib/features/chat/Operations.svelte",
-      "source_sha256": "ca3dbf15bbd5fc8ca9dcbbecade1b4246873f8e3734720a647c4aea653dea190"
+      "source_sha256": "12c77b8930f11aee79f6956247d2b88bd4385bf4dd5a755029b293f9d9b49a71"
     },
     "desktop/src/lib/features/chat/ReplyInformation.svelte": {
-      "bytes": 2293,
+      "bytes": 2640,
       "mode": "100644",
-      "sha256": "a8f72bbc722a2947cdc403fb6536b4b546bc723c649d31357dfdef39ae06ee6a",
+      "sha256": "8b1ed5caf40373edff034a2e37602fb198f102fffa8adec999bce69383568f6a",
       "source": "desktop/src/lib/features/chat/ReplyInformation.svelte",
-      "source_sha256": "a8f72bbc722a2947cdc403fb6536b4b546bc723c649d31357dfdef39ae06ee6a"
+      "source_sha256": "8b1ed5caf40373edff034a2e37602fb198f102fffa8adec999bce69383568f6a"
     },
     "desktop/src/lib/features/chat/RichText.svelte": {
       "bytes": 3327,
@@ -547,11 +568,11 @@
       "source_sha256": "59319ce3a97adc53b84628c2aa459f0c2b4a209163b22820c77d53a7a0f47531"
     },
     "desktop/src/lib/features/chat/SkillChooser.svelte": {
-      "bytes": 8581,
+      "bytes": 8752,
       "mode": "100644",
-      "sha256": "631426aa5db0ca6d46b322030c871fd754fccd07c35d3c139ab92b1ff2d8b206",
+      "sha256": "96b2a0ddc8dbcbb05edf7de69fab994397149a72de1743b90ed8e4f703fb5e68",
       "source": "desktop/src/lib/features/chat/SkillChooser.svelte",
-      "source_sha256": "631426aa5db0ca6d46b322030c871fd754fccd07c35d3c139ab92b1ff2d8b206"
+      "source_sha256": "96b2a0ddc8dbcbb05edf7de69fab994397149a72de1743b90ed8e4f703fb5e68"
     },
     "desktop/src/lib/features/chat/SourceLink.svelte": {
       "bytes": 1004,
@@ -561,11 +582,11 @@
       "source_sha256": "60e989111f500c0a8fe3604539d309d4634bd65696da3b509363921347c511b6"
     },
     "desktop/src/lib/features/chat/StudyRequestCard.svelte": {
-      "bytes": 4600,
+      "bytes": 4672,
       "mode": "100644",
-      "sha256": "946700445001ce6f582e91490d5be7db67211c53ef24e7b8af6763b8536bfda7",
+      "sha256": "b03a2336e7f9668a41e4fa607e1789f0e66229f9f1d9bf72a996ecb1e38b588f",
       "source": "desktop/src/lib/features/chat/StudyRequestCard.svelte",
-      "source_sha256": "946700445001ce6f582e91490d5be7db67211c53ef24e7b8af6763b8536bfda7"
+      "source_sha256": "b03a2336e7f9668a41e4fa607e1789f0e66229f9f1d9bf72a996ecb1e38b588f"
     },
     "desktop/src/lib/features/chat/StudyRequestText.svelte": {
       "bytes": 756,
@@ -575,11 +596,11 @@
       "source_sha256": "3dafa655ab26a340c461ea1800fc9473c010c0504714a24e62025583b431c1d3"
     },
     "desktop/src/lib/features/chat/Transcript.svelte": {
-      "bytes": 40108,
+      "bytes": 40139,
       "mode": "100644",
-      "sha256": "c91c4520bab1afd8c4a23963216c7562b552be63697dc0badea0340cc05f5d34",
+      "sha256": "25d7f8cc9afd0a195c194a24a1503588edec0a0485d59936e47a56d34363cae2",
       "source": "desktop/src/lib/features/chat/Transcript.svelte",
-      "source_sha256": "c91c4520bab1afd8c4a23963216c7562b552be63697dc0badea0340cc05f5d34"
+      "source_sha256": "25d7f8cc9afd0a195c194a24a1503588edec0a0485d59936e47a56d34363cae2"
     },
     "desktop/src/lib/features/chat/TranscriptBatch.svelte": {
       "bytes": 4825,
@@ -645,11 +666,11 @@
       "source_sha256": "3117173c8660f3d2044ba50d07500a530affe141a5119cfc8c11edbdfb906a1c"
     },
     "desktop/src/lib/features/chat/shell.css": {
-      "bytes": 8649,
+      "bytes": 9548,
       "mode": "100644",
-      "sha256": "f83744b73e4557445104d014934942bccdb6bd8843273c318d900a3471cdd69c",
+      "sha256": "ad6c04c9962ab584814b8236d02e2e3083bb78f9d95cc64f09bcb8db10521ecc",
       "source": "desktop/src/lib/features/chat/shell.css",
-      "source_sha256": "f83744b73e4557445104d014934942bccdb6bd8843273c318d900a3471cdd69c"
+      "source_sha256": "ad6c04c9962ab584814b8236d02e2e3083bb78f9d95cc64f09bcb8db10521ecc"
     },
     "desktop/src/lib/features/chat/stream.ts": {
       "bytes": 2757,
@@ -680,25 +701,25 @@
       "source_sha256": "1ac7caf0ba76b54b6553e694f49f21e65a4977ec6ce5e04a32173e0713d48574"
     },
     "desktop/src/lib/features/development/NativePipeline.svelte": {
-      "bytes": 71977,
+      "bytes": 72063,
       "mode": "100644",
-      "sha256": "0f55a7654af4032243b52ace6d295c421af50cbd446b309f38a8d7372759e095",
+      "sha256": "4b2c1d9a6b2dcc0489fd82835eb1027b476165dbfd246ee7c7e952adc08ec5b3",
       "source": "desktop/src/lib/features/development/NativePipeline.svelte",
-      "source_sha256": "0f55a7654af4032243b52ace6d295c421af50cbd446b309f38a8d7372759e095"
+      "source_sha256": "4b2c1d9a6b2dcc0489fd82835eb1027b476165dbfd246ee7c7e952adc08ec5b3"
     },
     "desktop/src/lib/features/help/Help.svelte": {
-      "bytes": 8031,
+      "bytes": 8206,
       "mode": "100644",
-      "sha256": "037a491e5e029b5455a7e3edcb916346e2051ac3af4ece1d2174de4d57317b71",
+      "sha256": "2eb370736d4348c252aedd0a8e9623e75f83df8429385fab4f844e58dcfec13f",
       "source": "desktop/src/lib/features/help/Help.svelte",
-      "source_sha256": "037a491e5e029b5455a7e3edcb916346e2051ac3af4ece1d2174de4d57317b71"
+      "source_sha256": "2eb370736d4348c252aedd0a8e9623e75f83df8429385fab4f844e58dcfec13f"
     },
     "desktop/src/lib/features/help/Welcome.svelte": {
-      "bytes": 2698,
+      "bytes": 2781,
       "mode": "100644",
-      "sha256": "0bc81e01b7ab5b0f929742fdb0ce1eb6b22ff95d5b3606fe806faed87cac7c07",
+      "sha256": "8f83e8ba453507edf59a0926fc0c6bcc313a312538f317f1adfd19154c96fe2a",
       "source": "desktop/src/lib/features/help/Welcome.svelte",
-      "source_sha256": "0bc81e01b7ab5b0f929742fdb0ce1eb6b22ff95d5b3606fe806faed87cac7c07"
+      "source_sha256": "8f83e8ba453507edf59a0926fc0c6bcc313a312538f317f1adfd19154c96fe2a"
     },
     "desktop/src/lib/features/help/guide.ts": {
       "bytes": 2333,
@@ -708,18 +729,18 @@
       "source_sha256": "0e7a2bbcba17984006a5046dca2d40f87c1d05fd6b36e51f35f1341bd4888cd4"
     },
     "desktop/src/lib/features/notebook/Notebook.svelte": {
-      "bytes": 19573,
+      "bytes": 19618,
       "mode": "100644",
-      "sha256": "a5d65ec016269de0fc6b42ec94825aab25a3869bb5f9c99a1aa1cef000a8d721",
+      "sha256": "bea237a79d6b631bfff3280e33546a65143f5f2d099ed8b1923e81f638164df9",
       "source": "desktop/src/lib/features/notebook/Notebook.svelte",
-      "source_sha256": "a5d65ec016269de0fc6b42ec94825aab25a3869bb5f9c99a1aa1cef000a8d721"
+      "source_sha256": "bea237a79d6b631bfff3280e33546a65143f5f2d099ed8b1923e81f638164df9"
     },
     "desktop/src/lib/features/notebook/PreferenceRecall.svelte": {
-      "bytes": 3837,
+      "bytes": 3878,
       "mode": "100644",
-      "sha256": "a6b309e33a394d147311a4c2362ac7640420fc4c7526f56bd1cd8dafadaa4fae",
+      "sha256": "2d75555e23b7ac84a83f715e61f528cf95a6bc214fda59c514b5aa5edceeae25",
       "source": "desktop/src/lib/features/notebook/PreferenceRecall.svelte",
-      "source_sha256": "a6b309e33a394d147311a4c2362ac7640420fc4c7526f56bd1cd8dafadaa4fae"
+      "source_sha256": "2d75555e23b7ac84a83f715e61f528cf95a6bc214fda59c514b5aa5edceeae25"
     },
     "desktop/src/lib/features/people/PeopleAccess.svelte": {
       "bytes": 4404,
@@ -813,11 +834,11 @@
       "source_sha256": "c3b0732f730971fc9d0b4fc29b33bd692d4992c4d6b9ac6ef57f0fe96ca36161"
     },
     "desktop/src/lib/features/replies/visuals.css": {
-      "bytes": 4156,
+      "bytes": 4290,
       "mode": "100644",
-      "sha256": "2d16c918db1ef5ba159309bf235758c7198033d131ac1191e8adf56bd492dd17",
+      "sha256": "e469d22b6c6057d1de6526b0d3bf4d08355cb70df8f6aa4e6655a24ee1579088",
       "source": "desktop/src/lib/features/replies/visuals.css",
-      "source_sha256": "2d16c918db1ef5ba159309bf235758c7198033d131ac1191e8adf56bd492dd17"
+      "source_sha256": "e469d22b6c6057d1de6526b0d3bf4d08355cb70df8f6aa4e6655a24ee1579088"
     },
     "desktop/src/lib/features/settings/AccessRecovery.svelte": {
       "bytes": 2263,
@@ -827,32 +848,32 @@
       "source_sha256": "53452363e1af7d96c4cbd481160a62ce52fde5e896bae6390783bc87e7d3a250"
     },
     "desktop/src/lib/features/settings/Appearance.svelte": {
-      "bytes": 6510,
+      "bytes": 6420,
       "mode": "100644",
-      "sha256": "1ea934f3f1e7a23c8818f363eb7b6afe3bac462355bbf6bec071acbfdc7671d1",
+      "sha256": "139082260e7b82475f0c8d22a1200d8ac8d5d3082b0084a28ed8f1d85f2fc73a",
       "source": "desktop/src/lib/features/settings/Appearance.svelte",
-      "source_sha256": "1ea934f3f1e7a23c8818f363eb7b6afe3bac462355bbf6bec071acbfdc7671d1"
+      "source_sha256": "139082260e7b82475f0c8d22a1200d8ac8d5d3082b0084a28ed8f1d85f2fc73a"
     },
     "desktop/src/lib/features/settings/ChatGPTConnection.svelte": {
-      "bytes": 6834,
+      "bytes": 6884,
       "mode": "100644",
-      "sha256": "ff884937d3ca0a2fd095e7ba5f309471dd85e3c35da1792e9e3d8b355194ba1f",
+      "sha256": "6fd838a1600d0dcba206be4aecd1f24fe7dc1604cf137667184ce1850f270c2d",
       "source": "desktop/src/lib/features/settings/ChatGPTConnection.svelte",
-      "source_sha256": "ff884937d3ca0a2fd095e7ba5f309471dd85e3c35da1792e9e3d8b355194ba1f"
+      "source_sha256": "6fd838a1600d0dcba206be4aecd1f24fe7dc1604cf137667184ce1850f270c2d"
     },
     "desktop/src/lib/features/settings/ConnectionResults.svelte": {
-      "bytes": 2383,
+      "bytes": 2788,
       "mode": "100644",
-      "sha256": "703a83a93e64b2623a3ea52ebe6a523284384831f2dcbe73a0e80723e037f87f",
+      "sha256": "bf6c9d88c983ab3a853f237543dad185f5c48b0fe3a61600b0e4cd3e4364c27d",
       "source": "desktop/src/lib/features/settings/ConnectionResults.svelte",
-      "source_sha256": "703a83a93e64b2623a3ea52ebe6a523284384831f2dcbe73a0e80723e037f87f"
+      "source_sha256": "bf6c9d88c983ab3a853f237543dad185f5c48b0fe3a61600b0e4cd3e4364c27d"
     },
     "desktop/src/lib/features/settings/Connections.svelte": {
-      "bytes": 21328,
+      "bytes": 21372,
       "mode": "100644",
-      "sha256": "98837ace8b7a0434ce69012d4e281cc28a928a1adf60cb5e9973e3f7ef9ea8ce",
+      "sha256": "16fda5bf8b94b62796604a4f7f05b49b0d173c17c6dad51b12d438fdb91f99ff",
       "source": "desktop/src/lib/features/settings/Connections.svelte",
-      "source_sha256": "98837ace8b7a0434ce69012d4e281cc28a928a1adf60cb5e9973e3f7ef9ea8ce"
+      "source_sha256": "16fda5bf8b94b62796604a4f7f05b49b0d173c17c6dad51b12d438fdb91f99ff"
     },
     "desktop/src/lib/features/settings/Execution.svelte": {
       "bytes": 4083,
@@ -862,11 +883,11 @@
       "source_sha256": "6aea1b45f376c38fe93937a2081bc324ea99ee2624342e73f8505b63f68f2eb9"
     },
     "desktop/src/lib/features/settings/Files.svelte": {
-      "bytes": 21438,
+      "bytes": 21504,
       "mode": "100644",
-      "sha256": "07129c127371018102afa6015560ee090db9969ba30d0e49669ebe0c5bc99089",
+      "sha256": "64010c5a5f1cadc6367c81784996ac49ed4268f3c408e03d7cb0e0c385a2bcb6",
       "source": "desktop/src/lib/features/settings/Files.svelte",
-      "source_sha256": "07129c127371018102afa6015560ee090db9969ba30d0e49669ebe0c5bc99089"
+      "source_sha256": "64010c5a5f1cadc6367c81784996ac49ed4268f3c408e03d7cb0e0c385a2bcb6"
     },
     "desktop/src/lib/features/settings/Models.svelte": {
       "bytes": 17613,
@@ -876,11 +897,11 @@
       "source_sha256": "56ea153ba5e4c514c338f6f6af37ea764d5bba3d44e8b567fa88ebbc0dfe683e"
     },
     "desktop/src/lib/features/settings/PrivacyAccess.svelte": {
-      "bytes": 9922,
+      "bytes": 9935,
       "mode": "100644",
-      "sha256": "503794990ef230f76d4d4f16c71e1afc3f5b55752636586069d56d13676d0f1a",
+      "sha256": "30ca0fe63c5bc8c4dc8142055f5ac4970bcecf79db1b692af81b2a895cca23db",
       "source": "desktop/src/lib/features/settings/PrivacyAccess.svelte",
-      "source_sha256": "503794990ef230f76d4d4f16c71e1afc3f5b55752636586069d56d13676d0f1a"
+      "source_sha256": "30ca0fe63c5bc8c4dc8142055f5ac4970bcecf79db1b692af81b2a895cca23db"
     },
     "desktop/src/lib/features/settings/Skills.svelte": {
       "bytes": 13292,
@@ -890,11 +911,11 @@
       "source_sha256": "4ca51e39a7ada3f9da8d0c53490ab673b1c15683a007a2d97b1708800eafd3b3"
     },
     "desktop/src/lib/features/settings/UserThumbnail.svelte": {
-      "bytes": 2874,
+      "bytes": 2929,
       "mode": "100644",
-      "sha256": "55f39400625fe567d139e2154dc0fc58d6223a4b9a3a4f23cabab9bad13f82ac",
+      "sha256": "058736e0f72d3a45397ef36973082ba01439005229b626ce425bdb9ef10555e7",
       "source": "desktop/src/lib/features/settings/UserThumbnail.svelte",
-      "source_sha256": "55f39400625fe567d139e2154dc0fc58d6223a4b9a3a4f23cabab9bad13f82ac"
+      "source_sha256": "058736e0f72d3a45397ef36973082ba01439005229b626ce425bdb9ef10555e7"
     },
     "desktop/src/lib/features/settings/connections.ts": {
       "bytes": 2925,
@@ -904,25 +925,25 @@
       "source_sha256": "67fe104b4e6cf60b07b0d5bdd5e627697ea71c963fefc0e46ca815972d25bb41"
     },
     "desktop/src/lib/features/settings/settings.css": {
-      "bytes": 9907,
+      "bytes": 10126,
       "mode": "100644",
-      "sha256": "17e3c25a3fc1db326393a90b72e37636bff118ce8b1a4a2a8fd5db6607b3e674",
+      "sha256": "19b5e240a0880a9ffc6b6da29e7abcab79f3bf9131f13282bf50271dc202ada2",
       "source": "desktop/src/lib/features/settings/settings.css",
-      "source_sha256": "17e3c25a3fc1db326393a90b72e37636bff118ce8b1a4a2a8fd5db6607b3e674"
+      "source_sha256": "19b5e240a0880a9ffc6b6da29e7abcab79f3bf9131f13282bf50271dc202ada2"
     },
     "desktop/src/lib/features/tasks/FindingCard.svelte": {
-      "bytes": 5323,
+      "bytes": 5533,
       "mode": "100644",
-      "sha256": "ee295ebe1841bfaa8844ded6f5a9a441238ea352013469875bdd8e8e0a218873",
+      "sha256": "c99396fe6da33a3868e53926fb7cb7c82c205d9a022428ff734217517fe2e572",
       "source": "desktop/src/lib/features/tasks/FindingCard.svelte",
-      "source_sha256": "ee295ebe1841bfaa8844ded6f5a9a441238ea352013469875bdd8e8e0a218873"
+      "source_sha256": "c99396fe6da33a3868e53926fb7cb7c82c205d9a022428ff734217517fe2e572"
     },
     "desktop/src/lib/features/tasks/Research.svelte": {
-      "bytes": 26609,
+      "bytes": 27686,
       "mode": "100644",
-      "sha256": "6e8ff4f45df179a2cb9963457ed08d0b680d6b358fac9364b44e434946b9c378",
+      "sha256": "c91a376244ca630f8abdafe72a12c146722421134c83849a2b29dcf483929be2",
       "source": "desktop/src/lib/features/tasks/Research.svelte",
-      "source_sha256": "6e8ff4f45df179a2cb9963457ed08d0b680d6b358fac9364b44e434946b9c378"
+      "source_sha256": "c91a376244ca630f8abdafe72a12c146722421134c83849a2b29dcf483929be2"
     },
     "desktop/src/lib/features/tasks/TaskAccess.svelte": {
       "bytes": 6237,
@@ -932,32 +953,32 @@
       "source_sha256": "b4af661cd72171d30d15ad4a6a690417d9fea7a486ae6495cb2eb05ed2e5521b"
     },
     "desktop/src/lib/features/tasks/TaskDescription.svelte": {
-      "bytes": 7088,
+      "bytes": 7140,
       "mode": "100644",
-      "sha256": "23412d75f9235f7fbca292de8b0e45b5574ebd935a98413390ea25d346a963d8",
+      "sha256": "c3ff0a7b17a78de3af6a0fe144230c3803c5c79150e130c617dbcb6e7a6abad7",
       "source": "desktop/src/lib/features/tasks/TaskDescription.svelte",
-      "source_sha256": "23412d75f9235f7fbca292de8b0e45b5574ebd935a98413390ea25d346a963d8"
+      "source_sha256": "c3ff0a7b17a78de3af6a0fe144230c3803c5c79150e130c617dbcb6e7a6abad7"
     },
     "desktop/src/lib/features/tasks/TaskRows.svelte": {
-      "bytes": 4317,
+      "bytes": 4358,
       "mode": "100644",
-      "sha256": "ee1e7bbed3946052e018ecb5b4249ac89f348b008bdfad88bc22a57cb2890241",
+      "sha256": "cfb9055796687d9ef7eb5ff8a9838af6d7c38387b0167f3824194e7fadce1652",
       "source": "desktop/src/lib/features/tasks/TaskRows.svelte",
-      "source_sha256": "ee1e7bbed3946052e018ecb5b4249ac89f348b008bdfad88bc22a57cb2890241"
+      "source_sha256": "cfb9055796687d9ef7eb5ff8a9838af6d7c38387b0167f3824194e7fadce1652"
     },
     "desktop/src/lib/features/tasks/Tasks.svelte": {
-      "bytes": 38402,
+      "bytes": 38428,
       "mode": "100644",
-      "sha256": "3cd4019fa62d2884ad96124e2bb48a3f54af6d8da4582dd0e4445b4051cda223",
+      "sha256": "0c130a4be245a0f0f0f943ae5ed222eda7d520bcbd08bedb51edd1b00077f041",
       "source": "desktop/src/lib/features/tasks/Tasks.svelte",
-      "source_sha256": "3cd4019fa62d2884ad96124e2bb48a3f54af6d8da4582dd0e4445b4051cda223"
+      "source_sha256": "0c130a4be245a0f0f0f943ae5ed222eda7d520bcbd08bedb51edd1b00077f041"
     },
     "desktop/src/lib/features/tasks/planning.css": {
-      "bytes": 3166,
+      "bytes": 3250,
       "mode": "100644",
-      "sha256": "49bbd9d1ae695caf94647397d8bb53768416560646df37984a768b369a5a5e50",
+      "sha256": "8c8e87c3c94e8d7bf5db39e68d23f8a3d34fb7123f91f8e4ac77ecf4417d84c7",
       "source": "desktop/src/lib/features/tasks/planning.css",
-      "source_sha256": "49bbd9d1ae695caf94647397d8bb53768416560646df37984a768b369a5a5e50"
+      "source_sha256": "8c8e87c3c94e8d7bf5db39e68d23f8a3d34fb7123f91f8e4ac77ecf4417d84c7"
     },
     "desktop/src/lib/features/tasks/research-view.ts": {
       "bytes": 1656,
@@ -974,11 +995,11 @@
       "source_sha256": "16249b6ffc096c4533b95b0d3792ea1cdc62e16aee546862141b3ed36bd6c67e"
     },
     "desktop/src/lib/features/web/WebSettings.svelte": {
-      "bytes": 12204,
+      "bytes": 12229,
       "mode": "100644",
-      "sha256": "d147513e77a1c462e0b138ff5bd2143a04ba086aea8c5ce37840633f33b9855a",
+      "sha256": "b70a67c302ff75a743aa9ea36a16940967894b0fe8153dce996c7b8680ac297d",
       "source": "desktop/src/lib/features/web/WebSettings.svelte",
-      "source_sha256": "d147513e77a1c462e0b138ff5bd2143a04ba086aea8c5ce37840633f33b9855a"
+      "source_sha256": "b70a67c302ff75a743aa9ea36a16940967894b0fe8153dce996c7b8680ac297d"
     },
     "desktop/src/lib/features/web/WebSources.svelte": {
       "bytes": 4239,
@@ -1002,25 +1023,25 @@
       "source_sha256": "b9e0481600508620a728dfbceb2b72691e00a32a60fdb8bbf0b02482fa337727"
     },
     "desktop/src/lib/features/workspace/CraftReader.svelte": {
-      "bytes": 17959,
+      "bytes": 17946,
       "mode": "100644",
-      "sha256": "40abca3b7c5b654ef38de16e657668c818dcad29a7ba9d0df69ba5c290c45fe0",
+      "sha256": "8c2f27ae0d25bfda22638b27648aca4dbf2794050467798247ad02cdb6280258",
       "source": "desktop/src/lib/features/workspace/CraftReader.svelte",
-      "source_sha256": "40abca3b7c5b654ef38de16e657668c818dcad29a7ba9d0df69ba5c290c45fe0"
+      "source_sha256": "8c2f27ae0d25bfda22638b27648aca4dbf2794050467798247ad02cdb6280258"
     },
     "desktop/src/lib/features/workspace/DocumentActivity.svelte": {
-      "bytes": 3010,
+      "bytes": 3026,
       "mode": "100644",
-      "sha256": "38eecb8dddec8ba498b5c8c31d586617e4a6375f220e7991572c0ee5886d6805",
+      "sha256": "d4406094b20ff81e5ba103e282bd246d4677553f50874574d6deb491b7ad67e5",
       "source": "desktop/src/lib/features/workspace/DocumentActivity.svelte",
-      "source_sha256": "38eecb8dddec8ba498b5c8c31d586617e4a6375f220e7991572c0ee5886d6805"
+      "source_sha256": "d4406094b20ff81e5ba103e282bd246d4677553f50874574d6deb491b7ad67e5"
     },
     "desktop/src/lib/features/workspace/DocumentDiscussion.svelte": {
-      "bytes": 9473,
+      "bytes": 10054,
       "mode": "100644",
-      "sha256": "1bf8dbddb3cb3fdba3f20dff9ac98ac30d60d5923533716bf2a74f02195ae5f3",
+      "sha256": "0fb2b8016883c4aa6cbe39cd012007327f6f08d41c1e204f0ba92eaf9e7ea967",
       "source": "desktop/src/lib/features/workspace/DocumentDiscussion.svelte",
-      "source_sha256": "1bf8dbddb3cb3fdba3f20dff9ac98ac30d60d5923533716bf2a74f02195ae5f3"
+      "source_sha256": "0fb2b8016883c4aa6cbe39cd012007327f6f08d41c1e204f0ba92eaf9e7ea967"
     },
     "desktop/src/lib/features/workspace/DocumentImage.svelte": {
       "bytes": 301,
@@ -1030,18 +1051,18 @@
       "source_sha256": "1565303d1d4f290ef8e54a3205bd12f690c533901f3ef81501cf1cb361ab9679"
     },
     "desktop/src/lib/features/workspace/DocumentPopover.svelte": {
-      "bytes": 8684,
+      "bytes": 8801,
       "mode": "100644",
-      "sha256": "a0ac98501b21998db9fb22d42085411315e5049a3e69f33e5d1408a7fcd85a07",
+      "sha256": "47aa36496a0a67baaa46b4cb0d94053cc62c2c02a33a9c7539d92f17cdd8aa47",
       "source": "desktop/src/lib/features/workspace/DocumentPopover.svelte",
-      "source_sha256": "a0ac98501b21998db9fb22d42085411315e5049a3e69f33e5d1408a7fcd85a07"
+      "source_sha256": "47aa36496a0a67baaa46b4cb0d94053cc62c2c02a33a9c7539d92f17cdd8aa47"
     },
     "desktop/src/lib/features/workspace/DocumentPreview.svelte": {
-      "bytes": 2396,
+      "bytes": 2412,
       "mode": "100644",
-      "sha256": "d6315e3826814ee48440505066a902d7c3ff12bcabe4a35f18c2afa8edc4d289",
+      "sha256": "bacabe3e4eab22d85d4ee101473ad537e4087a678d798e9f060c1532d06d5118",
       "source": "desktop/src/lib/features/workspace/DocumentPreview.svelte",
-      "source_sha256": "d6315e3826814ee48440505066a902d7c3ff12bcabe4a35f18c2afa8edc4d289"
+      "source_sha256": "bacabe3e4eab22d85d4ee101473ad537e4087a678d798e9f060c1532d06d5118"
     },
     "desktop/src/lib/features/workspace/EventEditor.svelte": {
       "bytes": 12245,
@@ -1051,11 +1072,11 @@
       "source_sha256": "7289112ede6289e3505231a3f0497ba47ccb51f7351697ce2e736e5ee41e7ded"
     },
     "desktop/src/lib/features/workspace/Home.svelte": {
-      "bytes": 23869,
+      "bytes": 24173,
       "mode": "100644",
-      "sha256": "fe355696f330ba3c246aa2613f4fe707d131514c6204b15798932a9df24f9aab",
+      "sha256": "c54829936a24ebe20e2a97e7d76e2b3353acf76e3b9f495e069c61e611c8d6d5",
       "source": "desktop/src/lib/features/workspace/Home.svelte",
-      "source_sha256": "fe355696f330ba3c246aa2613f4fe707d131514c6204b15798932a9df24f9aab"
+      "source_sha256": "c54829936a24ebe20e2a97e7d76e2b3353acf76e3b9f495e069c61e611c8d6d5"
     },
     "desktop/src/lib/features/workspace/HomeArtwork.svelte": {
       "bytes": 1439,
@@ -1065,46 +1086,46 @@
       "source_sha256": "1f0d5bad6635d0428f941556a8f73b8c695a2fa31ff9674b9479b0df3df105f9"
     },
     "desktop/src/lib/features/workspace/HomeResearch.svelte": {
-      "bytes": 7555,
+      "bytes": 8390,
       "mode": "100644",
-      "sha256": "d32a180106467deef46cd178e3b7c052a771f907cbc80ca41ca9b0cc66c58181",
+      "sha256": "794a6a6c966b8155bc99b114a90c30a35554d7fb16687cb419350dca04a6c6b3",
       "source": "desktop/src/lib/features/workspace/HomeResearch.svelte",
-      "source_sha256": "d32a180106467deef46cd178e3b7c052a771f907cbc80ca41ca9b0cc66c58181"
+      "source_sha256": "794a6a6c966b8155bc99b114a90c30a35554d7fb16687cb419350dca04a6c6b3"
     },
     "desktop/src/lib/features/workspace/MarkdownEditor.svelte": {
-      "bytes": 40373,
+      "bytes": 40828,
       "mode": "100644",
-      "sha256": "1e13b52befe491f139e9fa93dac1fd05313ae75a238d23f215b87963d9b1c262",
+      "sha256": "022af9d492f8bf112f0ab3549b431b2a724e1d6387d7002568147ea75c7a2442",
       "source": "desktop/src/lib/features/workspace/MarkdownEditor.svelte",
-      "source_sha256": "1e13b52befe491f139e9fa93dac1fd05313ae75a238d23f215b87963d9b1c262"
+      "source_sha256": "022af9d492f8bf112f0ab3549b431b2a724e1d6387d7002568147ea75c7a2442"
     },
     "desktop/src/lib/features/workspace/Material.svelte": {
-      "bytes": 27235,
+      "bytes": 27373,
       "mode": "100644",
-      "sha256": "f5a72562e8619a4d9ada7273744208ee65a8973a96cc23c4cb6d032e523211fd",
+      "sha256": "1fef95222d4b4cbf630ac6437ac52ad01802329c2bd0839ce37766ae4474f16c",
       "source": "desktop/src/lib/features/workspace/Material.svelte",
-      "source_sha256": "f5a72562e8619a4d9ada7273744208ee65a8973a96cc23c4cb6d032e523211fd"
+      "source_sha256": "1fef95222d4b4cbf630ac6437ac52ad01802329c2bd0839ce37766ae4474f16c"
     },
     "desktop/src/lib/features/workspace/MaterialFiles.svelte": {
-      "bytes": 2804,
+      "bytes": 2847,
       "mode": "100644",
-      "sha256": "f21aaff356b26912ecaf333cab7247294b2eb53f97747106274896a86d9a2aaf",
+      "sha256": "3f295def6b090d0eb672319b72b4063cf2f2fb6506cd81883f64a1690aaff395",
       "source": "desktop/src/lib/features/workspace/MaterialFiles.svelte",
-      "source_sha256": "f21aaff356b26912ecaf333cab7247294b2eb53f97747106274896a86d9a2aaf"
+      "source_sha256": "3f295def6b090d0eb672319b72b4063cf2f2fb6506cd81883f64a1690aaff395"
     },
     "desktop/src/lib/features/workspace/MaterialFolder.svelte": {
-      "bytes": 5267,
+      "bytes": 5324,
       "mode": "100644",
-      "sha256": "dc5b11ae5a1a8626f4521324ef9e8137fb11a324ad077a7cc46edcd0ce935668",
+      "sha256": "21921ce492f8b020939d72aa47f8d9f519844725a172b56f96af8a2e7843628e",
       "source": "desktop/src/lib/features/workspace/MaterialFolder.svelte",
-      "source_sha256": "dc5b11ae5a1a8626f4521324ef9e8137fb11a324ad077a7cc46edcd0ce935668"
+      "source_sha256": "21921ce492f8b020939d72aa47f8d9f519844725a172b56f96af8a2e7843628e"
     },
     "desktop/src/lib/features/workspace/MaterialReader.svelte": {
-      "bytes": 24636,
+      "bytes": 24935,
       "mode": "100644",
-      "sha256": "a5ad67754f42ab0404568ff62aeae76ad3d04649b2180deceb5602907e859a25",
+      "sha256": "68bf70422285b09447160c6a73ba2a8905bf9f216c57f945a29697584aca2d19",
       "source": "desktop/src/lib/features/workspace/MaterialReader.svelte",
-      "source_sha256": "a5ad67754f42ab0404568ff62aeae76ad3d04649b2180deceb5602907e859a25"
+      "source_sha256": "68bf70422285b09447160c6a73ba2a8905bf9f216c57f945a29697584aca2d19"
     },
     "desktop/src/lib/features/workspace/Media.svelte": {
       "bytes": 14689,
@@ -1114,18 +1135,18 @@
       "source_sha256": "5ad9e0f3932469f2c36e3c04e9749a94a175cdbbd36beca5dcc7d43ae7c5fe91"
     },
     "desktop/src/lib/features/workspace/NoteOriginal.svelte": {
-      "bytes": 5333,
+      "bytes": 5346,
       "mode": "100644",
-      "sha256": "a535949f1d9f3643ed0124b2358dd2308d337a295aefc3d8fca53784c1dcf00b",
+      "sha256": "94b710ee289166b883bc1b54f8755be035fa12f5866025d708c5dbba6f74e914",
       "source": "desktop/src/lib/features/workspace/NoteOriginal.svelte",
-      "source_sha256": "a535949f1d9f3643ed0124b2358dd2308d337a295aefc3d8fca53784c1dcf00b"
+      "source_sha256": "94b710ee289166b883bc1b54f8755be035fa12f5866025d708c5dbba6f74e914"
     },
     "desktop/src/lib/features/workspace/PdfReader.svelte": {
-      "bytes": 8455,
+      "bytes": 8498,
       "mode": "100644",
-      "sha256": "79fc91e0616ba480fa6cf4773670d036f6bc6e4d76aa125d004b9c68aa71f5c2",
+      "sha256": "54a2602fba63e5481317bf5d0dec2c5419c3904213f57640d45920d1f59c8dac",
       "source": "desktop/src/lib/features/workspace/PdfReader.svelte",
-      "source_sha256": "79fc91e0616ba480fa6cf4773670d036f6bc6e4d76aa125d004b9c68aa71f5c2"
+      "source_sha256": "54a2602fba63e5481317bf5d0dec2c5419c3904213f57640d45920d1f59c8dac"
     },
     "desktop/src/lib/features/workspace/Practice.svelte": {
       "bytes": 6286,
@@ -1135,25 +1156,25 @@
       "source_sha256": "c26c0be45e95c4e0a3166f35bdc3c63c885afd1e0c3a1c655798b3c07dd57cc2"
     },
     "desktop/src/lib/features/workspace/ProjectFolderPicker.svelte": {
-      "bytes": 4264,
+      "bytes": 4305,
       "mode": "100644",
-      "sha256": "4047fe8acb3a2fb259c83c38fe554ac2839b7fa41179a69f3e7af1c463130b36",
+      "sha256": "7409a408a674641e097b7e2ef142d94087baa54909ef0100acefd8f630528422",
       "source": "desktop/src/lib/features/workspace/ProjectFolderPicker.svelte",
-      "source_sha256": "4047fe8acb3a2fb259c83c38fe554ac2839b7fa41179a69f3e7af1c463130b36"
+      "source_sha256": "7409a408a674641e097b7e2ef142d94087baa54909ef0100acefd8f630528422"
     },
     "desktop/src/lib/features/workspace/ProjectSaveLocation.svelte": {
-      "bytes": 5093,
+      "bytes": 5420,
       "mode": "100644",
-      "sha256": "840925c9a01d5612e7a4c88a52dd0b0321fb8cc76647ede7b6cb9312973c5e10",
+      "sha256": "009ea60d22912585abf643e328311c1d737dc1471ef47f7eb33ec969d5484fda",
       "source": "desktop/src/lib/features/workspace/ProjectSaveLocation.svelte",
-      "source_sha256": "840925c9a01d5612e7a4c88a52dd0b0321fb8cc76647ede7b6cb9312973c5e10"
+      "source_sha256": "009ea60d22912585abf643e328311c1d737dc1471ef47f7eb33ec969d5484fda"
     },
     "desktop/src/lib/features/workspace/Radio.svelte": {
-      "bytes": 11740,
+      "bytes": 11857,
       "mode": "100644",
-      "sha256": "2475499cbc237bbb035eb96b2fb4227dcebf6d091ebaf3bdaf3af8f82e13332b",
+      "sha256": "e050811a52b6f92557b1e14701820a165bee785d25fd78800bd44683bbd03599",
       "source": "desktop/src/lib/features/workspace/Radio.svelte",
-      "source_sha256": "2475499cbc237bbb035eb96b2fb4227dcebf6d091ebaf3bdaf3af8f82e13332b"
+      "source_sha256": "e050811a52b6f92557b1e14701820a165bee785d25fd78800bd44683bbd03599"
     },
     "desktop/src/lib/features/workspace/RadioIllustration.svelte": {
       "bytes": 3692,
@@ -1163,60 +1184,60 @@
       "source_sha256": "94cb106783d538dbed6b1bf804369e905184ea599ecc403fbbf927f8a909f4c8"
     },
     "desktop/src/lib/features/workspace/ReaderNotice.svelte": {
-      "bytes": 1156,
+      "bytes": 1170,
       "mode": "100644",
-      "sha256": "44ffaa630ff0e788a236bbee5e4ee99fc60311fe95b0b1080c54b4559c17faeb",
+      "sha256": "a5062820f3112373727e345dd0d95f7c65ff5d7e8f108a4cab7885b7bc9f3026",
       "source": "desktop/src/lib/features/workspace/ReaderNotice.svelte",
-      "source_sha256": "44ffaa630ff0e788a236bbee5e4ee99fc60311fe95b0b1080c54b4559c17faeb"
+      "source_sha256": "a5062820f3112373727e345dd0d95f7c65ff5d7e8f108a4cab7885b7bc9f3026"
     },
     "desktop/src/lib/features/workspace/Semesters.svelte": {
-      "bytes": 18078,
+      "bytes": 18132,
       "mode": "100644",
-      "sha256": "164c86dba0c7b7722c8e7a6df82174239ec3541c782d303428b86a9093c5c38f",
+      "sha256": "9e450b10a566faaac7fad72fb903358f78e89149cca7bc8b819860b4cb44965d",
       "source": "desktop/src/lib/features/workspace/Semesters.svelte",
-      "source_sha256": "164c86dba0c7b7722c8e7a6df82174239ec3541c782d303428b86a9093c5c38f"
+      "source_sha256": "9e450b10a566faaac7fad72fb903358f78e89149cca7bc8b819860b4cb44965d"
     },
     "desktop/src/lib/features/workspace/StudyNav.svelte": {
-      "bytes": 2820,
+      "bytes": 2991,
       "mode": "100644",
-      "sha256": "f2dcc7e80501649bc7f8e54a44608469cf64e28eb895162291b6087621a50331",
+      "sha256": "f3d84e45d8ef99ec4fd7670496fe0ce221ce6be637feaecac9647b2d8eda2a1f",
       "source": "desktop/src/lib/features/workspace/StudyNav.svelte",
-      "source_sha256": "f2dcc7e80501649bc7f8e54a44608469cf64e28eb895162291b6087621a50331"
+      "source_sha256": "f3d84e45d8ef99ec4fd7670496fe0ce221ce6be637feaecac9647b2d8eda2a1f"
     },
     "desktop/src/lib/features/workspace/UniversityNav.svelte": {
-      "bytes": 1423,
+      "bytes": 1436,
       "mode": "100644",
-      "sha256": "6ccbe63066c6266613e99560b2e899530eba8aaf63c21094a215ab1750ae6997",
+      "sha256": "e59306a078f065b36e198e7f39705dbf30c717d32c233bdfc22bb340e6763b5c",
       "source": "desktop/src/lib/features/workspace/UniversityNav.svelte",
-      "source_sha256": "6ccbe63066c6266613e99560b2e899530eba8aaf63c21094a215ab1750ae6997"
+      "source_sha256": "e59306a078f065b36e198e7f39705dbf30c717d32c233bdfc22bb340e6763b5c"
     },
     "desktop/src/lib/features/workspace/Upcoming.svelte": {
-      "bytes": 3988,
+      "bytes": 4071,
       "mode": "100644",
-      "sha256": "b107d5d85cbb3610eb0250add19bf626229bfc759e565792cc8cbd2d71190976",
+      "sha256": "6f4fd4f56e13ab0c6da170f04fe3d7cf5fa4c07660fa1a72556a1575d5b03e64",
       "source": "desktop/src/lib/features/workspace/Upcoming.svelte",
-      "source_sha256": "b107d5d85cbb3610eb0250add19bf626229bfc759e565792cc8cbd2d71190976"
+      "source_sha256": "6f4fd4f56e13ab0c6da170f04fe3d7cf5fa4c07660fa1a72556a1575d5b03e64"
     },
     "desktop/src/lib/features/workspace/Week.svelte": {
-      "bytes": 26293,
+      "bytes": 26571,
       "mode": "100644",
-      "sha256": "68db4e38a44251378b73613353bbbf190b640af9d951f32b6a069299ab9cd6b0",
+      "sha256": "80ce2419b17d924cff5a889f1bb87b96312c447c5643c1e26ce0e195e59a8cbf",
       "source": "desktop/src/lib/features/workspace/Week.svelte",
-      "source_sha256": "68db4e38a44251378b73613353bbbf190b640af9d951f32b6a069299ab9cd6b0"
+      "source_sha256": "80ce2419b17d924cff5a889f1bb87b96312c447c5643c1e26ce0e195e59a8cbf"
     },
     "desktop/src/lib/features/workspace/WeekCalendar.svelte": {
-      "bytes": 5938,
+      "bytes": 6038,
       "mode": "100644",
-      "sha256": "cdda44a738f66c92765b9f081bedaa9365850797ae84cfe12859e9697aea8ea3",
+      "sha256": "8b7d5afa9956db8c2f4f3e48a36a694ba0962f0e3626304cf477445310fb20a8",
       "source": "desktop/src/lib/features/workspace/WeekCalendar.svelte",
-      "source_sha256": "cdda44a738f66c92765b9f081bedaa9365850797ae84cfe12859e9697aea8ea3"
+      "source_sha256": "8b7d5afa9956db8c2f4f3e48a36a694ba0962f0e3626304cf477445310fb20a8"
     },
     "desktop/src/lib/features/workspace/WidgetCard.svelte": {
-      "bytes": 8068,
+      "bytes": 8123,
       "mode": "100644",
-      "sha256": "6502aaaf22182f27928f42dcb9ce23b1ed0741071bd9cea9548c320c177084e9",
+      "sha256": "950db9673aeb2d572a5f36add5116ca0b4058a740327f045547ce136782e52e7",
       "source": "desktop/src/lib/features/workspace/WidgetCard.svelte",
-      "source_sha256": "6502aaaf22182f27928f42dcb9ce23b1ed0741071bd9cea9548c320c177084e9"
+      "source_sha256": "950db9673aeb2d572a5f36add5116ca0b4058a740327f045547ce136782e52e7"
     },
     "desktop/src/lib/features/workspace/WidgetEditor.svelte": {
       "bytes": 10854,
@@ -1226,32 +1247,32 @@
       "source_sha256": "42bc8265b5a2a18845af7478bd14b6e321736d53c6a9a682a6f652d0720ecdff"
     },
     "desktop/src/lib/features/workspace/WordEditor.svelte": {
-      "bytes": 14081,
+      "bytes": 14122,
       "mode": "100644",
-      "sha256": "6ad18c08b35bd10cf4c8328380c029c375f9f40353dcb56a0d1c3bfff8e6c9eb",
+      "sha256": "84e46933b852f1d640042dede27b930dcac9c506d37009c8261da3d70d1c44ac",
       "source": "desktop/src/lib/features/workspace/WordEditor.svelte",
-      "source_sha256": "6ad18c08b35bd10cf4c8328380c029c375f9f40353dcb56a0d1c3bfff8e6c9eb"
+      "source_sha256": "84e46933b852f1d640042dede27b930dcac9c506d37009c8261da3d70d1c44ac"
     },
     "desktop/src/lib/features/workspace/WorkspaceNotice.svelte": {
-      "bytes": 6361,
+      "bytes": 6448,
       "mode": "100644",
-      "sha256": "8e29d857b9b0da62aee2ac4b6c8c5b8da19db71857286dcfd19e489716803695",
+      "sha256": "3ea0b1cb7db80bbe66554618ce5a33eba2ea3bcf8d7b4b86509baca4b9653cd8",
       "source": "desktop/src/lib/features/workspace/WorkspaceNotice.svelte",
-      "source_sha256": "8e29d857b9b0da62aee2ac4b6c8c5b8da19db71857286dcfd19e489716803695"
+      "source_sha256": "3ea0b1cb7db80bbe66554618ce5a33eba2ea3bcf8d7b4b86509baca4b9653cd8"
     },
     "desktop/src/lib/features/workspace/WorkspaceSettings.svelte": {
-      "bytes": 10817,
+      "bytes": 10857,
       "mode": "100644",
-      "sha256": "e7020274d01ef64cf536ce6928aac889ff6d87b1a64bbf4516b4d6769041a7ba",
+      "sha256": "81b290e8186ced5d42d2991fab31be908a616b39f670b99dce49a6d36499544e",
       "source": "desktop/src/lib/features/workspace/WorkspaceSettings.svelte",
-      "source_sha256": "e7020274d01ef64cf536ce6928aac889ff6d87b1a64bbf4516b4d6769041a7ba"
+      "source_sha256": "81b290e8186ced5d42d2991fab31be908a616b39f670b99dce49a6d36499544e"
     },
     "desktop/src/lib/features/workspace/WorkspaceView.svelte": {
-      "bytes": 5740,
+      "bytes": 5753,
       "mode": "100644",
-      "sha256": "ae0fc4ae7cfb9bb5377d1b3a272da463852a24f8d7e90cb7a22467fc497125b0",
+      "sha256": "68fb698c11767ff22ad6a5808f1c4daee86c7e926a22de1aa9676aaf8fee7f5d",
       "source": "desktop/src/lib/features/workspace/WorkspaceView.svelte",
-      "source_sha256": "ae0fc4ae7cfb9bb5377d1b3a272da463852a24f8d7e90cb7a22467fc497125b0"
+      "source_sha256": "68fb698c11767ff22ad6a5808f1c4daee86c7e926a22de1aa9676aaf8fee7f5d"
     },
     "desktop/src/lib/features/workspace/calendar-view.ts": {
       "bytes": 1730,
@@ -1289,11 +1310,11 @@
       "source_sha256": "885a663f20b8911ddaef4326ea6c10b233f8dc79dec1363abb5a4d19b1019ca9"
     },
     "desktop/src/lib/features/workspace/document-chrome.css": {
-      "bytes": 3277,
+      "bytes": 3323,
       "mode": "100644",
-      "sha256": "92aee3546e1f6c63fe35fa276a6ef7b4b0c19899668cf21a0c41dde47fca7366",
+      "sha256": "246b5ef20b439982b67f3d5adb7deed282a82dfd4dee1cbe8952ef8d04b60a0f",
       "source": "desktop/src/lib/features/workspace/document-chrome.css",
-      "source_sha256": "92aee3546e1f6c63fe35fa276a6ef7b4b0c19899668cf21a0c41dde47fca7366"
+      "source_sha256": "246b5ef20b439982b67f3d5adb7deed282a82dfd4dee1cbe8952ef8d04b60a0f"
     },
     "desktop/src/lib/features/workspace/document-conversation.ts": {
       "bytes": 4399,
@@ -1303,11 +1324,11 @@
       "source_sha256": "8120fd8dbef6a24a7b0887505e9afa10f6e6131e2cc3b77396e4961ba92b3560"
     },
     "desktop/src/lib/features/workspace/document-discussion.ts": {
-      "bytes": 1287,
+      "bytes": 1453,
       "mode": "100644",
-      "sha256": "e5b49d39f2a238c9a98cb7cb55c1e0bac5dcfda7cf4766e520598b09f72f3720",
+      "sha256": "f80addb7ab5dfa71aa3ad452152965cb25e252717784a0bb3d243aab98516ace",
       "source": "desktop/src/lib/features/workspace/document-discussion.ts",
-      "source_sha256": "e5b49d39f2a238c9a98cb7cb55c1e0bac5dcfda7cf4766e520598b09f72f3720"
+      "source_sha256": "f80addb7ab5dfa71aa3ad452152965cb25e252717784a0bb3d243aab98516ace"
     },
     "desktop/src/lib/features/workspace/document-format.ts": {
       "bytes": 1695,
@@ -1436,11 +1457,11 @@
       "source_sha256": "a0fec465a8cba07f0cc18490d10d3b17cde70916cd2526a86576afe548dcf6a6"
     },
     "desktop/src/lib/features/workspace/widgets.css": {
-      "bytes": 5473,
+      "bytes": 5950,
       "mode": "100644",
-      "sha256": "f7592349431f57cc7fcefd4cc4f55705c24c3d878dce3b08730d66878fcb2da0",
+      "sha256": "7973d3cde066fc979a04a58d2dfb361dbede636944ae6a6d36fe459531db7acd",
       "source": "desktop/src/lib/features/workspace/widgets.css",
-      "source_sha256": "f7592349431f57cc7fcefd4cc4f55705c24c3d878dce3b08730d66878fcb2da0"
+      "source_sha256": "7973d3cde066fc979a04a58d2dfb361dbede636944ae6a6d36fe459531db7acd"
     },
     "desktop/src/lib/features/workspace/widgets.ts": {
       "bytes": 731,
@@ -1450,11 +1471,11 @@
       "source_sha256": "50797e1aba716fd8957b49207ec2f5aea6fb0a3567791e0c0f07848c47b15a18"
     },
     "desktop/src/lib/features/workspace/workspace.css": {
-      "bytes": 3991,
+      "bytes": 4322,
       "mode": "100644",
-      "sha256": "c40021300cdf04fc5403fd081e8e05879a1b348df401b7f2e5ec73d3b4361c2d",
+      "sha256": "7fb3b9d17c6ad02a2042f88bbb5a2538374cc8172f2e79f66a7ebb35cb133dae",
       "source": "desktop/src/lib/features/workspace/workspace.css",
-      "source_sha256": "c40021300cdf04fc5403fd081e8e05879a1b348df401b7f2e5ec73d3b4361c2d"
+      "source_sha256": "7fb3b9d17c6ad02a2042f88bbb5a2538374cc8172f2e79f66a7ebb35cb133dae"
     },
     "desktop/src/lib/features/workspace/workspace.ts": {
       "bytes": 11490,
@@ -2353,11 +2374,11 @@
       "source_sha256": "65f8049ee619dd60d8e50386c9719bafa8f24a8c731b10d9a4f7b9418c130b21"
     },
     "src/kejtu_next/adapters/storage/note_metadata.py": {
-      "bytes": 7298,
+      "bytes": 8207,
       "mode": "100644",
-      "sha256": "c9594cbbcdd1432ff05aed94d9a4627c2740ddd063886277fbb2c1545dd4ebde",
+      "sha256": "6fa25eabcadc5b18145b78555d11dfdade85c956ee9416fd31a1282048e08409",
       "source": "src/kejtu_next/adapters/storage/note_metadata.py",
-      "source_sha256": "c9594cbbcdd1432ff05aed94d9a4627c2740ddd063886277fbb2c1545dd4ebde"
+      "source_sha256": "6fa25eabcadc5b18145b78555d11dfdade85c956ee9416fd31a1282048e08409"
     },
     "src/kejtu_next/adapters/storage/note_removal.py": {
       "bytes": 31407,
@@ -2381,11 +2402,11 @@
       "source_sha256": "9f25cdde93c60d03c2ff14e706aed059a3c3ac28f36eec43f26de35466e07033"
     },
     "src/kejtu_next/adapters/storage/notes.py": {
-      "bytes": 57450,
+      "bytes": 58839,
       "mode": "100644",
-      "sha256": "5f11dbc28d30d634bee9c4cb13b4edf9a3f1773a34d95c8aef8c3f09ff1845c2",
+      "sha256": "ab0a276d39a51011d7e97c9e771017ecc910359d543460c20ce53d1f6a12fd66",
       "source": "src/kejtu_next/adapters/storage/notes.py",
-      "source_sha256": "5f11dbc28d30d634bee9c4cb13b4edf9a3f1773a34d95c8aef8c3f09ff1845c2"
+      "source_sha256": "ab0a276d39a51011d7e97c9e771017ecc910359d543460c20ce53d1f6a12fd66"
     },
     "src/kejtu_next/adapters/storage/onboarding.py": {
       "bytes": 4068,
@@ -2423,11 +2444,11 @@
       "source_sha256": "bdd866ac51c8cf94603960ed9402d13607f3c5d5fe6127f2120ce9bebb52294e"
     },
     "src/kejtu_next/adapters/storage/recall.py": {
-      "bytes": 54747,
+      "bytes": 61548,
       "mode": "100644",
-      "sha256": "3fdf872d7491012bea836ee2d0d9c6568e45a08e9f34d99d94ded818eb489057",
+      "sha256": "72cc3bd16d2eb25cb66fac927f5bd7d8ddcd2880bdeabb24e94816ed178fa092",
       "source": "src/kejtu_next/adapters/storage/recall.py",
-      "source_sha256": "3fdf872d7491012bea836ee2d0d9c6568e45a08e9f34d99d94ded818eb489057"
+      "source_sha256": "72cc3bd16d2eb25cb66fac927f5bd7d8ddcd2880bdeabb24e94816ed178fa092"
     },
     "src/kejtu_next/adapters/storage/reminder_access.py": {
       "bytes": 17224,
@@ -2969,11 +2990,11 @@
       "source_sha256": "6e4240dae50ad7935db9a785769cccfa4f391d135f19b74111b70d65f78ea88d"
     },
     "src/kejtu_next/core/note_fields.py": {
-      "bytes": 5024,
+      "bytes": 5603,
       "mode": "100644",
-      "sha256": "70c7082b43e22490620d11a41ada59d7938e52afe44c45592f35cc30966be36b",
+      "sha256": "9e4b15076b53a2c6dad83788f50c2540c2b0be07305c5156f6385eaedaf654d2",
       "source": "src/kejtu_next/core/note_fields.py",
-      "source_sha256": "70c7082b43e22490620d11a41ada59d7938e52afe44c45592f35cc30966be36b"
+      "source_sha256": "9e4b15076b53a2c6dad83788f50c2540c2b0be07305c5156f6385eaedaf654d2"
     },
     "src/kejtu_next/core/notes.py": {
       "bytes": 10848,
@@ -3004,11 +3025,11 @@
       "source_sha256": "f1076e74ff7fb0d03ef9c42710c09c767c329b794535a02175498b147ef68d9d"
     },
     "src/kejtu_next/core/preferences.py": {
-      "bytes": 1231,
+      "bytes": 2142,
       "mode": "100644",
-      "sha256": "40be12f492b6959bc555c6b7a4c7bb4e41cca174f565004fd5d61a2fdc3ae01d",
+      "sha256": "38875114f386093209316b12b874c9547e59638cf76c68820b9e2c70de92c675",
       "source": "src/kejtu_next/core/preferences.py",
-      "source_sha256": "40be12f492b6959bc555c6b7a4c7bb4e41cca174f565004fd5d61a2fdc3ae01d"
+      "source_sha256": "38875114f386093209316b12b874c9547e59638cf76c68820b9e2c70de92c675"
     },
     "src/kejtu_next/core/prompt.py": {
       "bytes": 4317,
@@ -3186,11 +3207,11 @@
       "source_sha256": "cac2fefa6e7e31fb7f8278daa03727d3533a121e1c36a3f80cec294dbc32bf00"
     },
     "src/kejtu_next/help/07-settings-troubleshooting.md": {
-      "bytes": 4875,
+      "bytes": 5063,
       "mode": "100644",
-      "sha256": "2bd6599d35e168e34a9e98a9eecf08d7f0cc8b1775cddda4d5efb2f44ca3a4d7",
+      "sha256": "747846c038d0ed74b0b7de6a64bef8e2c30fde6b77dcb49e1888cf6ad38b78e6",
       "source": "src/kejtu_next/help/07-settings-troubleshooting.md",
-      "source_sha256": "2bd6599d35e168e34a9e98a9eecf08d7f0cc8b1775cddda4d5efb2f44ca3a4d7"
+      "source_sha256": "747846c038d0ed74b0b7de6a64bef8e2c30fde6b77dcb49e1888cf6ad38b78e6"
     },
     "src/kejtu_next/help/08-privacy-limits.md": {
       "bytes": 3193,
@@ -3378,9 +3399,9 @@
   "inclusion_manifest_sha256": "3b8e99453b5be22750a1def609fc7327b5a2d26bc872e0b9e08b82f3c9f04b15",
   "kind": "linux-source-x86_64",
   "schema": 1,
-  "source_commit": "476f96ccf4676ba5b2d0a4b69b84cba9a6cf6f4e",
-  "source_date_epoch": 1793998420,
-  "source_tree": "10ddc402645ea63e398a2584423966f50af6cef5",
+  "source_commit": "538c75acb580b62895e7f83089dcdf983c7ada70",
+  "source_date_epoch": 1794062977,
+  "source_tree": "98c51d24375862d23f8de323f90e3cb231025f36",
   "transformations": {
     "desktop/package-lock.json": {
       "unreachable_package_entries_removed": 84

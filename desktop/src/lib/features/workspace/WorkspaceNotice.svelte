@@ -123,7 +123,7 @@
     overflow-y: auto;
     pointer-events: none;
     font-family: var(--ke-font-ui);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     color: var(--ke-text-primary);
   }
   .notification,
@@ -132,7 +132,7 @@
     min-width: 0;
     padding: 14px 16px;
     border: 1px solid var(--ke-border);
-    border-radius: 12px;
+    border-radius: var(--ke-radius-lg);
     background: color-mix(
       in srgb,
       var(--ke-accent-soft) 65%,
@@ -156,7 +156,7 @@
     margin-bottom: 6px;
   }
   strong {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     font-weight: 600;
   }
   p {
@@ -203,7 +203,7 @@
     min-height: 28px;
     padding: 0;
     border: 0;
-    border-radius: 6px;
+    border-radius: var(--ke-radius-sm);
     background: transparent;
     color: var(--ke-text-secondary);
   }
@@ -220,7 +220,7 @@
   .actions button {
     padding: 6px 8px;
     border: 1px solid var(--ke-border);
-    border-radius: 6px;
+    border-radius: var(--ke-radius-sm);
     background: transparent;
     color: var(--ke-text-primary);
   }
@@ -235,7 +235,7 @@
   }
   .recovery-chip {
     justify-self: end;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     padding: 8px 12px;
   }
 </style>

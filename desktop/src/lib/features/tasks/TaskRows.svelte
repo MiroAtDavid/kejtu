@@ -125,19 +125,19 @@
   .task-main {
     flex: 1;
     min-width: 0;
-    font-size: 14px;
+    font-size: var(--ke-text-base);
     overflow-wrap: anywhere;
   }
   small {
     display: block;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     color: var(--ke-text-tertiary);
     margin-top: 3px;
   }
   .date {
     flex: none;
     text-align: right;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     color: var(--ke-text-secondary);
   }
   /* Carried-forward open work stays visible with its date, without an alarm

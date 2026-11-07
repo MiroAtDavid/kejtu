@@ -1,5 +1,6 @@
 import type { DocumentReply } from "./document-assist";
 import type { DocumentExchange } from "./document-conversation";
+import type { KejtuState } from "$lib/design/kejtu-state";
 
 // Both surfaces observe the same editor. Neither owns a request or a draft.
 export type DocumentDiscussionState = {
@@ -28,6 +29,8 @@ export type DocumentDiscussionState = {
   available: boolean;
   pending: boolean;
   phase: string;
+  /** What the Kejtu mark shows while an edit request runs; null when idle. */
+  kejtu: KejtuState | null;
 };
 
 type Action = () => void | Promise<unknown>;

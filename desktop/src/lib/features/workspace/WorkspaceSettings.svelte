@@ -307,7 +307,7 @@
   }
   .uni .computer-zone {
     background: transparent;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
   }
   fieldset {
     display: grid;
@@ -319,14 +319,14 @@
     justify-self: start;
   }
   legend {
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
     color: var(--ke-text-secondary);
     padding: 0;
   }
   .hint {
     margin: 0;
     color: var(--ke-text-secondary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
   .recommended {
     display: grid;

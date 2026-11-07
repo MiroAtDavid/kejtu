@@ -51,7 +51,7 @@
   background: none;
   color: var(--ke-text-secondary);
   font: inherit;
-  font-size: 11px;
+  font-size: var(--ke-text-2xs);
   min-height: 32px;
   padding: 5px 7px;
   cursor: pointer;
@@ -67,7 +67,7 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  border-radius: 6px;
+  border-radius: var(--ke-radius-sm);
 }
 .topbar .journal-mode {
   box-sizing: border-box;
@@ -83,7 +83,7 @@
   color: var(--ke-text-primary);
 }
 .result-count {
-  font-size: 10px;
+  font-size: var(--ke-text-3xs);
 }
 .icon-action {
   width: 32px;
@@ -94,7 +94,7 @@
   flex: none;
   padding: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--ke-radius-sm);
   background: none;
   color: var(--ke-text-secondary);
   cursor: pointer;
@@ -193,9 +193,9 @@
   color: var(--ke-text-secondary);
 }
 .widget-panel-heading > span {
-  font-size: 10px;
+  font: var(--ke-label-font);
   text-transform: uppercase;
-  letter-spacing: 1.4px;
+  letter-spacing: var(--ke-label-tracking);
 }
 /* Conversation and project destinations share the same sidebar row treatment. */
 .sidebar-menu-row {
@@ -209,7 +209,7 @@
   color: var(--ke-text-secondary);
   background: none;
   border: 0;
-  border-radius: 4px;
+  border-radius: var(--ke-radius-sm);
   padding: calc(10px * var(--ke-density)) 10px;
   text-align: left;
   cursor: pointer;
@@ -219,6 +219,15 @@
   background: var(--ke-surface-inset);
   color: var(--ke-text-primary);
   font-weight: 500;
+}
+/* With the sliding highlight, rows sit above it and the current row lets it
+   show through instead of painting its own background. */
+.has-nav-indicator .sidebar-menu-row {
+  position: relative;
+  z-index: 1;
+}
+.has-nav-indicator .sidebar-menu-row.current {
+  background: transparent;
 }
 .sidebar-menu-row:hover:not(:disabled) {
   color: var(--ke-text-primary);
@@ -272,6 +281,11 @@
   display: flex;
   flex-direction: column;
 }
+/* Opening or leaving Settings crossfades the whole surface in place. */
+.surface:not([hidden]),
+.shell > .workspace:not([hidden]) {
+  animation: ke-fade-in var(--ke-motion-slow) var(--ke-motion-ease);
+}
 .nav-scrim {
   display: none;
 }
@@ -279,7 +293,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: var(--ke-text-2xs);
   color: var(--ke-accent);
   margin: 0 0 18px;
   padding: 6px 0;
@@ -322,9 +336,11 @@
     padding: 18px 20px;
     background: var(--ke-surface);
     border: 1px solid var(--ke-border);
-    border-radius: 9px;
-    box-shadow: var(--ke-shadow-panel);
+    border-radius: var(--ke-overlay-radius);
+    box-shadow: var(--ke-overlay-shadow);
     z-index: 40;
+    transform-origin: top right;
+    animation: ke-menu-in var(--ke-motion-base) var(--ke-motion-ease);
   }
 }
 @media (max-width: 1000px) {
@@ -349,6 +365,7 @@
     background: var(--ke-surface);
     border-right: 1px solid var(--ke-border);
     z-index: 45;
+    animation: ke-sheet-in-start var(--ke-motion-slow) var(--ke-motion-ease);
   }
   .nav-close {
     display: flex;
@@ -358,10 +375,11 @@
     display: block;
     position: fixed;
     inset: 42px 0 0;
-    background: #0003;
+    background: var(--ke-scrim);
     border: 0;
     z-index: 44;
     cursor: pointer;
+    animation: ke-fade-in var(--ke-motion-slow) var(--ke-motion-ease);
   }
 }
 @media (max-width: 650px) {

@@ -7,6 +7,8 @@
   export let onStop: (() => void) | undefined = undefined;
   export let showMark = true;
   export let paused = false;
+  /** Reply phase, so the mark shows the kind of work instead of spinning. */
+  export let phase: string | null | undefined = undefined;
 </script>
 
 <div class="stream-status">
@@ -18,7 +20,7 @@
   >
     {#if showMark}
       {#if $rotatingKejtu}<span class="activity-mark" aria-hidden="true">
-          <ChatAvatar role="assistant" working={!paused} />
+          <ChatAvatar role="assistant" working={!paused} {phase} />
         </span>
       {:else}<span class="activity-dots" class:paused aria-hidden="true">
           <span class="dot"></span><span class="dot"></span><span class="dot"

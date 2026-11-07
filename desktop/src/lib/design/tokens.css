@@ -70,7 +70,9 @@
 
   /* Shared event markers: decorative accents, always accompanied by text. */
   --ke-marker-sand: #b9a58e;
-  --ke-marker-sage: #829b85;
+  /* The neutral Kejtu palette has always rendered sage with the blue value;
+     the other palettes set their own sage below. */
+  --ke-marker-sage: #8c94ac;
   --ke-marker-blue: #8c94ac;
   --ke-marker-rose: #b87c75;
 
@@ -87,8 +89,20 @@
   --ke-text-xl: 1.25rem;
   --ke-text-2xl: 1.5rem;
   --ke-text-3xl: 2rem;
-  --ke-text-answer: 0.9375rem;
+  --ke-text-md: 0.9375rem;
+  --ke-text-2xs: 0.6875rem;
+  --ke-text-3xs: 0.625rem;
   --ke-leading-body: 1.55;
+  /* Headings: one serif display face. Every page title uses the same size and
+     tracking so moving between pages never changes the title's shape. */
+  --ke-font-heading: Georgia, "Times New Roman", serif;
+  --ke-title-page: 400 32px/1.25 var(--ke-font-heading);
+  --ke-title-page-tracking: -0.7px;
+  --ke-title-section: 400 22px/1.3 var(--ke-font-heading);
+  --ke-title-section-tracking: -0.3px;
+  /* Small spaced capitals: section labels, widget names, weekday labels. */
+  --ke-label-font: 500 10px/1.6 var(--ke-font-mono);
+  --ke-label-tracking: 0.1em;
   /* Authored text keeps the same typography before and after sending. */
   --ke-chat-user-font: 500 13px/1.55 var(--ke-font-ui);
 
@@ -106,11 +120,32 @@
   --ke-radius-sm: 5px;
   --ke-radius-md: 7px;
   --ke-radius-lg: 10px;
-  --ke-radius-xl: 16px;
+  --ke-radius-pill: 999px;
+
+  /* One page-action surface for every workspace (Projects, Calendar, Tasks,
+     Research and Settings). Components set layout; these set the look. */
+  --ke-control-height: 32px;
+  --ke-control-padding: 6px 10px;
+  --ke-control-radius: var(--ke-radius-sm);
+  --ke-control-bg: var(--ke-surface-inset);
+  --ke-control-bg-hover: color-mix(
+    in srgb,
+    var(--ke-surface-inset) 88%,
+    var(--ke-text-secondary)
+  );
+  --ke-control-text: var(--ke-text-secondary);
+  --ke-control-font-size: var(--ke-label-size);
+  --ke-control-bg-selected: var(--ke-accent-soft);
+
+  /* Floating surfaces: menus, pickers, popovers, dialogs and side sheets. */
+  --ke-overlay-radius: var(--ke-radius-lg);
+  --ke-overlay-shadow: var(--ke-shadow-panel);
+  --ke-scrim: rgb(0 0 0 / 0.32);
 
   /* Motion: short, purposeful, transform/opacity only */
   --ke-motion-fast: 120ms;
   --ke-motion-base: 180ms;
+  --ke-motion-slow: 260ms;
   --ke-motion-ease: cubic-bezier(0.2, 0, 0, 1);
 }
 
@@ -193,7 +228,6 @@
   --ke-sidebar-width: 218px;
   --ke-topbar-height: 42px;
   --ke-reader-stage: #f0f0f0;
-  --ke-marker-sage: #8c94ac;
 }
 :root[data-density="comfortable"] {
   --ke-density: 1;

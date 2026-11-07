@@ -19,7 +19,7 @@
     gap: 12px;
     padding: 2px 0 8px;
     color: var(--ke-text-tertiary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     line-height: 1.5;
   }
   .reader-message.error {

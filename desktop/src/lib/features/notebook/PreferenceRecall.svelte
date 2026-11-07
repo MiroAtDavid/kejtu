@@ -114,11 +114,11 @@
     border-bottom: 1px solid var(--ke-border);
   }
   h3 {
-    font-size: 14px;
+    font-size: var(--ke-text-base);
     font-weight: 500;
   }
   p {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     line-height: 1.6;
   }
   .muted {
@@ -134,7 +134,7 @@
     margin: 0;
     display: grid;
     gap: 8px;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     min-width: 190px;
   }
   [role="alert"] {

@@ -265,7 +265,7 @@
     white-space: nowrap;
   }
   h4 {
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
     font-weight: 500;
     margin: 0 0 5px;
   }

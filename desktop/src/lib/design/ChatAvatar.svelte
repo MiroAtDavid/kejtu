@@ -1,9 +1,23 @@
 <script lang="ts">
   import { userAvatar } from "./user-avatar";
   import { rotatingKejtu } from "./theme";
+  import KejtuMark from "./KejtuMark.svelte";
+  import { replyState } from "./kejtu-state";
 
   export let role: "user" | "assistant";
   export let working = false;
+  /** The reply phase the native stream reports; it chooses what Kejtu shows. */
+  export let phase: string | null | undefined = undefined;
+
+  // With animation off the mark stays still. A finished reply passes its
+  // "complete" phase after work stops, which the mark turns into one blink.
+  $: state = !$rotatingKejtu
+    ? "idle"
+    : working
+      ? replyState(phase)
+      : phase === "complete"
+        ? "done"
+        : "idle";
 </script>
 
 <span
@@ -21,20 +35,7 @@
         draggable="false"
       />{/if}
   {:else}
-    <svg
-      class:working={working && $rotatingKejtu}
-      viewBox="0 0 96 96"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M48 8C70 6 88 23 87 47C86 70 70 88 46 87C23 86 7 69 9 45C11 22 27 10 48 8Z"
-        stroke="currentColor"
-        stroke-width="2.5"
-      />
-      <circle cx="34" cy="34" r="6" fill="currentColor" />
-      <circle cx="63" cy="63" r="3.5" fill="currentColor" opacity=".58" />
-    </svg>
+    <KejtuMark {state} />
   {/if}
 </span>
 
@@ -50,26 +51,11 @@
     color: var(--ke-accent);
     user-select: none;
   }
-  img,
-  svg {
+  img {
     display: block;
     width: 24px;
     height: 24px;
     object-fit: contain;
-  }
-  img {
-    border-radius: 3px;
-  }
-  @media (prefers-reduced-motion: no-preference) {
-    /* Rotate the complete mark, keeping both eyes and the outline together. */
-    svg.working {
-      transform-origin: 50% 50%;
-      animation: kejtu-working 4s linear infinite;
-    }
-  }
-  @keyframes kejtu-working {
-    to {
-      transform: rotate(360deg);
-    }
+    border-radius: var(--ke-radius-sm);
   }
 </style>

@@ -379,7 +379,7 @@
   }
   .muted {
     color: var(--ke-text-secondary);
-    font-size: 0.9rem;
+    font-size: var(--ke-text-base);
   }
   .credentials :global(a) {
     color: inherit;
@@ -393,7 +393,7 @@
   }
   dt {
     color: var(--ke-text-secondary);
-    font-size: 0.85rem;
+    font-size: var(--ke-text-base);
   }
   dd {
     margin: var(--ke-space-1) 0 0;

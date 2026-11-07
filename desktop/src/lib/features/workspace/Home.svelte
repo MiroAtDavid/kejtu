@@ -421,15 +421,13 @@
     margin: 0;
   }
   h1 {
-    font:
-      400 29px/1.25 Georgia,
-      serif;
-    letter-spacing: -0.6px;
+    font: var(--ke-title-page);
+    letter-spacing: var(--ke-title-page-tracking);
   }
   .eyebrow {
     color: var(--ke-text-tertiary);
-    font: 400 10px/1.6 var(--ke-font-mono);
-    letter-spacing: 1.2px;
+    font: var(--ke-label-font);
+    letter-spacing: var(--ke-label-tracking);
     text-transform: uppercase;
     margin: 0 0 12px;
   }
@@ -451,7 +449,7 @@
     width: 30px;
     height: 30px;
     border: 0;
-    border-radius: 5px;
+    border-radius: var(--ke-radius-sm);
     background: none;
     color: var(--ke-text-secondary);
   }
@@ -485,16 +483,16 @@
     gap: 25px;
     padding: 9px 12px;
     border: 0;
-    border-radius: 6px;
+    border-radius: var(--ke-radius-sm);
     background: var(--ke-surface-inset);
     color: var(--ke-text-primary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
   .primary:hover:not(:disabled) {
     background: var(--ke-border);
   }
   .text-button {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     color: var(--ke-text-secondary);
     border: 0;
     background: none;
@@ -507,12 +505,12 @@
     text-underline-offset: 4px;
   }
   .more {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
   }
   .muted,
   .read-error {
     color: var(--ke-text-secondary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     line-height: 1.8;
   }
   .read-error {
@@ -532,7 +530,7 @@
     padding: 10px 0;
   }
   .agenda time {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     font-variant-numeric: tabular-nums;
     color: var(--ke-text-secondary);
     padding-top: 2px;
@@ -543,18 +541,18 @@
     min-width: 0;
   }
   .agenda strong {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     font-weight: 450;
     overflow-wrap: anywhere;
   }
   .agenda li span {
     display: block;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-secondary);
     margin-top: 4px;
   }
   .footnote {
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     line-height: 1.6;
     color: var(--ke-text-tertiary);
     margin: 12px 0 0;
@@ -569,7 +567,7 @@
     padding: 12px 0;
     text-align: left;
     color: var(--ke-text-primary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     line-height: 1.65;
   }
   .row:hover:not(:disabled) .row-title {
@@ -592,7 +590,7 @@
     background: var(--ke-accent);
   }
   .task-date {
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     color: var(--ke-text-secondary);
     white-space: nowrap;
   }
@@ -609,7 +607,7 @@
   }
   .start p {
     flex-basis: 100%;
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
     color: var(--ke-text-secondary);
   }
   @container home (min-width: 660px) {
@@ -652,7 +650,7 @@
     width: 30px;
     height: 28px;
     border: 1px solid var(--ke-border);
-    border-radius: 4px;
+    border-radius: var(--ke-radius-sm);
     color: var(--ke-text-primary);
     background: transparent;
   }
@@ -710,7 +708,7 @@
       font-size: 25px;
     }
     .eyebrow {
-      font-size: 9px;
+      font-size: var(--ke-text-3xs);
       letter-spacing: 0.5px;
     }
     .home-heading .refresh {
@@ -730,7 +728,7 @@
       var(--ke-surface)
     );
     padding: 20px 22px;
-    border-radius: 8px;
+    border-radius: var(--ke-radius-md);
     margin-bottom: 16px;
   }
   [data-section="today"] {
@@ -819,7 +817,7 @@
       var(--ke-surface)
     );
     border: 1px solid var(--ke-border);
-    border-radius: 8px;
+    border-radius: var(--ke-radius-md);
   }
   .project:hover:not(:disabled) {
     background: color-mix(
@@ -834,9 +832,8 @@
     font: 10px/1.6 var(--ke-font-mono);
   }
   .project-title {
-    font:
-      400 21px/1.35 Georgia,
-      serif;
+    font: var(--ke-title-section);
+    letter-spacing: var(--ke-title-section-tracking);
     overflow-wrap: anywhere;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -846,7 +843,7 @@
   }
   .project-action {
     color: var(--ke-text-secondary);
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     margin-top: 3px;
   }
   .project:hover:not(:disabled) .project-action {

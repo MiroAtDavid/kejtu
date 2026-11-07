@@ -275,20 +275,20 @@
     padding: 7px 0;
     box-sizing: border-box;
     color: var(--ke-text-tertiary);
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     text-align: center;
   }
   .page-message {
     color: #626262;
     padding: 24px;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     max-width: 48ch;
   }
   .page-message button {
     border: 0;
     background: #efefef;
     padding: 7px 12px;
-    border-radius: 4px;
+    border-radius: var(--ke-radius-sm);
     color: #333;
   }
   @media (max-width: 800px) {

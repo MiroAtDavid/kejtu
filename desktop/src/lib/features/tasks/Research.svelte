@@ -14,6 +14,8 @@
   import { when, runLabel } from "../background/editor";
 
   import FindingCard from "./FindingCard.svelte";
+  import KejtuMark from "$lib/design/KejtuMark.svelte";
+  import { rotatingKejtu } from "$lib/design/theme";
   import {
     changes,
     emptyCounts,
@@ -357,7 +359,17 @@
           disabled={busy || !!pending}
           on:click={() => run(() => read(item.id, true))}
         >
-          <span class="name">{item.title}</span>
+          <span class="name-row"
+            ><span class="name">{item.title}</span
+            >{#if item.last_run?.status === "running" && item.last_run.error_code !== "research_paused"}<span
+                class="run-mark"
+                title="Checking now"
+                ><KejtuMark
+                  state={$rotatingKejtu ? "desk" : "idle"}
+                  size={20}
+                /></span
+              >{/if}</span
+          >
           <span class="change-count" class:has-updates={unread(item.counts) > 0}
             >{changes(item.counts) || `${item.counts.total} findings`}</span
           >
@@ -651,9 +663,9 @@
   }
 
   button {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     border: 1px solid var(--ke-border);
-    border-radius: 5px;
+    border-radius: var(--ke-radius-sm);
     padding: 7px 10px;
     color: var(--ke-text-primary);
     background: transparent;
@@ -683,7 +695,7 @@
     font-variant-numeric: tabular-nums;
   }
   .overview span {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-secondary);
   }
   .workspace {
@@ -704,20 +716,33 @@
     text-align: left;
     width: 100%;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: var(--ke-radius-md);
+  }
+  /* A search that is checking right now shows Kejtu at the desk. */
+  .name-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+  }
+  .run-mark {
+    flex: none;
+    margin: 3px 8px 0 0;
+    color: var(--ke-accent);
   }
   .assignment.chosen {
     background: var(--ke-surface-inset);
     border-color: var(--ke-border-strong);
   }
   .name {
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
     font-weight: 550;
     line-height: 1.5;
     overflow-wrap: anywhere;
   }
   .change-count {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-secondary);
   }
   .has-updates {
@@ -726,11 +751,11 @@
   .next-check {
     display: block;
     margin-top: 4px;
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
   }
   .muted {
     color: var(--ke-text-secondary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     line-height: 1.6;
   }
   .detail {
@@ -748,19 +773,19 @@
   }
   summary {
     cursor: pointer;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     color: var(--ke-text-secondary);
   }
   .body {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
     line-height: 1.8;
   }
   .report {
     background: color-mix(in srgb, var(--ke-marker-sage) 7%, var(--ke-surface));
     padding: 14px 16px;
-    border-radius: 8px;
+    border-radius: var(--ke-radius-md);
     margin: 16px 0 22px;
   }
   .report summary {
@@ -770,7 +795,7 @@
     align-items: baseline;
   }
   .report-actions .muted {
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
   }
   .filters {
     display: flex;
@@ -782,7 +807,7 @@
   }
   .filters button {
     border-color: transparent;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
   }
   .filters button.active {
     background: var(--ke-surface-inset);
@@ -800,11 +825,11 @@
   .find input {
     min-width: 0;
     flex: 1;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     padding: 8px 10px;
     background: transparent;
     border: 1px solid var(--ke-border);
-    border-radius: 5px;
+    border-radius: var(--ke-radius-sm);
     color: var(--ke-text-primary);
   }
   .findings {
@@ -816,14 +841,14 @@
     overflow-anchor: none;
   }
   .pagination {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-secondary);
     margin-top: 18px;
   }
   .empty {
     padding: 26px 0;
     color: var(--ke-text-secondary);
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
     line-height: 1.7;
   }
   .empty h4 {
@@ -840,13 +865,13 @@
   }
   .delete-confirmation {
     border: 1px solid var(--ke-border);
-    border-radius: 8px;
+    border-radius: var(--ke-radius-md);
     padding: 16px;
     margin: 16px 0;
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
   }
   .check-status {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     line-height: 1.8;
     border-left: 2px solid var(--ke-marker-sand);
     padding-left: 12px;

@@ -839,6 +839,7 @@
                       !progressPaused &&
                       !collapsed[view.turn.id] &&
                       !!expanded}
+                    phase={live?.phase}
                   />{/if}
                 <div class="response-content">
                   <!-- Turn identity owns this renderer, never terminal status/body identity. -->
@@ -861,6 +862,7 @@
                       <Activity
                         showMark={!$rotatingKejtu}
                         paused={progressPaused}
+                        phase={live?.phase}
                         label={progressPaused
                           ? "Progress unavailable"
                           : phaseLabel(live?.phase)}
@@ -939,7 +941,7 @@
 <style>
   .import-notice {
     color: var(--ke-text-secondary);
-    font-size: 0.85rem;
+    font-size: var(--ke-text-base);
     line-height: 1.5;
     margin-top: 0.75rem;
   }
@@ -1040,7 +1042,7 @@
     min-height: 18px;
     margin: 0 0 8px;
     color: var(--ke-text-tertiary);
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
   }
 
   /* The day heading only appears when the day changes: mono 11px, spaced, with a
@@ -1051,7 +1053,7 @@
     border-top: 1px solid var(--ke-border);
     color: var(--ke-text-secondary);
     font-family: var(--ke-font-mono);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     font-weight: 400;
     letter-spacing: 0.06em;
   }
@@ -1063,21 +1065,16 @@
   }
 
   .eyebrow {
-    font-family: var(--ke-font-mono);
-    font-size: 10px;
-    line-height: 1.7;
-    letter-spacing: 0.11em;
+    font: var(--ke-label-font);
+    letter-spacing: var(--ke-label-tracking);
     text-transform: uppercase;
     color: var(--ke-text-tertiary);
   }
 
   .day-header h1 {
     margin: 13px 0 0;
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 34px;
-    font-weight: 400;
-    line-height: 1.2;
-    letter-spacing: -1.1px;
+    font: var(--ke-title-page);
+    letter-spacing: var(--ke-title-page-tracking);
     color: var(--ke-text-primary);
     overflow-wrap: anywhere;
   }

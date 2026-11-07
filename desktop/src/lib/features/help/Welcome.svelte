@@ -49,7 +49,7 @@
 <style>
   .welcome {
     border: 0;
-    border-radius: 14px;
+    border-radius: var(--ke-radius-lg);
     padding: 1.4rem 1.5rem;
     margin: 1rem auto 2rem;
     max-width: 48rem;
@@ -64,13 +64,13 @@
     margin: 0 0 0.4rem;
   }
   .active h2 {
-    font-size: 15px;
+    font-size: var(--ke-text-md);
   }
   p {
     margin: 0;
     color: var(--ke-text-secondary);
     line-height: 1.6;
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
   }
   .actions {
     display: flex;
@@ -80,11 +80,11 @@
   }
   button {
     font: inherit;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     color: var(--ke-text-primary);
     border: 0;
     background: var(--ke-surface-raised);
-    border-radius: 7px;
+    border-radius: var(--ke-radius-md);
     padding: 0.5rem 0.75rem;
     cursor: pointer;
   }
@@ -102,6 +102,6 @@
   }
   .draft-hint {
     margin-top: 0.6rem;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
 </style>

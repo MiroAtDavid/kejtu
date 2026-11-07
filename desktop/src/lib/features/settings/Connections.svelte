@@ -569,7 +569,7 @@
   small {
     color: var(--ke-text-secondary);
     line-height: 1.6;
-    font-size: 0.875rem;
+    font-size: var(--ke-text-base);
   }
   .actions {
     display: flex;
@@ -587,7 +587,7 @@
     gap: 1rem;
     padding: 0.8rem 1rem;
     border: 1px solid var(--ke-border);
-    border-radius: 12px;
+    border-radius: var(--ke-radius-lg);
   }
   .connections .connection-summary {
     display: grid;
@@ -604,7 +604,7 @@
     background: transparent;
   }
   .connection-summary span {
-    font-size: 0.8rem;
+    font-size: var(--ke-text-sm);
     color: var(--ke-text-secondary);
     font-weight: normal;
   }
@@ -628,7 +628,7 @@
     display: grid;
     gap: 0.4rem;
     margin: 0.7rem 0;
-    font-size: 0.875rem;
+    font-size: var(--ke-text-base);
   }
   .check {
     display: flex;
@@ -653,10 +653,10 @@
   pre {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
-    font-size: 0.75rem;
+    font-size: var(--ke-text-xs);
   }
   .error {
-    color: var(--ke-text-danger, #b75248);
+    color: var(--ke-danger);
     white-space: pre-line;
   }
 </style>

@@ -65,7 +65,7 @@
 <style>
   .document-block {
     display: flow-root;
-    border-radius: 3px;
+    border-radius: var(--ke-radius-sm);
   }
   .document-block.marked {
     background: var(--ke-accent-soft);

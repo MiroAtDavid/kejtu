@@ -177,7 +177,7 @@
     background: transparent;
     color: var(--ke-text-primary);
     font: inherit;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
   }
 
   .history-search::placeholder {
@@ -198,7 +198,7 @@
     padding: calc(9px * var(--ke-density)) 10px;
     border: 0;
     background: none;
-    border-radius: 6px;
+    border-radius: var(--ke-radius-sm);
     color: var(--ke-text-secondary);
     font-size: var(--ke-label-size);
     font-weight: 400;
@@ -250,7 +250,7 @@
     border: 0;
     background: transparent;
     color: var(--ke-text-secondary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     cursor: pointer;
   }
   .more:hover:not(:disabled) {

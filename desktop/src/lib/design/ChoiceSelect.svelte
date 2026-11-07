@@ -35,6 +35,6 @@
     display: block;
     margin-top: 6px;
     color: var(--ke-danger);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
 </style>

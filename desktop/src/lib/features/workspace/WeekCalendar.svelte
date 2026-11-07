@@ -94,7 +94,7 @@
   .calendar-scroll {
     overflow-x: auto;
     border: 1px solid var(--ke-border);
-    border-radius: 8px;
+    border-radius: var(--ke-radius-md);
   }
   .week-board {
     display: grid;
@@ -129,7 +129,7 @@
     text-align: left;
   }
   .day-heading span {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-secondary);
   }
   .day-heading strong {
@@ -138,7 +138,7 @@
   }
   .day-heading small {
     margin-left: auto;
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     color: var(--ke-text-tertiary);
   }
   .today .day-heading strong {
@@ -174,7 +174,7 @@
   .calendar-event time {
     display: block;
     color: var(--ke-text-tertiary);
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     line-height: 14px;
   }
   .calendar-event span {
@@ -183,7 +183,7 @@
     -webkit-line-clamp: 2;
     line-clamp: 2;
     overflow: hidden;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     line-height: 15px;
     overflow-wrap: anywhere;
   }
@@ -194,11 +194,11 @@
     border: 0;
     text-align: left;
     padding: 8px 3px 0;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-secondary);
   }
   .day-empty {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-tertiary);
     margin: 12px 3px;
   }

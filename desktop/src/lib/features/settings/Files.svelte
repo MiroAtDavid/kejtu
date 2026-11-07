@@ -506,11 +506,11 @@
   }
   .files-panel .privacy-note {
     color: var(--ke-text-secondary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     margin: 12px 0 24px;
   }
   .files-panel .access-row .access-switch {
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
     font-weight: 500;
     color: var(--ke-text-primary);
     margin: 0;
@@ -534,7 +534,7 @@
   .permission,
   .summary-note {
     color: var(--ke-text-secondary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     font-weight: 400;
   }
   .optional {
@@ -594,7 +594,7 @@
   .folder-path span,
   .folder-path small {
     color: var(--ke-text-secondary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     margin-top: 3px;
   }
   .folder-controls {
@@ -643,7 +643,7 @@
   .tool-description {
     display: block;
     color: var(--ke-text-secondary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     margin-top: 2px;
   }
   .check {

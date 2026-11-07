@@ -589,7 +589,7 @@
   .image-limits {
     margin: 0;
     color: var(--ke-text-tertiary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     line-height: 1.5;
   }
   .image-limits[hidden] {

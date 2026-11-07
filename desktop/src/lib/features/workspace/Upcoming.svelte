@@ -80,7 +80,7 @@
   .calendar-source {
     margin: -4px 0 14px;
     color: var(--ke-text-tertiary);
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
   }
   .agenda {
     list-style: none;
@@ -92,7 +92,7 @@
     align-items: center;
     gap: 9px;
     margin: 15px 0 7px;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     font-weight: 500;
     color: var(--ke-text-secondary);
   }
@@ -116,13 +116,13 @@
   }
   .agenda-time {
     color: var(--ke-text-secondary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     font-variant-numeric: tabular-nums;
     line-height: 1.65;
   }
   .agenda-title {
     margin: 0;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     line-height: 1.65;
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -134,12 +134,12 @@
   .entry-source {
     display: block;
     color: var(--ke-text-tertiary);
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     margin-top: 2px;
   }
   .agenda-zone {
     color: var(--ke-text-tertiary);
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     margin: 12px 0 0;
   }
   .agenda-controls {

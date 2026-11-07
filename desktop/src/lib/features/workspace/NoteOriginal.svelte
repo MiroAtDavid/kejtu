@@ -174,7 +174,7 @@
     margin: 12px 0;
   }
   blockquote {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     white-space: pre-wrap;
   }
 </style>

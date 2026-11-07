@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
   import HomeArtwork from "./HomeArtwork.svelte";
+  import KejtuMark from "$lib/design/KejtuMark.svelte";
+  import { rotatingKejtu } from "$lib/design/theme";
   import { request } from "$lib/api/client";
   import type { ResearchSearch } from "$lib/api/wire.generated";
   import {
@@ -22,6 +24,13 @@
   ) => void = () => {};
   let rows: ResearchSearch[] = [],
     counts = emptyCounts();
+  // While any search is checking, Kejtu sits at the desk instead of the
+  // still artwork; paused progress keeps the artwork.
+  $: checking = rows.some(
+    (task) =>
+      task.last_run?.status === "running" &&
+      task.last_run.error_code !== "research_paused",
+  );
   let loading = false,
     error = "",
     seen = "",
@@ -98,7 +107,12 @@
               : "You’re caught up")}<span aria-hidden="true"> ↗</span></span
         >
       </button>
-      <div class="research-art"><HomeArtwork /></div>
+      <div class="research-art">
+        {#if checking && $rotatingKejtu}<span
+            class="art-mark"
+            title="Checking now"><KejtuMark state="desk" size={42} /></span
+          >{:else}<HomeArtwork />{/if}
+      </div>
     </div>
     <ul>
       {#each rows as task}<li>
@@ -166,7 +180,7 @@
     outline-offset: 4px;
   }
   .more {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-secondary);
     background: none;
     border: 0;
@@ -212,7 +226,7 @@
     flex: 1;
   }
   strong {
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
     font-weight: 450;
     line-height: 1.6;
     overflow-wrap: anywhere;
@@ -224,17 +238,17 @@
   .meta {
     display: block;
     color: var(--ke-text-secondary);
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     line-height: 1.6;
     margin-top: 4px;
   }
   .arrow {
     color: var(--ke-text-tertiary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
   .muted,
   .error {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     line-height: 1.8;
     color: var(--ke-text-secondary);
     margin: 0;
@@ -244,7 +258,7 @@
     overflow-wrap: anywhere;
   }
   .footnote {
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     line-height: 1.6;
     color: var(--ke-text-secondary);
     margin: 12px 0 0;
@@ -277,9 +291,7 @@
     color: var(--ke-text-primary);
   }
   .big-number {
-    font:
-      400 68px/0.95 Georgia,
-      serif;
+    font: 400 68px/0.95 var(--ke-font-heading);
     letter-spacing: -4px;
   }
   .metric-label {
@@ -292,6 +304,13 @@
     margin-left: auto;
     flex-shrink: 1;
     min-width: 70px;
+  }
+  .art-mark {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    color: var(--ke-accent);
+    animation: ke-fade-in var(--ke-motion-slow) var(--ke-motion-ease);
   }
   header {
     margin-bottom: 8px;
@@ -318,7 +337,7 @@
       gap: 10px;
     }
     .metric-label {
-      font-size: 11px;
+      font-size: var(--ke-text-2xs);
     }
   }
 </style>

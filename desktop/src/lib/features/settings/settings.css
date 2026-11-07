@@ -2,7 +2,7 @@
    recovery state. The page scope deliberately outranks component defaults;
    it never reaches Journal, Study or standalone versions of these controls. */
 .operations-content .settings-page {
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   line-height: 1.65;
   min-width: 0;
 }
@@ -12,11 +12,8 @@
 }
 .operations-content .settings-page .settings-title {
   margin: 0 0 10px;
-  font:
-    400 28px/1.25 Georgia,
-    "Times New Roman",
-    serif;
-  letter-spacing: -0.6px;
+  font: var(--ke-title-page);
+  letter-spacing: var(--ke-title-page-tracking);
   color: var(--ke-text-primary);
 }
 /* A task controller can also appear inside Background; it is then a section. */
@@ -36,11 +33,11 @@
   :is(.settings-title + p, .panel-intro, .intro) {
   margin: 0 0 28px;
   color: var(--ke-text-secondary);
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
 }
 .operations-content .settings-page h3 {
   margin: 28px 0 12px;
-  font-size: 13px;
+  font-size: var(--ke-text-sm);
   line-height: 1.4;
   font-weight: 500;
   text-transform: none;
@@ -48,7 +45,7 @@
   color: var(--ke-text-primary);
 }
 .operations-content .settings-page label {
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   line-height: 1.6;
   color: var(--ke-text-secondary);
 }
@@ -64,19 +61,20 @@
   max-width: 100%;
   min-width: 0;
   font-family: var(--ke-font-ui);
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   color: var(--ke-text-primary);
 }
 .operations-content
   .settings-page
   button:where(:not(.choice-trigger, .choice-option)) {
-  min-height: 32px;
-  padding: 6px 10px;
+  min-height: var(--ke-control-height);
+  padding: var(--ke-control-padding);
+  font-size: var(--ke-control-font-size);
   line-height: 1.5;
   border: 1px solid transparent;
-  border-radius: var(--ke-radius-sm);
-  background: var(--ke-surface-inset);
-  color: var(--ke-text-secondary);
+  border-radius: var(--ke-control-radius);
+  background: var(--ke-control-bg);
+  color: var(--ke-control-text);
   cursor: pointer;
   overflow-wrap: anywhere;
 }
@@ -84,7 +82,7 @@
   .settings-page
   button:where(:not(.choice-trigger, .choice-option)):hover:not(:disabled) {
   color: var(--ke-text-primary);
-  background: var(--ke-surface-sidebar);
+  background: var(--ke-control-bg-hover);
 }
 .operations-content .settings-page button:disabled {
   opacity: 0.5;
@@ -93,7 +91,7 @@
 .operations-content
   .settings-page
   :is(button.selected, button[aria-pressed="true"]) {
-  background: var(--ke-accent-soft);
+  background: var(--ke-control-bg-selected);
   border-color: var(--ke-border-strong);
   color: var(--ke-text-primary);
 }
@@ -145,7 +143,7 @@
   padding: 0;
   margin: 0;
   border: 0;
-  border-radius: 12px;
+  border-radius: var(--ke-radius-lg);
   background: var(--ke-border-strong);
   cursor: pointer;
 }
@@ -223,7 +221,7 @@
   background: transparent;
   border: 0;
   color: var(--ke-text-primary);
-  font-size: 14px;
+  font-size: var(--ke-text-base);
 }
 .operations-content .settings-page .tasks .preview input[type="checkbox"] {
   margin-right: 7px;
@@ -243,7 +241,7 @@
 .operations-content .settings-page legend {
   padding: 0;
   margin-bottom: 12px;
-  font-size: 13px;
+  font-size: var(--ke-text-sm);
   font-weight: 500;
   color: var(--ke-text-primary);
 }
@@ -270,7 +268,7 @@
 }
 .operations-content .settings-page :is(small, .hint, .muted, .help) {
   color: var(--ke-text-secondary);
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
 }
 .operations-content
   .settings-page
@@ -279,7 +277,7 @@
   background: transparent;
   border: 0;
   border-radius: 0;
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
 }
 .operations-content .settings-page [role="alert"] {
   color: var(--ke-danger);
@@ -294,7 +292,7 @@
 .operations-content .settings-page summary {
   color: var(--ke-text-secondary);
   padding: 8px 0;
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   cursor: pointer;
 }
 .operations-content .settings-page .settings-tabs {

@@ -632,6 +632,23 @@ class NoteStore:
             result.append((kind, rid, revision, source, meta['sha256']))
         return result
 
+    def _cited(self, snapshot, ref, bank, ledger):
+        """One of the user's own earlier messages, as quote evidence.
+
+        Only a current conversation reference from this archive epoch, to a
+        user-role message in a conversation granted to this bank. The exact
+        body is read here; the quote is matched against it by the caller.
+        """
+        value = self.memory._decode(snapshot, bank['handle_key'], ref)
+        if (not isinstance(value, list) or len(value) != 5 or value[0] != 'h'
+                or value[1] not in ('current', 'historical') or value[4] != snapshot.archive_epoch):
+            raise Failure('note_quote_invalid', 'source_ref must be a current reference to one of the user\'s own messages; rediscover it.')
+        source = self.store.recall._source(snapshot, 'message', value[3], ledger)
+        if not source or source['conversation_id'] != value[2] or source['role'] != 'user':
+            raise Failure('note_quote_invalid', 'source_ref must name one of the user\'s own messages in a granted conversation.')
+        body = self.store._history.body(value[3], 'user_message', ledger, 4 * ledger.profile.context_limit)
+        return dict(artifact_id=value[3], body=body)
+
     def _target(self, snapshot, args, ledger):
         owned = self._query(ledger, '''SELECT 1 FROM note_records
             WHERE record_id=? AND bank_id=? AND actor=?''', (args['note_id'], snapshot.bank_id, ACTOR)).fetchone()
@@ -750,6 +767,8 @@ class NoteStore:
                     args=dict(args,note_id=rid,expected_revision=value[3])
                     result['note_id']=rid
                 bases = self._basis(snapshot, args['basis_refs'], bank, ledger)
+                if args.get('fields',{}).get('source_ref'):
+                    args = dict(args, cited=self._cited(snapshot, args['fields']['source_ref'], bank, ledger))
                 previous, meta = (b'', None) if create else self._target(snapshot, args, ledger)
                 previous_bases=[] if create else [tuple(r) for r in self._query(ledger,
                     'SELECT kind,record_id,memory_revision,source_revision,sha256 FROM note_bases WHERE revision_id=? ORDER BY ordinal',

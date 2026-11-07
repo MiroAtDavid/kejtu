@@ -3,7 +3,7 @@
   border-top: 1px solid var(--ke-border);
   padding: 16px 0 0;
   margin: 24px 0 26px;
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   line-height: 1.8;
   overflow-wrap: anywhere;
   color: var(--ke-text-primary);
@@ -21,8 +21,8 @@
 }
 .widget-heading h3,
 .journal-widget-editor .eyebrow {
-  font: 9px/1.7 var(--ke-font-mono);
-  letter-spacing: 0.1em;
+  font: var(--ke-label-font);
+  letter-spacing: var(--ke-label-tracking);
   text-transform: uppercase;
   margin: 0;
   color: var(--ke-text-tertiary);
@@ -46,7 +46,7 @@
 .widget-link {
   display: inline-block;
   text-align: left;
-  font-size: 11px;
+  font-size: var(--ke-text-2xs);
   padding: 2px 0;
   line-height: 1.7;
 }
@@ -59,13 +59,13 @@
 }
 .widget-muted {
   color: var(--ke-text-secondary);
-  font-size: 11px;
+  font-size: var(--ke-text-2xs);
   line-height: 1.8;
   margin: 8px 0 12px;
 }
 .widget-error {
   color: var(--ke-danger);
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   line-height: 1.7;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -99,29 +99,31 @@
   color: var(--ke-text-primary);
   background: var(--ke-surface);
   border: 1px solid var(--ke-border);
-  border-radius: 6px;
+  border-radius: var(--ke-overlay-radius);
   padding: 26px;
   max-width: 660px;
   width: calc(100vw - 36px);
   max-height: calc(100vh - 56px);
   overflow: auto;
-  box-shadow: var(--ke-shadow-panel, 0 12px 40px #0003);
+  box-shadow: var(--ke-overlay-shadow);
+  animation: ke-dialog-in var(--ke-motion-slow) var(--ke-motion-ease);
 }
 .journal-widget-editor::backdrop {
-  background: rgb(0 0 0 / 0.35);
+  background: var(--ke-scrim, rgb(0 0 0 / 0.32));
+  /* Older engines do not let ::backdrop inherit custom properties. */
+  animation: ke-fade-in var(--ke-motion-slow, 260ms)
+    var(--ke-motion-ease, ease-out);
 }
 .journal-widget-editor header {
   align-items: start;
 }
 .journal-widget-editor h2 {
-  font:
-    400 26px/1.4 Georgia,
-    serif;
-  letter-spacing: -0.4px;
+  font: var(--ke-title-section);
+  letter-spacing: var(--ke-title-section-tracking);
   margin: 8px 0 15px;
 }
 .journal-widget-editor h3 {
-  font-size: 14px;
+  font-size: var(--ke-text-base);
   font-weight: 500;
   margin: 0;
 }
@@ -142,7 +144,7 @@
   text-align: left;
   border: 1px solid var(--ke-border);
   background: transparent;
-  border-radius: 4px;
+  border-radius: var(--ke-radius-sm);
   cursor: pointer;
   color: var(--ke-text-primary);
 }
@@ -151,12 +153,12 @@
 }
 .widget-picker strong {
   display: block;
-  font-size: 13px;
+  font-size: var(--ke-text-sm);
   font-weight: 500;
 }
 .widget-picker span {
   display: block;
-  font-size: 11px;
+  font-size: var(--ke-text-2xs);
   color: var(--ke-text-secondary);
   line-height: 1.7;
   margin-top: 5px;
@@ -181,7 +183,7 @@
   margin-top: 13px;
 }
 .journal-widget-editor label {
-  font-size: 11px;
+  font-size: var(--ke-text-2xs);
   color: var(--ke-text-secondary);
 }
 .journal-widget-editor input:not([type="checkbox"]),
@@ -192,10 +194,10 @@
   margin-top: 5px;
   border: 1px solid var(--ke-border);
   background: var(--ke-surface);
-  border-radius: 3px;
+  border-radius: var(--ke-radius-sm);
   color: var(--ke-text-primary);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   box-sizing: border-box;
 }
 .widget-fold {
@@ -229,7 +231,7 @@
   margin-top: 12px;
 }
 .widget-savebar span {
-  font-size: 11px;
+  font-size: var(--ke-text-2xs);
   color: var(--ke-text-tertiary);
 }
 .widget-savebar > div {
@@ -239,9 +241,9 @@
 .widget-savebar button {
   background: transparent;
   border: 1px solid var(--ke-border);
-  border-radius: 4px;
+  border-radius: var(--ke-radius-sm);
   font: inherit;
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   color: var(--ke-text-primary);
   padding: 7px 12px;
   cursor: pointer;

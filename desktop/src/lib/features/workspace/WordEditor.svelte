@@ -455,12 +455,12 @@
     padding: 0;
   }
   .status {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-tertiary);
     margin-left: 8px;
   }
   .quiet {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     margin-left: auto;
   }
   .canvas {
@@ -480,7 +480,7 @@
     place-items: center;
     background: var(--ke-surface);
     color: var(--ke-text-tertiary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
   .export-format {
     width: 128px;

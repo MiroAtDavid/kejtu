@@ -3,11 +3,9 @@
   min-width: 0;
 }
 .uni h1 {
-  font:
-    400 29px Georgia,
-    serif;
+  font: var(--ke-title-page);
   margin: 0 0 12px;
-  letter-spacing: -0.6px;
+  letter-spacing: var(--ke-title-page-tracking);
 }
 .uni h2 {
   font-size: var(--ke-resource-size);
@@ -15,7 +13,7 @@
   margin: 24px 0 12px;
 }
 .uni h3 {
-  font-size: 14px;
+  font-size: var(--ke-text-base);
   font-weight: 500;
 }
 .uni p {
@@ -24,7 +22,7 @@
 .uni .muted,
 .uni small {
   color: var(--ke-text-tertiary);
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
 }
 .uni button,
 .uni input,
@@ -34,18 +32,21 @@
 }
 .uni button {
   border: 1px solid transparent;
-  background: var(--ke-surface-inset);
-  border-radius: 6px;
-  min-height: 32px;
-  padding: 6px 10px;
-  font-size: var(--ke-label-size);
-  color: var(--ke-text-secondary);
+  background: var(--ke-control-bg);
+  border-radius: var(--ke-control-radius);
+  min-height: var(--ke-control-height);
+  padding: var(--ke-control-padding);
+  font-size: var(--ke-control-font-size);
+  color: var(--ke-control-text);
   cursor: pointer;
 }
-.uni button:hover:not(:disabled),
+.uni button:hover:not(:disabled) {
+  color: var(--ke-text-primary);
+  background: var(--ke-control-bg-hover);
+}
 .uni button[aria-pressed="true"] {
   color: var(--ke-text-primary);
-  background: var(--ke-surface-inset);
+  background: var(--ke-control-bg-selected);
 }
 /* Labelled project and calendar actions share one visible surface in every palette. */
 .uni .workspace-action {
@@ -56,20 +57,16 @@
   min-height: 36px;
   padding: 8px 12px;
   border: 1px solid transparent;
-  border-radius: var(--ke-radius-sm);
-  background: var(--ke-surface-inset);
-  color: var(--ke-text-secondary);
-  font-size: var(--ke-text-xs);
+  border-radius: var(--ke-control-radius);
+  background: var(--ke-control-bg);
+  color: var(--ke-control-text);
+  font-size: var(--ke-control-font-size);
   line-height: 18px;
   white-space: nowrap;
 }
 .uni .workspace-action:hover:not(:disabled) {
   color: var(--ke-text-primary);
-  background: color-mix(
-    in srgb,
-    var(--ke-surface-inset) 88%,
-    var(--ke-text-secondary)
-  );
+  background: var(--ke-control-bg-hover);
 }
 .uni button:disabled {
   opacity: 0.5;
@@ -88,7 +85,7 @@
   width: 100%;
   min-width: 0;
   border: 1px solid var(--ke-border);
-  border-radius: 4px;
+  border-radius: var(--ke-radius-sm);
   padding: 7px;
   background: var(--ke-surface);
   color: var(--ke-text-primary);
@@ -98,7 +95,7 @@
 }
 .uni label {
   display: block;
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   color: var(--ke-text-secondary);
 }
 .uni label > input:not([type="checkbox"]),
@@ -135,7 +132,7 @@
 .uni .card {
   border: 1px solid var(--ke-border);
   padding: calc(16px * var(--ke-density));
-  border-radius: 6px;
+  border-radius: var(--ke-radius-sm);
   min-width: 0;
 }
 .uni .tabs {
@@ -154,8 +151,8 @@
 .uni .notice {
   padding: 10px 12px;
   background: var(--ke-surface-inset);
-  border-radius: 4px;
-  font-size: 12px;
+  border-radius: var(--ke-radius-sm);
+  font-size: var(--ke-text-xs);
 }
 .uni .drawer {
   position: fixed;
@@ -166,14 +163,15 @@
   padding: 24px;
   background: var(--ke-surface);
   border: 1px solid var(--ke-border);
-  box-shadow: 0 6px 30px #0002;
-  border-radius: 8px;
+  box-shadow: var(--ke-overlay-shadow);
+  border-radius: var(--ke-overlay-radius);
+  animation: ke-sheet-in var(--ke-motion-slow) var(--ke-motion-ease);
 }
 .uni .drawer h2 {
   margin-top: 0;
 }
 .uni .source {
-  font-size: 11px;
+  font-size: var(--ke-text-2xs);
   overflow-wrap: anywhere;
   color: var(--ke-text-tertiary);
 }
@@ -189,7 +187,7 @@
 }
 .uni details > summary {
   cursor: pointer;
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   padding: 10px 0;
 }
 .uni [hidden] {

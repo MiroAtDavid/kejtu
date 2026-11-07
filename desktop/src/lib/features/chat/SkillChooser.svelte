@@ -245,13 +245,15 @@
     overscroll-behavior: contain;
     padding: 5px;
     border: 1px solid var(--ke-border);
-    border-radius: 8px;
+    border-radius: var(--ke-radius-md);
     background: var(--ke-surface-raised);
-    box-shadow: 0 6px 20px rgb(0 0 0 / 0.12);
+    box-shadow: var(--ke-overlay-shadow);
+    transform-origin: top left;
+    animation: ke-menu-in var(--ke-motion-base) var(--ke-motion-ease);
   }
   .heading {
     padding: 4px 7px;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-tertiary);
   }
   [role="option"] {
@@ -261,10 +263,10 @@
     width: 100%;
     padding: 5px 7px;
     border: 0;
-    border-radius: 4px;
+    border-radius: var(--ke-radius-sm);
     background: transparent;
     text-align: left;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     line-height: 20px;
   }
   [role="option"] span:first-child {
@@ -284,6 +286,6 @@
     padding: 5px 7px;
     margin: 0;
     color: var(--ke-text-secondary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
 </style>

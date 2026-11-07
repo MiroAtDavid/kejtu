@@ -86,7 +86,7 @@
     max-width: 540px;
     margin: 9px 0;
     padding: 12px 14px;
-    border-radius: 5px;
+    border-radius: var(--ke-radius-sm);
     background: var(--ke-accent-soft);
     color: var(--ke-text-primary);
     white-space: normal;
@@ -133,7 +133,7 @@
     text-underline-offset: 3px;
   }
   .page {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-tertiary);
     white-space: nowrap;
   }
@@ -146,7 +146,7 @@
   }
   summary {
     cursor: pointer;
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     color: var(--ke-text-tertiary);
   }
   .details-actions {
@@ -154,7 +154,7 @@
     align-items: center;
     justify-content: flex-end;
     gap: 14px;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
   }
   pre {
     white-space: pre-wrap;
@@ -166,7 +166,7 @@
   }
   .source-error {
     color: var(--ke-danger);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     margin: 8px 0 0;
   }
   button:disabled {

@@ -733,10 +733,10 @@
     gap: 7px;
     background: none;
     border: 0;
-    border-radius: 5px 5px 0 0;
+    border-radius: var(--ke-radius-sm) var(--ke-radius-sm) 0 0;
     color: var(--ke-text-secondary);
     font: inherit;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     min-height: 32px;
     padding: 6px 10px;
     white-space: nowrap;
@@ -759,7 +759,7 @@
     display: flex;
     align-items: center;
     flex: none;
-    border-radius: 5px 5px 0 0;
+    border-radius: var(--ke-radius-sm) var(--ke-radius-sm) 0 0;
     position: relative;
   }
   .editor-tab.tab-dragging {
@@ -792,7 +792,7 @@
   .icon {
     padding: 7px;
     flex: none;
-    border-radius: 4px;
+    border-radius: var(--ke-radius-sm);
   }
   .new-document {
     flex: none;
@@ -818,7 +818,7 @@
     opacity: 0.4;
   }
   .dirty {
-    font-size: 14px;
+    font-size: var(--ke-text-base);
     color: var(--ke-text-secondary);
   }
   .panes {
@@ -839,13 +839,13 @@
     background: color-mix(in srgb, var(--ke-surface) 75%, transparent);
     color: var(--ke-text-secondary);
     border: 1px dashed var(--ke-border-strong);
-    border-radius: 8px;
+    border-radius: var(--ke-radius-md);
     display: flex;
     align-items: flex-start;
     justify-content: center;
     padding: 24px;
     font: inherit;
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
   }
   .pane-drop-zone.drop-ready {
     background: color-mix(in srgb, var(--ke-accent-soft) 85%, transparent);

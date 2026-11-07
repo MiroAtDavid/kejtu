@@ -36,9 +36,10 @@
       on:click={() => onOpen(item.id)}
       ><Icon name={item.icon} size={15} />{item.label}
       {#if item.id === "research" && researchNew > 0}<span
-          class="research-count"
-          aria-hidden="true">{researchNew}</span
-        >{/if}</button
+          class="research-dot"
+          title={`${researchNew} ${researchNew === 1 ? "finding" : "findings"} to review`}
+          aria-hidden="true"
+        ></span>{/if}</button
     >{/each}
   {#if view === "course" && course}<div class="course-context">
       <span>Current section</span>
@@ -47,16 +48,16 @@
 </nav>
 
 <style>
-  .research-count {
+  /* Something is waiting: a quiet dot, not a number asking to be cleared. The
+     exact count stays in the accessible name and the tooltip. */
+  .research-dot {
+    flex: none;
     margin-left: auto;
-    min-width: 20px;
-    padding: 1px 5px;
-    border-radius: var(--ke-radius-sm);
-    background: var(--ke-accent-soft);
-    color: var(--ke-text-primary);
-    font-size: 11px;
-    font-variant-numeric: tabular-nums;
-    text-align: center;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ke-accent);
+    animation: ke-fade-in var(--ke-motion-slow) var(--ke-motion-ease);
   }
   .course-context {
     margin-top: calc(24px * var(--ke-density));
@@ -64,8 +65,8 @@
     border-top: 1px solid var(--ke-border);
   }
   .course-context span {
-    font: 9px var(--ke-font-mono);
-    letter-spacing: 1.2px;
+    font: var(--ke-label-font);
+    letter-spacing: var(--ke-label-tracking);
     text-transform: uppercase;
     color: var(--ke-text-tertiary);
   }

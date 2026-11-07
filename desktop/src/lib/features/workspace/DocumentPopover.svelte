@@ -246,11 +246,12 @@
     display: flex;
     flex-direction: column;
     border: 1px solid var(--ke-border);
-    border-radius: 12px;
+    border-radius: var(--ke-overlay-radius);
     background: var(--ke-surface-raised);
-    box-shadow: 0 12px 38px rgb(0 0 0 / 0.13);
+    box-shadow: var(--ke-overlay-shadow);
     color: var(--ke-text-primary);
     font: 12px var(--ke-font-ui);
+    animation: ke-dialog-in var(--ke-motion-slow) var(--ke-motion-ease);
   }
   .document-popover::backdrop {
     background: transparent;
@@ -275,7 +276,7 @@
     border: 0;
     color: var(--ke-text-secondary);
     font: inherit;
-    border-radius: 5px;
+    border-radius: var(--ke-radius-sm);
     cursor: pointer;
     min-height: 0;
   }
@@ -300,7 +301,7 @@
     cursor: grabbing;
   }
   .grip {
-    font-size: 16px;
+    font-size: var(--ke-text-lg);
     color: var(--ke-text-tertiary);
   }
   .document-popover .popover-heading .close,

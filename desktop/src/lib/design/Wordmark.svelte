@@ -8,7 +8,7 @@
   /* Branding stays independent of the conversation's reading typography. */
   .wordmark {
     margin: 0;
-    font-family: var(--ke-font-heading, Georgia, "Times New Roman", serif);
+    font-family: var(--ke-font-heading);
     font-size: 27px;
     font-weight: 400;
     letter-spacing: -1px;

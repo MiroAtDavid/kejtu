@@ -245,7 +245,7 @@
     width: min(25rem, 70vw);
     padding: 0.75rem;
     border: 1px solid var(--ke-border);
-    border-radius: 6px;
+    border-radius: var(--ke-radius-sm);
     background: var(--ke-surface-raised);
     color: var(--ke-text-primary);
     z-index: 12;
@@ -254,7 +254,7 @@
     font: inherit;
     cursor: pointer;
     border: 0;
-    border-radius: 6px;
+    border-radius: var(--ke-radius-sm);
     color: var(--ke-text-secondary);
     background: transparent;
   }
@@ -291,10 +291,12 @@
     width: min(12rem, 70vw);
     padding: 0.35rem;
     border: 1px solid var(--ke-border);
-    border-radius: 9px;
+    border-radius: var(--ke-radius-md);
     background: var(--ke-surface-raised);
-    box-shadow: var(--ke-shadow-panel);
-    font-size: 0.8rem;
+    box-shadow: var(--ke-overlay-shadow);
+    font-size: var(--ke-text-sm);
+    transform-origin: top right;
+    animation: ke-menu-in var(--ke-motion-base) var(--ke-motion-ease);
   }
   .actions.above {
     top: auto;
@@ -309,7 +311,7 @@
   .actions p {
     margin: 0;
     padding: 0.5rem 0.6rem;
-    font-size: 0.8rem;
+    font-size: var(--ke-text-sm);
   }
   .memory-editor {
     position: absolute;
@@ -319,10 +321,12 @@
     width: min(25rem, 70vw);
     padding: 1rem;
     border: 1px solid var(--ke-border);
-    border-radius: 9px;
+    border-radius: var(--ke-radius-md);
     background: var(--ke-surface-raised);
-    box-shadow: var(--ke-shadow-panel);
-    font-size: 0.85rem;
+    box-shadow: var(--ke-overlay-shadow);
+    font-size: var(--ke-text-base);
+    transform-origin: top right;
+    animation: ke-menu-in var(--ke-motion-base) var(--ke-motion-ease);
   }
   .memory-editor textarea {
     box-sizing: border-box;
@@ -333,7 +337,7 @@
     color: var(--ke-text-primary);
     background: var(--ke-surface-inset);
     border: 1px solid var(--ke-border);
-    border-radius: 6px;
+    border-radius: var(--ke-radius-sm);
     font: inherit;
   }
   .memory-editor p {

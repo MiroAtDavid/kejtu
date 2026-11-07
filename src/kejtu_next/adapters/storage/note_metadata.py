@@ -42,7 +42,7 @@ def original_quote(quote,body):
     parts=re.split(r'\s+',quote.strip())
     found=re.search(r'\s+'.join(re.escape(part) for part in parts),body)
     if found is None:
-        raise Failure('note_quote_invalid','source_quote must match the current user message; ordinary authored saves need no quote.')
+        raise Failure('note_quote_invalid','source_quote must match the quoted user message exactly; ordinary authored saves need no quote.')
     exact=found.group()
     if len(exact.encode())>2048:
         raise Failure('note_quote_invalid','Use a shorter exact source_quote; original whitespace exceeded the quote bound.')
@@ -67,9 +67,23 @@ def prepare(notes,snapshot,args,origin,ledger):
     if supplied.get('source_quote'):
         if origin['user_id'] is None:
             raise Failure('note_quote_invalid', 'Private review is not a new user statement or user correction; use independent authorship and deliberate source links.')
-        body=notes.store._history.body(origin['user_id'],'user_message',ledger,4*ledger.profile.context_limit)
+        # A cited earlier user message (resolved and authorised by the caller)
+        # replaces the current one as the quote's source. It still requires a
+        # user turn, so private reviews and background work cannot adopt.
+        cited=args.get('cited')
+        if cited and supplied.get('correction_reason'):
+            # Correction evidence names the CURRENT user message. A historical
+            # source cannot vouch for a correction made now; refuse rather
+            # than pair an old quote with an unrelated current event.
+            raise Failure('note_quote_invalid',
+                'A user correction quotes the current user message; omit source_ref. '
+                'source_ref is only for adopting an older statement in a new linked note; no note changed.')
+        if cited:
+            body,artifact=cited['body'],cited['artifact_id']
+        else:
+            body,artifact=notes.store._history.body(origin['user_id'],'user_message',ledger,4*ledger.profile.context_limit),origin['user_id']
         quote=original_quote(supplied['source_quote'],body)
-        value['attribution']={'source_quote':quote,'artifact_id':origin['user_id']}
+        value['attribution']={'source_quote':quote,'artifact_id':artifact}
     if value['basis'] in ('user_statement','user_summary'):
         if not value.get('attribution'):
             raise Failure('note_quote_invalid','A user-attributed note needs an exact source_quote; your own ideas do not.')

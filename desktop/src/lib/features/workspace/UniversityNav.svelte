@@ -43,7 +43,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
   .university-disclosure span {
     color: var(--ke-text-tertiary);

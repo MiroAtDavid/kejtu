@@ -288,7 +288,7 @@
      a separate ruled command block. Only recorded replacement data is shown. */
   .tool-activity {
     color: var(--ke-text-secondary);
-    font-size: 0.78rem;
+    font-size: var(--ke-text-xs);
   }
   .tool-activity summary {
     display: list-item;
@@ -323,7 +323,7 @@
     overflow-wrap: anywhere;
     max-height: 14rem;
     overflow: auto;
-    font-size: 0.76rem;
+    font-size: var(--ke-text-xs);
     color: var(--ke-text-primary);
   }
   summary:focus-visible,
@@ -384,22 +384,22 @@
     width: 1.5rem;
     height: 3px;
     border: 0;
-    border-radius: 999px;
+    border-radius: var(--ke-radius-pill);
     background: var(--ke-border);
   }
   meter::-webkit-meter-bar {
     height: 3px;
     border: 0;
-    border-radius: 999px;
+    border-radius: var(--ke-radius-pill);
     background: var(--ke-border);
     box-shadow: none;
   }
   meter::-webkit-meter-optimum-value {
-    border-radius: 999px;
+    border-radius: var(--ke-radius-pill);
     background: var(--ke-text-tertiary);
   }
   meter::-moz-meter-bar {
-    border-radius: 999px;
+    border-radius: var(--ke-radius-pill);
     background: var(--ke-text-tertiary);
   }
 </style>

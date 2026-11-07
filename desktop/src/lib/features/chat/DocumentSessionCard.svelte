@@ -60,7 +60,7 @@
     color: var(--ke-text-secondary);
   }
   time {
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     color: var(--ke-text-tertiary);
   }
   .row {
@@ -95,12 +95,12 @@
     min-width: 0;
     text-align: left;
     overflow-wrap: anywhere;
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
   }
   .count,
   .details,
   .status {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-tertiary);
   }
   .count {

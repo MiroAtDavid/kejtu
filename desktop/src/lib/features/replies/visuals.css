@@ -13,7 +13,7 @@
 }
 .rich-chart figcaption span {
   display: block;
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   color: var(--ke-text-secondary);
   margin: 3px 0 16px;
 }
@@ -33,19 +33,19 @@
 }
 .rich-choice-group button {
   font: inherit;
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   padding: 4px 10px;
   color: var(--ke-text-secondary);
   background: transparent;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: var(--ke-radius-sm);
   cursor: pointer;
 }
 .rich-choice-group button[aria-pressed="true"] {
   border-color: var(--ke-border-strong);
 }
 .rich-visuals .rich-axis-caption {
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   margin: 0;
   color: var(--ke-text-secondary);
 }
@@ -53,11 +53,11 @@
   height: 280px;
   width: 100%;
   color: var(--ke-text-secondary);
-  font-size: 11px;
+  font-size: var(--ke-text-2xs);
 }
 .rich-visuals .rich-scale-note {
   min-height: 22px;
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   color: var(--ke-text-secondary);
   margin: 10px 0 16px;
 }
@@ -66,7 +66,7 @@
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
 }
 .rich-point-inspector input {
   min-width: 100px;
@@ -81,13 +81,13 @@
   display: flex;
   gap: 20px;
   align-items: center;
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   margin-top: 12px;
 }
 .rich-values {
   border-collapse: collapse;
   width: 100%;
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   margin-top: 12px;
 }
 .rich-values caption {
@@ -152,7 +152,7 @@
   text-anchor: middle;
 }
 .rich-diagram details {
-  font-size: 12px;
+  font-size: var(--ke-text-xs);
   color: var(--ke-text-secondary);
   margin-top: 10px;
 }

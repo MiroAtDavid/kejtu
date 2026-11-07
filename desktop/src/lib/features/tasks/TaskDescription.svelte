@@ -163,7 +163,7 @@
   }
   label {
     color: var(--ke-text-secondary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
   .modes {
     display: flex;
@@ -178,7 +178,7 @@
     border: 0;
     border-radius: var(--ke-radius-sm);
     font: inherit;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     cursor: pointer;
   }
   .modes button[aria-pressed="true"],
@@ -212,7 +212,7 @@
   .hint,
   .placeholder {
     color: var(--ke-text-tertiary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     margin: 6px 0 0;
   }
   .preview {
@@ -255,7 +255,7 @@
   .preview :global(h2),
   .preview :global(h3),
   .preview :global(h4) {
-    font-size: 15px;
+    font-size: var(--ke-text-md);
     margin: 15px 0 8px;
   }
   .preview.disabled :global(input) {

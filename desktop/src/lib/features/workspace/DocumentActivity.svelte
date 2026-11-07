@@ -77,7 +77,7 @@
     align-items: center;
     padding: 3px 2px;
     border: 0;
-    border-radius: 4px;
+    border-radius: var(--ke-radius-sm);
     background: var(--ke-surface-raised);
     color: var(--ke-text-secondary);
     cursor: pointer;

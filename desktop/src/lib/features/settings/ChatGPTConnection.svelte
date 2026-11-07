@@ -193,7 +193,7 @@
     border-block: 1px solid var(--ke-border);
   }
   h3 {
-    font-size: var(--ke-text-md);
+    font-size: var(--ke-text-base);
     font-weight: 500;
   }
   .muted,
@@ -214,7 +214,7 @@
     background: var(--ke-surface);
     color: inherit;
     border: 1px solid var(--ke-border);
-    border-radius: 6px;
+    border-radius: var(--ke-radius-sm);
   }
   .actions {
     display: flex;
@@ -230,7 +230,7 @@
     color: var(--ke-surface);
     padding: 10px 16px;
     border: 0;
-    border-radius: 6px;
+    border-radius: var(--ke-radius-sm);
   }
   .usage {
     margin-top: 16px;
@@ -241,7 +241,7 @@
   .welcome {
     border: 1px solid var(--ke-border);
     padding: 16px;
-    border-radius: 8px;
+    border-radius: var(--ke-radius-md);
     margin-top: 16px;
   }
   .error {

@@ -5,6 +5,8 @@
     DocumentDiscussionActions,
   } from "./document-discussion";
   import Icon from "$lib/design/Icon.svelte";
+  import KejtuMark from "$lib/design/KejtuMark.svelte";
+  import { rotatingKejtu } from "$lib/design/theme";
   import RichText from "$lib/features/chat/RichText.svelte";
   import ChoicePicker from "$lib/design/ChoicePicker.svelte";
   import ReaderNotice from "./ReaderNotice.svelte";
@@ -152,7 +154,14 @@
         >{/if}
     </div>
     <div class="assist-foot">
-      <span>{$model.phase}</span>
+      <span class="assist-phase"
+        >{#if $model.kejtu}<span class="assist-mark"
+            ><KejtuMark
+              state={$rotatingKejtu ? $model.kejtu : "idle"}
+              size={16}
+            /></span
+          >{/if}{$model.phase}</span
+      >
       {#if $model.pending && !$model.asking}<button on:click={actions.resolve}
           >Check pending request</button
         >{/if}
@@ -167,7 +176,7 @@
     min-height: 24px;
     padding: 4px 0 8px;
     flex-shrink: 1;
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
     line-height: 1.55;
   }
   .document-answer :global(p) {
@@ -180,7 +189,7 @@
   .document-exchange small,
   .history-heading {
     color: var(--ke-text-tertiary);
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
   }
   .document-exchange pre {
     white-space: pre-wrap;
@@ -199,7 +208,7 @@
     height: 100%;
     padding: 0;
     color: var(--ke-text-secondary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
   }
   .assist-context,
   .instruction-row,
@@ -262,7 +271,7 @@
     background: transparent;
     color: var(--ke-text-primary);
     font: inherit;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     line-height: 1.5;
   }
   .instruction-row .submit {
@@ -274,11 +283,20 @@
     align-self: flex-end;
     padding: 0;
   }
+  .assist-phase {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .assist-mark {
+    display: inline-flex;
+    color: var(--ke-accent);
+  }
   .assist-foot {
     justify-content: space-between;
     padding-top: 5px;
     color: var(--ke-text-tertiary);
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
   }
   .edit-conversation,
   .proposal {
@@ -316,7 +334,7 @@
     min-width: 0;
   }
   .assist-context :global(.choice-trigger) {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     min-height: 28px;
   }
 </style>

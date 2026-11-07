@@ -84,7 +84,7 @@
     color: var(--ke-text-secondary);
   }
   .hint {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     max-width: 68ch;
     line-height: 1.65;
     margin: 1.5rem 0;

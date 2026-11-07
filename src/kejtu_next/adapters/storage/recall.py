@@ -20,6 +20,17 @@ from ...core.preferences import applies, MAX_PREFERENCES, MAX_PREFERENCE_BYTES
 from .history import encoded
 from .conversation_import import source_info
 
+# Automatic recall selection. Short past requests embed as more alike than
+# notes do, so in one ranking they crowd out the notes that hold what was
+# learned. Notes therefore get their own share of the same bounded room, and a
+# request repeated almost word for word is delivered once. No length rule and
+# no substituted answer: a short but different request still competes normally.
+NOTE_SHARE = 2
+MESSAGE_SHARE = 3
+RESTATEMENT = .90
+SCOPE_BATCH = 8
+AUTOMATIC_POOL = 16
+
 RECALL_SCHEMA = '''
 CREATE TABLE recall_epoch(singleton INTEGER PRIMARY KEY CHECK(singleton=1), epoch INTEGER NOT NULL);
 INSERT INTO recall_epoch VALUES(1,0);
@@ -114,6 +125,9 @@ class RecallStore:
         with self.db:
             self.db.execute("INSERT OR IGNORE INTO recall_pending SELECT segment_id FROM recall_vectors WHERE contract!=?",(CONTRACT,))
         self.queries = OrderedDict()
+        # Preference scope phrases, embedded in the same call as a query.
+        self.scopes = OrderedDict()
+        self._scope_heads = (None, [])
         self.retry_at = 0.
         self.unavailable = False
         self.metrics = dict(source_reads=0, segmented_sources=0, embedded_segments=0, query_embeddings=0)
@@ -325,13 +339,30 @@ class RecallStore:
         with mem.bounded(ledger):
             # Queue first is intentional: SQLite may otherwise scan every
             # segment to discover that the pending queue is empty.
+            # Current preference scopes not yet embedded share the same single
+            # call as the query; pending segments keep the remaining room.
+            # Notes only, and only again after the bank's notes changed: an
+            # unchanged notebook never rescans to discover the same scopes.
+            identity = (snapshot.bank_id, snapshot.epoch)
+            if self._scope_heads[0] != identity:
+                self._scope_heads = (identity, [document_text(row[0]) for row in mem.query(ledger,
+                    '''SELECT DISTINCT json_extract(p.body,'$.preference_scope') FROM note_records n
+                    JOIN memory_records r ON r.id=n.record_id JOIN note_metadata p ON p.revision_id=r.head_revision
+                    WHERE n.bank_id=? AND r.validity='current'
+                    AND COALESCE(json_extract(p.body,'$.preference_scope'),'')!='' LIMIT 64''',
+                    (snapshot.bank_id,)).fetchall()])
+            scope_texts = [text for text in self._scope_heads[1] if (CONTRACT, text) not in self.scopes][:SCOPE_BATCH]
             rows = mem.query(ledger,'''SELECT s.* FROM recall_pending p CROSS JOIN recall_segments s ON s.id=p.segment_id
-                WHERE '''+self._access()+''' ORDER BY s.id LIMIT 15''',(snapshot.bank_id,snapshot.bank_id)).fetchall()
+                WHERE '''+self._access()+''' ORDER BY s.id LIMIT ?''',
+                (snapshot.bank_id,snapshot.bank_id,15-len(scope_texts))).fetchall()
             available = bool(rows) or bool(mem.query(ledger,'SELECT EXISTS(SELECT 1 FROM recall_segments s WHERE '+
                 self._access()+')',(snapshot.bank_id,snapshot.bank_id)).fetchone()[0])
         key = query_text(query)
         query_needed = available and bool(query.strip()) and key not in self.queries
         texts = [document_text(row['body'], row['label']) for row in rows]
+        if not available:
+            scope_texts = []
+        texts += scope_texts
         if query_needed:
             texts.append(key)
         if not texts:
@@ -362,6 +393,10 @@ class RecallStore:
                         (row['id'],row['source_hash'],CONTRACT,vector))
                     mem.query(ledger,'DELETE FROM recall_pending WHERE segment_id=?',(row['id'],))
                     self.metrics['embedded_segments'] += 1
+        for offset, text in enumerate(scope_texts):
+            self.scopes[(CONTRACT, text)] = vectors[len(rows)+offset]
+            while len(self.scopes) > 128:
+                self.scopes.popitem(last=False)
         if query_needed:
             self.queries[key] = vectors[-1]
             self.metrics['query_embeddings'] += 1
@@ -585,10 +620,11 @@ class RecallStore:
             winners = heapq.nsmallest(limit, scores())
             semantic = self._ranked_rows([(-score, ident) for score, ident in winners], ledger, 'score')
         ranked = fuse(lexical,semantic,historical=args['mode']=='historical')
-        if preference_mode=='only':
-            scores = {row['source_id']:row['score'] for row in semantic}
-            for item in ranked:
-                item['semantic_score'] = scores.get(item['row']['source_id'])
+        # Similarity to the request, per candidate. Preferences use it in their
+        # gate; automatic selection uses it to recognise repeated requests.
+        scores = {row['source_id']:row['score'] for row in semantic}
+        for item in ranked:
+            item['semantic_score'] = scores.get(item['row']['source_id'])
         if args.get('order','relevance') != 'relevance' or not args['query'].strip():
             ranked.sort(key=lambda r:(r['row']['created_at'] or '',r['row']['source_id']),reverse=args.get('order')!='asc')
         result = ranked,bool(semantic)
@@ -676,20 +712,44 @@ class RecallStore:
             preferences = self.search(snapshot, preference_args, ledger, maximum)
             selected = preferences['results']
         complete_messages = {}
-        ordinary = self.search(snapshot, dict(base, _preference_mode='exclude'), ledger, maximum,
-            complete_messages=complete_messages)
+        similarity = {}
+        # Look further than the room holds, so repeats collapsed below cannot
+        # use up the candidates; the final fit below still enforces `maximum`.
+        ordinary = self.search(snapshot, dict(base, _preference_mode='exclude', limit=AUTOMATIC_POOL), ledger,
+            4*maximum, complete_messages=complete_messages, semantic_scores=similarity)
+        # Notes are ranked among notes for their share; the same exclusion keeps
+        # scoped preferences behind their own gate.
+        notes = self.search(snapshot, dict(base, scope='notebook', limit=NOTE_SHARE,
+            _preference_mode='exclude'), ledger, maximum)
         result = dict(ordinary, results=[], delivered_count=0, next_cursor=None, status='complete')
         result.pop('reason', None)
         result['retrieval'] = dict(ordinary['retrieval'], preference_strength=strength,
             preference_count=0, selection='bounded_automatic')
         # These internal searches are not publicly continuable. Missing items
         # can be rediscovered through the ordinary explicit search tool.
-        for item in selected + ordinary['results']:
-            candidate = dict(result, results=result['results']+[item], delivered_count=result['delivered_count']+1,
+        def extended(items):
+            return dict(result, results=result['results']+items, delivered_count=result['delivered_count']+len(items),
                 retrieval=dict(result['retrieval'], preference_count=result['retrieval']['preference_count']+
-                    int(item.get('complete_preference',False))))
+                    sum(bool(item.get('complete_preference',False)) for item in items)))
+
+        for item in selected:
+            candidate = extended([item])
             if len(encoded(candidate).encode()) <= maximum:
                 result = candidate
+        # Reserve the selected notes' exact serialized room after preferences.
+        # A fixed position after three messages cannot protect their share at
+        # the foreground's smaller allowances. Messages keep rank order where
+        # they fit alongside the reserved notes; unused room remains available.
+        reserved = []
+        for item in notes['results']:
+            if len(encoded(extended(reserved+[item])).encode()) <= maximum:
+                reserved.append(item)
+        for item in self._automatic_order(ordinary['results'], notes['results'], similarity):
+            pending = [note for note in reserved
+                if (note['record_id'],note['revision_id']) != (item['record_id'],item['revision_id'])]
+            if len(encoded(extended([item]+pending)).encode()) <= maximum:
+                result = extended([item])
+                reserved = pending
         if not result['results'] and ordinary.get('reason'):
             result.update(status='not_delivered', reason=ordinary['reason'])
         # Preference/ordinary selection retains its existing priority and
@@ -699,14 +759,65 @@ class RecallStore:
         self.store.memory.check(snapshot, ledger)
         return result
 
+    @staticmethod
+    def _automatic_order(ordinary, notes, similarity):
+        """Priority order for the bounded automatic room, never new candidates.
+
+        Ordinary results keep their rank. A request that repeats the current
+        one almost exactly (RESTATEMENT similarity) is offered once, as its
+        highest-ranked copy, and a message whose complete text was already
+        offered is not offered again. The best notes not already present are
+        placed right after the first MESSAGE_SHARE messages. The caller reserves
+        their byte share before admitting those messages; unused room is filled
+        in this same order.
+        """
+        cleaned, texts, restated = [], set(), False
+        # The two searches can select different segments of the same note.
+        # Use the notebook representation consistently so the reserved byte
+        # cost is the cost of the exact preview eventually offered.
+        shared_items = {(item['record_id'],item['revision_id']):item for item in notes}
+        for item in ordinary:
+            item = shared_items.get((item['record_id'],item['revision_id']), item)
+            if item.get('record_kind') == 'conversation_message':
+                score = similarity.get((item['record_id'], item['revision_id']))
+                if item.get('role') == 'user' and score is not None and score >= RESTATEMENT:
+                    if restated:
+                        continue
+                    restated = True
+                if item.get('preview_end') == item.get('total_bytes') and 'preview' in item:
+                    text = ' '.join(item['preview'].casefold().split())
+                    if text in texts:
+                        continue
+                    texts.add(text)
+            cleaned.append(item)
+        position, messages = len(cleaned), 0
+        for index, item in enumerate(cleaned):
+            if item.get('record_kind') == 'conversation_message':
+                messages += 1
+                if messages == MESSAGE_SHARE:
+                    position = index + 1
+                    break
+        # A note already in the pool but ranked behind many messages moves up
+        # to its share's place; it is never offered twice.
+        early = {(item['record_id'], item['revision_id']) for item in cleaned[:position]}
+        shared = [item for item in notes if (item['record_id'], item['revision_id']) not in early]
+        moved = {(item['record_id'], item['revision_id']) for item in shared}
+        rest = [item for item in cleaned[position:] if (item['record_id'], item['revision_id']) not in moved]
+        return cleaned[:position] + shared + rest
+
     def _preference(self, snapshot, item, ranked, args, ledger):
         details = item.get('note', {})
         scope = details.get('preference_scope','')
+        query_vector = self.queries.get(query_text(args['query']))
+        scope_vector = self.scopes.get((CONTRACT, document_text(scope))) if scope else None
+        scope_score = (sum(x*y for x,y in zip(unpack_vector(query_vector), unpack_vector(scope_vector)))
+            if query_vector is not None and scope_vector is not None else None)
         if (not scope or item['revision_id'] != ranked['row']['source_id']
                 or item['total_bytes'] > MAX_PREFERENCE_BYTES
                 or details.get('purpose') != 'about_user'
                 or details.get('basis') not in ('user_statement','user_summary')
-                or not applies(args['_preference_question'], scope, args['_preference_strength'], ranked.get('semantic_score'))):
+                or not applies(args['_preference_question'], scope, args['_preference_strength'],
+                    ranked.get('semantic_score'), scope_score)):
             return None
         mem = self.store.memory
         fields = self.store.notes.metadata(snapshot, item['revision_id'], ledger)
@@ -721,7 +832,7 @@ class RecallStore:
         # removal keeps one body owner, and this grants no note-edit authority.
         return dict(item, preview=page['content'], preview_offset=0, preview_end=page['end'], complete_preference=True)
 
-    def search(self,snapshot,args,ledger,maximum,*,budget=None,complete_messages=None):
+    def search(self,snapshot,args,ledger,maximum,*,budget=None,complete_messages=None,semantic_scores=None):
         mem = self.store.memory
         expand = complete_messages is None
         if complete_messages is None:
@@ -814,6 +925,8 @@ class RecallStore:
                     result.update(status='page' if result['results'] else 'not_delivered',next_cursor=cursor(index),reason='result_capacity')
                     break
                 result=candidate; positions.append(index+1); seen.add((item['record_id'],item['revision_id']))
+                if semantic_scores is not None:
+                    semantic_scores[(item['record_id'],item['revision_id'])]=ranked[index].get('semantic_score')
             while result['results'] and not fits(result):
                 result['results'].pop(); positions.pop()
                 result.update(delivered_count=len(result['results']),status='page' if result['results'] else 'not_delivered',

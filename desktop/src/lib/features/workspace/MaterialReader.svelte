@@ -590,7 +590,7 @@
     padding: 0;
     border: 0;
     background: transparent;
-    border-radius: 4px;
+    border-radius: var(--ke-radius-sm);
     flex-shrink: 0;
   }
   .document {
@@ -633,7 +633,7 @@
   .material-layout .page-navigation input {
     width: 32px;
     text-align: center;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     padding: 5px 0;
     border: 0;
     border-radius: 0;
@@ -646,7 +646,7 @@
     margin: 0;
   }
   .page-total {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-tertiary);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
@@ -663,7 +663,7 @@
     align-items: center;
     gap: 8px;
     padding: 7px 10px;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     border: 0;
     background: color-mix(in srgb, var(--ke-marker-blue) 10%, transparent);
   }
@@ -677,7 +677,7 @@
   .source-details {
     position: relative;
     flex-shrink: 0;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-tertiary);
   }
   .source-details summary {
@@ -687,7 +687,7 @@
     height: 32px;
     cursor: pointer;
     list-style: none;
-    border-radius: 4px;
+    border-radius: var(--ke-radius-sm);
   }
   .source-details summary::-webkit-details-marker {
     display: none;
@@ -707,9 +707,11 @@
     z-index: 4;
     background: var(--ke-surface-raised);
     border: 1px solid var(--ke-border);
-    border-radius: 6px;
-    box-shadow: 0 5px 20px #0001;
+    border-radius: var(--ke-radius-md);
+    box-shadow: var(--ke-overlay-shadow);
     overflow-wrap: anywhere;
+    transform-origin: top right;
+    animation: ke-menu-in var(--ke-motion-base) var(--ke-motion-ease);
   }
   .source-popover strong {
     color: var(--ke-text-secondary);
@@ -717,11 +719,11 @@
   }
   .source-popover p {
     margin: 8px 0 0;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
   }
   .retained-label {
     color: var(--ke-text-tertiary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     align-self: center;
   }
   .document pre {
@@ -733,7 +735,7 @@
       monospace;
     background: var(--ke-surface-inset);
     padding: 18px;
-    border-radius: 4px;
+    border-radius: var(--ke-radius-sm);
     max-height: var(--ke-reader-height, 64vh);
     overflow-y: auto;
   }
@@ -754,7 +756,7 @@
     padding: 56px 16px;
     color: var(--ke-text-tertiary);
     text-align: center;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
   .reader-empty > span {
     color: var(--ke-marker-sand);
@@ -762,11 +764,11 @@
   }
   .reader-empty h3 {
     color: var(--ke-text-secondary);
-    font-size: 15px;
+    font-size: var(--ke-text-md);
   }
   .reader-error {
     margin-bottom: 16px;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
   @media (max-width: 800px) {
     .reader-toolbar {

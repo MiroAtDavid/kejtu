@@ -6,7 +6,7 @@ PURPOSES = ('about_user','shared_experience','knowledge','notebook','open_thread
 THREAD_STATES = ('open','parked','done')
 BASES = ('unspecified','user_statement','user_summary','observation','hypothesis','reference')
 FLAGS = ('coverage-partial','user-rejected')
-FIELDS = frozenset(('title','purpose','tags','thread_status','basis','source_quote','correction_reason','basis_refs','flags','preference_scope'))
+FIELDS = frozenset(('title','purpose','tags','thread_status','basis','source_quote','source_ref','correction_reason','basis_refs','flags','preference_scope'))
 METADATA_FIELDS = frozenset(('title','purpose','tags','thread_status','flags','preference_scope'))
 
 def tag_key(value):
@@ -65,6 +65,9 @@ def validate_fields(args):
             raise ValueError('flags')
     if 'source_quote' in args and (not text(args['source_quote'],2048) or not args['source_quote'].strip()):
         raise ValueError('source_quote')
+    if 'source_ref' in args and (not text(args['source_ref'],512) or not args['source_ref']
+            or not args.get('source_quote')):
+        raise ValueError('source_ref')
     if 'correction_reason' in args and (not text(args['correction_reason'],256) or
             not args['correction_reason'].strip() or not args.get('source_quote') or not args.get('read_ref')):
         raise ValueError('correction_reason')
@@ -77,6 +80,10 @@ def validate_fields(args):
 def field_schemas():
     return {**{name:{'type':'string'} for name in
         ('title','source_quote','correction_reason')},
+        'source_ref':{'type':'string','description':
+            'Optional read_ref of the user\'s own earlier message; source_quote must then match it exactly. '
+            'Only when the user asks to adopt an older note as a preference: keep that note unchanged and '
+            'link it in basis_refs. Never combine with correction_reason; a correction quotes the current message.'},
         **{name:{'type':'string','enum':list(values)} for name,values in
            (('purpose',PURPOSES),('basis',BASES),('thread_status',THREAD_STATES))},
         'tags':{'type':'array','items':{'type':'string'}},

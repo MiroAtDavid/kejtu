@@ -66,7 +66,7 @@
   }
   .course-name {
     margin: 0 8px 10px;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     line-height: 1.6;
     color: var(--ke-text-tertiary);
     overflow-wrap: anywhere;
@@ -86,9 +86,9 @@
     background: transparent;
     color: var(--ke-text-secondary);
     font: inherit;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: var(--ke-radius-sm);
     padding: 6px 8px;
   }
   .material-files .toggle {

@@ -451,7 +451,7 @@
   .semester-dates {
     margin: 9px 0 0 12px;
     color: var(--ke-text-tertiary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     font-variant-numeric: tabular-nums;
   }
   .semester-actions {
@@ -481,7 +481,7 @@
   }
   .course-count {
     margin: 0;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-tertiary);
   }
   .course-grid {
@@ -506,10 +506,7 @@
     border-radius: var(--ke-radius-sm);
     background: color-mix(in srgb, var(--course-tone) 15%, transparent);
     color: var(--ke-text-secondary);
-    font:
-      17px/1 Georgia,
-      "Times New Roman",
-      serif;
+    font: 17px/1 var(--ke-font-heading);
   }
   .course-copy {
     min-width: 0;
@@ -539,7 +536,7 @@
   }
   .course-copy p {
     margin: 6px 0 0;
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-tertiary);
   }
   .course-grid .empty {
@@ -562,12 +559,12 @@
     margin: 0;
   }
   legend {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     color: var(--ke-text-secondary);
     padding-right: 8px;
   }
   .editor-fields label {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
   }
   .course-directory .editor-fields input {
     min-height: 36px;
@@ -576,7 +573,7 @@
     border-bottom: 1px solid var(--ke-border);
     border-radius: var(--ke-radius-sm) var(--ke-radius-sm) 0 0;
     background: color-mix(in srgb, var(--ke-marker-sand) 5%, transparent);
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
   }
   .editor-fields .save-action {
     justify-self: start;

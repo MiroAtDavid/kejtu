@@ -149,7 +149,7 @@
     background: none;
     color: var(--ke-text-secondary);
     font: inherit;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     cursor: pointer;
   }
   .workspace-nav button[aria-pressed="true"] {

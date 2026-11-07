@@ -94,16 +94,16 @@
     display: flex;
     align-items: center;
     color: var(--ke-text-secondary);
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
   }
   button {
     border: 1px solid var(--ke-border);
-    border-radius: 6px;
+    border-radius: var(--ke-radius-sm);
     background: none;
     color: var(--ke-text-secondary);
     padding: 8px 12px;
     font: inherit;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     cursor: pointer;
   }
   button:hover:not(:disabled) {
@@ -115,7 +115,7 @@
   }
   .hint,
   .error {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     line-height: 1.7;
   }
   .hint {

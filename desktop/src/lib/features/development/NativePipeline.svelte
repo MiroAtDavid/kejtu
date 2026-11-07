@@ -2069,9 +2069,10 @@
     border-radius: var(--ke-radius-sm);
     background: var(--ke-surface-raised);
     color: var(--ke-text-secondary);
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
     box-shadow: var(--ke-shadow-panel);
     pointer-events: none;
+    animation: ke-dialog-in var(--ke-motion-base) var(--ke-motion-ease);
   }
   .kept-chat[hidden],
   .workspace-surface[hidden] {

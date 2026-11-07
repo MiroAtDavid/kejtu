@@ -147,11 +147,11 @@
     margin: 2px 0;
     padding: 7px 8px;
     border: 0;
-    border-radius: 4px;
+    border-radius: var(--ke-radius-sm);
     background: transparent;
     color: var(--ke-text-secondary);
     font: inherit;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     line-height: 1.55;
     text-align: left;
     cursor: pointer;
@@ -190,7 +190,7 @@
   .error {
     padding: 8px;
     color: var(--ke-text-tertiary);
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
     line-height: 1.6;
     overflow-wrap: anywhere;
   }
@@ -198,6 +198,6 @@
     color: var(--ke-text-secondary);
   }
   .material-folder .more {
-    font-size: 11px;
+    font-size: var(--ke-text-2xs);
   }
 </style>

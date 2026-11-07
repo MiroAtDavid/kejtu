@@ -245,10 +245,14 @@
     color: var(--ke-text-primary);
     background: var(--ke-surface);
     border: 1px solid var(--ke-border);
-    border-radius: var(--ke-radius-sm);
+    border-radius: var(--ke-overlay-radius);
+    animation: ke-dialog-in var(--ke-motion-slow) var(--ke-motion-ease);
   }
   dialog::backdrop {
     background: rgb(0 0 0 / 75%);
+    /* Older engines do not let ::backdrop inherit custom properties. */
+    animation: ke-fade-in var(--ke-motion-slow, 260ms)
+      var(--ke-motion-ease, ease-out);
   }
   .viewer {
     display: flex;

@@ -84,7 +84,7 @@
     left: 0.3rem;
     bottom: 0.25rem;
     padding: 0.1rem 0.3rem;
-    border-radius: 3px;
+    border-radius: var(--ke-radius-sm);
     background: var(--ke-surface);
     font-size: var(--ke-text-xs);
   }

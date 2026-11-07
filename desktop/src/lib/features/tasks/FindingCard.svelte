@@ -94,7 +94,7 @@
   .finding {
     padding: 20px 22px 16px;
     border: 1px solid var(--ke-border);
-    border-radius: 10px;
+    border-radius: var(--ke-radius-lg);
     background: var(--ke-surface);
     min-width: 0;
   }
@@ -106,7 +106,7 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 8px;
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     color: var(--ke-text-secondary);
   }
   .source {
@@ -118,7 +118,7 @@
   .state,
   .saved {
     padding: 2px 7px;
-    border-radius: 4px;
+    border-radius: var(--ke-radius-sm);
     background: var(--ke-surface-inset);
   }
   .new {
@@ -147,12 +147,12 @@
     text-underline-offset: 3px;
   }
   a span {
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     color: var(--ke-text-secondary);
   }
   .body,
   .uncertain {
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
     line-height: 1.75;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
@@ -171,7 +171,7 @@
     color: var(--ke-text-secondary);
   }
   .provenance {
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
     color: var(--ke-text-secondary);
   }
   .actions,
@@ -185,21 +185,19 @@
     justify-content: space-between;
     margin-top: 14px;
   }
-  button {
-    font-size: 11px;
-    padding: 5px 8px;
-    border: 1px solid var(--ke-border);
-    border-radius: 5px;
+  /* Review actions use the shared page-action surface from planning.css; only
+     the quiet Details toggle keeps its own text treatment. */
+  .text-action {
+    font-size: var(--ke-text-2xs);
+    padding: 5px 8px 5px 0;
+    border: 1px solid transparent;
+    border-radius: var(--ke-radius-sm);
     background: transparent;
     color: var(--ke-text-secondary);
   }
-  button:hover:not(:disabled) {
+  .text-action:hover:not(:disabled) {
     background: var(--ke-surface-inset);
     color: var(--ke-text-primary);
-  }
-  .text-action {
-    padding-left: 0;
-    border-color: transparent;
   }
   @media (max-width: 600px) {
     .finding {
@@ -209,7 +207,7 @@
       margin-left: 0;
     }
     h4 {
-      font-size: 15px;
+      font-size: var(--ke-text-md);
     }
   }
 </style>

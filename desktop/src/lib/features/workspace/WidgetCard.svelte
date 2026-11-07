@@ -213,7 +213,7 @@
   .preview {
     white-space: pre-wrap;
     overflow-wrap: anywhere;
-    font-size: 12px;
+    font-size: var(--ke-text-xs);
     line-height: 1.85;
     max-height: 150px;
     overflow: auto;
@@ -221,10 +221,10 @@
   }
   .journal-widget[data-size="comfortable"] .preview {
     max-height: 320px;
-    font-size: 13px;
+    font-size: var(--ke-text-sm);
   }
   .journal-widget h3:not(.widget-heading h3) {
-    font-size: 14px;
+    font-size: var(--ke-text-base);
     font-weight: 500;
     margin: 0;
   }
@@ -245,6 +245,6 @@
   .widget-refresh {
     margin-top: 10px;
     color: var(--ke-text-tertiary);
-    font-size: 10px;
+    font-size: var(--ke-text-3xs);
   }
 </style>
