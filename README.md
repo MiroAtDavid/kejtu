@@ -1,17 +1,41 @@
 # Kejtu
 
-A calm personal AI workspace that remembers what matters and can show you why.
+[![Linux x86-64](https://img.shields.io/badge/Linux-x86--64-386689?logo=linux&logoColor=white)](#download-for-linux)
+[![MIT license](https://img.shields.io/badge/license-MIT-39734f)](LICENSE)
+[![Tauri 2](https://img.shields.io/badge/Tauri-2-167483?logo=tauri&logoColor=white)](https://v2.tauri.app/)
+[![Svelte 5](https://img.shields.io/badge/Svelte-5-a6412b?logo=svelte&logoColor=white)](https://svelte.dev/)
+
+A personal AI workspace that remembers what matters and can show you why.
 
 Talk things through, plan your week, keep notes, organise projects and tasks,
-research a topic and work on documents, all in one quiet desktop app. Your
-conversations and notes are stored on your computer. You choose the model.
+research a topic and work on documents in one desktop app. Your conversations
+and notes are stored on your computer.
 
 <p align="center">
-  <a href="docs/images/kejtu-conversation.png"><img src="docs/images/kejtu-conversation.png" width="49%" alt="A Kejtu conversation: episode updates with a table, sources and a checked date"></a>
-  <a href="docs/images/kejtu-home.png"><img src="docs/images/kejtu-home.png" width="47%" alt="Kejtu's Home page with research, today's schedule, projects and tasks"></a>
+  <a href="docs/images/kejtu-project-workspace.png"><img src="docs/images/kejtu-project-workspace.png" width="100%" alt="Kejtu in dark mode with the project and module picker open beside a Markdown document."></a>
 </p>
 
+## Download for Linux
+
+[Download Kejtu from GitHub Releases](https://github.com/MiroAtDavid/kejtu/releases)
+for 64-bit Intel or AMD computers.
+
+- **Debian-based systems** — choose the `.deb` package.
+- **Arch-based systems** — choose the `.pkg.tar.zst` package.
+
 ## What makes it different
+
+**Pick up a project where you left off.** While writing a paper, you can compare
+two studies in a project chat, save why you chose one, and add a task to cite it
+in your draft. A week later, the project overview shows the open task. When you
+ask “Why did I choose that study?” in a new chat for the same project, Kejtu
+gives that project’s memories priority.
+
+With **Kejtu Development** selected, we asked when the project started to come
+together. Kejtu picked the last week of October, when we were using the app to
+organise its own release. [Read the reply at full size.](docs/images/kejtu-october-recap.png)
+
+[![Kejtu traces its development through October, names a turning point and lists open work. The project selector below the reply shows Kejtu Development.](docs/images/kejtu-october-recap.png)](docs/images/kejtu-october-recap.png)
 
 **Memory you can check.** Kejtu keeps a versioned notebook beside your
 conversations. Each note records how it came about: saved by you, written during
@@ -25,15 +49,14 @@ questions about long chat histories, 466 of Kejtu's answers passed automatic
 grading (93.2%). Every case was counted, with no retries or manual corrections.
 [Results, setup and caveats](docs/evaluation.md).
 
-**Quiet by design.** Kejtu feels more like a journal than a chat feed: soft
-transitions and little competing for your attention. A small figure shows what
-Kejtu is doing while it works: gathering its thoughts, searching, reading or
-writing.
+> **Memory search by meaning requires a separate GPU setup.** See the
+> [memory search requirements](docs/install.md#memory-search-requires-a-separate-gpu-setup).
 
-**Local, with the model you choose.** Conversations, notes and settings live on
-your machine. Connect a local model through Ollama, or an online service:
-DeepSeek, Kimi, the Anthropic or OpenAI API, or your ChatGPT plan. An online service receives
-the messages and context needed for each reply.
+**Local storage and model options.** Conversations, notes and settings live on
+your machine. Kejtu works with local models through Ollama and with online
+services including DeepSeek, Kimi, the Anthropic and OpenAI APIs, and your
+ChatGPT plan. An online service receives the messages and context needed for
+each reply. No model or paid account is included.
 
 **Clear permissions.** Folders, web access, tools, notes, tasks and People each
 have their own setting. Kejtu never automatically repeats an action whose outcome
@@ -51,40 +74,18 @@ was uncertain.
 - **Research.** Search and read the web with Tavily (works without a key), Brave
   or SearXNG. Kejtu can repeat a research task on a schedule and keep sourced
   reports.
-- **Extend.** Add skills (reusable procedures) and MCP tools, each with explicit
-  grants.
-
-## Install on Manjaro
-
-This is an early release for 64-bit Manjaro. You install it from source, so the
-first setup takes time and needs an internet connection.
-
-Download or clone this repository into the folder where you want to keep Kejtu.
-Open a terminal in that folder and run:
-
-```sh
-python3 packaging/source/install.py --install
-```
-
-The installer downloads the tools Kejtu needs and builds the app. It may ask for
-your password to install missing system packages. If Python or Git is missing,
-install them first with `sudo pacman -S --needed python git`.
-
-When setup finishes, open **Kejtu** from your application menu. In **Settings**,
-connect your preferred AI service or local model. No model or paid account is
-included. Help is available inside the app under **Settings → Help**.
-
-> **Memory search by meaning requires a separate GPU setup.** The installer
-> does not include it. See the [memory search requirements](docs/install.md#memory-search-requires-a-separate-gpu-setup).
-
-Keep the installation folder where it is. See the [installation guide](docs/install.md)
-for updates, backups and help with setup.
+- **Extend.** Teach Kejtu a routine, such as turning meeting notes into a
+  checklist. Paste your own `SKILL.md` into the Shelf or import a skill from a
+  local folder or GitHub. Skills use your existing permissions. The Shelf shows
+  which skills and connections it can import from a Claude or Codex plugin.
+  MCP connections let Kejtu use tools from other apps. For example, you can
+  connect your Todoist account and allow Kejtu to add tasks from that checklist.
+  [Shelf guide](src/kejtu_next/help/04-web-files-skills.md#skills).
 
 ## Still in development
 
 This is an early release. Keep backups of important files.
 
-Manjaro is the focus of this release. Other platforms are not maintained as part
-of it. Community ports and contributions are welcome.
+Community ports and contributions are welcome.
 
 [Documentation](docs/README.md) · [Credits](CREDITS.md) · [MIT license](LICENSE)

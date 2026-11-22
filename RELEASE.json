@@ -29,11 +29,11 @@
       "source_sha256": "49d81c13d0ad9a479b26a8ce16dcbdc7427f7393dc949ea4b8d486a0f31a3e24"
     },
     "README.md": {
-      "bytes": 4358,
+      "bytes": 4909,
       "mode": "100644",
-      "sha256": "2ab0bf502048f1d4400c301ef9936e4aa829c4f780bb9ed19d246249b5cb8adb",
+      "sha256": "696df7bf11b2a197fa1815fd48c9c7589faaa2bc4e326be022c086d585da5c0e",
       "source": "packaging/source/README.md",
-      "source_sha256": "2ab0bf502048f1d4400c301ef9936e4aa829c4f780bb9ed19d246249b5cb8adb"
+      "source_sha256": "696df7bf11b2a197fa1815fd48c9c7589faaa2bc4e326be022c086d585da5c0e"
     },
     "catalogue/README.md": {
       "bytes": 5372,
@@ -2884,6 +2884,20 @@
       "source": "docs/images/kejtu-home.png",
       "source_sha256": "b40c4a86b92f756335ebc275ca7a78014570569b26d7577628c874bd42d0ed70"
     },
+    "docs/images/kejtu-october-recap.png": {
+      "bytes": 308380,
+      "mode": "100644",
+      "sha256": "51e1bd41bd194ab5584ce12a93bb4c184307afe92faa40efe1328ccc3b778af8",
+      "source": "docs/images/kejtu-october-recap.png",
+      "source_sha256": "51e1bd41bd194ab5584ce12a93bb4c184307afe92faa40efe1328ccc3b778af8"
+    },
+    "docs/images/kejtu-project-workspace.png": {
+      "bytes": 245339,
+      "mode": "100644",
+      "sha256": "500700a7512cbdc0d56eec2772de63595089c3a6d49553028f9099cca6a31e67",
+      "source": "docs/images/kejtu-project-workspace.png",
+      "source_sha256": "500700a7512cbdc0d56eec2772de63595089c3a6d49553028f9099cca6a31e67"
+    },
     "docs/install.md": {
       "bytes": 11504,
       "mode": "100644",
@@ -4789,12 +4803,12 @@
       "source_sha256": "5c77c008408d0b235e815af4ca9a91a41428b55922764cd3027e5d47b0eb7418"
     }
   },
-  "inclusion_manifest_sha256": "96b9515076295b89df77a944e1162dc74ef038c5e7d514b7dfe1273c40580f9c",
+  "inclusion_manifest_sha256": "33365fde50fedc8b6ded59407cb9ab4f3207bd99fe2938e6d44f3e2f3bd6e4ae",
   "kind": "linux-source-x86_64",
   "schema": 1,
-  "source_commit": "0cab18574186c605c7e9a17f790e36ef78cdd2eb",
-  "source_date_epoch": 1795366466,
-  "source_tree": "bad82f8f8b21732c41b6a6d47b96214c85e7e6a3",
+  "source_commit": "74dca8a240187b4e99a8daf6b9d60332be976ba1",
+  "source_date_epoch": 1795376527,
+  "source_tree": "377d94ff51630a759962a9d5808e0e088ecd90b6",
   "transformations": {
     "desktop/package-lock.json": {
       "unreachable_package_entries_removed": 84
