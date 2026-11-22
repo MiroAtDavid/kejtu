@@ -1,18 +1,23 @@
 <script lang="ts">
+  import ChatNoticeCard from "./ChatNotice.svelte";
+  import type { ChatNotice } from "$lib/features/reminders/messages";
+  export let notices: ChatNotice[] = [];
+  export let noticesDisabled = false;
+  export let onNoticeAction: (
+    item: ChatNotice,
+    action: "present" | "later" | "dismiss",
+  ) => Promise<void> = async () => {};
+  export let moreNotices = false;
+  export let onMoreNotices: () => void = () => {};
+
   import type { SkillSelection } from "$lib/api/wire.generated";
   export let maximumMessageBytes: number | null = null;
   export let selectedSkill: SkillSelection | null = null;
   import { onDestroy, onMount, tick } from "svelte";
+  import type { Snippet } from "svelte";
   import { quietScrollbar } from "$lib/design/quiet-scrollbar";
-  import {
-    editSummary,
-    type DocumentReference,
-  } from "$lib/features/workspace/document-assist";
-  import { groupDocumentTurns } from "$lib/features/workspace/document-conversation";
-  import DocumentSessionCard from "./DocumentSessionCard.svelte";
-  export let onOpenDocument:
-    ((reference: DocumentReference) => Promise<void>) | undefined = undefined;
-  let documentExpanded: Record<string, boolean> = {};
+  import { revealContent } from "$lib/design/page-fade";
+  import { editSummary } from "$lib/features/workspace/document-assist";
   import TranscriptBatch from "./TranscriptBatch.svelte";
   import { historyBatches } from "./history-batches";
   import ContextLine from "./ContextLine.svelte";
@@ -36,6 +41,8 @@
   import Latest from "./Latest.svelte";
   import type { ReadingPosition } from "./reading-position";
   import Composer from "./Composer.svelte";
+  import DocumentChat from "./DocumentChat.svelte";
+  import type { DocumentDiscussion } from "$lib/features/workspace/document-discussion";
   import Activity from "./Activity.svelte";
   import { readMetrics, shouldFollow } from "./scroll";
   import type { BodyRef, Results, Turn } from "$lib/api/wire.generated";
@@ -55,10 +62,6 @@
       ) => Promise<void>)
     | undefined = undefined;
   export let exchangeActionsDisabled = false;
-  /** Backend title or first-question fallback for the conversation. */
-  export let title = "";
-  /** The conversation's stored creation timestamp, for the header date. */
-  export let createdAt: string | null = null;
   /** A collapse affordance is per entry; state is local to this surface. */
   let collapsed: Record<string, boolean> = {};
   let information: { id: string; section: "activity" | "context" } | null =
@@ -98,15 +101,13 @@
     };
   });
 
-  $: documentSessions = groupDocumentTurns(turnViews);
   $: batches = historyBatches(turnViews);
   let forcedEntry = "";
 
   /**
    * Calendar-day key for a turn, or '' when the turn has no usable timestamp.
    *
-   * The journal only draws a divider when the DAY changes (`Transcript.svelte:160`
-   * in the old app), so the key is the local calendar date, not the raw value.
+   * The journal shows a day heading when the local calendar date changes.
    */
   export function dayKey(value: string | null | undefined): string {
     if (!value) return "";
@@ -118,11 +119,6 @@
   const timeFormat = new Intl.DateTimeFormat(undefined, {
     hour: "numeric",
     minute: "2-digit",
-  });
-  const headerFormat = new Intl.DateTimeFormat(undefined, {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
   });
   const dayFormat = new Intl.DateTimeFormat(undefined, {
     weekday: "long",
@@ -137,14 +133,6 @@
     const at = new Date(value);
     if (Number.isNaN(at.getTime())) return "";
     return timeFormat.format(at);
-  }
-
-  /** `5 October 2026` — the header eyebrow, uppercased by CSS. */
-  export function headerDate(value: string | null | undefined): string {
-    if (!value) return "Original date unavailable";
-    const at = new Date(value);
-    if (Number.isNaN(at.getTime())) return "Original date unavailable";
-    return headerFormat.format(at);
   }
 
   /** `Wednesday, October 5, 2026` — the journal's day heading. */
@@ -178,6 +166,8 @@
    * of this component instead, and its state belongs to the coordinator.
    */
   export let showComposer = false;
+  /** Chips the coordinator places in the composer's tool row. */
+  export let composerTools: Snippet | undefined = undefined;
   export let draft = "";
   export let composerDisabled = false;
   export let composerReadOnly = false;
@@ -186,9 +176,12 @@
   export let stopping = false;
   export let onSend: () => void = () => {};
   export let onStop: () => void = () => {};
+  export let documentDiscussion: DocumentDiscussion | null = null;
+  let documentComposer: DocumentChat | undefined;
   let composer: Composer | undefined;
   export function focusComposer() {
-    composer?.focus();
+    if (documentDiscussion) documentComposer?.focus();
+    else composer?.focus();
   }
 
   /** The journal shell owns scrolling; standalone hosts can use the local box. */
@@ -239,6 +232,9 @@
   }
   $: if (mounted && loaded && visible && restorePending) {
     restorePending = false;
+    // The page faded in when it was opened; history that arrives later fades
+    // in with the same timing instead of appearing at once.
+    if (selected && feed) revealContent(feed);
     void tick().then(async () => {
       const saved = positions.get(selected);
       if (saved) await applyPosition(saved);
@@ -283,7 +279,7 @@
   }
 
   function entryTop(node: HTMLElement): number {
-    // The first entry gains a separator/padding after a prepend. Anchor its
+    // The first entry gains spacing after a prepend. Anchor its
     // content, so that change in the outer box cannot shift the text.
     return (node.querySelector(".entry-meta") ?? node).getBoundingClientRect()
       .top;
@@ -639,19 +635,11 @@
       class:restoring={restorePending && !!selected}
       bind:this={feed}
     >
-      <!-- The journal opens a conversation with an eyebrow date over a serif
-           title and a quiet separator. -->
-      {#if selected || loaded}
-        <header class="day-header">
-          <div class="eyebrow">{headerDate(createdAt)}</div>
-          <h1>{title || "A new conversation"}</h1>
-          {#if imported}
-            <p class="import-notice">
-              Imported conversation. Kejtu can recall this history; start a new
-              conversation to reply.
-            </p>
-          {/if}
-        </header>
+      {#if imported && (selected || loaded)}
+        <p class="import-notice">
+          Imported conversation. Kejtu can recall this history; start a new
+          conversation to reply.
+        </p>
       {/if}
       {#if selected && loaded && turns.length && (canEarlier || requestingEarlier)}
         <div
@@ -674,6 +662,11 @@
           </button>
         </div>
       {/if}
+      {#if moreNotices}<button
+          type="button"
+          class="earlier"
+          on:click={onMoreNotices}>Earlier reminders and check-ins</button
+        >{/if}
       {#each batches as batch, batchIndex (batch.key)}
         <TranscriptBatch
           scrollElement={scroller}
@@ -690,37 +683,11 @@
             {@const live = stream?.turn_id === view.turn.id ? stream : null}
             {@const ref = view.answerRef}
             {@const body = ref ? bodies[ref.body_id] : undefined}
-            {@const session = documentSessions[view.turn.id]}
-            {@const expanded =
-              !session ||
-              documentExpanded[session.key] ||
-              (forcedEntry !== session.head &&
-                session.ids.includes(forcedEntry)) ||
-              session.ids.includes(information?.id ?? "")}
-
-            <!-- The journal draws a divider only when the DAY changes
-             (old `Transcript.svelte:160`), never between turns of one day. -->
+            <!-- Keep the date heading when the day changes, without a rule. -->
             {#if view.index > 0 && view.day && view.day !== view.previousDay}
               <h2 class="day-divider">{view.heading}</h2>
             {/if}
-            {#if session?.head === view.turn.id}
-              <DocumentSessionCard
-                {session}
-                time={view.time}
-                expanded={!!expanded}
-                disabled={exchangeActionsDisabled}
-                onOpen={onOpenDocument}
-                onToggle={() =>
-                  (documentExpanded = {
-                    ...documentExpanded,
-                    [session.key]: !documentExpanded[session.key],
-                  })}
-                onStop={session.running && working ? onStop : undefined}
-                {stopping}
-              />
-            {/if}
             <section
-              hidden={!expanded}
               class="turn"
               class:continued={view.index > 0 &&
                 !(view.day && view.day !== view.previousDay)}
@@ -770,7 +737,7 @@
                         onImage,
                       )}
                     />
-                    {#if !bodies[ref.body_id]?.complete}
+                    {#if !bodies[ref.body_id]?.complete && !view.document}
                       <p class="extent">
                         {bodies[ref.body_id]
                           ? `${bodies[ref.body_id].end} of ${bodies[ref.body_id].total_bytes} UTF-8 bytes shown`
@@ -837,14 +804,14 @@
                     working={view.turn.status === "running" &&
                       working &&
                       !progressPaused &&
-                      !collapsed[view.turn.id] &&
-                      !!expanded}
+                      !collapsed[view.turn.id]}
                     phase={live?.phase}
                   />{/if}
                 <div class="response-content">
                   <!-- Turn identity owns this renderer, never terminal status/body identity. -->
                   <MessageBody
                     turnId={view.turn.id}
+                    documentRequestId={view.document?.request_id ?? ""}
                     role={ref?.role === "partial" ? "partial" : "answer"}
                     state={ref?.state ?? "partial"}
                     content={live?.content ?? body?.content ?? ""}
@@ -887,6 +854,14 @@
                 </div>
               </div>
             </section>
+            {#each notices.filter((item) => item.afterSequence === view.turn.sequence && (!item.pending || !working)) as item (item.id)}
+              <ChatNoticeCard
+                {item}
+                {visible}
+                disabled={noticesDisabled}
+                onAction={onNoticeAction}
+              />
+            {/each}
           {/each}
         </TranscriptBatch>
       {/each}
@@ -912,22 +887,45 @@
          the field and the window edge, at the very bottom. -->
     {#if showComposer && !imported}
       <div class="composer">
-        <Composer
-          {maximumMessageBytes}
-          {onOpenStudy}
-          bind:this={composer}
-          bind:draft
-          conversationId={selected}
-          bind:selectedSkill
-          empty={turns.length === 0}
-          autoFocus={visible && loaded && turns.length === 0}
-          disabled={composerDisabled}
-          readOnly={composerReadOnly}
-          {sending}
-          {onSend}
-          {onImageViewer}
-        />
+        {#if documentDiscussion}
+          {#key documentDiscussion}
+            <DocumentChat
+              bind:this={documentComposer}
+              discussion={documentDiscussion}
+              {maximumMessageBytes}
+              conversationId={selected}
+              bind:selectedSkill
+              tools={composerTools}
+              disabled={composerDisabled}
+              readOnly={composerReadOnly}
+              {sending}
+              {working}
+              {onImageViewer}
+            />
+          {/key}
+        {:else}
+          <Composer
+            {maximumMessageBytes}
+            {onOpenStudy}
+            bind:this={composer}
+            bind:draft
+            conversationId={selected}
+            bind:selectedSkill
+            tools={composerTools}
+            empty={turns.length === 0}
+            autoFocus={visible && loaded && turns.length === 0}
+            disabled={composerDisabled}
+            readOnly={composerReadOnly}
+            {sending}
+            {onSend}
+            {onImageViewer}
+          />
+        {/if}
       </div>
+    {:else if imported && composerTools}
+      <!-- Imported history has no reply composer, but its project association
+           remains editable through the same conversation tools. -->
+      <div class="composer">{@render composerTools()}</div>
     {/if}
   </div>
 
@@ -943,7 +941,7 @@
     color: var(--ke-text-secondary);
     font-size: var(--ke-text-base);
     line-height: 1.5;
-    margin-top: 0.75rem;
+    margin: 0 0 1.25rem;
   }
   .feed.restoring {
     /* Keep layout measurable but reveal history only at its restored position. */
@@ -982,20 +980,15 @@
     padding: 0;
   }
 
-  /* The grid owns the shared top inset; no second offset in the reading column. */
-  .day-header {
-    margin-top: 0;
-  }
-  /* Keep a little breathing room around the separator between exchanges. */
+  /* Spacing separates exchanges; the only outer rule is above the composer. */
   .turn.continued {
     margin-top: 1.25rem;
     padding-top: 1.125rem;
-    border-top: 1px solid var(--ke-border);
   }
 
-  /* Align the first exchange with the compact separator rhythm. */
+  /* The first timestamp starts at the reading column's shared top inset. */
   .turn.first-entry {
-    margin-top: 1.125rem;
+    margin-top: 0;
   }
   .history-start {
     display: flex;
@@ -1045,38 +1038,15 @@
     font-size: var(--ke-text-3xs);
   }
 
-  /* The day heading only appears when the day changes: mono 11px, spaced, with a
-     hairline above and 23px of air (old `.journal-date-divider`). */
+  /* The day heading keeps its spacing when the calendar date changes. */
   .day-divider {
     margin: 12px 0 0;
     padding-top: 23px;
-    border-top: 1px solid var(--ke-border);
     color: var(--ke-text-secondary);
     font-family: var(--ke-font-mono);
     font-size: var(--ke-text-2xs);
     font-weight: 400;
     letter-spacing: 0.06em;
-  }
-
-  /* Conversation header: mono uppercase eyebrow, serif title, hairline, air. */
-  .day-header {
-    padding: 0 0 22px;
-    border-bottom: 1px solid var(--ke-border);
-  }
-
-  .eyebrow {
-    font: var(--ke-label-font);
-    letter-spacing: var(--ke-label-tracking);
-    text-transform: uppercase;
-    color: var(--ke-text-tertiary);
-  }
-
-  .day-header h1 {
-    margin: 13px 0 0;
-    font: var(--ke-title-page);
-    letter-spacing: var(--ke-title-page-tracking);
-    color: var(--ke-text-primary);
-    overflow-wrap: anywhere;
   }
 
   /* Journal questions and responses share the same reading measure. */
@@ -1165,10 +1135,5 @@
   }
   .external {
     flex: none;
-  }
-  @media (max-width: 1180px) {
-    .day-header h1 {
-      font-size: 30px;
-    }
   }
 </style>

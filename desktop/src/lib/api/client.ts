@@ -120,10 +120,25 @@ export async function presentWindow(): Promise<void> {
   await invoke("native_present", { marker });
 }
 
-/** A native picker returns a location; saving Files settings grants access. */
-export async function chooseFolder(initial: string): Promise<string | null> {
-  const value: unknown = await invoke("choose_folder", { initial });
+/** Native folder choice/creation; the existing Files save remains the grant owner. */
+export async function chooseFolder(
+  initial: string,
+  create = false,
+): Promise<string | null> {
+  const value: unknown = await invoke("choose_folder", {
+    initial,
+    ...(create ? { create: true } : {}),
+  });
   if (value !== null && (typeof value !== "string" || !value.startsWith("/")))
     throw new Error("The folder chooser returned an invalid location.");
   return value as string | null;
+}
+
+/**
+ * Installed Linux only: start the new version once a package update has finished.
+ * The window closes only after the new program started; otherwise this throws and
+ * everything stays as it was.
+ */
+export async function relaunchAfterUpdate(): Promise<void> {
+  await invoke("relaunch_after_update");
 }

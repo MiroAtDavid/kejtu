@@ -5,7 +5,6 @@ from __future__ import annotations
 import argparse
 from contextlib import contextmanager
 import fcntl
-import hashlib
 import importlib.util
 import json
 import os
@@ -21,7 +20,7 @@ import sys
 import tarfile
 import tempfile
 import time
-import urllib.request
+import urllib.request  # the shared artifact module downloads through this same module
 
 ROOT = Path(__file__).resolve().parents[2]
 _spec = importlib.util.spec_from_file_location('kejtu_linux_toolchain', ROOT / 'tools/linux_toolchain.py')
@@ -33,6 +32,9 @@ _spec.loader.exec_module(_apparmor)
 _spec = importlib.util.spec_from_file_location('kejtu_linux_sandbox', ROOT / 'src/kejtu_next/adapters/linux_sandbox.py')
 _sandbox = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_sandbox)
+_spec = importlib.util.spec_from_file_location('kejtu_artifacts', ROOT / 'src/kejtu_next/adapters/artifacts.py')
+_artifacts = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_artifacts)
 _spec = importlib.util.spec_from_file_location('kejtu_source_desktop', ROOT / 'packaging/source/desktop.py')
 _desktop = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_desktop)
@@ -59,6 +61,15 @@ TOOLCHAIN = {'node': (22, 12, 0), 'rustc': (1, 93, 0), 'cargo': (1, 93, 0)}
 
 class InstallError(RuntimeError):
     pass
+
+
+@contextmanager
+def _install_errors():
+    """Report shared artifact refusals as installer errors, with the same text."""
+    try:
+        yield
+    except _artifacts.ArtifactError as error:
+        raise InstallError(str(error)) from error
 
 
 def process_group(group):
@@ -156,12 +167,10 @@ def package_installed(distro, package):
     return result.returncode == 0 and (distro != 'ubuntu' or result.stdout == 'installed')
 
 
-def dependencies(distro, media=False):
+def dependencies(distro):
     packages = list(PACKAGES[distro])
     if _sandbox.system_runtime() is None:
         packages += ['meson', 'ninja-build', 'libcap-dev'] if distro == 'ubuntu' else ['meson', 'ninja', 'libcap']
-    if media:
-        packages.append('mpv')
     return packages
 
 
@@ -178,9 +187,9 @@ def compatible_rust():
     return True
 
 
-def missing_packages(distro, media=False):
+def missing_packages(distro):
     rust_ready = compatible_rust()
-    return [package for package in dependencies(distro, media)
+    return [package for package in dependencies(distro)
             if not (rust_ready and package in ('rust', 'rustc', 'cargo'))
             and not package_installed(distro, package)]
 
@@ -198,14 +207,8 @@ def package_commands(distro, missing):
 
 def real_directory(path):
     """Reject redirected installer destinations before any write or mkdir."""
-    path = Path(path)
-    for item in (path, *path.parents):
-        if item.is_symlink():
-            raise InstallError(f'Installation paths must not be symlinks: {item}')
-    if path.exists() and not path.is_dir():
-        raise InstallError(f'Expected a directory: {path}')
-    path.mkdir(parents=True, exist_ok=True, mode=0o700)
-    return path
+    with _install_errors():
+        return _artifacts.real_directory(path)
 
 
 @contextmanager
@@ -280,75 +283,46 @@ def venv(root, destination, python):
 
 
 def file_hash(path):
-    with Path(path).open('rb') as stream:
-        return hashlib.file_digest(stream, 'sha256').hexdigest()
+    return _artifacts.file_hash(path)
 
 
 def tree_hash(root):
-    records = []
-    for path in sorted(root.rglob('*')):
-        if path.is_symlink() or not (path.is_dir() or path.is_file()):
-            raise InstallError(f'Unexpected runtime entry: {path}')
-        if path.is_file():
-            records.append([path.relative_to(root).as_posix(), path.stat().st_size,
-                            bool(path.stat().st_mode & 0o111), file_hash(path)])
-    return hashlib.sha256(json.dumps(records, separators=(',', ':')).encode()).hexdigest()
+    with _install_errors():
+        return _artifacts.tree_hash(root)
 
 
 def check_craft(destination, item):
-    if tree_hash(destination) != item['tree_sha256']:
-        raise InstallError(f'Installed {item["id"]} differs from the pinned complete runtime; preserved at {destination}. Restore it from a backup or move it aside before retrying.')
+    with _install_errors():
+        _artifacts.verify_tree(destination, item)
+    # An execution probe of the trusted pinned runtime, deliberately kept here
+    # rather than in the data-only shared verification.
     run([destination / item['executable'], '--version'])
 
 
 def download(cache, item):
-    path = cache / item['archive']
-    if path.is_symlink():
-        raise InstallError(f'Archive cache is a symlink: {path}')
-    if path.exists():
-        if path.stat().st_size != item['bytes'] or file_hash(path) != item['sha256']:
-            raise InstallError(f'Cached archive failed integrity verification: {path}. Move it aside and retry.')
-        return path
-    with tempfile.NamedTemporaryFile(dir=cache, prefix='.download-', delete=False) as stream:
-        temporary = Path(stream.name)
-        try:
-            request = urllib.request.Request(item['url'], headers={'User-Agent': 'Kejtu-source-installer'})
-            with urllib.request.urlopen(request, timeout=60) as response:
-                if not response.url.startswith('https://'):
-                    raise InstallError('Runtime download redirected outside HTTPS.')
-                copied = 0
-                while chunk := response.read(1024 * 1024):
-                    copied += len(chunk)
-                    if copied > item['bytes']:
-                        raise InstallError(f'{item["id"]} download exceeds the pinned size.')
-                    stream.write(chunk)
-            stream.flush()
-            os.fsync(stream.fileno())
-            if copied != item['bytes'] or file_hash(temporary) != item['sha256']:
-                raise InstallError(f'{item["id"]} download failed integrity verification.')
-            temporary.rename(path)
-        finally:
-            temporary.unlink(missing_ok=True)
-    return path
+    with _install_errors():
+        return _artifacts.download(cache, item, user_agent='Kejtu-source-installer')
+
+
+def cli_tree(destination, item):
+    # Only the verified upstream release is eligible for trimming. Its CLI,
+    # documentation, font notices and PDF OCR data stay at their original paths.
+    if 'upstream_tree_sha256' in item:
+        with _install_errors():
+            _artifacts.verify_tree(destination, dict(item, tree_sha256=item['upstream_tree_sha256']))
+        (destination / 'bin' / item['id']).unlink()
+        for name in ('applications', 'icons', 'metainfo', 'mime'):
+            component = destination / 'share' / name
+            if component.exists():
+                shutil.rmtree(component)
+    check_craft(destination, item)
+    return destination
 
 
 def extract_craft(archive, staging, item):
-    with tarfile.open(archive, 'r:gz') as source:
-        members = source.getmembers()
-        total = 0
-        for member in members:
-            parts = PurePosixPath(member.name).parts
-            if (not parts or parts[0] != item['directory'] or '..' in parts
-                    or PurePosixPath(member.name).is_absolute()
-                    or not (member.isdir() or member.isfile())):
-                raise InstallError('Runtime archive contains an unexpected path or entry type.')
-            total += member.size
-            if total > item['unpacked_bytes']:
-                raise InstallError('Runtime archive exceeds the pinned extracted size.')
-        source.extractall(staging, members=members, filter='data')
-    destination = staging / item['directory']
-    check_craft(destination, item)
-    return destination
+    with _install_errors():
+        destination = _artifacts.extract_archive(archive, staging, item)
+    return cli_tree(destination, item)
 
 
 def install_craft(root, lock):
@@ -356,16 +330,38 @@ def install_craft(root, lock):
     for item in lock['craft']:
         parent = real_directory(root / '.state/apps' / item['id'])
         destination = parent / item['directory']
-        if destination.is_symlink():
+        previous = parent / ('.' + item['directory'] + '.full')
+        if destination.is_symlink() or previous.is_symlink():
             raise InstallError(f'Runtime destination is a symlink: {destination}')
+        # A stopped source installation may still have the previous complete
+        # release. Keep it recoverable across interruption until publication.
+        if previous.exists() and tree_hash(previous) != item.get('upstream_tree_sha256'):
+            raise InstallError(f'Unrecognized previous runtime preserved at {previous}.')
+        if destination.exists() and not previous.exists() and 'upstream_tree_sha256' in item:
+            if tree_hash(destination) == item['upstream_tree_sha256']:
+                destination.rename(previous)
         if destination.exists():
             check_craft(destination, item)
-            continue
-        print(f'Installing {item["id"]} {item["version"]}, including upstream notices…', flush=True)
-        archive = download(cache, item)
-        with tempfile.TemporaryDirectory(prefix='.install-', dir=parent) as temporary:
-            prepared = extract_craft(archive, Path(temporary), item)
-            prepared.rename(destination)
+        elif previous.exists():
+            def prepare(temporary):
+                copy = shutil.copytree(previous, temporary / item['directory'], copy_function=os.link)
+                return cli_tree(copy, item)
+            try:
+                with _install_errors():
+                    _artifacts.publish(destination, prepare)
+                check_craft(destination, item)
+            except Exception:
+                if not destination.exists():
+                    previous.rename(destination)
+                raise
+        else:
+            print(f'Installing {item["id"]} {item["version"]} command-line tools and notices…', flush=True)
+            archive = download(cache, item)
+            with _install_errors():
+                _artifacts.publish(destination, lambda temporary: extract_craft(archive, temporary, item))
+        if previous.exists():
+            with tempfile.TemporaryDirectory(prefix='.retired-', dir=parent) as temporary:
+                previous.rename(Path(temporary) / 'full')
 
 
 def extract_sandbox(archive, staging, item):
@@ -425,7 +421,10 @@ def install_sandbox(root, lock, *, jobs=2):
         # dependency to unrelated wrappers or introduce runtime library paths.
         env = dict(PATH=SYSTEM_PATH, HOME=str(Path.home()), LANG='C.UTF-8')
         run([meson, 'setup', build_dir, source, '--buildtype=release',
-             '-Dtests=false', '-Dman=disabled', '-Dselinux=auto',
+             # No SELinux: this managed copy serves AppArmor-restricted Ubuntu; SELinux
+             # systems use their own bwrap. 'auto' linked libselinux wherever its
+             # headers existed, which Arch does not ship.
+             '-Dtests=false', '-Dman=disabled', '-Dselinux=disabled',
              '-Dbash_completion=disabled', '-Dzsh_completion=disabled'], env=env)
         run([ninja, '-C', build_dir, '-j', jobs], env=env)
         binary = build_dir / 'bwrap'
@@ -452,7 +451,7 @@ def install_sandbox(root, lock, *, jobs=2):
     return _sandbox.managed_runtime(root)
 
 
-def build(root, python, *, media, jobs, lock, browser_policy=False, allow_system=True):
+def build(root, python, *, jobs, lock, browser_policy=False, allow_system=True):
     env = _toolchain.environment()
     install_sandbox(root, lock, jobs=jobs)
     interpreter = venv(root, root / '.venv', python)
@@ -461,6 +460,7 @@ def build(root, python, *, media, jobs, lock, browser_policy=False, allow_system
     run([interpreter, '-m', 'pip', 'check'], env=env)
     run(['/usr/bin/npm', 'ci', '--no-audit', '--no-fund'], cwd=root / 'desktop', env=env)
     run([interpreter, '-B', root / 'tools/setup_files.py'], cwd=root, env=env)
+    run([interpreter, '-B', root / 'tools/setup_terminals.py'], cwd=root, env=env)
     if browser_policy:
         receipt = root / '.state/source-install/web-prepared.json'
         run([interpreter, '-B', root / 'tools/setup_web.py', '--prepare-only', '--receipt', receipt], cwd=root, env=env)
@@ -469,10 +469,6 @@ def build(root, python, *, media, jobs, lock, browser_policy=False, allow_system
          '--unshare-net', '--cap-drop', 'ALL', '--', '/usr/bin/true'], env=env)
     run([interpreter, '-B', root / 'tools/setup_web.py'], cwd=root, env=env)
     install_craft(root, lock)
-    if media:
-        media_python = venv(root, root / '.state/video-tools', python)
-        run([media_python, '-m', 'pip', 'install', '--disable-pip-version-check', '-r', root / 'ops/private-video-requirements.lock'], env=env)
-        run([media_python, '-m', 'pip', 'check'], env=env)
     run(['/usr/bin/npm', 'run', 'check'], cwd=root / 'desktop', env=env)
     run(['/usr/bin/npm', 'run', 'build'], cwd=root / 'desktop', env=env)
     env['CARGO_TARGET_DIR'] = str(root / '.state/build/rust')
@@ -483,7 +479,6 @@ def build(root, python, *, media, jobs, lock, browser_policy=False, allow_system
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--install', action='store_true', help='Install missing packages and build; otherwise print a read-only plan.')
-    parser.add_argument('--media', action='store_true', help='Also install mpv and the pinned video extraction environment.')
     parser.add_argument('--no-system-packages', action='store_true', help='Require system dependencies to be installed already; never call sudo.')
     parser.add_argument('--no-desktop-entry', action='store_true', help='Do not register this checkout in the application menu (useful for a second test copy).')
     parser.add_argument('--jobs', type=int, default=2, help='Concurrent native build jobs (default: 2).')
@@ -498,16 +493,15 @@ def main(argv=None):
             raise InstallError('--jobs must be between 1 and 64.')
         distro = distribution()
         lock = json.loads((ROOT / 'packaging/source/runtime.lock.json').read_text())
-        missing = missing_packages(distro, args.media)
+        missing = missing_packages(distro)
         print(f'Installation path: {ROOT}\nSystem: {distro}; build jobs: {args.jobs}')
         print('Missing OS packages: ' + (', '.join(missing) or 'none'))
-        print('Required downloads: locked Python/npm/Rust dependencies, Files, two matched Chromium engines, and Craft document runtimes (202 MB compressed).')
-        print('Optional media: ' + ('mpv and locked yt-dlp environment selected.' if args.media else 'not selected; add --media for radio/video.'))
+        print('Required downloads: locked Python/npm/Rust dependencies, Files, the shared Chromium headless shell, Terminal Use and Craft document tools.')
         print('No model is downloaded. GPU embeddings require the separately documented compatible Ollama/model setup.')
         browser_policy = _apparmor.required(distro)
         print('OS packages and the exact-path Ubuntu sandbox/browser policy use sudo; app files and runtimes belong to your normal user.')
         if browser_policy:
-            print('Ubuntu restricts user namespaces. Install/verify per-checkout AppArmor profiles for two managed browser paths and two role copies of one pinned Bubblewrap build; keep global restrictions and Chromium sandboxes enabled.')
+            print('Ubuntu restricts user namespaces. Install/verify per-checkout AppArmor profiles for the shared managed browser path and two role copies of one pinned Bubblewrap build; keep global restrictions and Chromium sandboxes enabled.')
         for command in package_commands(distro, missing):
             print(shlex.join(command))
         if not args.no_desktop_entry:
@@ -527,7 +521,7 @@ def main(argv=None):
                 for command in package_commands(distro, missing):
                     run(command)
                 python = check_toolchain()
-                build(ROOT, python, media=args.media, jobs=args.jobs, lock=lock,
+                build(ROOT, python, jobs=args.jobs, lock=lock,
                       browser_policy=browser_policy, allow_system=not args.no_system_packages)
                 if not args.no_desktop_entry:
                     print("Desktop entry installed: " + str(_desktop.install(ROOT)))

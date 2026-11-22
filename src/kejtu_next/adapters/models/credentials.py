@@ -1,5 +1,6 @@
 """Platform desktop keyrings; credentials never enter application files."""
 import asyncio
+from dataclasses import dataclass
 import sys
 
 from ...core.records import Failure
@@ -10,9 +11,27 @@ from ...core.providers import provider
 _DEFAULT_SPAWN = asyncio.create_subprocess_exec
 
 
+@dataclass(frozen=True)
+class SecretItem:
+    """Identity of a keyring item that is not a provider's API key.
+
+    ``id`` names the consumer and ``endpoint`` its own item, in the attribute
+    positions a provider uses, so this one keyring owner serves both. The
+    consumer supplies its own value rule (``validate``) to the keyring.
+    """
+    id: str
+    endpoint: str
+    item_label: str
+    requires_key: bool = True
+
+
 class DesktopKeyring:
-    def __init__(self, provider_id='deepseek', *, spec=None, spawn=_DEFAULT_SPAWN):
+    def __init__(self, provider_id='deepseek', *, spec=None, spawn=_DEFAULT_SPAWN,
+                 validate=validate_key, encoding='ascii', limit=4096):
         self.spawn = spawn
+        # A provider key is bounded printable ASCII. Another consumer passes its
+        # own rule, text encoding and byte bound for the values it saves.
+        self.validate, self.encoding, self.limit = validate, encoding, limit
         self.spec = spec if spec is not None else provider(provider_id)
         if not (self.spec.requires_key or getattr(self.spec, 'optional_key', False)):
             raise ValueError('This provider does not use a key')
@@ -23,7 +42,7 @@ class DesktopKeyring:
         # injection contract, including isolated controls on Windows hosts.
         if sys.platform == 'win32' and spawn is _DEFAULT_SPAWN:
             from .windows_credentials import WindowsCredentials
-            self._windows = WindowsCredentials(self.attributes)
+            self._windows = WindowsCredentials(self.attributes, validate=validate, encoding=encoding)
 
     def for_provider(self, provider_id):
         return self if provider_id == self.spec.id else DesktopKeyring(provider_id, spawn=self.spawn)
@@ -32,19 +51,20 @@ class DesktopKeyring:
         process = None
         try:
             async with asyncio.timeout(20):
-                args = ('store', f'--label=Kejtu — {self.spec.label} API key') if action == 'store' else (action,)
+                label = getattr(self.spec, 'item_label', None) or f'{self.spec.label} API key'
+                args = ('store', f'--label=Kejtu — {label}') if action == 'store' else (action,)
                 process = await self.spawn('/usr/bin/secret-tool', *args, *self.attributes,
                     stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE,
                     stderr=asyncio.subprocess.PIPE)
-                out, error = await process.communicate(key.encode('ascii') if key is not None else b'')
+                out, error = await process.communicate(key.encode(self.encoding) if key is not None else b'')
                 # Never include command output or raw exceptions in diagnostics.
-                if len(out) > 4096 or len(error) > 4096:
+                if len(out) > self.limit or len(error) > 4096:
                     raise ValueError
                 if action == 'lookup' and process.returncode == 1 and not out and not error:
                     return None
                 if process.returncode:
                     raise ValueError
-                return out.decode('ascii') if action == 'lookup' else None
+                return out.decode(self.encoding) if action == 'lookup' else None
         except (OSError, ValueError, TimeoutError):
             raise Failure('credential_store',
                 'The desktop keyring is unavailable or locked. Unlock it and try again; the key was not saved to a file.') from None
@@ -57,7 +77,7 @@ class DesktopKeyring:
         if self._windows is not None:
             return self._windows.read()
         value = await self._run('lookup')
-        return validate_key(value) if value is not None else None
+        return self.validate(value) if value is not None else None
 
     async def save(self, key):
         if self._windows is not None:
@@ -65,7 +85,7 @@ class DesktopKeyring:
             # cancelled task cannot leave a late write running after its result.
             # Save and verification complete together before cancellation yields.
             return self._windows.save(key)
-        await self._run('store', validate_key(key))
+        await self._run('store', self.validate(key))
 
     async def remove(self):
         if self._windows is not None:

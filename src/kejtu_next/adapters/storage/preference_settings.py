@@ -10,7 +10,7 @@ class PreferenceSettings:
     def __init__(self, store):
         self.store = store
         self.path = store.path.parent / 'preference-settings.json'
-        self.value = dict(strength='subtle', revision=0)
+        self.value = dict(strength='balanced', revision=0)
         try:
             source = open_regular(self.path)
         except FileNotFoundError:

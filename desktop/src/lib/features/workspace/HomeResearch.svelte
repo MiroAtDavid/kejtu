@@ -83,7 +83,7 @@
   <header>
     <h2>Research</h2>
     <button class="more" {disabled} on:click={() => onResearch()}
-      >All research →</button
+      >All research</button
     >
   </header>
   {#if error}<p class="error" role="status">
@@ -104,7 +104,7 @@
           ) ||
             (reports
               ? `${reports} ${reports === 1 ? "report" : "reports"} ready`
-              : "You’re caught up")}<span aria-hidden="true"> ↗</span></span
+              : "You’re caught up")}</span
         >
       </button>
       <div class="research-art">
@@ -138,7 +138,7 @@
                 )}{#if task.last_run?.finished_at}
                   · {stamp(task.last_run.finished_at)}{/if}</span
               ></span
-            ><span class="arrow" aria-hidden="true">↗</span>
+            >
           </button>
         </li>{/each}
     </ul>
@@ -150,7 +150,7 @@
   {:else if loading}<p class="muted" role="status">Reading saved research…</p>
   {:else}<p class="muted">No research saved yet.</p>
     <button class="more" {disabled} on:click={() => onResearch()}
-      >Open research →</button
+      >Open research</button
     >{/if}
 </div>
 
@@ -241,10 +241,6 @@
     font-size: var(--ke-text-3xs);
     line-height: 1.6;
     margin-top: 4px;
-  }
-  .arrow {
-    color: var(--ke-text-tertiary);
-    font-size: var(--ke-text-xs);
   }
   .muted,
   .error {

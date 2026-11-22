@@ -7,7 +7,7 @@
   export let busy = false;
   export let locked = false;
   let saved: PreferenceSettings | null = null;
-  let strength: PreferenceSettings["strength"] = "subtle";
+  let strength: PreferenceSettings["strength"] = "balanced";
   let loading = true;
   let uncertain = false;
   let error = "";

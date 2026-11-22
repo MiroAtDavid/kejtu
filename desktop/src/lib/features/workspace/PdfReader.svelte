@@ -1,6 +1,19 @@
 <script lang="ts">
+  import { quietScrollbar } from "$lib/design/quiet-scrollbar";
   import { onMount, onDestroy, tick } from "svelte";
-  import { pdfPages, type MaterialPage } from "./material-reader";
+  import {
+    blockAt,
+    passageRange,
+    passageText,
+    pdfLayout,
+    pdfPages,
+    type MaterialPage,
+    type PdfLayout,
+  } from "./material-reader";
+  import {
+    MAX_PASSAGE_CHARACTERS,
+    type StudyPassage,
+  } from "$lib/features/chat/study-requests";
   export let courseId: string;
   export let file: string;
   export let first: MaterialPage;
@@ -10,6 +23,12 @@
     value: MaterialPage | null,
     number: number,
   ) => void = () => {};
+  /** The chat draft's marked passage; this reader only displays it. */
+  export let marked: StudyPassage | null = null;
+  /** Without an owner for marks, pages stay plain images. */
+  export let onMark: ((value: StudyPassage | null) => void) | undefined =
+    undefined;
+  export let markDisabled = false;
   const pages = pdfPages(courseId, file, first);
   const total = first.page_count || 1;
   const ratios = new Map<number, number>();
@@ -142,6 +161,150 @@
     announce();
     void fill();
   }
+  // Paragraph boxes load on first pointer use of a page, never while only
+  // scrolling. A page without usable boxes stays an ordinary image.
+  let layouts = new Map<number, PdfLayout | null>();
+  const loadingLayouts = new Set<number>();
+  let hover: { page: number; index: number } | null = null;
+  let press: { page: number; index: number; x: number; y: number } | null =
+    null;
+  function wantLayout(number: number) {
+    const page = displayed.get(number);
+    if (!onMark || !page?.image || layouts.has(number)) return;
+    if (loadingLayouts.has(number)) return;
+    loadingLayouts.add(number);
+    const image = page.image;
+    pdfLayout(courseId, file, page.source)
+      .then(
+        (layout) => {
+          // Fail closed when the boxes do not describe the rendered page.
+          const ratio = image.height / image.width;
+          return Math.abs(layout.height / layout.width - ratio) / ratio < 0.02
+            ? layout
+            : null;
+        },
+        () => null,
+      )
+      .then((layout) => {
+        loadingLayouts.delete(number);
+        if (!destroyed) layouts = new Map(layouts).set(number, layout);
+      });
+  }
+  $: if (onMark && marked)
+    for (const [number, page] of displayed)
+      if (page.source.artifact_id === marked.artifactId) wantLayout(number);
+  function markedRange(
+    number: number,
+    page: MaterialPage | undefined,
+    passage: StudyPassage | null,
+    _layouts: Map<number, PdfLayout | null>,
+  ) {
+    const layout = layouts.get(number);
+    return passage && layout && page?.source.artifact_id === passage.artifactId
+      ? passageRange(layout, passage.text)
+      : null;
+  }
+  function sheet(slotWidth: number, slotHeight: number, page: MaterialPage) {
+    // The paper box can be taller than its image at very narrow widths.
+    const height = slotHeight - 32,
+      ratio = page.image!.height / page.image!.width;
+    let w = slotWidth,
+      h = slotWidth * ratio;
+    if (h > height) {
+      h = height;
+      w = h / ratio;
+    }
+    return {
+      left: `${((slotWidth - w) / 2 / slotWidth) * 100}%`,
+      top: `${((height - h) / 2 / height) * 100}%`,
+      width: `${(w / slotWidth) * 100}%`,
+      height: `${(h / height) * 100}%`,
+    };
+  }
+  function boxStyle(layout: PdfLayout, index: number) {
+    const [x0, y0, x1, y1] = layout.blocks[index].box;
+    const pct = (value: number, size: number) => (value / size) * 100;
+    return `left:calc(${pct(x0, layout.width)}% - 5px);top:calc(${pct(y0, layout.height)}% - 3px);width:calc(${pct(x1 - x0, layout.width)}% + 10px);height:calc(${pct(y1 - y0, layout.height)}% + 6px)`;
+  }
+  function pointAt(event: PointerEvent, number: number) {
+    const layout = layouts.get(number);
+    const target = event.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    if (!layout || !rect.width || !rect.height) return -1;
+    const scale = layout.width / rect.width;
+    return blockAt(
+      layout,
+      (event.clientX - rect.left) * scale,
+      (event.clientY - rect.top) * (layout.height / rect.height),
+      4 * scale,
+    );
+  }
+  function pointerMove(event: PointerEvent, number: number) {
+    wantLayout(number);
+    const index = pointAt(event, number);
+    if (hover?.page !== number || hover.index !== index)
+      hover = index < 0 ? null : { page: number, index };
+  }
+  function pointerDown(event: PointerEvent, number: number) {
+    if (event.button !== 0 || markDisabled) return;
+    press = {
+      page: number,
+      index: pointAt(event, number),
+      x: event.clientX,
+      y: event.clientY,
+    };
+  }
+  function pointerUp(event: PointerEvent, number: number) {
+    const start = press;
+    press = null;
+    const layout = layouts.get(number);
+    const page = displayed.get(number);
+    if (!start || start.page !== number || !layout || !page || markDisabled)
+      return;
+    const index = pointAt(event, number);
+    if (start.index < 0 || index < 0) return;
+    const current = markedRange(number, page, marked, layouts);
+    const moved =
+      Math.hypot(event.clientX - start.x, event.clientY - start.y) > 5;
+    // Shift-click grows the current mark; a drag spans from where it started.
+    const anchor =
+      !moved && event.shiftKey && current
+        ? index >= current[0]
+          ? current[0]
+          : current[1]
+        : start.index;
+    if (
+      !moved &&
+      !event.shiftKey &&
+      current &&
+      index >= current[0] &&
+      index <= current[1]
+    ) {
+      onMark?.(null);
+      return;
+    }
+    let from = Math.min(anchor, index),
+      to = Math.max(anchor, index);
+    if (!moved && event.shiftKey && current) {
+      from = Math.min(from, current[0]);
+      to = Math.max(to, current[1]);
+    }
+    // A long run keeps the paragraphs nearest its anchor that fit in one
+    // message card; a single paragraph is never cut.
+    while (
+      from < to &&
+      passageText(layout, from, to).length > MAX_PASSAGE_CHARACTERS
+    )
+      if (index >= anchor) to--;
+      else from++;
+    onMark?.({
+      courseId,
+      artifactId: page.source.artifact_id,
+      path: page.source.path,
+      page: number,
+      text: passageText(layout, from, to),
+    });
+  }
   function scrolled() {
     cancelAnimationFrame(frame);
     frame = requestAnimationFrame(measure);
@@ -202,6 +365,7 @@
 <!-- svelte-ignore a11y_no_noninteractive_tabindex -->
 <div
   class="pdf-scroll"
+  use:quietScrollbar
   bind:this={reader}
   on:scroll={scrolled}
   tabindex="0"
@@ -223,6 +387,44 @@
             alt={`Page ${number} of ${total} — ${file.split("/").pop()}`}
             src={`data:${value.image.mime_type};base64,${value.image.data}`}
           />
+          {#if onMark}
+            {@const layout = layouts.get(number)}
+            {@const range = markedRange(number, value, marked, layouts)}
+            {@const place = sheet(slot.width, slot.height, value)}
+            <!-- Pointer-only enhancement; the mark itself is read from the chat card. -->
+            <div
+              class="marks"
+              class:pointing={hover?.page === number && !markDisabled}
+              style:left={place.left}
+              style:top={place.top}
+              style:width={place.width}
+              style:height={place.height}
+              aria-hidden="true"
+              data-marks-page={number}
+              on:pointermove={(event) => pointerMove(event, number)}
+              on:pointerleave={() => {
+                if (hover?.page === number) hover = null;
+              }}
+              on:pointerdown={(event) => pointerDown(event, number)}
+              on:pointerup={(event) => pointerUp(event, number)}
+              on:pointercancel={() => (press = null)}
+            >
+              {#if layout && range}
+                {#each layout.blocks.slice(range[0], range[1] + 1) as _, i}
+                  <div
+                    class="block marked"
+                    style={boxStyle(layout, range[0] + i)}
+                  ></div>
+                {/each}
+              {/if}
+              {#if layout && hover?.page === number && !markDisabled && !(range && hover.index >= range[0] && hover.index <= range[1])}
+                {#key hover.index}<div
+                    class="block hover"
+                    style={boxStyle(layout, hover.index)}
+                  ></div>{/key}
+              {/if}
+            </div>
+          {/if}
         {:else if errors.has(number)}
           <div class="page-message">
             <p role="alert">{errors.get(number)}</p>
@@ -259,10 +461,46 @@
     max-width: 100%;
   }
   .paper {
+    position: relative;
     background: #fff;
     display: grid;
     place-items: center;
     overflow: hidden;
+  }
+  /* Paper stays white in every theme: the Markdown mark's marker blue, with a
+     light tint multiplied into the print so the words keep full contrast. */
+  .marks {
+    position: absolute;
+    touch-action: pan-x pan-y;
+  }
+  .marks.pointing {
+    cursor: pointer;
+  }
+  .block {
+    position: absolute;
+    border-radius: 3px;
+    pointer-events: none;
+  }
+  .block.hover {
+    box-shadow: inset 0 0 0 1px var(--ke-marker-blue);
+    opacity: 0;
+    animation: mark-hint 140ms ease 120ms forwards;
+  }
+  .block.marked {
+    background: rgba(140, 148, 172, 0.22);
+    mix-blend-mode: multiply;
+    box-shadow: -3px 0 var(--ke-marker-blue);
+  }
+  @keyframes mark-hint {
+    to {
+      opacity: 0.55;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .block.hover {
+      animation: none;
+      opacity: 0.55;
+    }
   }
   img {
     display: block;

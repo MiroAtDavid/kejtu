@@ -32,7 +32,7 @@ writing.
 
 **Local, with the model you choose.** Conversations, notes and settings live on
 your machine. Connect a local model through Ollama, or an online service:
-DeepSeek, Kimi, the OpenAI API or your ChatGPT plan. An online service receives
+DeepSeek, Kimi, the Anthropic or OpenAI API, or your ChatGPT plan. An online service receives
 the messages and context needed for each reply.
 
 **Clear permissions.** Folders, web access, tools, notes, tasks and People each
@@ -43,11 +43,11 @@ was uncertain.
 
 - **Think and write.** Plan, draft and work through problems, with earlier
   conversations Kejtu can search and quote exactly.
-- **Organise.** Projects with sections and resources, personal tasks with due
-  dates, and a local calendar that can suggest study or work slots.
+- **Organise.** Open a project to see its modules and tasks. Start a conversation
+  for a module or use the local calendar to plan work and study sessions.
 - **Learn.** Practise material one question at a time, with hints and feedback.
-- **Work on documents.** Read and edit PDF, Word and Markdown files from folders
-  you share.
+- **Work on documents.** Open module files beside chat. Edit Markdown or code, preview Word
+  documents, and mark a PDF passage to ask about it in the conversation.
 - **Research.** Search and read the web with Tavily (works without a key), Brave
   or SearXNG. Kejtu can repeat a research task on a schedule and keep sourced
   reports.
@@ -82,8 +82,7 @@ for updates, backups and help with setup.
 
 ## Still in development
 
-Expect bugs and unfinished parts. Video playback and editing existing PDFs still
-need testing. Keep backups of anything important.
+This is an early release. Keep backups of important files.
 
 Manjaro is the focus of this release. Other platforms are not maintained as part
 of it. Community ports and contributions are welcome.

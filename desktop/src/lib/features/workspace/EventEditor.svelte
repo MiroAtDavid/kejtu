@@ -254,7 +254,7 @@
             ></select
           ></label
         ><label
-          >Section<select bind:value={course}
+          >Module<select bind:value={course}
             ><option value="">Independent</option
             >{#each $workspace.snapshot?.courses ?? [] as row}<option
                 value={row.id}>{row.data.title}</option

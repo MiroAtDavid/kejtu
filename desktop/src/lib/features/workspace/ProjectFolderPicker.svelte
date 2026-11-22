@@ -10,6 +10,9 @@
   let status: FilesStatus | null = null;
   let loading = true;
   let error = "";
+  let notice = "";
+  let pendingFolder = "";
+  let creating = false;
   let alive = true;
   const name = (path: string) =>
     path.split(/[\\/]/).filter(Boolean).at(-1) || path;
@@ -40,22 +43,97 @@
       if (alive) loading = false;
     }
   }
-  async function browse() {
-    if (disabled || picking) return;
+  function writable(saved: FilesStatus, path: string) {
+    if (!saved.configured || !saved.enabled) return false;
+    // Existing nested read-only grants still override a writable ancestor.
+    const grants = [
+      ...saved.folders,
+      ...(saved.workspace ? [{ path: saved.workspace, access: "write" }] : []),
+    ];
+    const covering = grants.filter(
+      (row) =>
+        path === row.path || path.startsWith(row.path.replace(/\/$/, "") + "/"),
+    );
+    covering.sort((a, b) => b.path.length - a.path.length);
+    return covering[0]?.access === "write";
+  }
+  async function share(path: string, saved: FilesStatus) {
+    if (!writable(saved, path)) {
+      // Preserve the other grants and tools. Only this explicit folder action
+      // adds/upgrades a share; selecting an existing dropdown option does not.
+      const folders = saved.folders.filter((row) => row.path !== path);
+      if (saved.workspace !== path) folders.push({ path, access: "write" });
+      saved = await request("files.save", {
+        expected_revision: saved.revision,
+        enabled: true,
+        workspace: saved.workspace,
+        create_workspace: false,
+        folders,
+        servers: saved.servers,
+      });
+    }
+    if (alive) {
+      status = saved;
+      value = path;
+      pendingFolder = "";
+      notice = "Folder ready · Read & write";
+    }
+  }
+  async function browse(create = false, retry = false) {
+    if (disabled || picking || loading) return;
     picking = true;
+    creating = create;
     error = "";
+    notice = "";
+    let chosen: string | null = null;
     try {
-      const chosen = await chooseFolder(
-        value || locations.find((folder) => folder.available)?.path || "",
-      );
-      // Closing/switching the section while the native dialog is open must
-      // never write its late result into another project's draft.
-      if (alive && chosen) value = chosen;
+      // Read before opening the chooser. A concurrent settings change then
+      // fails the existing revision check rather than being overwritten.
+      const saved = await request("files.status", {});
+      if (!alive) return;
+      status = saved;
+      if (!saved.runtime_available)
+        throw new Error(
+          "The built-in Files component is unavailable. Repair the Kejtu installation to share folders.",
+        );
+      const initial =
+        value ||
+        saved.locations.find((folder) => folder.available)?.path ||
+        saved.documents ||
+        saved.home ||
+        "";
+      chosen = retry
+        ? pendingFolder
+        : create
+          ? await chooseFolder(initial, true)
+          : await chooseFolder(initial);
+      // A closed section must never grant access or receive a late picker result.
+      if (!alive || !chosen) return;
+      pendingFolder = chosen;
+      await share(chosen, saved);
     } catch (caught) {
+      if (!alive) return;
+      // Reconcile a lost acknowledgement; never automatically repeat a save.
+      if (chosen) {
+        try {
+          status = await request("files.status", {});
+          if (alive && writable(status, chosen)) {
+            value = chosen;
+            pendingFolder = "";
+            notice = "Folder ready · Read & write";
+            return;
+          }
+        } catch {
+          if (alive) status = null;
+        }
+      }
       if (alive)
         error = caught instanceof Error ? caught.message : String(caught);
     } finally {
-      if (alive) picking = false;
+      if (alive) {
+        picking = false;
+        creating = false;
+      }
     }
   }
   onMount(() => {
@@ -74,27 +152,51 @@
     {options}
     disabled={disabled || picking}
     describedBy="project-folder-help"
-    onChange={(path) => (value = path || null)}
+    onChange={(path) => {
+      value = path || null;
+      pendingFolder = "";
+      notice = "";
+      error = "";
+    }}
   />
   {#if value}<p class="folder-path" title={value}>{value}</p>{/if}
-  <button
-    class="browse-folder"
-    type="button"
-    disabled={disabled || picking}
-    on:click={browse}
-  >
-    {picking ? "Choosing folder…" : "Browse or create a folder…"}
-  </button>
+  <div class="folder-actions">
+    <button
+      class="browse-folder"
+      type="button"
+      disabled={disabled || picking || loading}
+      on:click={() => browse()}
+      >{picking && !creating ? "Choosing folder…" : "Browse folder…"}</button
+    >
+    <button
+      class="browse-folder"
+      type="button"
+      disabled={disabled || picking || loading}
+      on:click={() => browse(true)}
+      >{creating ? "Creating folder…" : "Create folder…"}</button
+    >
+  </div>
   <p class="folder-help" id="project-folder-help">
-    {#if loading}
-      Loading shared folders…
-    {:else if status && (!status.configured || !status.enabled || !locations.length)}
-      Share a folder in Settings → Files to use it here.
-    {:else}
-      Choose a shared folder, or browse to select or create a subfolder inside
-      it.
+    {#if loading}Loading shared folders…
+    {:else}Folders you browse to or create here are shared with Kejtu for
+      reading and writing.
+      {#if status?.configured && !status.enabled}This also turns shared file
+        access back on for your saved folders.{/if}
     {/if}
   </p>
+  {#if notice}<p class="folder-help" role="status">{notice}</p>{/if}
+  {#if pendingFolder && !picking}
+    <p class="folder-help">
+      Folder selected: {pendingFolder}. Read/write access has not been
+      confirmed.
+    </p>
+    <button
+      class="browse-folder"
+      type="button"
+      disabled={disabled || picking || loading}
+      on:click={() => browse(false, true)}>Enable read & write</button
+    >
+  {/if}
   {#if error}
     <p class="error" role="alert">{error}</p>
     <button
@@ -108,6 +210,11 @@
     <label
       >Folder path<input
         bind:value
+        on:input={() => {
+          pendingFolder = "";
+          notice = "";
+          error = "";
+        }}
         disabled={disabled || picking}
         placeholder="Path to a shared folder"
       /></label
@@ -125,6 +232,11 @@
     color: var(--ke-text-secondary);
     font-size: var(--ke-text-2xs);
     overflow-wrap: anywhere;
+  }
+  .folder-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
   }
   .browse-folder {
     margin-top: 8px;

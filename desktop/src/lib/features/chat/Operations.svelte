@@ -5,8 +5,6 @@
   import { pageFade } from "$lib/design/page-fade";
   import { navIndicator } from "$lib/design/nav-indicator";
   import Files from "../settings/Files.svelte";
-  import Skills from "../settings/Skills.svelte";
-  import Connections from "../settings/Connections.svelte";
   import "$lib/features/settings/settings.css";
   import ContextAccounting from "$lib/features/development/ContextAccounting.svelte";
   import Background from "$lib/features/background/Background.svelte";
@@ -48,6 +46,9 @@
   export let backgroundLock = false;
   export let showAccess = 0;
   export let showHelp = 0;
+  export let showModels = 0;
+  export let showFiles = 0;
+  export let onOpenShelf: (filter: "Skills" | "Connections") => void = () => {};
   export let canAskHelp = false;
   export let onAskHelp: (text: string) => void = () => {};
   export let selected = "";
@@ -105,11 +106,13 @@
   let visited = new Set<Panel>([panel]);
   let expandedGroup = "";
   let revealedPanel: Panel | undefined;
+  $: if (showFiles) select("files");
 
   // Explicit diagnostic inspection opens its panel, away from the chat.
   $: if (inspectTurnId) select("inspection");
   $: if (recoverAccess && !webLock && !visited.has("access")) select("access");
   $: if (showHelp) select("help");
+  $: if (showModels) select("models");
   $: if (showNotes) select("notes");
   $: if (showAccess) select("access");
   $: if (showWorkspace) select("workspace");
@@ -143,6 +146,10 @@
       next !== panel
     )
       return;
+    if (next === "skills" || next === "connections") {
+      onOpenShelf(next === "skills" ? "Skills" : "Connections");
+      return;
+    }
     visited.add(next);
     visited = visited;
     panel = next;
@@ -286,7 +293,6 @@
 
 <div class="operations">
   <aside class="operations-nav" use:navIndicator={"nav button.selected"}>
-    <h1>Settings</h1>
     <p class="nav-caption">Preferences and tools</p>
     <nav aria-label="Operations sections">
       <button
@@ -334,7 +340,10 @@
         aria-label="Settings section"
         value={panel}
         disabled={locked}
-        on:change={(event) => select(event.currentTarget.value as Panel)}
+        on:change={(event) => {
+          select(event.currentTarget.value as Panel);
+          event.currentTarget.value = panel;
+        }}
       >
         <option value="overview">Overview</option>
         {#each groups as group (group.title)}<optgroup label={group.title}
@@ -400,12 +409,6 @@
         >
           <slot name="workspace-settings" />
         </div>{/if}
-      {#if visited.has("skills")}<div
-          class="settings-page"
-          hidden={panel !== "skills"}
-        >
-          <Skills {ownerBusy} bind:busy={modelsBusy} />
-        </div>{/if}
       {#if visited.has("appearance")}
         <div class="settings-page" hidden={panel !== "appearance"}>
           <Appearance />
@@ -414,16 +417,6 @@
       {#if visited.has("files")}
         <div class="settings-page" hidden={panel !== "files"}>
           <Files {ownerBusy} bind:busy={modelsBusy} />
-        </div>
-      {/if}
-      {#if visited.has("connections")}
-        <div class="settings-page" hidden={panel !== "connections"}>
-          <Connections
-            {ownerBusy}
-            bind:busy={modelsBusy}
-            active={active && panel === "connections"}
-            onOpenFiles={() => select("files")}
-          />
         </div>
       {/if}
       {#if visited.has("execution")}
@@ -554,7 +547,7 @@
 </div>
 
 <style>
-  /* Old settings frame: fixed navigation column plus scrolling content. */
+  /* The shell owns the dialog; these mounted panels retain their own scroll. */
   .operations {
     display: grid;
     grid-template-columns: 244px minmax(0, 1fr);
@@ -566,14 +559,9 @@
   .operations-nav {
     min-width: 0;
     overflow-y: auto;
-    padding: 2.25rem 1.1rem;
+    padding: 1.5rem 1.1rem;
     border-right: 1px solid var(--ke-border);
     background: var(--ke-surface);
-  }
-  .operations-nav h1 {
-    margin: 0 0.85rem 0.4rem;
-    font: var(--ke-title-page);
-    letter-spacing: var(--ke-title-page-tracking);
   }
   .operations-nav nav {
     display: grid;
@@ -614,7 +602,7 @@
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
-    padding: 2.25rem clamp(1.5rem, 4vw, 4.5rem) 4rem;
+    padding: 1.5rem clamp(1.5rem, 4vw, 4.5rem) 4rem;
   }
   .operations-inner {
     max-width: 46rem;
@@ -781,10 +769,6 @@
       border-right: 0;
       border-bottom: 1px solid var(--ke-border);
       overflow: visible;
-    }
-    .operations-nav h1 {
-      margin: 0 0 0.75rem;
-      font-size: var(--ke-text-lg);
     }
     .operations-nav nav,
     .nav-caption {

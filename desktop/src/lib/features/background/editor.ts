@@ -13,6 +13,16 @@ export function isReview(kind: JobDefinition["kind"]): boolean {
 }
 
 export const procedures = {
+  reminder_review: {
+    title: "Review leftover reminders",
+    description:
+      "Privately review due reminders and clear occurrences already handled or no longer relevant. Useful or uncertain reminders stay pending. Uses the existing reminder controls; never changes tasks or future repetitions.",
+  },
+  interest_following: {
+    title: "Follow interests",
+    description:
+      "Optional public checks and conversational asides; managed under Interests.",
+  },
   research: {
     title: "Research assignment",
     description: "Created through chat; results and controls are in Tasks.",
@@ -35,12 +45,12 @@ export const procedures = {
   check_in: {
     title: "Prepare a check-in",
     description:
-      "Prepare a useful follow-up to a conversation, or decide no message is needed. Automatic display in chat is not available yet.",
+      "Prepare a useful follow-up to a conversation, or decide no message is needed. With delivery allowed, the message appears quietly in its conversation.",
   },
   reminder_delivery: {
     title: "Prepare a reminder message",
     description:
-      "Prepare a message about existing reminders. This job does not create reminders. Automatic display in chat is not available yet.",
+      "Prepare a message about existing reminders. This job does not create reminders. With delivery allowed, the message appears quietly in its conversation.",
   },
 } as const;
 
@@ -156,7 +166,17 @@ export function changeProcedure(
   if (!isReview(kind) && job.conversation_id === null)
     job.conversation_id = conversation;
   job.permissions.write_notes = false;
-  job.permissions.deliver = !isReview(kind) && job.permissions.read_memory;
+  job.permissions.deliver =
+    !isReview(kind) &&
+    kind !== "reminder_review" &&
+    job.permissions.read_memory;
+  if (kind === "reminder_review") {
+    job.conversation_id = null;
+    job.delivery = "quiet";
+    job.schedule.repeat = "daily";
+    job.schedule.interval = 1;
+    job.limits = { ...DEFAULT_JOB_LIMITS.reminder_review };
+  }
   // Procedure changes select its model/tool allowance. Preserve independently
   // chosen timing, source count and frequency; reading a saved job changes none.
   job.limits.calls = DEFAULT_JOB_LIMITS[kind].calls;

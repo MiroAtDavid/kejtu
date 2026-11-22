@@ -17,6 +17,11 @@ class DeliveryControls:
                     if operation == 'deliveries.pending' else
                     port.page(args['conversation_id'], after=after, limit=limit))
             return dict(page, next_cursor=self.app._cursor(scope, page['next_cursor']) if page['next_cursor'] is not None else None)
+        if operation == 'deliveries.messages':
+            scope='delivery-messages:'+args['conversation_id']
+            before=self.app._uncursor(scope,args['cursor']) if args.get('cursor') else None
+            page=port.messages(args['conversation_id'],before=before,limit=self.app._page_size(args.get('page_size')))
+            return dict(page,next_cursor=self.app._cursor(scope,page['next_cursor']) if page['next_cursor'] is not None else None)
         if operation == 'deliveries.read':
             return port.read(args['delivery_id'])
         if operation == 'deliveries.validate':

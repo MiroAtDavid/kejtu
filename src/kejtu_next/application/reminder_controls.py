@@ -17,6 +17,39 @@ class ReminderControls:
 
     async def dispatch(self, operation, args):
         port = self.reminders
+        chat, now = self.app.store.reminder_chat, self.app.background.wall()
+        if operation == 'reminders.attention':
+            scope = 'reminder-attention'
+            after = self.app._uncursor(scope,args['cursor']) if args.get('cursor') else 0
+            page = self.app.store.reminder_attention.page(now=now,after=after,limit=self.app._page_size(args.get('page_size')))
+            return dict(page,next_cursor=self._cursor(scope,page['next_cursor']))
+        if operation == 'reminders.attend':
+            if args['action'] == 'lookup':
+                return port.control_receipt(args['mutation_key'],expected_intent=args['intent_sha256'])
+            await self.app.background.foreground()
+            result = self.app.store.reminder_attention.change(args,now=now)
+            self.app.service.working_context.clear()
+            return result
+        if operation == 'reminders.messages':
+            scope = 'reminder-chat:' + args['conversation_id']
+            before = self.app._uncursor(scope,args['cursor']) if args.get('cursor') else None
+            page = chat.page(args['conversation_id'],now=now,before=before,limit=self.app._page_size(args.get('page_size')))
+            return dict(page,next_cursor=self._cursor(scope,page['next_cursor']))
+        if operation == 'reminders.inbox':
+            scope = 'reminder-inbox'
+            after = self.app._uncursor(scope,args['cursor']) if args.get('cursor') else 0
+            page = chat.inbox(now=now,after=after,limit=self.app._page_size(args.get('page_size')))
+            return dict(page,next_cursor=self._cursor(scope,page['next_cursor']))
+        if operation == 'reminders.message':
+            if args['action'] == 'lookup':
+                return port.control_receipt(args['mutation_key'],expected_intent=args['intent_sha256'])
+            if args['action'] == 'validate':
+                return chat.validate(args['id'],args['receipt'],now)
+            if args['action'] != 'present':
+                await self.app.background.foreground()
+            result = chat.change(args,now=now)
+            self.app.service.working_context.clear()
+            return result
         limit = self.app._page_size(args.get('page_size'))
         if operation == 'reminders.access':
             if args.get('action') == 'set':

@@ -16,6 +16,7 @@ from ...core.history import HistorySnapshot, HistoryUnit
 from ...core.records import Failure, Message
 from ...core.reference import exact_page
 from ...core.notes import intent_digest, note_arguments, operation_key
+from .reply_presentation import restore as restore_reply_presentation
 
 HISTORY_SCHEMA = '''
 CREATE TABLE history_units(turn_id TEXT PRIMARY KEY REFERENCES turns(id),
@@ -83,6 +84,20 @@ class HistoryStore:
         ledger.spend_sql()  # Final partial VM quantum, even for indexed point reads.
         return self.db.execute(sql, parameters)
 
+    def workspace_context(self, turn_id, ledger):
+        rows=self.query(ledger,"""SELECT record FROM context_events WHERE turn_id=?
+            AND json_extract(record,'$.kind')='workspace_scope' LIMIT 2""",(turn_id,)).fetchall()
+        if not rows:
+            return {}  # Unknown historical scope stays unknown, never inferred.
+        if len(rows)!=1 or len(rows[0]['record'].encode())>256:
+            raise Failure('memory_integrity','The retained workspace context is invalid.')
+        value=json.loads(rows[0]['record'])
+        if (set(value)-{'kind','project_id','module_id'} or
+                any(not isinstance(v,str) or re.fullmatch('[0-9a-f]{32}',v) is None
+                    for k,v in value.items() if k!='kind')):
+            raise Failure('memory_integrity','The retained workspace context is invalid.')
+        return {k:v for k,v in value.items() if k!='kind'}
+
     def start(self, turn):
         previous = self.db.execute('SELECT ordinal FROM history_units WHERE conversation_id=? ORDER BY ordinal DESC LIMIT 1',
                                    (turn['conversation_id'],)).fetchone()
@@ -144,8 +159,14 @@ class HistoryStore:
                 (snapshot.conversation_id, snapshot.before_sequence, value)).fetchone()
             if row is None or type(row['cost']) is not int or row['cost'] < 1:
                 raise Failure('history_unavailable', 'Selected history identity is missing, foreign or not terminal.')
+            delivered = self.store.deliveries.history_records(snapshot.conversation_id,row['sequence'],ledger)
+            delivered += self.store.reminder_chat.history_records(snapshot.conversation_id,row['sequence'],ledger)
+            identities = tuple(source for item in delivered
+                for source in ([item['artifact_id']] if 'artifact_id' in item else item['source_dependencies']))
+            presentations = sum(item.get('omitted_presentations',item.get('presentation_count',1)) for item in delivered)
             return HistoryUnit(row['turn_id'], row['sequence'], row['ordinal'], row['cost'], row['created_at'],
-                deliveries=self.store.deliveries.history_messages(snapshot.conversation_id, row['sequence'], ledger))
+                deliveries=self.store.deliveries.messages_from_records(delivered), delivery_dependencies=identities,
+                deliveries_without_bodies=(Message('system', f'Application history: {presentations} earlier reminder/check-in presentations were not loaded within this reply budget; exact retained records remain available.'),) if delivered else ())
 
     def body(self, aid, kind, ledger, maximum):
         if self.query(ledger, "SELECT 1 FROM imported_messages WHERE artifact_id=? AND excluded=1", (aid,)).fetchone():
@@ -188,6 +209,12 @@ class HistoryStore:
                 messages.append(failure_marker(row))
             if sum(message_cost(m) for m in messages) != unit.cost:
                 raise Failure('store_integrity', 'Historical unit cost does not match its exact projection.')
+            if row['status'] == 'completed' and state is not None:
+                # Verify the original stored cost first; the shared request
+                # ledger then charges this deterministic replay presentation.
+                state = restore_reply_presentation(self.store, row, conv, state, answer,
+                    ledger.response_bytes, unit.cost, ledger)
+                messages[-1] = Message('assistant', answer, reasoning=state)
             return tuple(messages)
 
     def save_admission(self, snapshot, record):
@@ -339,11 +366,18 @@ class HistoryStore:
                                          'intent_sha256': intent_digest(args)})
                 elif call.name in ('people','university','media'):
                     arguments = encoded({'arguments_sha256': hashlib.sha256(call.arguments.encode()).hexdigest()})
+                elif call.name == 'background_interests':
+                    from ...core.interests import tool_arguments, control_key
+                    args = tool_arguments(call)
+                    record = {'arguments_sha256': hashlib.sha256(call.arguments.encode()).hexdigest()}
+                    if args['action'] in ('stop','later'):
+                        record['mutation_key'] = control_key(self.store.state_id, snapshot.turn_id, args)
+                    arguments = encoded(record)
                 elif call.name == 'reminders':
                     from ...core.reminder_tools import arguments as reminder_arguments, mutation_key
                     args = reminder_arguments(call)
                     record = {'arguments_sha256': hashlib.sha256(call.arguments.encode()).hexdigest()}
-                    if args['action'] in ('save', 'cancel', 'dismiss'):
+                    if args['action'] in ('save', 'cancel', 'dismiss', 'acknowledge', 'later', 'resolve'):
                         record['mutation_key'] = mutation_key(self.store.state_id, snapshot.turn_id, args)
                     arguments = encoded(record)
                 self.db.execute('INSERT INTO history_operations VALUES(?,?,?,?,?,?,NULL)',

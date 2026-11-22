@@ -13,6 +13,8 @@ receives those excerpts and the request uses its allowance. Saved titles are
 reused; failed attempts are not automatically retried.
 
 Provider credentials belong in Settings and use the supported credential store.
+Keys of connections you add are kept in the same system keyring; a connection saved
+by an earlier version keeps its key in the settings file until you import it again.
 ChatGPT sign-in tokens are kept separately in owner-only files inside the private
 application state, and refreshed when needed. Treat state backups as private too.
 They are never stored in browser storage or the source release.
@@ -38,8 +40,8 @@ separately in Connections. Review the actual saved choices.
 
 This is an experimental Linux source preview for people comfortable with setup.
 Mac and Windows installation have not been verified, and desktop installer
-bundling is disabled. Some optional tools depend on Linux services, Bubblewrap,
-mpv or external providers. The interface and first-run installation still have
+bundling is disabled. Some optional tools depend on Linux services, Bubblewrap or
+external providers. The interface and first-run installation still have
 known unfinished work; the README and release status describe it.
 
 The published LongMemEval development result concerns a specific history-only

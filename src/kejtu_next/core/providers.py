@@ -24,6 +24,7 @@ EFFORT = ThinkingPolicy('effort', ('low', 'high', 'max'), 'high')
 ALWAYS = ThinkingPolicy('always', (True,), True)
 PRESERVED = ThinkingPolicy('preserved', (True, False), True)
 OPENAI = ThinkingPolicy('responses', ('low', 'medium', 'high', 'xhigh', 'max'), 'medium')
+ANTHROPIC = ThinkingPolicy('anthropic', ('low', 'medium', 'high', 'xhigh', 'max'), 'medium')
 OPENAI_LUNA = ThinkingPolicy('responses', (False, 'low', 'medium', 'high', 'xhigh', 'max'), 'medium')
 
 
@@ -49,7 +50,7 @@ class Provider:
 
     @property
     def unique_tool_ids(self):
-        return self.transport in ('chat_completions', 'responses')
+        return self.transport in ('chat_completions', 'responses', 'anthropic')
 
     def thinking_for(self, model):
         if not self.models:
@@ -102,12 +103,20 @@ PROVIDERS = MappingProxyType({p.id: p for p in (
              preserve_reasoning=True, rejects_context_overflow=True),
     Provider('openai', 'OpenAI', 'https://api.openai.com/v1', 'responses',
              'gpt-6.1-sol', 65536, 16384, OPENAI,
-             models=(('gpt-6.1-sol', OPENAI), ('gpt-6-astra', OPENAI), ('gpt-6-luna', OPENAI_LUNA)),
+             models=(('gpt-6.2-sol', OPENAI), ('gpt-6.2-astra', OPENAI),
+                     ('gpt-6.1-sol', OPENAI), ('gpt-6-astra', OPENAI), ('gpt-6-luna', OPENAI_LUNA)),
              preserve_reasoning=True, rejects_context_overflow=True,
              reasoning_state_format='openai_responses_v1'),
+    Provider('anthropic', 'Anthropic', 'https://api.anthropic.com/v1', 'anthropic',
+             'claude-opus-5-5', 65536, 16384, ANTHROPIC,
+             models=tuple((name, ANTHROPIC) for name in (
+                 'claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5', 'claude-fable-5-2')),
+             preserve_reasoning=True, rejects_context_overflow=True,
+             reasoning_state_format='anthropic_messages_v1'),
     Provider('chatgpt', 'ChatGPT plan', 'https://api.openai.com/v1', 'responses',
              'gpt-6.1-sol', 240000, 16384, OPENAI,
-             models=(('gpt-6.1-sol', OPENAI), ('gpt-6-astra', OPENAI), ('gpt-6-luna', OPENAI_LUNA)),
+             models=(('gpt-6.2-sol', OPENAI), ('gpt-6.2-astra', OPENAI),
+                     ('gpt-6.1-sol', OPENAI), ('gpt-6-astra', OPENAI), ('gpt-6-luna', OPENAI_LUNA)),
              preserve_reasoning=True, rejects_context_overflow=True,
              reasoning_state_format='chatgpt_responses_v1', subscription=True),
 )})

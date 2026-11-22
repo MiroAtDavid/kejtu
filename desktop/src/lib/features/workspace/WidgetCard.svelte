@@ -6,10 +6,8 @@
     type Workspace,
     type Widget,
     type View,
-    type Receipt,
   } from "./workspace";
   import type { Results } from "$lib/api/wire.generated";
-  import Radio from "./Radio.svelte";
   import Upcoming from "./Upcoming.svelte";
   import Icon from "$lib/design/Icon.svelte";
   import type { Agenda } from "./upcoming";
@@ -36,8 +34,7 @@
     openNote = false,
     seenConversation = "",
     generation = 0;
-  let note: Note | null = null,
-    radio: (Receipt & { data?: { state?: string } }) | null = null;
+  let note: Note | null = null;
   let agenda: Agenda | null = null;
   let taskItems: { id: string; title: string; due: string | null }[] = [];
   let seenRevision = "";
@@ -70,7 +67,6 @@
       value = result;
       if (result.status === "ready" || result.status === "partial") {
         if (widget.kind === "note") note = result.data as Note;
-        else if (widget.kind === "radio") radio = result.data as typeof radio;
         else if (widget.kind === "calendar") {
           const data = result.data as Agenda;
           agenda =
@@ -82,7 +78,6 @@
       } else {
         note = null;
         agenda = null;
-        radio = null;
         taskItems = [];
       }
     } catch (caught) {
@@ -91,14 +86,10 @@
   }
   onMount(() => {
     const timer =
-      widget.kind === "radio" || widget.kind === "calendar"
-        ? setInterval(
-            () => {
-              if (active && !widget.collapsed && !document.hidden)
-                void refresh();
-            },
-            widget.kind === "radio" ? 4000 : 60000,
-          )
+      widget.kind === "calendar"
+        ? setInterval(() => {
+            if (active && !widget.collapsed && !document.hidden) void refresh();
+          }, 60000)
         : null;
     return () => {
       generation++;
@@ -143,13 +134,6 @@
         >{:else}<p class="widget-muted">
           Add a bookmark with the ··· menu.
         </p>{/each}
-    {:else if widget.kind === "radio" && value?.status === "ready"}<Radio
-        {workspace}
-        {busy}
-        compact
-        comfortable={widget.size === "comfortable"}
-        observed={radio}
-      />
     {:else if widget.kind === "note" && note}<h3>
         {note.note?.title || "Original note"}
       </h3>

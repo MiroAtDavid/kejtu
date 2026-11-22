@@ -7,6 +7,9 @@ if __name__ == "__main__":
     if sys.argv[1:] == ['--skill-import-worker']:
         from .bootstrap import skill_import_main
         sys.exit(skill_import_main())
+    if sys.argv[1:] == ['--package-tree-worker']:
+        from .bootstrap import package_tree_main
+        sys.exit(package_tree_main())
     if len(sys.argv) > 1 and sys.argv[1] == 'native-key':
         from .bootstrap import native_key_main
         sys.exit(native_key_main(sys.argv[2:]))

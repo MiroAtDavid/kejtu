@@ -161,6 +161,10 @@ class ReminderStore:
         return dict(sources=sources, note=dict(note) if note else None, task=dict(task) if task else None)
 
     def _links(self, definition, original=None):
+        if definition.task_revision is not None and (original is None or definition.task_revision != original.task_revision or definition.task_id != original.task_id):
+            task = self.db.execute('SELECT revision,outcome FROM personal_tasks WHERE id=?',(definition.task_id,)).fetchone()
+            if not task or task['revision'] != definition.task_revision or task['outcome'] != 'open':
+                raise Failure('reminder_link_unavailable','The task changed; read its current state before saving a reminder.')
         for field, table in (('note_id', 'note_records'), ('task_id', 'personal_tasks')):
             value = getattr(definition, field)
             if value is not None and (original is None or value != getattr(original, field)):
@@ -213,8 +217,8 @@ class ReminderStore:
         """Explicit local user operation; this does not grant any model tool.
 
         A valid source quote proves its origin, not that it requested a reminder.
-        A future model-facing path must enforce its own explicit request/capability
-        and shared-ledger contract before invoking this owner.
+        The model-facing path enforces its permission, exact current-user source
+        and shared-ledger contract. Companion initiative remains a distinct kind.
         """
         if type(definition) is not ReminderDefinition or type(reactivate) is not bool:
             raise Failure('reminder_definition', 'Use a validated complete definition and explicit reactivation choice.')
@@ -227,6 +231,12 @@ class ReminderStore:
                 return prior
             old = self._reminder(reminder_id) if reminder_id is not None else None
             original = self._definition(reminder_id) if old is not None else None
+            # Classification is durable: a conversational initiative cannot turn
+            # into a user reminder through an edit or a future Home renderer.
+            if original is not None and original.origin != definition.origin:
+                raise Failure('reminder_origin', 'Keep the original reminder kind; create a separate user-requested reminder if needed.')
+            if definition.origin == 'companion' and not definition.support:
+                raise Failure('reminder_source_unavailable', 'A companion follow-up requires exact user-message support.')
             if old is None and (expected_revision is not None or reactivate):
                 raise Failure('reminder_revision', 'New reminders have no existing revision to reactivate.')
             if old is not None and (type(expected_revision) is not int or expected_revision != old['revision']):
@@ -346,7 +356,10 @@ class ReminderStore:
         with self._transaction():
             rows = self.db.execute('''SELECT o.*,v.reminder_revision,v.first_due,v.covered_through FROM reminder_occurrences o
                 JOIN reminder_occurrence_versions v ON v.occurrence_id=o.id AND v.version=o.version
-                WHERE o.status='pending' AND o.sequence>? ORDER BY o.sequence LIMIT ?''', (after, limit + 1)).fetchall()
+                JOIN reminder_versions d ON d.reminder_id=o.reminder_id AND d.revision=v.reminder_revision
+                WHERE o.status='pending' AND o.sequence>?
+                AND coalesce(json_extract(d.definition,'$.origin'),'requested')='requested'
+                ORDER BY o.sequence LIMIT ?''', (after, limit + 1)).fetchall()
             values = []
             for row in rows[:limit]:
                 notice = self._notice(self._reminder(row['reminder_id']), row)
@@ -397,6 +410,8 @@ class ReminderStore:
         with self._transaction():
             reminder = self._reminder(ident)
             definition = self._definition(ident, revision)
+            if definition.origin == 'companion':
+                raise Failure('reminder_conversation_only', 'This follow-up belongs to conversation, not the reminder display.')
             # Inspection is manual and remains available after source loss.
             rows = self.db.execute('''SELECT revision,sha256,created_at FROM reminder_versions
                 WHERE reminder_id=? AND (? IS NULL OR revision<?) ORDER BY revision DESC LIMIT ?''', (ident, before, before, limit + 1)).fetchall()
@@ -405,12 +420,15 @@ class ReminderStore:
                         history=[dict(row) for row in rows[:limit]],
                         next_cursor=rows[limit - 1]['revision'] if len(rows) > limit else None)
 
-    def page(self, *, after='', limit=20):
+    def page(self, *, after='', limit=20, include_companion=False):
         self._page_limit(limit)
         if after != '' or not isinstance(after, str):
             self._id(after)
         with self._transaction():
-            rows = [dict(row) for row in self.db.execute('SELECT * FROM reminders WHERE id>? ORDER BY id LIMIT ?', (after, limit + 1))]
+            rows = [dict(row) for row in self.db.execute('''SELECT r.* FROM reminders r
+                JOIN reminder_versions d ON d.reminder_id=r.id AND d.revision=r.revision
+                WHERE r.id>? AND (? OR coalesce(json_extract(d.definition,'$.origin'),'requested')='requested')
+                ORDER BY r.id LIMIT ?''', (after, include_companion, limit + 1))]
             return dict(items=rows[:limit], next_cursor=rows[limit - 1]['id'] if len(rows) > limit else None)
 
     def occurrences(self, ident, *, after=0, limit=20):

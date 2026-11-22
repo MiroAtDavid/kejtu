@@ -1,51 +1,52 @@
 <script lang="ts">
-  import type { DocumentReference } from "./document-assist";
   import { tick } from "svelte";
   import type { Workspace, View, Event, Source } from "./workspace";
   import Week from "./Week.svelte";
   import Semesters from "./Semesters.svelte";
   import Course from "./Course.svelte";
-  import Media from "./Media.svelte";
   export let workspace: Workspace;
   export let view: View = "journal";
   export let courseId = "";
+  /** Counted visits: a plain Projects open, and one with a project/module. */
+  export let projectListVisit = 0;
+  export let projectScopeVisit = 0;
+  export let conversationModule = "";
+  export let documentModule = "";
+  export let dockBounds: import("./document-dock").DocumentDockBounds | null =
+    null;
+  export let onOpenDock: (id: string) => boolean = () => false;
+  export let onDocumentsChange: (id: string, count: number) => void = () => {};
   export let compactNavigation = false;
   export let fileSidebar: HTMLElement | null = null;
   export let busy = false;
-  export let onFileChosen: () => void = () => {};
   export let active = true;
   export let navigationLocked = false;
   export let onOpen: (view: View, id?: string) => void = () => {};
+  export let onConversation: (id: string) => void = () => {};
+  export let onNewConversation: (
+    projectId: string,
+    moduleId?: string,
+  ) => void = () => {};
   export let onDiscuss: (text: string, source?: Source) => void = () => {};
+  /** The module whose documents the sidebar shows on the project page. */
+  export let onPageFiles: (id: string) => void = () => {};
   let visited = new Set<View>();
   let courses = new Set<string>();
   let week: Week | undefined;
-  export let onReadingChange: (value: boolean) => void = () => {};
-  export let onWideChange: (wide: boolean) => void = () => {};
-  let courseWide: Record<string, boolean> = {};
-  $: onWideChange(reading && (courseWide[courseId] ?? false));
-  let courseTabs: Record<string, string> = {};
   let courseViews: Record<string, Course> = {};
-  let reportedReading = false;
-  $: reading = view === "course" && courseTabs[courseId] === "material";
-  $: if (reading !== reportedReading) {
-    reportedReading = reading;
-    onReadingChange(reading);
-  }
   export function openMaterial(id: string, source: Source) {
     courseViews[id]?.openMaterial(source);
   }
-  export async function showMaterial(id: string) {
-    await courseViews[id]?.showMaterial();
-  }
-  export async function openDocument(reference: DocumentReference) {
-    const course = courseViews[reference.course_id];
-    if (!course) throw new Error("This section is unavailable.");
-    await course.openDocument(reference);
-  }
   $: if (view !== "journal") visited = new Set([...visited, view]);
-  $: if (view === "course" && courseId)
-    courses = new Set([...courses, courseId]);
+  $: if (view === "journal" && conversationModule)
+    courses = new Set([...courses, conversationModule]);
+  let projectFilesModule = "";
+  $: pageFiles =
+    view === "semesters" && $workspace.snapshot?.settings.university_enabled
+      ? projectFilesModule
+      : "";
+  $: if (pageFiles) courses = new Set([...courses, pageFiles]);
+  $: onPageFiles(pageFiles);
   export async function reserve(value: Partial<Event>) {
     onOpen("overview");
     await tick();
@@ -66,7 +67,7 @@
         >
         <button
           disabled={navigationLocked}
-          aria-pressed={view === "semesters" || view === "course"}
+          aria-pressed={view === "semesters"}
           on:click={() => onOpen("semesters")}>Projects</button
         >
       {/if}
@@ -81,8 +82,7 @@
         {busy}
         active={active && view === "overview"}
         onTasks={() => onOpen("tasks")}
-        onCourse={(id) => onOpen("course", id)}
-        onProject={(id) => onOpen("semesters", id)}
+        onTask={(ref) => onOpen("tasks", "task-ref:" + ref)}
       />
     </div>{/if}
   {#if visited.has("semesters")}<div
@@ -90,45 +90,41 @@
         !$workspace.snapshot?.settings.university_enabled}
     >
       <Semesters
+        active={active && view === "semesters"}
+        {onConversation}
+        {onNewConversation}
         {workspace}
         {busy}
         projectId={view === "semesters" ? courseId : ""}
+        listVisit={projectListVisit}
+        scopeVisit={projectScopeVisit}
         onTasks={(id) => onOpen("tasks", "project:" + id)}
-        onOpenCourse={(id) => onOpen("course", id)}
+        onTask={(ref) => onOpen("tasks", "task-ref:" + ref)}
+        onReserve={(value) => reserve(value)}
+        onFilesModule={(id) => (projectFilesModule = id)}
       />
     </div>{/if}
   {#each [...courses] as id (id)}{@const course =
       $workspace.snapshot?.courses.find((row) => row.id === id)}{#if course}<div
-        hidden={view !== "course" ||
-          courseId !== id ||
+        hidden={!(view === "journal" && documentModule === id) ||
           !$workspace.snapshot?.settings.university_enabled}
       >
         <Course
           bind:this={courseViews[id]}
-          {onFileChosen}
-          onWideChange={(wide) => {
-            if (courseWide[id] !== wide)
-              courseWide = { ...courseWide, [id]: wide };
-          }}
-          onTabChange={(tab) => (courseTabs = { ...courseTabs, [id]: tab })}
           {workspace}
           {course}
           {fileSidebar}
           {busy}
-          active={active && view === "course" && courseId === id}
+          active={active && view === "journal" && documentModule === id}
+          conversation={view === "journal" && conversationModule === id}
+          files={pageFiles === id}
+          docked={view === "journal" && documentModule === id}
+          {dockBounds}
+          onOpenDock={() => onOpenDock(id)}
+          onDocumentsChange={(count) => onDocumentsChange(id, count)}
           {onDiscuss}
-          onTasks={() => onOpen("tasks", "section:" + id)}
-          onReserve={(value) => reserve(value)}
         />
       </div>{/if}{/each}
-  {#if view === "course" && !$workspace.snapshot?.courses.some((row) => row.id === courseId)}<p
-      class="notice"
-    >
-      Choose an available section in Projects.
-    </p>{/if}
-  {#if visited.has("media")}<div hidden={view !== "media"}>
-      <Media {workspace} {busy} active={active && view === "media"} />
-    </div>{/if}
 </div>
 
 <style>

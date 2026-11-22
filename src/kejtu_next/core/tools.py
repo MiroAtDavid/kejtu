@@ -11,6 +11,7 @@ from .tasks import schema as task_schema
 from .research import schema as research_schema
 from .reminder_tools import schema as reminder_schema
 from .people import schema as people_schema
+from .interests import tool_schema as interest_schema
 
 
 def result_receipt(result):
@@ -24,13 +25,22 @@ def result_receipt(result):
         return dict({k:v for k,v in result.items() if k in ('domain','source_id','source_turn_id','source_run_id','provider','kind','sha256','status','source_status','offset','end','next_offset','total_bytes','total_results','reason')}, result_sha256=result_hash)
     record = {k: v for k, v in result.items() if k not in ('content', 'results')}
     if result.get('domain') == 'people':
+        from .people import read_identity
         record = {k:v for k,v in result.items() if k in ('domain','status','action','reason','person_id','target_id','assertion_id','revision','replayed')}
+        if 'items' in result:
+            record['items'] = [read_identity(item) for item in result['items']]
+        if 'identity_sources' in result:
+            record['identity_sources'] = [read_identity(item) for item in result['identity_sources']]
     if result.get('domain') == 'reminders':
         # Definition and notice bodies belong to immutable reminder versions.
         # Operation audit never keeps another copy or confers fresh read rights.
         record = {k:v for k,v in result.items() if k in (
             'domain', 'status', 'outcome', 'reason', 'reminder_id', 'revision',
-            'occurrence_id', 'occurrence_version', 'channel', 'mutation_key', 'replayed')}
+            'occurrence_id', 'occurrence_version', 'channel', 'mutation_key', 'replayed', 'source_dependencies')}
+        if 'items' in result:
+            record['items'] = [{k:v for k,v in item.items() if k in (
+                'id', 'revision', 'reminder_id', 'reminder_revision', 'occurrence_id',
+                'occurrence_version', 'attention_revision', 'origin', 'source_dependencies')} for item in result['items']]
     if 'results' in result:
         record['results'] = [{k: v for k, v in entry.items() if k != 'preview'} for entry in result['results']]
     if result.get('domain') == 'skill':
@@ -40,7 +50,7 @@ def result_receipt(result):
 
 
 def schemas(*, history=False, reference=False, memory=False, notes=False, notes_write=False, hybrid=False, tasks=False, notebook_only=False, web_only=False, reminders=False, people=False, people_write=False, web=False, web_provider='searxng', mcp=False, skills=False, workspace=False) -> list[dict]:
-    if type(notebook_only) is not bool or notebook_only and (not history or not memory or reference or tasks or reminders or people or web or mcp or skills):
+    if type(notebook_only) is not bool or notebook_only and (not history or not memory or reference or tasks or people or web or mcp or skills):
         raise ValueError('Private-review tools require memory, without task or attachment authority.')
     if memory and not history:
         raise ValueError('memory requires the shared history execution grant')
@@ -77,6 +87,8 @@ def schemas(*, history=False, reference=False, memory=False, notes=False, notes_
             result[-2]['function']['parameters']['properties']['cursor']['description'] = (
                 'First page: use the empty string "". Later pages: copy next_cursor exactly from the previous result. '
                 'Never use the words empty or returned.')
+        if history and web and not (notebook_only or web_only):
+            result.append(interest_schema())
     if notes or hybrid:
         # Newly opted-in notes/hybrid contracts use compact descriptions.
         # Legacy read-only configurations retain their frozen schemas exactly.
@@ -115,7 +127,7 @@ def schemas(*, history=False, reference=False, memory=False, notes=False, notes_
     if reminders:
         if not memory:
             raise ValueError('reminders require the existing memory grant')
-        result.append(reminder_schema(write=not web_only))
+        result.append(reminder_schema(write=not web_only,review=notebook_only))
     if web:
         if not history: raise ValueError('Web requires the shared execution grant')
         from .web import schemas as web_schemas

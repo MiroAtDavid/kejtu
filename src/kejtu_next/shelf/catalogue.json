@@ -1,0 +1,1633 @@
+{
+  "schema": 1,
+  "revision": "dedde588a7e50529bc7d76a2bed473b00a089a50c7c942fece4d10d91796b37e",
+  "entries": [
+    {
+      "id": "notion-codex",
+      "title": "Notion",
+      "publisher": "Notion / OpenAI catalogue",
+      "category": "Work & notes",
+      "summary": "Keep notes, prepare meetings and turn ideas into documents.",
+      "requirements": "Browser sign-in to Notion. Its account and service limits apply.",
+      "icon": "book-open",
+      "repository": "https://github.com/openai/plugins",
+      "commit": "d420d13051bffe4543ed39e30fa46b87148e47dd",
+      "path": "plugins/notion",
+      "license": "MIT",
+      "license_files": [
+        "plugins/notion/skills/notion-knowledge-capture/LICENSE.txt"
+      ],
+      "files": [
+        {
+          "path": "plugins/notion/.app.json",
+          "bytes": 97,
+          "sha256": "066b7fa66f7a30c640f4697be1f325f651e4a1665ff7b1aff1b9b11f4740f604",
+          "git_blob": "b7423370e49087af0bb59c493e8f6e78717040c1",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/.codex-plugin/plugin.json",
+          "bytes": 1774,
+          "sha256": "7373f08364d1d64197be67c474be5deb39bb099727f12cfe6bc6bb34a8eb430c",
+          "git_blob": "cd44e632db0d831ba0ec4a68d1a2687af5ac821f",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/.mcp.json",
+          "bytes": 162,
+          "sha256": "821462c96086604ee94502b8aadc2ba0e12e224042dafa4cbe660822ea1852f8",
+          "git_blob": "843c641200c8698c55a83115690a46709aba2e71",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/README.md",
+          "bytes": 1440,
+          "sha256": "4ef26a5a98fb9e5203c2c25f1fd13e331bbc912ddfad3d6e2951108f3f1818ee",
+          "git_blob": "50d7c9cc271c47e76f1cd43ac21ff598d086099d",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/agents/openai.yaml",
+          "bytes": 361,
+          "sha256": "feb02ade81d3417f2c5719c18cc6a9db0b476f142ccea58f35b694c52d86b022",
+          "git_blob": "e07afdd7f81abbddfe45787a7a16917e97ccfd89",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/assets/notion-dark.png",
+          "bytes": 4651,
+          "sha256": "014ab1e20210938aea95d5b118eba970d7f4955068c9acc47223eb51ed79f74c",
+          "git_blob": "ba627f80d898a63e2e604e8e1a2a859c7b7d4d14",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/assets/notion-small.svg",
+          "bytes": 1600,
+          "sha256": "ab9820a943b724f710617509ef605d8b3f2303e89654762b61b546d618fb322a",
+          "git_blob": "213238bc03606157bceccb6508f60a00579d4c4b",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/assets/notion.png",
+          "bytes": 3581,
+          "sha256": "e20b9668553aeb46b55a366d0a8eddd9051b5ac55207ab067ed347029a53434e",
+          "git_blob": "0df7e06ef5e50b57af4b36ecf54e3fce8ef9fd23",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/plugin.lock.json",
+          "bytes": 1674,
+          "sha256": "ab218055a4f84e3745dbd138d77ccb349fda52eeea127b835da658967e3c6146",
+          "git_blob": "5658742d2ebbff284de77153c9c0de307be4402b",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/LICENSE.txt",
+          "bytes": 1057,
+          "sha256": "0f377d9b2a1db642e4b0531ffa126e96d9bc6c085f8d9441f220fb25f723c6f8",
+          "git_blob": "08717083b66cc66a7d45267fd9a6998e79bddf04",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/SKILL.md",
+          "bytes": 4498,
+          "sha256": "ade7d8902823500f6af26bdf290f2a88e35b34ce9668739eb8807b773648e333",
+          "git_blob": "9393646083f064bc0ceff0b135a0e12ac780ed3b",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/agents/openai.yaml",
+          "bytes": 327,
+          "sha256": "f6f71ba1cc9ac62fc787b165673343d172ab764f9ae6a22fe5b879f86ed61f8b",
+          "git_blob": "470de10a193b5d4760405ed4999edfb9f4a7c07f",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/assets/notion-small.svg",
+          "bytes": 1561,
+          "sha256": "949b811b28ed4a5cdd4896b58a2b9f697225e1d436d509ef55cab7541c3522c1",
+          "git_blob": "6606aaf29423e25a9f1d38238e1722fffb5aac6f",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/assets/notion.png",
+          "bytes": 8526,
+          "sha256": "5eef1e62d96a3d09bc9d18e4140486c22799145b017033bd0924c2c49d741cd4",
+          "git_blob": "085023cdf185ccc58f7c52de47982e3565d6ed45",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/evaluations/README.md",
+          "bytes": 3490,
+          "sha256": "694be82592ceadf804f79937effad0cff0ed87e35b7d4ba9b9b348bc6ae998ce",
+          "git_blob": "9081e25e15ac6ed76689aebd9d124cb0064b402e",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/evaluations/conversation-to-wiki.json",
+          "bytes": 2027,
+          "sha256": "8c84d9b799f78101b78a89d2954de6a8f7d9c4727e0d0137f5ebd737173a9585",
+          "git_blob": "d55cd831036cae3ae67091a5705a1449508a4978",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/evaluations/decision-record.json",
+          "bytes": 2191,
+          "sha256": "67884298598fa36551f85015d5751ea19cd719bc0849b28c45233a7937405290",
+          "git_blob": "a681423717bd593b6b1b3a3dbc6d893bf488a82c",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/examples/conversation-to-faq.md",
+          "bytes": 16283,
+          "sha256": "a886c0ec003bb21df4f4dea63658fbca262cb57eaa7e87aaf7581856dd720d08",
+          "git_blob": "13197e99ae265ad129b174a6988787b555669193",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/examples/decision-capture.md",
+          "bytes": 3628,
+          "sha256": "3f5bd35360410e564afa0fbf7bc293da4c95becdf03a13f4ffd84d8f63c4bd43",
+          "git_blob": "2e957f32d73d31402ec87c7551cb58c42148ab93",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/examples/how-to-guide.md",
+          "bytes": 3201,
+          "sha256": "a499e24295896ab9c7e419301c7bc660d1358cf9af66ad3f079dc30b65a95cd1",
+          "git_blob": "de8ea3c9c4ad96b5c0698f137b4f5a428b225a07",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/reference/database-best-practices.md",
+          "bytes": 2419,
+          "sha256": "a73919ace3be1edec3e5d88f2276edd7be369944c9882561a1687a5cf2f189e1",
+          "git_blob": "8395fa97a6201d1db99f5eda6f713e0cb328768b",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/reference/decision-log-database.md",
+          "bytes": 2032,
+          "sha256": "9ce22a75462c2bd00d221c4829fdc5065a7ee0732be7beebcc4c62c6b81a111c",
+          "git_blob": "3304eba38da2906cf9f5a79954e619ab175fdc02",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/reference/documentation-database.md",
+          "bytes": 2343,
+          "sha256": "4b1f69f15637381a44716fd4628eda92b1015cd151a108c80648394a55a7ce32",
+          "git_blob": "c1ef5dd0bcaa2d3cb86729214ab5aa4b77cd4996",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/reference/faq-database.md",
+          "bytes": 2036,
+          "sha256": "e8e95a0a83975ce314aaae871fd5b95002bb247e76dd1181150ed10a74e89815",
+          "git_blob": "4c9eaf4f2c45702882c7e098a0b7f2332d06d041",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/reference/how-to-guide-database.md",
+          "bytes": 1236,
+          "sha256": "a53c3347b3be31d920c79da9f9c64b3b8fb6841aacf1c55a28f14c73fbd99ba2",
+          "git_blob": "444e166df023633f87581afe48e441e5f42ccd79",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/reference/learning-database.md",
+          "bytes": 1321,
+          "sha256": "30c8f86545d627cc620d5a9b6de940c36f8732fff985bb3f0468865b54a5c55d",
+          "git_blob": "6571b39511b81f92d598227f29c102008669c211",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-knowledge-capture/reference/team-wiki-database.md",
+          "bytes": 926,
+          "sha256": "e6742b3b5d0a52f76c0ffda081c1dc8acfb919085e28f9331ee05ebf81d990e4",
+          "git_blob": "c8ff191d66740f781cf11bfa8bd3f45783cf0a65",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/LICENSE.txt",
+          "bytes": 1057,
+          "sha256": "0f377d9b2a1db642e4b0531ffa126e96d9bc6c085f8d9441f220fb25f723c6f8",
+          "git_blob": "08717083b66cc66a7d45267fd9a6998e79bddf04",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/SKILL.md",
+          "bytes": 4387,
+          "sha256": "1a8647c46cdfab399a1e0199924e0aecb83034e9a1b0957db211a045145b7771",
+          "git_blob": "6169d8cb29ed2257c6587b3832f9678f2d7394ce",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/agents/openai.yaml",
+          "bytes": 327,
+          "sha256": "7bfdd9261a98daf92eadf9df2ec9608e8351422cdd2b5c889471eb5327b7b729",
+          "git_blob": "8264aaa51085faa7554b0f23b29a5f706717c5ff",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/assets/notion-small.svg",
+          "bytes": 1561,
+          "sha256": "949b811b28ed4a5cdd4896b58a2b9f697225e1d436d509ef55cab7541c3522c1",
+          "git_blob": "6606aaf29423e25a9f1d38238e1722fffb5aac6f",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/assets/notion.png",
+          "bytes": 8526,
+          "sha256": "5eef1e62d96a3d09bc9d18e4140486c22799145b017033bd0924c2c49d741cd4",
+          "git_blob": "085023cdf185ccc58f7c52de47982e3565d6ed45",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/evaluations/README.md",
+          "bytes": 4052,
+          "sha256": "f65abefae6ac350822a9feb4b52136d59c69712f5aaa8a3dc435765023e5fe40",
+          "git_blob": "123309f06b2927297c6b991e3d040b33a0f7d373",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/evaluations/decision-meeting-prep.json",
+          "bytes": 3454,
+          "sha256": "3e0be43df34c3d37db8fe662b51f95ef0bc7c5f32cff9bfacd98664cb221bd53",
+          "git_blob": "e0311088b62201bbe73f58bcf032338e74c6396d",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/evaluations/status-meeting-prep.json",
+          "bytes": 3304,
+          "sha256": "78d8a696176466d320b00f66a77f5cd887f174cc6af7aeade9521a0e0d8c05f9",
+          "git_blob": "f497638d8f6d426b5f35ed42f897fbb173e55e2c",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/examples/customer-meeting.md",
+          "bytes": 3320,
+          "sha256": "9754405fc697ce78d258f8d0d5b32c52079f3a85dbc2a43a02341e24d4d3218f",
+          "git_blob": "946cc9ea7653fb4fc43baa8140f0ddbe8cfebaf7",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/examples/executive-review.md",
+          "bytes": 2480,
+          "sha256": "5e07d36692a240fb2fce54d2dbb32bd1c40fae869c23fb137ba9e9e7de4af2cc",
+          "git_blob": "d63344364c5afd14d5b32f59ee9d02c96c4395ec",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/examples/project-decision.md",
+          "bytes": 12783,
+          "sha256": "6df8305d2b7d91be7a25adc8f1f1281151268b1d493deb3c887c84bbf35f18a2",
+          "git_blob": "274df7a9bb2f94af7e25b54f0787ff6d2887c606",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/examples/sprint-planning.md",
+          "bytes": 2550,
+          "sha256": "d8d316fbb6bbeec402aa71b9da209d4b36e22bf4c3942427894579742681930b",
+          "git_blob": "e00695e566e46cbaf122a0e9a491d0c60cb13eb8",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/reference/brainstorming-template.md",
+          "bytes": 1479,
+          "sha256": "a023ae9844bf58aa5bb172b5029ab65569cea1a7099a1f0940a920e7eb3c8cb8",
+          "git_blob": "0e1821a46e5a12980ea3e14eed67125c1d12723e",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/reference/decision-meeting-template.md",
+          "bytes": 1824,
+          "sha256": "b8c5a897e7822db63e22f04100c4432eea44b62ebe8557f40cc6732ac7df40ba",
+          "git_blob": "a8ff079b9f27bcfc64be21f900fc0fa4a15bb2e4",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/reference/one-on-one-template.md",
+          "bytes": 931,
+          "sha256": "60a86fa950bed9fe7f0a183b436ae52e5a195e358fe78f45b9e55b741b8b94d7",
+          "git_blob": "e530206303cc3dafbadb811e05867affc450a4fb",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/reference/retrospective-template.md",
+          "bytes": 939,
+          "sha256": "06e576e3008eab1d18deac814d07229a8a96049e780125cc06af701e8ddf1bd4",
+          "git_blob": "8fecf83f9699192c3d93124ed5855ce737b399a4",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/reference/sprint-planning-template.md",
+          "bytes": 1300,
+          "sha256": "3198bbd068a6c47fa8e28164667ebd13574f0974096d9360423923fc6fe9b3c9",
+          "git_blob": "39d66302275352c1d8efc4b633c6fb5cdde353c2",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/reference/status-update-template.md",
+          "bytes": 1355,
+          "sha256": "e505e39158a79b9a58ae2e799dcc6d37a765e8a89ef535f9fc39defb29580424",
+          "git_blob": "772330f5da6b37062ca0f9fa1369256a316e5d0e",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-meeting-intelligence/reference/template-selection-guide.md",
+          "bytes": 1954,
+          "sha256": "6d6b87c7769e2429fd9b1461bb107ad8cc1d34fe673e5975e25628874ee76b6d",
+          "git_blob": "41b47f7ff14cafe5db29d21c707bc800d30bfc58",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/LICENSE.txt",
+          "bytes": 1057,
+          "sha256": "0f377d9b2a1db642e4b0531ffa126e96d9bc6c085f8d9441f220fb25f723c6f8",
+          "git_blob": "08717083b66cc66a7d45267fd9a6998e79bddf04",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/SKILL.md",
+          "bytes": 4253,
+          "sha256": "8ca523535915c1b9016202fa24d120545c60caea5c5545d74bfdec195f0a039a",
+          "git_blob": "68c265a0b49c962ca140b62d22d6ceb8acd6b6a4",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/agents/openai.yaml",
+          "bytes": 312,
+          "sha256": "2b7f6d1e5e96c81a077163e98abd98ddcb6f67bf61d9f7c0fe194ddc4c3f70ee",
+          "git_blob": "f9eb05448da8ef6d222bde8b4c012b0443a6bd8e",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/assets/notion-small.svg",
+          "bytes": 1561,
+          "sha256": "949b811b28ed4a5cdd4896b58a2b9f697225e1d436d509ef55cab7541c3522c1",
+          "git_blob": "6606aaf29423e25a9f1d38238e1722fffb5aac6f",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/assets/notion.png",
+          "bytes": 8526,
+          "sha256": "5eef1e62d96a3d09bc9d18e4140486c22799145b017033bd0924c2c49d741cd4",
+          "git_blob": "085023cdf185ccc58f7c52de47982e3565d6ed45",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/evaluations/README.md",
+          "bytes": 4264,
+          "sha256": "96284d43eae1671ac73d65324624dcfbc3e586aa1cf46d50ca74b32336cc010c",
+          "git_blob": "9c6275c5e7d3d962e243437562b85d4b900a08fb",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/evaluations/basic-research.json",
+          "bytes": 1716,
+          "sha256": "45b80d0d2590a36d95fbba517e432516745d1178eb977e7b58febc14ff49549a",
+          "git_blob": "8b59300c1ac759cd14f029f38ad52cd8b82749af",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/evaluations/research-to-database.json",
+          "bytes": 1659,
+          "sha256": "407fa39f1bca10911988965f716d0995164f5a261401b5b485a4eb37fba0886f",
+          "git_blob": "cae2927202c3e9ff46ee1849d13c03aa95b2be14",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/examples/competitor-analysis.md",
+          "bytes": 8271,
+          "sha256": "995fd6d67e13f3dbfd6dd8b06f0c85e5e7988507e91985833625661be626a137",
+          "git_blob": "cd2ef0aa5d99d6c7097ad597893d7cd059e6dfc0",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/examples/market-research.md",
+          "bytes": 2181,
+          "sha256": "51f9193718ba4ea13916443dad59c8f828d1149039e0f96b97e9203e5e6f7ef5",
+          "git_blob": "059b5092187836d4aef67d24189541c4ffd842af",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/examples/technical-investigation.md",
+          "bytes": 6504,
+          "sha256": "a2b3d385c2482356f610c9c0e0a7fa2bd2b8f1e4568bb5c9a3d698b7d424de77",
+          "git_blob": "1064e86f6e311d5618f564d7138a48831cc8689a",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/examples/trip-planning.md",
+          "bytes": 3872,
+          "sha256": "32d827f2f8640488dff967255f9891be370b005c9ad937e471ce0fcfa18c9c6b",
+          "git_blob": "17809b8fe0f1c958638d6fd3e0f62e3d6c15c7ef",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/reference/advanced-search.md",
+          "bytes": 4592,
+          "sha256": "dee8c886072089bcb34cc0a90e3631063c69f793f639d0a4efacd64de769aa75",
+          "git_blob": "f201dc85111a8970d314cc4291dc23233525fe16",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/reference/citations.md",
+          "bytes": 5149,
+          "sha256": "4010a821d371612a0c05f21c7eaaa9466345c4aef43a547140888fc37e41141b",
+          "git_blob": "f0fcb17ec48e2fcd0acba7904110991538dab5aa",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/reference/comparison-format.md",
+          "bytes": 869,
+          "sha256": "558b3d96b3a811206746c8437c9740e894b3f4c45f6bb129c2f16f5d1140f0cb",
+          "git_blob": "7d9a8180d493048e80923d4b5f24707fe03e3b26",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/reference/comparison-template.md",
+          "bytes": 910,
+          "sha256": "cc038471266d5dc1305e258200739c87a4b51cfa73ef0c1a20b5c7f3ff0fb46e",
+          "git_blob": "489490281fbb446e74f95394288d355240c397b0",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/reference/comprehensive-report-format.md",
+          "bytes": 1075,
+          "sha256": "5915882e9d8ffb2ad268079a4adc23e5a7deb6a696476709349802d7da13cbcd",
+          "git_blob": "6883ad32c51708232b1173e1ef57d0a7afadace5",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/reference/comprehensive-report-template.md",
+          "bytes": 1269,
+          "sha256": "23311fd5a81b195b8c1bcb8b0fd0296951a33c5d89546f13966ce702fd5e8f2e",
+          "git_blob": "cacd496a2858b10da6c4ce47da8f0b7de1dbda2c",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/reference/format-selection-guide.md",
+          "bytes": 2797,
+          "sha256": "0e5e7473b88caba3b2894ef93d7faa68a676af76ed8536ffe8dec1ab12f52036",
+          "git_blob": "dceac34e912589b493d637a2a87c886f9c6afc24",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/reference/quick-brief-format.md",
+          "bytes": 766,
+          "sha256": "18af016700644f3ea4c758a240b1ff963f3f35cb368af319cdf5a158840b4737",
+          "git_blob": "18db0e990a0fd9b39db922e9ce1ae63e1e2594bf",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/reference/quick-brief-template.md",
+          "bytes": 472,
+          "sha256": "33022e896e478ba0caee81a1ce82afa6d5a98453b491bed72f48691d1c949379",
+          "git_blob": "53811be8288eb89e761814602b1a5fc9eac101c9",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/reference/research-summary-format.md",
+          "bytes": 840,
+          "sha256": "2e69f8fc84579f3a5df553dc0325f3eb74fd0706bd65d8d2b1b6c9af1841abcf",
+          "git_blob": "1333cb4063b95314cab1575b3ae68104241a28bd",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-research-documentation/reference/research-summary-template.md",
+          "bytes": 1151,
+          "sha256": "27ae7e041fe3bb3d2823c8ab30f4f7eaa37a5a6fd16845903bbca41f1ca14a5a",
+          "git_blob": "cef6fb7795d165fd423c99f7ac86c18ca63a2b01",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/LICENSE.txt",
+          "bytes": 1057,
+          "sha256": "0f377d9b2a1db642e4b0531ffa126e96d9bc6c085f8d9441f220fb25f723c6f8",
+          "git_blob": "08717083b66cc66a7d45267fd9a6998e79bddf04",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/SKILL.md",
+          "bytes": 4552,
+          "sha256": "43b304aaff38fbd4fd5d81efcefb2fd92f5450649eba8b02a2371edb4599cf3f",
+          "git_blob": "ac5c5ec39c30fd4427a9a4ea4651a2b0ce1d16af",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/agents/openai.yaml",
+          "bytes": 339,
+          "sha256": "d4bab7e0b8bceba275f17563b06855cc712adefb34ba33cfc83c048ae5788123",
+          "git_blob": "511966bb26ee94ffeb8a828449ad4c8bc4f441b0",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/assets/notion-small.svg",
+          "bytes": 1561,
+          "sha256": "949b811b28ed4a5cdd4896b58a2b9f697225e1d436d509ef55cab7541c3522c1",
+          "git_blob": "6606aaf29423e25a9f1d38238e1722fffb5aac6f",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/assets/notion.png",
+          "bytes": 8526,
+          "sha256": "5eef1e62d96a3d09bc9d18e4140486c22799145b017033bd0924c2c49d741cd4",
+          "git_blob": "085023cdf185ccc58f7c52de47982e3565d6ed45",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/evaluations/README.md",
+          "bytes": 4441,
+          "sha256": "a77f9c607ba308db2c8af619ed6a9cd87661cca8b29946b5a3a1ce19bdc9e4e6",
+          "git_blob": "c7b39371c972e3c4c1f8ba1fa30fc0c15f586244",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/evaluations/basic-spec-implementation.json",
+          "bytes": 2358,
+          "sha256": "4f4bc9d10327601a619e153d559b18950b51a491e7c48f1ab44aadc22c9e664f",
+          "git_blob": "3799691dd254fe456d04d1ac69ea9b61725568b3",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/evaluations/spec-to-tasks.json",
+          "bytes": 2504,
+          "sha256": "c8b3e81900b07a7b70ff2c687a662e68bc56d66d2b6e71ef689235e7097cddf4",
+          "git_blob": "74c6bb156f05ffe412f46302c127dd140cd6a52a",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/examples/api-feature.md",
+          "bytes": 14073,
+          "sha256": "6cfde7f2417aafa9caf4fe74ce91568d363654a71e551b0d3c6607d3688cd5a1",
+          "git_blob": "05f0e4f2c7003baae8979311d22673fac3b10023",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/examples/database-migration.md",
+          "bytes": 2639,
+          "sha256": "d90a31c3c8a2bceabc21b7bc3814c6c652d0ae4e2174012bf0ce8dce07ff5b5d",
+          "git_blob": "7220d24477331560b693f846b3966d2f1e4d6f5f",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/examples/ui-component.md",
+          "bytes": 2150,
+          "sha256": "684db20292e43a943ee5642a57a8653743820344fe51804e52f071df21ca6fbe",
+          "git_blob": "f7ce2d8d2fd3eac74b6169249c44c771bfd254a8",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/reference/milestone-summary-template.md",
+          "bytes": 455,
+          "sha256": "68607864c17dba7f71739769518392b80c1dd3fc55b7bb2bc56b505ecaac22a2",
+          "git_blob": "225f80988d1c4a44f81b2cee78bcde90c11eaa4a",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/reference/progress-tracking.md",
+          "bytes": 9018,
+          "sha256": "11d8202fc14f473a53237a713b97b2f29e4602360cd2a8271236c0f0e14abd1d",
+          "git_blob": "16046cd64af704d1c1148eb7a41ebddb2adbb980",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/reference/progress-update-template.md",
+          "bytes": 419,
+          "sha256": "64d85ba1c1839f17b5390796ac1b8542d1601e019481aeb8156fac50d683ffde",
+          "git_blob": "76ac8fe385b7dee3f013006757fdb1e93f4423c3",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/reference/quick-implementation-plan.md",
+          "bytes": 479,
+          "sha256": "8a5088a4c9ec29786431e9be0609e2a44513483efe40ceee3b47dd96cc8fd218",
+          "git_blob": "acab757caffdb8ca52ddaea723e1e149634f130e",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/reference/spec-parsing.md",
+          "bytes": 7057,
+          "sha256": "26bebf0eb255488bdda004b54391fb95ec56447d2b05553164f38d00548e4889",
+          "git_blob": "d8f79bca2408f998bc4653853b83b4cb6d2da38e",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/reference/standard-implementation-plan.md",
+          "bytes": 3285,
+          "sha256": "8a115e36fe098122db0dd48743702d561ef190d27f6062a3ba798671efa3d9e7",
+          "git_blob": "84044041d6201b83aba63672cfeacb97e186e37a",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/reference/task-creation-template.md",
+          "bytes": 596,
+          "sha256": "ce5e5adde2d93993436717639195f0d6695f6ba11e42a89966a46a8ff8205181",
+          "git_blob": "90b16d00eb73cf81d46467e919acd4aeaa52f035",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/notion/skills/notion-spec-to-implementation/reference/task-creation.md",
+          "bytes": 8025,
+          "sha256": "5d70bab183d98d85430e613d52b63f8263ce3fb5cbaf2aa574199532bc54026e",
+          "git_blob": "477ce24f1721ba842d9443fa5019996fcd8c2226",
+          "mode": "100644"
+        }
+      ],
+      "bytes": 269625,
+      "package": {
+        "format": "codex-plugin",
+        "name": "notion",
+        "version": "0.1.7",
+        "description": "Notion workflows for implementation planning, research synthesis, meeting preparation, and knowledge capture.",
+        "directory": "/catalogue/package",
+        "components": [
+          {
+            "kind": "skill",
+            "name": "notion-knowledge-capture",
+            "path": "skills/notion-knowledge-capture"
+          },
+          {
+            "kind": "skill",
+            "name": "notion-meeting-intelligence",
+            "path": "skills/notion-meeting-intelligence"
+          },
+          {
+            "kind": "skill",
+            "name": "notion-research-documentation",
+            "path": "skills/notion-research-documentation"
+          },
+          {
+            "kind": "skill",
+            "name": "notion-spec-to-implementation",
+            "path": "skills/notion-spec-to-implementation"
+          },
+          {
+            "kind": "connection",
+            "name": "notion",
+            "url": "https://mcp.notion.com/mcp",
+            "description": "Notion workflows for implementation planning, research synthesis, meeting preparation, and knowledge capture."
+          }
+        ],
+        "unsupported": [
+          {
+            "kind": "agents",
+            "name": "agents",
+            "essential": false,
+            "reason": "Doesn’t work in Kejtu: agents need the app they were written for."
+          },
+          {
+            "kind": "apps",
+            "name": "apps",
+            "essential": false,
+            "reason": "Doesn’t work in Kejtu: app connectors need the product they were made for."
+          }
+        ],
+        "installable": true
+      },
+      "source_url": "https://github.com/openai/plugins/tree/d420d13051bffe4543ed39e30fa46b87148e47dd/plugins/notion",
+      "digest": "d94a5e580f015145b537f1a4d7a5540c3fca196cd2eddc25f6108dbfd575c187"
+    },
+    {
+      "id": "todoist",
+      "title": "Todoist",
+      "publisher": "Doist",
+      "category": "Work & notes",
+      "summary": "Find, create and organise tasks in Todoist.",
+      "requirements": "Browser sign-in to Todoist. Its account and service limits apply.",
+      "icon": "list-checks",
+      "repository": "https://github.com/Doist/todoist-mcp",
+      "commit": "e7ff7f2e29f508f6a77be5518056cef556112d54",
+      "path": "plugins/todoist",
+      "license": "MIT",
+      "license_files": [
+        "plugins/todoist/LICENSE"
+      ],
+      "files": [
+        {
+          "path": "plugins/todoist/.claude-plugin/icon.png",
+          "bytes": 25312,
+          "sha256": "4c98567d3c74ff2b9d256d97a9dc04284c19d5b5c3894701a0a19b467b2a1830",
+          "git_blob": "f62f8f01de923378a26e58884f3f0d2ec32f49aa",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/todoist/.claude-plugin/plugin.json",
+          "bytes": 441,
+          "sha256": "9212c93029df5b069aaaa0539c2f68f96a7808b8bbffc5f52ab2fd3330b16570",
+          "git_blob": "50db4dbb294552a7a6f166d50fc3cef5d08310e6",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/todoist/.mcp.json",
+          "bytes": 137,
+          "sha256": "3387c561fa469b79ac91cd101531108c8d81538e90d4b19ed6c8a574a4232715",
+          "git_blob": "beccb203a9fa48f3d4061c6d92f04f7bf208d000",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/todoist/LICENSE",
+          "bytes": 1062,
+          "sha256": "4484e3e6a93f87d1bd6d9376323c4ec17b7a30a4b1985b185d958ce17904b4d0",
+          "git_blob": "b505bf643bc0ac3a1f0b65777ca503391351791d",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/todoist/README.md",
+          "bytes": 819,
+          "sha256": "1c1347cb3b10080b186457111158e45897d34caff24a9db5428b0b3c88f28ca2",
+          "git_blob": "8358757a1102ecc49609cbd8e56a10a51e714fa0",
+          "mode": "100644"
+        }
+      ],
+      "bytes": 27771,
+      "package": {
+        "format": "claude-plugin",
+        "name": "todoist",
+        "version": "15.2.0",
+        "description": "Manage your Todoist tasks and projects in Claude.",
+        "directory": "/catalogue/package",
+        "components": [
+          {
+            "kind": "connection",
+            "name": "todoist",
+            "url": "https://ai.todoist.net/mcp",
+            "description": "Manage your Todoist tasks and projects in Claude."
+          }
+        ],
+        "unsupported": [],
+        "installable": true
+      },
+      "source_url": "https://github.com/Doist/todoist-mcp/tree/e7ff7f2e29f508f6a77be5518056cef556112d54/plugins/todoist",
+      "digest": "f8cada87f30ebb304a514c11e77bda0a29dbf49e54509e7ffe44b1acf55fdc05"
+    },
+    {
+      "id": "linear",
+      "title": "Linear",
+      "publisher": "Linear",
+      "category": "Work & notes",
+      "summary": "Work with issues, projects and team plans in Linear.",
+      "requirements": "Browser sign-in to Linear. Its account and service limits apply.",
+      "icon": "layers",
+      "repository": "https://github.com/anthropics/claude-plugins-official",
+      "commit": "23c304a6387ed2fa207ceff27646d8514ee75235",
+      "path": "external_plugins/linear",
+      "license": "Apache-2.0",
+      "license_files": [
+        "LICENSE"
+      ],
+      "files": [
+        {
+          "path": "LICENSE",
+          "bytes": 11358,
+          "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+          "git_blob": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "mode": "100644"
+        },
+        {
+          "path": "external_plugins/linear/.claude-plugin/plugin.json",
+          "bytes": 279,
+          "sha256": "25d00b56e7789e19ce0d3b311a6686fb2e23a4dd91e3f1f3bb33e3aba684b390",
+          "git_blob": "2a5d9e0a514ec14f5102371dcd62786dcac4af10",
+          "mode": "100644"
+        },
+        {
+          "path": "external_plugins/linear/.mcp.json",
+          "bytes": 82,
+          "sha256": "60bc954e5c2018171f5efa358ddbfa6062a63b456f8d7fa567fd926910030e9f",
+          "git_blob": "f17db3b00329c9f980891497041c8380288b6a52",
+          "mode": "100644"
+        }
+      ],
+      "bytes": 11719,
+      "package": {
+        "format": "claude-plugin",
+        "name": "linear",
+        "version": "unversioned",
+        "description": "Linear issue tracking integration. Create issues, manage projects, update statuses, search across workspaces, and streamline your software development workflow with Linear's modern issue tracker.",
+        "directory": "/catalogue/package",
+        "components": [
+          {
+            "kind": "connection",
+            "name": "linear",
+            "url": "https://mcp.linear.app/mcp",
+            "description": "Linear issue tracking integration. Create issues, manage projects, update statuses, search across workspaces, and streamline your software development workflow with Linear's modern issue tracker."
+          }
+        ],
+        "unsupported": [],
+        "installable": true
+      },
+      "source_url": "https://github.com/anthropics/claude-plugins-official/tree/23c304a6387ed2fa207ceff27646d8514ee75235/external_plugins/linear",
+      "digest": "09bcdc30536f65341cf3a1b66ac50dfc0c55c2f5847a7decab10d47af420a202"
+    },
+    {
+      "id": "canva",
+      "title": "Canva",
+      "publisher": "Canva",
+      "category": "Design & writing",
+      "summary": "Create and revise designs, resize them and work through feedback.",
+      "requirements": "Browser sign-in to Canva. Some features need a paid Canva plan.",
+      "icon": "palette",
+      "repository": "https://github.com/canva-sdks/canva-skills",
+      "commit": "bfcbc681560f6031e9949ea52f81e20beb87e39e",
+      "path": "plugins/canva",
+      "license": "Apache-2.0",
+      "license_files": [
+        "LICENSE"
+      ],
+      "files": [
+        {
+          "path": "LICENSE",
+          "bytes": 11357,
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+          "git_blob": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/.claude-plugin/plugin.json",
+          "bytes": 594,
+          "sha256": "6eb20922fd4614ab368b88c5d91568a4103de772fb91d27836db3e0c95d9bdcf",
+          "git_blob": "07722ba290d81f59c6be3ae812538abde474abf4",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/.codex-plugin/plugin.json",
+          "bytes": 1343,
+          "sha256": "97fcf39202be76c58daf1e6b340fe5d571ac7e724cab74b1ef7d6a07e8565d0f",
+          "git_blob": "3ba65e07176644ea155ed1c65636278dfabf2ed8",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/.cursor-plugin/plugin.json",
+          "bytes": 272,
+          "sha256": "6cb13b75ce64dafdd6504ec6e1a1a8c4a222b770375d57448a9f841f05bca3b5",
+          "git_blob": "f732036bfcf77a762ba1998fc6c55cf6cb07481d",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/.cursor/README.md",
+          "bytes": 983,
+          "sha256": "e0ac302a3e8b5ca0e5f278f8f7a7e0488a0b6c0c533362859db1d1a35241b514",
+          "git_blob": "caaed0e264d378e894aab340eae9ed23733adc01",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/.cursor/mcp.json",
+          "bytes": 142,
+          "sha256": "c86acf1862e32f25f7a2da9e297928b880f1ed65b20bd0cd2bd752d27705e347",
+          "git_blob": "367396be095ec1894125abb15101325ba6a3a21d",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/.cursor/skills",
+          "bytes": 9,
+          "sha256": "c1aefaccb300698f4b7ae764e1fa857f93c0609ba47b078e4806d926f289c23b",
+          "git_blob": "42c5394a18a882778ebf50eb940fb5a96bc4a6d9",
+          "mode": "120000"
+        },
+        {
+          "path": "plugins/canva/.mcp.json",
+          "bytes": 110,
+          "sha256": "3714284bf5987457d5902125e681db814ad8b874cbadd20e6adfaae24746e635",
+          "git_blob": "b8fbd3beacae121f32b19be5198a19f88dfaf4ee",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/README.md",
+          "bytes": 288,
+          "sha256": "3fcc8a66e92ab7e31c9b0c928dee86601654cde43b769bf17b7be01a17f21a0d",
+          "git_blob": "551747260edef9cbafbd9fe7fa1106c76a7ce918",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/assets/logo-canva.svg",
+          "bytes": 5888,
+          "sha256": "49512b474d4df654125019c73231f171215ff6e4a3ae86e6fa47ce73d0e2b4b1",
+          "git_blob": "2d8e4c84ee460296cc6159946b0aa68ea85270d6",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/inactive-skills/branded-presentation/SKILL.md",
+          "bytes": 3090,
+          "sha256": "cb941d4892cfeda9034f77cccaf1e1d8c45546bd3a41c5c85e72e37055150ca1",
+          "git_blob": "4927aab940a1451c8314a47b19859687f3f3d523",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/inactive-skills/canva-cli/SKILL.md",
+          "bytes": 80,
+          "sha256": "0db2c982f9c25db05d300554948bed877e51897530ac266ecc01c7fb583df5d1",
+          "git_blob": "43b334052767acc081003a0da9cd1efec4a73575",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/inactive-skills/classroom-helper/SKILL.md",
+          "bytes": 8503,
+          "sha256": "d7f7aeedd72dc258c96c1f1d93e668ea19dc208e3cdda64e9ec7f2db93728f75",
+          "git_blob": "4b7465352957b9fa8b690eb987cd538bd2fecdbc",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/inactive-skills/design-translation/SKILL.md",
+          "bytes": 2846,
+          "sha256": "c10b609033f5727c53d3c05dddd61c4e3d0de9a314b78420b2109dc6629192eb",
+          "git_blob": "1e3feb3cc09708709e23ea05e83e3deb1adc3fdf",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/inactive-skills/generate-deck/SKILL.md",
+          "bytes": 6596,
+          "sha256": "7ba51a834408befe6e7a4672a1339c46f409f1575a82f7b41679e3f303822cc0",
+          "git_blob": "ede31ff0482ec50ca677c6cf08f0824a4d2c699b",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/inactive-skills/presentation-time-fitting/SKILL.md",
+          "bytes": 8488,
+          "sha256": "37f13c6322be6062b3cd98934cffcfe65cff70e6698560b8a7243583ec7a454c",
+          "git_blob": "53198dd8e51c062fa2122ce7030fcfd2dd22e97c",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/mcp_config.json",
+          "bytes": 93,
+          "sha256": "c09425f9cc978d1166e176757f363726cace85f9945fdc8b9607d0a647e3fd91",
+          "git_blob": "57365784f4c622d2b51a1888867ad212dd7ed04a",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/plugin.json",
+          "bytes": 859,
+          "sha256": "a18d377847feae3b5aa312995cca93af442550fcba355b451a5205905142ed1e",
+          "git_blob": "36ec1d7664a52c345098b2ac783ef1fc9474d4dd",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/skills/brand-check/SKILL.md",
+          "bytes": 5147,
+          "sha256": "b292189744392db22b9e72481056a0db94781bd64892480abe2ce50c76efbb73",
+          "git_blob": "7392e054bac38ee93c01ae6e0ce62b1e2140e072",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/skills/bulk-create/SKILL.md",
+          "bytes": 5309,
+          "sha256": "65deda62b60ce9e748c7a90b3e41e91dadc38f6deee3ba4aca799fd7502eb8b4",
+          "git_blob": "643b6a4905ecb26a6e7f9d5dce65f698f85c4966",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/skills/edit-design/SKILL.md",
+          "bytes": 5769,
+          "sha256": "842eeec8f89bfcfb3490ca92092f4ef441577ff7f9b7bae979aad99cc92ceaa8",
+          "git_blob": "d0aaf0c0fb163a4a2a69cd62f9cbd1408b2010a1",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/skills/get-design-feedback/SKILL.md",
+          "bytes": 4735,
+          "sha256": "e18303be61308ad6dc8e05c4735b7254873f42ab9c6bc6c37b9cec339119be7b",
+          "git_blob": "ce1c52b5312f125ca07d825b82c5d74abb3c39c8",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/skills/implement-feedback/SKILL.md",
+          "bytes": 7170,
+          "sha256": "cb0d8a7434e7abd7a129ef74aa526ea7f5c0c7ea89db17e3a0ebf27d6108aa36",
+          "git_blob": "6bb8a7ce5244e158f6d8dec3ea05103e21f46b31",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/canva/skills/resize-for-social-media/SKILL.md",
+          "bytes": 5896,
+          "sha256": "bb36807630daf3ba7c2a27e83de64b329e03ce68457da874c36c5022ceff7094",
+          "git_blob": "b34e293ca264db980c639a7f2e7eca0ba97b1207",
+          "mode": "100644"
+        }
+      ],
+      "bytes": 85567,
+      "package": {
+        "format": "claude-plugin",
+        "name": "canva",
+        "version": "1.0.0",
+        "description": "Create, edit, review, resize, and brand-check Canva designs with the Canva MCP server.",
+        "directory": "/catalogue/package",
+        "components": [
+          {
+            "kind": "skill",
+            "name": "canva-brand-check",
+            "path": "skills/brand-check"
+          },
+          {
+            "kind": "skill",
+            "name": "canva-bulk-create",
+            "path": "skills/bulk-create"
+          },
+          {
+            "kind": "skill",
+            "name": "canva-edit-design",
+            "path": "skills/edit-design"
+          },
+          {
+            "kind": "skill",
+            "name": "canva-design-feedback",
+            "path": "skills/get-design-feedback"
+          },
+          {
+            "kind": "skill",
+            "name": "canva-implement-feedback",
+            "path": "skills/implement-feedback"
+          },
+          {
+            "kind": "skill",
+            "name": "canva-resize-for-social-media",
+            "path": "skills/resize-for-social-media"
+          },
+          {
+            "kind": "connection",
+            "name": "canva",
+            "url": "https://mcp.canva.com/mcp",
+            "description": "Create, edit, review, resize, and brand-check Canva designs with the Canva MCP server."
+          }
+        ],
+        "unsupported": [
+          {
+            "kind": "cursor",
+            "name": "cursor",
+            "essential": false,
+            "reason": "Doesn’t work in Kejtu: Cursor integration needs the app it was written for."
+          }
+        ],
+        "installable": true
+      },
+      "source_url": "https://github.com/canva-sdks/canva-skills/tree/bfcbc681560f6031e9949ea52f81e20beb87e39e/plugins/canva",
+      "digest": "9216fe529053e642c4fb96d8090d4f2dfdf4e0d3d2cbfdebf71bd5c4b9f51503"
+    },
+    {
+      "id": "dropbox",
+      "title": "Dropbox",
+      "publisher": "Dropbox",
+      "category": "Work & notes",
+      "summary": "Find, inspect, organise and share your Dropbox files.",
+      "requirements": "Browser sign-in to Dropbox. Its account and service limits apply.",
+      "icon": "folder-open",
+      "repository": "https://github.com/dropbox/dropbox-ai-plugins",
+      "commit": "078f0ca36df40f054829b58731a5f86a561d9668",
+      "path": "claude",
+      "license": "Apache-2.0",
+      "license_files": [
+        "claude/LICENSE"
+      ],
+      "files": [
+        {
+          "path": "claude/.claude-plugin/plugin.json",
+          "bytes": 1209,
+          "sha256": "cf3eecfa1159ae94ac3e9c4325c0e5fb80c704100053e77fae8866f17e0b4f6b",
+          "git_blob": "becf2cadb3e2f73ed0d7808bcca410d02065e1f4",
+          "mode": "100644"
+        },
+        {
+          "path": "claude/.mcp.json",
+          "bytes": 132,
+          "sha256": "f51db48b7f28dacc63cd9c0c69b56805ffed274f72bb786d06c67a8bd34b3d74",
+          "git_blob": "5d82e82219a7d66e56b8529f3c1a46d863a2b98d",
+          "mode": "100644"
+        },
+        {
+          "path": "claude/LICENSE",
+          "bytes": 10254,
+          "sha256": "3e0377597b9e3a583878478fa09c1f2de98f1b17ba0b10f8cae07c72786f5722",
+          "git_blob": "a7b7eb6d2757dd47c189f15cf09079f48ea5f209",
+          "mode": "100644"
+        },
+        {
+          "path": "claude/README.md",
+          "bytes": 4180,
+          "sha256": "d3faa3e5170f207ce33be1c9cf704dc6fd0c5516245c57c73a478dbb6fea6b46",
+          "git_blob": "ff294275697f7b80265c8c23116265c7b9202a23",
+          "mode": "100644"
+        },
+        {
+          "path": "claude/assets/logo.png",
+          "bytes": 17533,
+          "sha256": "05162b78ce66a3f2adb358858c5b99f43766bd67d1fef8189f76238d87e7b60a",
+          "git_blob": "f8a94c4898548a9d6f66be55a6312d27ebe9fd85",
+          "mode": "100644"
+        },
+        {
+          "path": "claude/skills/clean-up-dropbox-content/SKILL.md",
+          "bytes": 2887,
+          "sha256": "43f8defb8d9014d3df240bbe280ef9da3dd7da9eede93a664fc8c550a4836b29",
+          "git_blob": "1b7a2084828721f1c906015c526b694f5515a4ca",
+          "mode": "100644"
+        },
+        {
+          "path": "claude/skills/collect-files-with-request/SKILL.md",
+          "bytes": 3204,
+          "sha256": "ecdb799feca6b757355850663f48bdf40d0c751af2a1856182c6f2c0a218f8ed",
+          "git_blob": "77dbe27e6652463789d9bbd36591000f488085df",
+          "mode": "100644"
+        },
+        {
+          "path": "claude/skills/find-dropbox-content/SKILL.md",
+          "bytes": 2263,
+          "sha256": "61ec760efb617c5f88b9d433ce2fa392ab4aa29cbdde4437d0ab4253e9e5f13c",
+          "git_blob": "8263ef3526850e47791358b52ce6888b74f86bbf",
+          "mode": "100644"
+        },
+        {
+          "path": "claude/skills/inspect-dropbox-file/SKILL.md",
+          "bytes": 2620,
+          "sha256": "693ccb9d293fd1de0964174ce9003bdb5f22cc4f599edb6ea4b2bf1e935d7b3e",
+          "git_blob": "b4ed633f7302a797dc51aa7c5bbcdab0f73f83a0",
+          "mode": "100644"
+        },
+        {
+          "path": "claude/skills/organize-dropbox-folder/SKILL.md",
+          "bytes": 2581,
+          "sha256": "d2d3dcc977be069ae286c3e2e3304ddf570eb53db117103103155949c12cbcbd",
+          "git_blob": "a30195b87f1fe337cd891d3388439260690fc474",
+          "mode": "100644"
+        },
+        {
+          "path": "claude/skills/share-dropbox-content/SKILL.md",
+          "bytes": 2849,
+          "sha256": "a57223e6924ca2374444cc8a4c8c40cd611873560b76545548e0b6fefd6b75df",
+          "git_blob": "6c75dde8dcf1b90ad425ec6958f0cf77655d41d9",
+          "mode": "100644"
+        }
+      ],
+      "bytes": 49712,
+      "package": {
+        "format": "claude-plugin",
+        "name": "dropbox",
+        "version": "1.0.1",
+        "description": "The Dropbox plugin for Claude connects your Dropbox files directly to Claude, so you can search, organize, save generated content, and create sharing links without switching tools. It respects your existing Dropbox permissions, and Claude only works with files you already have access to.",
+        "directory": "/catalogue/package",
+        "components": [
+          {
+            "kind": "skill",
+            "name": "clean-up-dropbox-content",
+            "path": "skills/clean-up-dropbox-content"
+          },
+          {
+            "kind": "skill",
+            "name": "collect-files-with-request",
+            "path": "skills/collect-files-with-request"
+          },
+          {
+            "kind": "skill",
+            "name": "find-dropbox-content",
+            "path": "skills/find-dropbox-content"
+          },
+          {
+            "kind": "skill",
+            "name": "inspect-dropbox-file",
+            "path": "skills/inspect-dropbox-file"
+          },
+          {
+            "kind": "skill",
+            "name": "organize-dropbox-folder",
+            "path": "skills/organize-dropbox-folder"
+          },
+          {
+            "kind": "skill",
+            "name": "share-dropbox-content",
+            "path": "skills/share-dropbox-content"
+          },
+          {
+            "kind": "connection",
+            "name": "claude_app_mcp",
+            "url": "https://mcp.dropbox.com/claude_app_mcp",
+            "description": "The Dropbox plugin for Claude connects your Dropbox files directly to Claude, so you can search, organize, save generated content, and create sharing links without switching tools. It respects your existing Dropbox permissions, and Claude o"
+          }
+        ],
+        "unsupported": [],
+        "installable": true
+      },
+      "source_url": "https://github.com/dropbox/dropbox-ai-plugins/tree/078f0ca36df40f054829b58731a5f86a561d9668/claude",
+      "digest": "05cac54eaf5fb26ac5de0f55a0cca2b3a2fd295a858f14b0876c01d5df22b68f"
+    },
+    {
+      "id": "context7-codex",
+      "title": "Context7",
+      "publisher": "Upstash",
+      "category": "Research & learning",
+      "summary": "Look up current documentation for programming libraries and frameworks.",
+      "requirements": "Public lookups work without signing in. Internet access and Context7's service limits apply.",
+      "icon": "book-open",
+      "repository": "https://github.com/upstash/context7",
+      "commit": "b1e3611e32a8b1369ae526cacdf335ddfd6e5fbb",
+      "path": "plugins/codex/context7",
+      "license": "MIT",
+      "license_files": [
+        "LICENSE"
+      ],
+      "files": [
+        {
+          "path": "LICENSE",
+          "bytes": 1079,
+          "sha256": "85cfb556dc2b22b55d2565674fcdaac82f3f2f6b7a928d27003132721bb6736c",
+          "git_blob": "17900de42d69131467aaa7a53fa88b92d238dc63",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/codex/context7/.codex-plugin/plugin.json",
+          "bytes": 1277,
+          "sha256": "7253be6fe6186e0f31914bf0063ba85856d05a416503fda5b10f26ed9c26a82a",
+          "git_blob": "496782f133e84cec0ffce28837ec73b08e986952",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/codex/context7/.mcp.json",
+          "bytes": 116,
+          "sha256": "fce4dbd6f3476e6ba72f643e541aa12c70b4a13f129021b9cbcca3fd3bece200",
+          "git_blob": "c5280c5f96d86cf3a83b0110c7229d031b8a1ca5",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/codex/context7/README.md",
+          "bytes": 2445,
+          "sha256": "d1d62756956a5896ed49781e30985759cce7cbaaee9a05ea9aee58896b68472a",
+          "git_blob": "9d3e7d8f0c044498b371f86dd3ba173e2e17596d",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/codex/context7/skills/context7-mcp/SKILL.md",
+          "bytes": 2981,
+          "sha256": "c4adf205fb49a5bd14e55d0d78ebb784fa528dbf312beadddb1491de7217e925",
+          "git_blob": "a3d816a38fe1a3a864dde55828c6c2b16464cc63",
+          "mode": "100644"
+        }
+      ],
+      "bytes": 7898,
+      "package": {
+        "format": "codex-plugin",
+        "name": "context7",
+        "version": "1.0.2",
+        "description": "Upstash Context7 MCP server for up-to-date documentation lookup. Pull version-specific documentation and code examples directly from source repositories into your coding agent's context.",
+        "directory": "/catalogue/package",
+        "components": [
+          {
+            "kind": "skill",
+            "name": "context7-mcp",
+            "path": "skills/context7-mcp"
+          },
+          {
+            "kind": "connection",
+            "name": "context7",
+            "url": "https://mcp.context7.com/mcp",
+            "description": "Upstash Context7 MCP server for up-to-date documentation lookup. Pull version-specific documentation and code examples directly from source repositories into your coding agent's context."
+          }
+        ],
+        "unsupported": [],
+        "installable": true
+      },
+      "source_url": "https://github.com/upstash/context7/tree/b1e3611e32a8b1369ae526cacdf335ddfd6e5fbb/plugins/codex/context7",
+      "digest": "14732b38234db6c1f510e73df3a6a1b6748d2a1200e7aa0898eb35f185461edf"
+    },
+    {
+      "id": "anti-ai-writing",
+      "title": "Anti-AI Writing",
+      "publisher": "avectats7",
+      "category": "Design & writing",
+      "summary": "Review and revise formulaic English and Spanish drafts.",
+      "requirements": "Works in chat with the included editing guides. No extra account is needed.",
+      "icon": "pen-line",
+      "repository": "https://github.com/avectats7/anti-ai-writing",
+      "commit": "d1326aaeca26049b9ac505a22a35fd31f3f585a5",
+      "path": "",
+      "license": "MIT",
+      "license_files": [
+        "LICENSE"
+      ],
+      "files": [
+        {
+          "path": ".claude-plugin/marketplace.json",
+          "bytes": 789,
+          "sha256": "dbfab5382f8dfbe906097e7981f5f9ed2c9457abf466ae7034e1e3060dda619f",
+          "git_blob": "466878370c17ef8f5fa76af800eb092f12024990",
+          "mode": "100644"
+        },
+        {
+          "path": ".claude-plugin/plugin.json",
+          "bytes": 1226,
+          "sha256": "68295f3cc1806047de522f25fbf9c3f5ffba57d9371313a21927c75c6c8fb9ad",
+          "git_blob": "029b19ab58b3fc6d50dc8bd6c964d74cad85fdd8",
+          "mode": "100644"
+        },
+        {
+          "path": ".github/ISSUE_TEMPLATE/bug_report.md",
+          "bytes": 598,
+          "sha256": "ee91a3990e711ae32ccc1370e1a7b0af73b698771a4a6ae8366cc62f80df1db2",
+          "git_blob": "73d92d674d13511bcbc187584eca25bb88344e3e",
+          "mode": "100644"
+        },
+        {
+          "path": ".github/ISSUE_TEMPLATE/new_banned_word.md",
+          "bytes": 870,
+          "sha256": "215e0bac024137b7630a2719f579974ebc9b4ef8cc85ccbb0375056b509d58e2",
+          "git_blob": "736880ad4446b0dfc0ae68d09c19bfbf13f88fbc",
+          "mode": "100644"
+        },
+        {
+          "path": ".github/ISSUE_TEMPLATE/new_example.md",
+          "bytes": 853,
+          "sha256": "295e22f1b93870ef759af8f8ebfab8736974c95d931ff280f19108e3fd1a1c0d",
+          "git_blob": "46dba7f86781217f79cc82418dab7a40972cdc46",
+          "mode": "100644"
+        },
+        {
+          "path": ".github/PULL_REQUEST_TEMPLATE.md",
+          "bytes": 1018,
+          "sha256": "7f1c594132a09fd02dc65c74c4067e9f957b67c88cd300731e5ccbf1516196b8",
+          "git_blob": "a5ca87d5e16c3847e26d9c5cc5d348c3976f64cf",
+          "mode": "100644"
+        },
+        {
+          "path": ".github/workflows/security.yml",
+          "bytes": 1772,
+          "sha256": "cde7a2560e101ac47fd6828949cea838782d06d043c122e619c9932dd4576457",
+          "git_blob": "d9a2d234cf75670a3f26969a26b1c39fd04d1b04",
+          "mode": "100644"
+        },
+        {
+          "path": ".gitignore",
+          "bytes": 358,
+          "sha256": "03d13406df4e2bd15b099eca9068a6c5b5bae969e4e56cf3f092171348747141",
+          "git_blob": "c36a2c257437a62033ec087e54cdef8433f90728",
+          "mode": "100644"
+        },
+        {
+          "path": ".gitleaks.toml",
+          "bytes": 393,
+          "sha256": "5b8c7ab02e18c4f623d5a46b7e2f69d5c48825c0d2468e72df3eaaf57c988784",
+          "git_blob": "47fec3e81491571721689ab30d5956fd130384e3",
+          "mode": "100644"
+        },
+        {
+          "path": ".pre-commit-config.yaml",
+          "bytes": 403,
+          "sha256": "da25bf10def1bda41c9cbd257f334a33c6cb4b49dc31ccc77d913fc579f835de",
+          "git_blob": "7ad760f884dc03e9d09d88cd52bfcbaa06d9bbcf",
+          "mode": "100644"
+        },
+        {
+          "path": "CHANGELOG.md",
+          "bytes": 4006,
+          "sha256": "e91a3b7dc02840f44f4dff0b6dd077381db4e6e7140c3955ab3097a4fcc7951b",
+          "git_blob": "73591d2cd9ddef01b557ce2d4a98af1973d6c8bf",
+          "mode": "100644"
+        },
+        {
+          "path": "CONTRIBUTING.md",
+          "bytes": 2961,
+          "sha256": "0bd7881790216ece24e5cd41e1c5a64ce60eb5c6ef04fa364c6a2e71a29ae3db",
+          "git_blob": "0c2955950ce3a2cb18a60652f4a289f29e508188",
+          "mode": "100644"
+        },
+        {
+          "path": "LICENSE",
+          "bytes": 1069,
+          "sha256": "249bd5495955f0d311e0404f4402240361b7b80179f4dc00de06980b255e2f26",
+          "git_blob": "b2c459c2c54ed4a512433b3e09b170038619d8ca",
+          "mode": "100644"
+        },
+        {
+          "path": "README.md",
+          "bytes": 16902,
+          "sha256": "20bab994b2604a110dbdf2ba6bdfc42dbc1790b71bff371dc1e2302cb0831096",
+          "git_blob": "824612d5ac47b16fe5a0fdce589a6dd362bc6239",
+          "mode": "100644"
+        },
+        {
+          "path": "anti-ai-writing.md",
+          "bytes": 8220,
+          "sha256": "0e3c1d5ab2d8be5bee8623c5f376eaaa7147aa085bc6392d383ef934ae145a4f",
+          "git_blob": "0eb9ac3916842eb792fb3247211dd37697381f7b",
+          "mode": "100644"
+        },
+        {
+          "path": "dist/anti-ai-writing.skill",
+          "bytes": 47562,
+          "sha256": "39d4248ca64b3388fba1b78df350cc584e9b858e17cfa32e9e061447fd1b81c0",
+          "git_blob": "5408a19bf16fcd16be7825cbbc38fa8eda22dd06",
+          "mode": "100644"
+        },
+        {
+          "path": "docs/install.md",
+          "bytes": 3076,
+          "sha256": "76575964fc0025c0f009138a07343923920ed9315eb7beee8e294ad1c56ade74",
+          "git_blob": "0d9fa971809d169cd2a8a0a4a2e4bc51258c61b7",
+          "mode": "100644"
+        },
+        {
+          "path": "llms.txt",
+          "bytes": 4020,
+          "sha256": "1453d81fb8df0a7b65c4eb8b992931c1442244e6d9f8c215d3172269b2e8c8c2",
+          "git_blob": "471c500fe50def0e6d98eb25332ef48c9bc0b93c",
+          "mode": "100644"
+        },
+        {
+          "path": "skills/anti-ai-writing/SKILL.md",
+          "bytes": 19855,
+          "sha256": "96574d52073965d0b860bbb5952c5c776273f284ec44b248432364d164161cd6",
+          "git_blob": "afd1848e605ccbfd541464c29b177ad1cee8a770",
+          "mode": "100644"
+        },
+        {
+          "path": "skills/anti-ai-writing/references/banned-list.md",
+          "bytes": 9936,
+          "sha256": "e4c9c62b1a79d31cb09f50eaebb7ad1637e68db2559c96fd2fab0bbfecbfb641",
+          "git_blob": "937f7a3785925f7a9720e6b3b85a36f0f247aaa7",
+          "mode": "100644"
+        },
+        {
+          "path": "skills/anti-ai-writing/references/discourse-rewrites.md",
+          "bytes": 17150,
+          "sha256": "1410fdb456b967c18f861c065b4494723140f10f704ea9b3c9dff3b8e13d5680",
+          "git_blob": "0971e20edffa1e1b99c3f09ac6a21751ea138e9f",
+          "mode": "100644"
+        },
+        {
+          "path": "skills/anti-ai-writing/references/discourse-tells.md",
+          "bytes": 21561,
+          "sha256": "cb66b01c4ac0b0ff6025e08e4a878bdf0b40ff6fd186be6371f2a4f780598a78",
+          "git_blob": "87e6b6587f833efb114c8ade9849f8996ebcb9ff",
+          "mode": "100644"
+        },
+        {
+          "path": "skills/anti-ai-writing/references/examples.md",
+          "bytes": 22575,
+          "sha256": "d877618c50be5759d72eca975082092e18b306ffb17b4507321cefefe60170bc",
+          "git_blob": "c754127083a0166f23469c96a9c2815ce00fece3",
+          "mode": "100644"
+        },
+        {
+          "path": "skills/anti-ai-writing/references/rewrites.md",
+          "bytes": 11539,
+          "sha256": "7601cb7fd7a81bbe0ac0b600b4dce90242681348f892c579bbc7fdc745014b47",
+          "git_blob": "e93f86ebe00a463d8e15ab2330669b7982adb218",
+          "mode": "100644"
+        },
+        {
+          "path": "skills/anti-ai-writing/references/strict-review.md",
+          "bytes": 12105,
+          "sha256": "117aadf81b6f2ffa0fb10fdc294ef65df066eadc9fce73b97dec45ddb3333eac",
+          "git_blob": "bdfaa1ea441b43f96170647c3098ed960f0dc5ed",
+          "mode": "100644"
+        }
+      ],
+      "bytes": 210817,
+      "package": {
+        "format": "claude-plugin",
+        "name": "anti-ai-writing",
+        "version": "2.2.0",
+        "description": "Edits any piece of writing to remove AI tells. Strips banned words, banned phrases, and banned structures (em dashes, the default rule of three, bullet lists with bold titles, formulaic transitions) at the sentence level, plus discourse-level tells that survive a surface edit (stated takeaways, single-track structure, manufactured closure, atmospheric openers). Includes a strict review mode that audits a draft and returns a verdict instead of a rewrite. Returns a clean rewrite plus a diagnosis of what was wrong. Works in English and Spanish. Pairs well with copy-that-sells.",
+        "directory": "/catalogue/package",
+        "components": [
+          {
+            "kind": "skill",
+            "name": "anti-ai-writing",
+            "path": "skills/anti-ai-writing"
+          }
+        ],
+        "unsupported": [],
+        "installable": true
+      },
+      "source_url": "https://github.com/avectats7/anti-ai-writing/tree/d1326aaeca26049b9ac505a22a35fd31f3f585a5",
+      "digest": "6d91d0297b0d4638059618f0340a2ca9428c30e838a983745deb5de1dff0961c"
+    },
+    {
+      "id": "obsidian-markdown",
+      "title": "Obsidian Markdown",
+      "publisher": "Obsidian",
+      "category": "Work & notes",
+      "summary": "Draft notes with Obsidian wikilinks, properties and callouts.",
+      "requirements": "Writing notes into an existing vault needs write access to that folder.",
+      "icon": "notebook-tabs",
+      "repository": "https://github.com/obsidianmd/obsidian-skills",
+      "commit": "b110b2f8e9eb1f287892f937050dfd40af862cbb",
+      "path": "plugins/obsidian/skills/obsidian-markdown",
+      "license": "MIT",
+      "license_files": [
+        "plugins/obsidian/LICENSE"
+      ],
+      "files": [
+        {
+          "path": "plugins/obsidian/LICENSE",
+          "bytes": 1077,
+          "sha256": "64c64d48361edfe8610016441bf593256ea9b67f133b00f47c55aa29ee878567",
+          "git_blob": "33d692ee84f4464f575f2d1e927f19cf1c8ccc57",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/obsidian/skills/obsidian-markdown/SKILL.md",
+          "bytes": 6120,
+          "sha256": "f1c4ff5257d3f9743af797d755cabeef129f553704d5ff67ebf1239f9569f081",
+          "git_blob": "13e3041536ac2b2e27509d7f4aff357995f0d090",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/obsidian/skills/obsidian-markdown/references/CALLOUTS.md",
+          "bytes": 1238,
+          "sha256": "9912ec2e3f8711f65b8ceb82cc19cbffc5e6f8ccf2ab627e18926c522c383d8b",
+          "git_blob": "c086824c64156d17731c94a7029d3496dadbaa04",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/obsidian/skills/obsidian-markdown/references/EMBEDS.md",
+          "bytes": 861,
+          "sha256": "63b6205507e28fb58cf200bc348a2b139e50ae739743e2e6316732148973cb7a",
+          "git_blob": "668851abe0f056493e162f0a866762cced15c991",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/obsidian/skills/obsidian-markdown/references/PROPERTIES.md",
+          "bytes": 1461,
+          "sha256": "f2d01b096a1c981a675e86b6a8c46bab271b278497646d465467b8120043b87c",
+          "git_blob": "244534b8b1d9258c266f80c58727cf24e502aaa3",
+          "mode": "100644"
+        }
+      ],
+      "bytes": 10757,
+      "package": {
+        "format": "skill",
+        "name": "obsidian-markdown",
+        "version": "unversioned",
+        "description": "Create and edit Obsidian Flavored Markdown with wikilinks, embeds, callouts, properties, and other Obsidian-specific syntax. Use when working with .md files in Obsidian, or when the user mentions wikilinks, callouts, frontmatter, tags, embeds, or Obsidian notes.",
+        "directory": "/catalogue/package",
+        "components": [
+          {
+            "kind": "skill",
+            "name": "obsidian-markdown",
+            "path": ""
+          }
+        ],
+        "unsupported": [],
+        "installable": true
+      },
+      "source_url": "https://github.com/obsidianmd/obsidian-skills/tree/b110b2f8e9eb1f287892f937050dfd40af862cbb/plugins/obsidian/skills/obsidian-markdown",
+      "digest": "14ee99bae457675989e0d87a289648e7716d453a8433649016373fc1ad806769"
+    },
+    {
+      "id": "json-canvas",
+      "title": "JSON Canvas",
+      "publisher": "Obsidian",
+      "category": "Work & notes",
+      "summary": "Write .canvas files with nodes and the connections between them.",
+      "requirements": "Saving a .canvas file needs write access to its folder. Open it in Obsidian or another JSON Canvas viewer.",
+      "icon": "route",
+      "repository": "https://github.com/obsidianmd/obsidian-skills",
+      "commit": "b110b2f8e9eb1f287892f937050dfd40af862cbb",
+      "path": "plugins/obsidian/skills/json-canvas",
+      "license": "MIT",
+      "license_files": [
+        "plugins/obsidian/LICENSE"
+      ],
+      "files": [
+        {
+          "path": "plugins/obsidian/LICENSE",
+          "bytes": 1077,
+          "sha256": "64c64d48361edfe8610016441bf593256ea9b67f133b00f47c55aa29ee878567",
+          "git_blob": "33d692ee84f4464f575f2d1e927f19cf1c8ccc57",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/obsidian/skills/json-canvas/SKILL.md",
+          "bytes": 8748,
+          "sha256": "4db4e69eea910b598c249e41bcdda85a70856348adaf11c35371198e258d50a6",
+          "git_blob": "7a60b5dd74415cc4a2a7c27a06760ea90e91caaf",
+          "mode": "100644"
+        },
+        {
+          "path": "plugins/obsidian/skills/json-canvas/references/EXAMPLES.md",
+          "bytes": 6476,
+          "sha256": "f5ce15a4b74643122396265e8c37c828874a4005794de2aee7030662968768eb",
+          "git_blob": "c94f99641d9d20f36dbb66e1e686432bb790cb00",
+          "mode": "100644"
+        }
+      ],
+      "bytes": 16301,
+      "package": {
+        "format": "skill",
+        "name": "json-canvas",
+        "version": "unversioned",
+        "description": "Create and edit JSON Canvas files (.canvas) with nodes, edges, groups, and connections. Use when working with .canvas files, creating visual canvases, mind maps, flowcharts, or when the user mentions Canvas files in Obsidian.",
+        "directory": "/catalogue/package",
+        "components": [
+          {
+            "kind": "skill",
+            "name": "json-canvas",
+            "path": ""
+          }
+        ],
+        "unsupported": [],
+        "installable": true
+      },
+      "source_url": "https://github.com/obsidianmd/obsidian-skills/tree/b110b2f8e9eb1f287892f937050dfd40af862cbb/plugins/obsidian/skills/json-canvas",
+      "digest": "e39887933d93ee944b008de82a724896fda8e35621748832f81b5c4658c3af3f"
+    }
+  ]
+}

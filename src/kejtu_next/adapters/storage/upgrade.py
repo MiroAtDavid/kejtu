@@ -1,6 +1,6 @@
 """Explicit offline replacement-store upgrades, never automatic startup migration.
 
-Only known replacement schema 16 through 38 -> 39 transitions are supported. The old
+Only known replacement schema 16 through 43 -> 44 transitions are supported. The old
 companion archive is a different product and is never opened by this operation.
 Original configuration artifacts stay immutable; this schema-only upgrade does
 not grant model task access to existing conversations.
@@ -21,13 +21,17 @@ from .jobs import JOB_SCHEMA
 from .research import RESEARCH_SCHEMA
 from .reminders import REMINDER_SCHEMA
 from .reminder_access import REMINDER_ACCESS_SCHEMA
+from .reminder_chat import REMINDER_CHAT_SCHEMA
+from .reminder_attention import REMINDER_ATTENTION_SCHEMA, OFFER_HISTORY_INDEX
 from .deliveries import DELIVERY_SCHEMA
 from .people import PEOPLE_SCHEMA
 from .exchanges import EXCHANGE_SCHEMA
 from .execution import EXECUTION_SCHEMA, EXECUTION_SEED
 from .mcp import MCP_SCHEMA, BACKGROUND_MCP_SCHEMA
 from .planner import PLANNER_SCHEMA
-from .skills import SKILL_SCHEMA
+from .interests import INTEREST_SCHEMA
+from .skills import SKILL_SCHEMA, SKILL_REMOVAL_SCHEMA
+from .shelf import SHELF_SCHEMA
 from .care import CARE_SCHEMA
 from .web import WEB_SCHEMA
 from .web_usage import WEB_USAGE_SCHEMA
@@ -35,6 +39,12 @@ from .conversation_import import IMPORT_SCHEMA
 from .historical_notes import HISTORICAL_NOTES_SCHEMA
 from .conversation_titles import TITLE_SCHEMA
 from .notes import NOTES_SCHEMA, FOREGROUND_NOTES_SCHEMA, NOTE_JOB_SCHEMA
+
+# Every reviewed replacement schema, oldest first; the last is current. Derived so
+# the upgrade, ownership and restore checks cannot drift apart again (restore had
+# stopped at 39). Each bump is still reviewed through the SCHEMA_VERSION guard in
+# upgrade_store and the per-version branches below.
+SUPPORTED_SCHEMAS = tuple(range(16, SCHEMA_VERSION + 1))
 
 
 def _functions(db):
@@ -51,6 +61,17 @@ def _expected(version):
     with closing(sqlite3.connect(':memory:')) as db:
         _functions(db)
         schema = SCHEMA if version >= 21 else SCHEMA.replace(NOTES_SCHEMA, FOREGROUND_NOTES_SCHEMA)
+        if version < 44:
+            schema = schema.removesuffix(SHELF_SCHEMA).removesuffix(SKILL_REMOVAL_SCHEMA)
+        if version < 42:
+            schema = schema.removesuffix(REMINDER_ATTENTION_SCHEMA)
+        elif version == 42:
+            schema = schema.replace("CREATE UNIQUE INDEX reminder_offer_once ON reminder_offers(occurrence_id,reminder_revision,attention_revision) WHERE status!='unused';",
+                "CREATE UNIQUE INDEX reminder_offer_once ON reminder_offers(occurrence_id,reminder_revision,attention_revision);").replace(OFFER_HISTORY_INDEX, '')
+        if version < 41:
+            schema = schema.removesuffix(REMINDER_CHAT_SCHEMA)
+        if version < 40:
+            schema = schema.removesuffix(INTEREST_SCHEMA)
         if version < 39:
             schema = schema.removesuffix(PLANNER_SCHEMA)
         if version < 38:
@@ -127,7 +148,7 @@ def fingerprints(db, names=None):
 
 
 def _check(db, expected_id, version):
-    if version not in (16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39):
+    if version not in SUPPORTED_SCHEMAS:
         raise Failure('upgrade_schema', 'Unsupported replacement schema after recovery.')
     if db.execute('PRAGMA application_id').fetchone()[0] != APPLICATION_ID:
         raise Failure('foreign_store', 'This is not a replacement archive.')
@@ -156,8 +177,8 @@ def _owned(directory, expected_id):
             header = source.read(100)
         if (len(header) != 100 or header[:16] != b'SQLite format 3\0'
                 or int.from_bytes(header[68:72], 'big') != APPLICATION_ID
-                or int.from_bytes(header[60:64], 'big') not in (16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39)):
-            raise Failure('foreign_store', 'Only replacement schemas 16–39 are supported; nothing was opened for writing.')
+                or int.from_bytes(header[60:64], 'big') not in SUPPORTED_SCHEMAS):
+            raise Failure('foreign_store', f'Only replacement schemas {SUPPORTED_SCHEMAS[0]}–{SUPPORTED_SCHEMAS[-1]} are supported; nothing was opened for writing.')
         # This release owns rollback-journal stores. Do not guess the identity
         # from a stale main file when a WAL could contain authoritative changes.
         if header[18:20] != b'\x01\x01' or (path.parent / (path.name + '-wal')).exists():
@@ -249,7 +270,7 @@ def upgrade_store(directory, expected_id, backup_directory, *, checkpoint=None):
     a hook used by product operations. Retrying a completed upgrade is read-only.
     No recovery/upgrade operation repeats model or task effects.
     """
-    if SCHEMA_VERSION != 39:
+    if SCHEMA_VERSION != 44:
         raise Failure('upgrade_version', 'This upgrade must be reviewed for the current schema.')
     checkpoint = checkpoint or (lambda phase: None)
     backup_directory = Path(backup_directory).absolute()
@@ -265,9 +286,9 @@ def upgrade_store(directory, expected_id, backup_directory, *, checkpoint=None):
         try:
             version = db.execute('PRAGMA user_version').fetchone()[0]
             _check(db, expected_id, version)
-            if version == 39:
+            if version == 44:
                 db.rollback()
-                return dict(status='already_current', state_id=expected_id, schema=39, changed=False)
+                return dict(status='already_current', state_id=expected_id, schema=44, changed=False)
             if db.execute("SELECT 1 FROM turns WHERE status='running' LIMIT 1").fetchone():
                 raise Failure('upgrade_active_turn', 'Unsettled turns remain; inspect them in the original runtime before upgrading.')
             if version >= 19 and db.execute("SELECT 1 FROM background_runs WHERE status IN ('running','cancel_requested') LIMIT 1").fetchone():
@@ -295,7 +316,7 @@ def upgrade_store(directory, expected_id, backup_directory, *, checkpoint=None):
             _sync(backup_directory)
             with backup.open('rb') as saved:
                 backup_hash = hashlib.file_digest(saved, 'sha256').hexdigest()
-            record = dict(state_id=expected_id, from_schema=version, to_schema=39,
+            record = dict(state_id=expected_id, from_schema=version, to_schema=44,
                           backup=str(backup), backup_sha256=backup_hash,
                           before=before, existing_conversation_configs='unchanged',
                           existing_model_task_access='unchanged; absent flag stays disabled',
@@ -314,8 +335,14 @@ def upgrade_store(directory, expected_id, backup_directory, *, checkpoint=None):
                          + (REMINDER_SCHEMA if version < 20 else '')
                          + (REMINDER_ACCESS_SCHEMA if version < 22 else '')
                          + (DELIVERY_SCHEMA if version < 23 else '')
-                         + (PEOPLE_SCHEMA if version < 24 else '') + (TITLE_SCHEMA if version < 25 else '') + (EXCHANGE_SCHEMA if version < 26 else '') + (WEB_SCHEMA if version < 27 else '') + (WEB_USAGE_SCHEMA if version < 28 else '') + (IMPORT_SCHEMA if version < 29 else '') + (EXECUTION_SCHEMA if version < 30 else '') + (HISTORICAL_NOTES_SCHEMA if version < 31 else '') + (MCP_SCHEMA if version < 33 else '') + (SKILL_SCHEMA if version < 34 else '') + (CARE_SCHEMA if version < 35 else '') + (RESEARCH_SCHEMA if version < 37 else '') + (BACKGROUND_MCP_SCHEMA if version < 38 else '') + (PLANNER_SCHEMA if version < 39 else ''))
+                         + (PEOPLE_SCHEMA if version < 24 else '') + (TITLE_SCHEMA if version < 25 else '') + (EXCHANGE_SCHEMA if version < 26 else '') + (WEB_SCHEMA if version < 27 else '') + (WEB_USAGE_SCHEMA if version < 28 else '') + (IMPORT_SCHEMA if version < 29 else '') + (EXECUTION_SCHEMA if version < 30 else '') + (HISTORICAL_NOTES_SCHEMA if version < 31 else '') + (MCP_SCHEMA if version < 33 else '') + (SKILL_SCHEMA if version < 34 else '') + (CARE_SCHEMA if version < 35 else '') + (RESEARCH_SCHEMA if version < 37 else '') + (BACKGROUND_MCP_SCHEMA if version < 38 else '') + (PLANNER_SCHEMA if version < 39 else '') + (INTEREST_SCHEMA if version < 40 else '') + (REMINDER_CHAT_SCHEMA if version < 41 else '') + (REMINDER_ATTENTION_SCHEMA if version < 42 else '') + (SKILL_REMOVAL_SCHEMA + SHELF_SCHEMA if version < 44 else ''))
             _statements(db, additions)
+            if version == 42:
+                # Preserve every admission, dependency and reply receipt. Only
+                # completed unused offers may have a second admission later.
+                db.execute('DROP INDEX reminder_offer_once')
+                db.execute("CREATE UNIQUE INDEX reminder_offer_once ON reminder_offers(occurrence_id,reminder_revision,attention_revision) WHERE status!='unused'")
+                db.execute(OFFER_HISTORY_INDEX)
             if 30 <= version < 36:
                 _execution_limits(db)
             if version < 21:
@@ -336,8 +363,8 @@ def upgrade_store(directory, expected_id, backup_directory, *, checkpoint=None):
                 if version < 18:
                     db.execute('INSERT INTO personal_task_grants VALUES(?,?,0,?)', (cid, int(enabled), created))
             checkpoint('schema_created')
-            db.execute('PRAGMA user_version=39')
-            _check(db, expected_id, 39)
+            db.execute('PRAGMA user_version=44')
+            _check(db, expected_id, 44)
             after = fingerprints(db, before)
             if after != before:
                 raise Failure('upgrade_preservation', 'An existing row changed; the upgrade will roll back.')
@@ -360,6 +387,15 @@ def upgrade_store(directory, expected_id, backup_directory, *, checkpoint=None):
             raise
 
 
+def check_backup_archive(path, expected_id):
+    """Normal restore uses the same exact archive/identity/integrity checks as upgrade restore."""
+    if not isinstance(expected_id, str) or len(expected_id) != 32 or any(c not in '0123456789abcdef' for c in expected_id):
+        raise Failure('state_identity', 'The backup has no valid launch identity; nothing was restored.')
+    with closing(sqlite3.connect(Path(path).as_uri() + '?mode=ro', uri=True)) as source:
+        _functions(source)
+        _check(source, expected_id, SCHEMA_VERSION)
+
+
 def restore_upgrade_backup(backup_directory, directory, expected_id):
     """Restore to a new directory only. Never overwrite post-upgrade user work."""
     backup_directory, directory = Path(backup_directory).absolute(), Path(directory).absolute()
@@ -369,7 +405,7 @@ def restore_upgrade_backup(backup_directory, directory, expected_id):
         raise Failure('upgrade_restore', 'Select a real backup and a new, absent destination directory.')
     record = json.loads((backup_directory / 'prepared.json').read_text())
     version = record['from_schema']
-    if version not in (16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37):
+    if version not in SUPPORTED_SCHEMAS[:-1]:
         raise Failure('upgrade_restore', 'Backup is not from a supported pre-upgrade schema.')
     with backup.open('rb') as source:
         digest = hashlib.file_digest(source, 'sha256').hexdigest()

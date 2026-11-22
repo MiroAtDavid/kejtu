@@ -9,6 +9,8 @@ import json
 
 REQUEST_SECONDS = 60
 FILE_SEARCH_SECONDS = 10
+TERMINAL_SERVER = 'terminal-use'
+COMMAND_TOOLS = ('terminal_run', 'terminal_output', 'terminal_cancel')
 
 
 class McpSession:
@@ -21,6 +23,8 @@ class McpSession:
         self.connections, self.known, self.attempted = {}, {}, set()
         self.failed = set()
         self.authority_error = None
+        self.keep_terminal = False
+        self.terminal_deadline = ledger.deadline
         self.monitor = asyncio.create_task(self._monitor())
 
     def check(self):
@@ -49,6 +53,10 @@ class McpSession:
                         self.check_permissions()
                     else:
                         self.check()
+                    if (self.keep_terminal and TERMINAL_SERVER in self.connections
+                            and asyncio.get_running_loop().time() >= self.terminal_deadline):
+                        self.failed.add(TERMINAL_SERVER)
+                        await self.connections.pop(TERMINAL_SERVER).close()
                 except Failure as error:
                     self.authority_error = error
                     await self._close_connections()
@@ -60,10 +68,51 @@ class McpSession:
         connections, self.connections = self.connections, {}
         await asyncio.gather(*(c.close() for c in connections.values()))
 
-    async def close(self):
+    async def close(self, *, retain_terminal=False):
         self.monitor.cancel()
         await asyncio.gather(self.monitor, return_exceptions=True)
+        if (retain_terminal and self.keep_terminal and not self.authority_error
+                and TERMINAL_SERVER not in self.failed
+                and TERMINAL_SERVER in self.connections):
+            connection = self.connections[TERMINAL_SERVER]
+            try:
+                self.check_permissions()
+                await self.host.keep_terminal(self.cid, connection, self.settings['revision'],
+                                              self.terminal_deadline, self.check_permissions)
+                del self.connections[TERMINAL_SERVER]
+            except Failure:
+                pass  # Revoked eligibility closes normally below.
         await self._close_connections()
+
+    async def development_tools(self):
+        """Deliver exact, currently permitted schemas; selection grants nothing.
+
+        This handshake runs in the existing turn deadline. The complete returned
+        message is protected by normal prefix admission before any model call.
+        Only these supplied definitions satisfy this turn's dispatch preflight.
+        """
+        row = self.server(TERMINAL_SERVER)
+        if row['transport'] != 'stdio':
+            raise Failure('mcp_configuration', 'Development needs the installed local terminal connection.')
+        for name in COMMAND_TOOLS:
+            self.server(TERMINAL_SERVER, name)
+        self.keep_terminal = True
+        data = await self.request(TERMINAL_SERVER, {'action': 'tools'})
+        definitions = {tool['name']: tool for tool in data['tools'] if tool['name'] in COMMAND_TOOLS}
+        if set(definitions) != set(COMMAND_TOOLS):
+            raise Failure('mcp_schema', 'The terminal connection needs the Development command tools; no command ran.')
+        tools = []
+        for name in COMMAND_TOOLS:
+            tool = definitions[name]
+            revision = digest(tool)
+            tools.append(dict(tool, schema_revision=revision))
+            self.known[(TERMINAL_SERVER, name)] = revision
+        return dict(server=TERMINAL_SERVER, tools=tools, complete=True,
+                    lifetime_seconds=max(0, int(self.terminal_deadline-asyncio.get_running_loop().time())),
+                    guidance='These tools are already discovered for this turn. Use mcp_call directly. '
+                    'Sessions can survive this reply within the original execution deadline. '
+                    'Use terminal_output to observe existing commands; never rerun an uncertain action. '
+                    'Stop, connection or permission changes, and app shutdown terminate the terminal.')
 
     def server(self, name, tool=None):
         self.check()
@@ -74,9 +123,15 @@ class McpSession:
             raise Failure('mcp_tool_forbidden', 'The user has not permitted this tool.')
         return row
 
+    def check_terminal_deadline(self, name):
+        # Worker expiry must not revoke access to already-saved receipts.
+        if self.keep_terminal and name == TERMINAL_SERVER and asyncio.get_running_loop().time() >= self.terminal_deadline:
+            raise Failure('mcp_not_executed', 'The terminal reached its original execution deadline. Inspect saved results or files; no command was repeated.')
+
     def preflight(self, name, args):
         if name == 'mcp_call':
             self.server(args['server'], args['tool'])
+            self.check_terminal_deadline(args['server'])
             # A batch is authored before any of its results are delivered. A
             # discovery earlier in that same batch cannot justify a guessed call.
             if (args['server'], args['tool']) not in self.known:
@@ -84,17 +139,24 @@ class McpSession:
 
     async def request(self, name, payload):
         row = self.server(name)
+        self.check_terminal_deadline(name)
         if name in self.failed:
             raise Failure('mcp_connection_closed', 'This connection failed earlier in this message. No automatic reconnection was made.')
         if name not in self.connections:
-            self.connections[name] = self.host.connection(name, row)
+            previous = (await self.host.take_terminal(self.cid, self.settings['revision'])
+                        if self.keep_terminal and name == TERMINAL_SERVER else None)
+            if previous:
+                self.connections[name], self.terminal_deadline = previous
+            else:
+                self.connections[name] = self.host.connection(name, row)
         connection = self.connections[name]
         # The reserved Files connection searches arbitrary user folder trees.
         # Bound that read separately from the turn; never imply an interrupted
         # walk established absence or silently exclude any shared subfolder.
         searching_files = name == 'kejtu-files' and payload.get('tool') == 'search_files'
         seconds = FILE_SEARCH_SECONDS if searching_files else REQUEST_SECONDS
-        deadline = min(self.ledger.deadline, asyncio.get_running_loop().time()+seconds)
+        deadline = min(self.ledger.deadline, asyncio.get_running_loop().time()+seconds,
+                       self.terminal_deadline if self.keep_terminal and name == TERMINAL_SERVER else self.ledger.deadline)
         if payload.get('action') == 'call':
             # The SDK and its enclosing transport must agree on this request's
             # lifetime, rather than passing the whole turn allowance downstream.

@@ -44,6 +44,10 @@ def page(store, snapshot, args, ledger, maximum, budget=None):
         if not (args.get('include_rejected') or args.get('flag') == 'user-rejected'):
             where.extend(['coalesce(h.rejected,0)=0',
                 "NOT EXISTS(SELECT 1 FROM json_each(nm.body,'$.flags') flag WHERE flag.value='user-rejected')"])
+        for field in ('project_id','module_id'):
+            if field in args:
+                where.append(mem.workspace_predicate('v.id',field))
+                params.extend([args[field]]*2)
         for field in ('purpose','thread_status'):
             if field in args:
                 where.append("json_extract("+metadata+",'$."+field+"')=?")
@@ -98,6 +102,8 @@ def page(store, snapshot, args, ledger, maximum, budget=None):
                 item.update(record_kind='authored_note',note=store.notes.metadata_summary(snapshot,row['id'],ledger))
             elif row['author']=='user' and row['origin']=='manual_memory':
                 item.update(record_kind='user_note',author='user')
+                context=mem.manual_workspace(row['id'],ledger)
+                if context: item['workspace']=context
             if row['historical_note'] is not None:
                 item.update(record_kind='historical_note',historical_note=store.historical_notes.summary(snapshot,row['id'],ledger))
             more = index+1 < len(rows)

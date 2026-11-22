@@ -49,6 +49,9 @@ def sandbox(row):
                  '--setenv', 'npm_config_cache', '/mcp-cache/npm',
                  '--setenv', 'UV_CACHE_DIR', '/mcp-cache/uv',
                  '--setenv', 'XDG_CACHE_HOME', '/mcp-cache']
+    if row.get('data'):
+        # A package's own lasting folder. Its cache above is disposable.
+        args += ['--bind', row['data'], '/plugin-data']
     if row.get('shared_root'):
         # Keep scratch separate from user paths under /tmp. A common-root
         # server must not "save" an unshared project into a private shadow tree.
@@ -81,6 +84,12 @@ def sandbox(row):
         # Tool code/dependencies never become writable through a broad Home grant.
         for value in sorted(row['read_paths'],key=lambda p:len(Path(p).parts)):
             bind(value,'--ro-bind')
+    # The installed package ships its interpreter outside /usr. Mount its
+    # program files only for the independently verified browser wrapper, before
+    # the usual private-path masks. Source venvs use their system interpreter.
+    bundled_python = ROOT / '.venv'
+    if browser and Path(row['command']).parent == bundled_python / 'bin':
+        bind(str(bundled_python), '--ro-bind')
     # This applies to legacy connection mounts too, before Files is configured.
     # Mask broad parent grants last, then restore only exact approved program
     # dependencies. The temporary parent stays writable only during mount setup.
@@ -136,12 +145,25 @@ def sandbox(row):
         args.extend(['--remount-ro',str(path)])
     for key, value in row['env'].items():
         args += ['--setenv', key, value]
+    if row.get('data'):
+        # After the saved environment, so an entry cannot point it elsewhere.
+        args += ['--setenv', 'PLUGIN_DATA', '/plugin-data']
+    start = '/mcp-tmp' if row.get('shared_root') else '/tmp'
+    root = row.get('root')
+    if root is not None:
+        # A package's program: its own tree is its root, and it starts where the launch
+        # owner resolved, inside that tree or its data folder. Checked again here.
+        start = row.get('cwd')
+        inside = lambda place: start == place or isinstance(start, str) and start.startswith(place + '/')
+        if (root not in row['read_paths'] or not row.get('data') or not (inside(root) or inside('/plugin-data'))
+                or any(part in ('', '.', '..') for part in start.split('/')[1:])):
+            raise ValueError('A package program was given a place outside its own folders.')
+        args += ['--setenv', 'PLUGIN_ROOT', root]
     if row.get('shared_root') and not any(r['path']=='/tmp' and r['access']=='write' for r in shared):
         # Only this tmpfs mount becomes read-only; explicit child write mounts
         # keep their saved access. An explicitly writable /tmp stays writable.
         args += ['--remount-ro', '/tmp']
-    return args + ['--remount-ro', '/', '--chdir', '/mcp-tmp' if row.get('shared_root') else '/tmp',
-                   '--', row['command'], *row['args']]
+    return args + ['--remount-ro', '/', '--chdir', start, '--', row['command'], *row['args']]
 
 
 def dump(value):
@@ -227,7 +249,9 @@ async def main():
                 timeout=httpx2.Timeout(60, connect=10)))
             transport = streamable_http_client(row['url'], http_client=http)
         client = await stack.enter_async_context(Client(transport, read_timeout_seconds=60,
-            client_info=Implementation(name='kejtu', version='A049'), input_required_max_rounds=0))
+            client_info=Implementation(name='kejtu', version='A049'), input_required_max_rounds=0,
+            # Explicit compatibility is selected before launch, never by replaying a call.
+            mode=row.get('protocol_mode', 'auto')))
         while True:
             line = await asyncio.to_thread(sys.stdin.buffer.readline, 65_537)
             if not line:

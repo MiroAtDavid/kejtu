@@ -4,15 +4,13 @@ The browser callback prepares a candidate only. ModelControls publishes it after
 the usual idle check, so signing in cannot change an admitted request's account.
 """
 import asyncio
-import base64
 from copy import deepcopy
-import hashlib
-import hmac
 import json
 import secrets
 import math
 import time
-from urllib.parse import parse_qs, urlencode, urlsplit
+from urllib.parse import urlencode
+from ..authorization import callback_arguments, challenge
 import uuid
 
 from ...core.records import Failure
@@ -205,7 +203,7 @@ class ChatGPTAccounts:
         params = dict(client_id=account['client_id'] if account else retry or 'dynamic_agent_client',
             ext_agent_host_id=self.data['host'], response_type='code', redirect_uri=redirect,
             scope=SCOPES, resource=RESOURCE, state=state, nonce=nonce, code_challenge_method='S256',
-            code_challenge=base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).decode().rstrip('='))
+            code_challenge=challenge(verifier))
         if not account and not retry:
             params['agent_name_hint'] = 'Kejtu'
         elif account and (not account.get('tokens') or PERMISSION not in account['tokens']['scope'].split()):
@@ -231,20 +229,8 @@ class ChatGPTAccounts:
         status, message = 400, 'This sign-in link is invalid or expired. Return to Kejtu.'
         pending = self.pending
         try:
-            raw = await asyncio.wait_for(reader.readuntil(b'\r\n\r\n'), 5)
-            if len(raw) > 12288:
-                raise ValueError
-            lines = raw.decode('ascii').split('\r\n')
-            method, target, version = lines[0].split(' ')
-            headers = dict(line.split(':', 1) for line in lines[1:] if line)
-            host = next((v.strip() for k,v in headers.items() if k.lower() == 'host'), '')
-            url = urlsplit(target)
-            if (method != 'GET' or version not in ('HTTP/1.0', 'HTTP/1.1') or url.path != '/auth/callback'
-                    or url.netloc or url.fragment or not pending or self.stage != 'waiting'
-                    or host != urlsplit(pending['redirect']).netloc or time.monotonic() >= pending['expires']):
-                raise ValueError
-            args = parse_qs(url.query, keep_blank_values=True, max_num_fields=16)
-            if any(len(v) != 1 for v in args.values()) or not hmac.compare_digest(args.get('state', [''])[0], pending['state']):
+            args = await callback_arguments(reader, pending)
+            if self.pending is not pending or self.stage != 'waiting':
                 raise ValueError
             # Consume the attempt once, before awaiting the token endpoint.
             self.stage = 'exchanging'

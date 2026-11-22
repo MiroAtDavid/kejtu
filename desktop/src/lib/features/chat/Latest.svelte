@@ -17,14 +17,20 @@
     display: inline-flex;
     align-items: center;
     gap: var(--ke-space-2);
-    padding: var(--ke-space-2) var(--ke-space-3);
-    border: 0;
-    background: transparent;
-    color: var(--ke-text-tertiary);
+    min-height: 32px;
+    padding: 6px 10px;
+    border: 1px solid var(--ke-border);
+    border-radius: var(--ke-radius-md);
+    background: var(--ke-surface);
+    box-shadow: var(--ke-shadow-search);
+    color: var(--ke-text-secondary);
+    font: inherit;
     font-size: var(--ke-text-xs);
+    line-height: 1.4;
     cursor: pointer;
   }
   .latest:hover {
+    background: var(--ke-surface-inset);
     color: var(--ke-text-primary);
   }
   svg {

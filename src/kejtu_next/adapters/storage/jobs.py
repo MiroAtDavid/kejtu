@@ -15,6 +15,7 @@ import uuid
 
 from ...core.jobs import REVIEW_KINDS, QUIET_KINDS, JobDefinition, RUN_TERMINAL
 from ...core.records import Failure
+from ...core.interests import KIND as INTEREST_KIND
 from ...core.research import SERIALIZED_BYTES as RESEARCH_SERIALIZED_BYTES
 from ...core.reference import exact_page
 from ...core.schedules import instant, utc
@@ -160,6 +161,8 @@ class JobStore:
         return value
 
     def _sources(self, definition):
+        if definition.kind == INTEREST_KIND:
+            self.store.interests.guard(definition)
         if definition.kind == 'research':
             self.store.research.guard(definition)
         if definition.conversation_id is None:
@@ -196,8 +199,8 @@ class JobStore:
             if definition.enabled:
                 self._sources(definition)
             if job_id is None:
-                if definition.kind == 'notebook_care' and self.db.execute("SELECT 1 FROM background_jobs WHERE kind='notebook_care' AND cancelled=0").fetchone():
-                    raise Failure('care_exists', 'Update the existing notebook-care schedule instead of creating another queue.')
+                if definition.kind in ('notebook_care', INTEREST_KIND, 'reminder_review') and self.db.execute("SELECT 1 FROM background_jobs WHERE kind=? AND cancelled=0", (definition.kind,)).fetchone():
+                    raise Failure('care_exists' if definition.kind == 'notebook_care' else 'job_exists', 'Update the existing managed schedule instead of creating another queue.')
                 if expected_revision is not None:
                     raise Failure('job_revision', 'A new job cannot claim an existing revision.')
                 if self.db.execute('SELECT count(*) FROM background_jobs WHERE cancelled=0').fetchone()[0] >= 64:
@@ -214,8 +217,8 @@ class JobStore:
                     raise Failure('job_cancelled', 'A cancelled job cannot be silently revived; create a new explicit job.')
                 ident, revision = job_id, job['revision'] + 1
                 original = self.definition(job_id)
-                if original.kind != definition.kind and any(kind in ('notebook_care','research') for kind in (original.kind, definition.kind)):
-                    raise Failure('care_kind', 'Notebook care has its own explicit schedule; keep this job kind unchanged.')
+                if original.kind != definition.kind and any(kind in ('notebook_care','research',INTEREST_KIND,'reminder_review') for kind in (original.kind, definition.kind)):
+                    raise Failure('care_kind', 'Keep the managed procedure kind unchanged.')
                 # Ordinary metadata/permission edits do not rearm a completed
                 # occurrence. Only an explicit schedule change starts a new
                 # anchor; reserved old runs are cancelled, never auto-replayed.
@@ -380,6 +383,12 @@ class JobStore:
             since = utc(instant(now) - timedelta(days=1))
             count, last = self.db.execute('SELECT count(*),max(started_at) FROM background_runs WHERE job_id=? AND started_at>?',
                                          (job['id'], since)).fetchone()
+            if definition.kind == INTEREST_KIND:
+                # One allowance across saved revisions AND replacement jobs.
+                # Cancelling/recreating the setting cannot refund paid attempts.
+                count, last = self.db.execute("""SELECT count(*),max(r.started_at) FROM background_runs r
+                    JOIN background_jobs j ON j.id=r.job_id WHERE j.kind=? AND r.started_at>?""",
+                    (INTEREST_KIND, since)).fetchone()
             # Notebook care owns a finite revision queue: its short resumable
             # batches are continuation of one sweep, not additional daily jobs.
             # Per-revision retries and run deadlines still bound failed work.
@@ -415,14 +424,14 @@ class JobStore:
 
     def review_conversation(self, ident):
         definition = self.check_run(ident)
-        if definition.kind not in REVIEW_KINDS:
-            raise Failure('job_kind', 'Notebook review requires its own explicit job kind.')
+        if definition.kind not in (*REVIEW_KINDS, 'reminder_review'):
+            raise Failure('job_kind', 'Private review requires its own explicit job kind.')
         return self.store.conversation(definition.conversation_id) if definition.conversation_id else None
 
     def notebook_grant(self, ident):
         """Independent read authority from one saved, enabled review and live run."""
         definition = self.check_run(ident)
-        if definition.kind not in REVIEW_KINDS or definition.conversation_id is not None or not definition.permissions.read_memory:
+        if definition.kind not in (*REVIEW_KINDS, INTEREST_KIND, 'reminder_review') or definition.conversation_id is not None or not definition.permissions.read_memory:
             raise Failure('job_forbidden', 'This run has no independent notebook permission.')
         bank = self.db.execute('SELECT id FROM memory_banks WHERE slot=1').fetchone()
         return dict(bank_id=bank['id'], enabled=True, epoch=self.run(ident)['revision'], run_id=ident)
@@ -543,7 +552,7 @@ class JobStore:
             if cid is None:
                 from ...core.background import NOTEBOOK_CONTEXT
                 grant = self.notebook_grant(ident)
-                value = dict(system_prompt=NOTEBOOK_CONTEXT, grant=grant, latest_sequence=None,
+                value = dict(system_prompt=('You are Kejtu, reviewing leftover reminders privately with the user-enabled job and supplied tools.' if definition.kind=='reminder_review' else NOTEBOOK_CONTEXT), grant=grant, latest_sequence=None,
                     configuration=None, conversation=dict(conversation_id=None,
                         selected_complete_exchanges=[], earlier_exchanges_omitted=False,
                         notebook_read=False, scope='notebook'), reminders=[])
@@ -693,6 +702,8 @@ class JobStore:
                 allowed={tool['function']['name'] for tool in schemas(history=True,web_only=True,
                     memory=True,hybrid=True,tasks=True,people=True,reminders=True,web=True,mcp=True,skills=True)}
             else:allowed={'search_memory', 'read_memory', 'note_outcome'}
+            if definition.kind=='reminder_review':
+                allowed.add('reminders')
             if definition.permissions.write_notes:
                 allowed.add('write_note')
             if (set(payload) != {'ordinal','call_number','call_id','name','arguments'}

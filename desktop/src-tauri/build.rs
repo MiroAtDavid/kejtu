@@ -4,7 +4,7 @@ fn main() {
     assert!(
         matches!(
             package_kind.as_str(),
-            "development" | "windows-test-portable"
+            "development" | "windows-test-portable" | "linux-installed"
         ),
         "unknown package kind"
     );

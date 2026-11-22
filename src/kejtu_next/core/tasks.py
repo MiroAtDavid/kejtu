@@ -9,10 +9,11 @@ DESCRIPTION_BYTES = 32768
 
 OUTCOMES = ('open', 'done', 'cancelled')
 ATTENTION = ('active', 'parked', 'archived')
+URGENCIES = ('low', 'medium', 'high')
 FIELDS = {
-    'list': {'query', 'outcome', 'attention', 'offset', 'limit', 'day', 'project_id', 'section_id'},
+    'list': {'query', 'outcome', 'attention', 'offset', 'limit', 'day', 'project_id', 'section_id', 'urgency', 'order'},
     'read': {'read_ref', 'offset', 'limit', 'view'},
-    'save': {'read_ref', 'title', 'description', 'due', 'note_id', 'source_quote', 'placement'},
+    'save': {'read_ref', 'title', 'description', 'due', 'note_id', 'source_quote', 'placement', 'urgency'},
     'transition': {'read_ref', 'outcome', 'attention'},
 }
 
@@ -32,7 +33,7 @@ def validate(value, *, manual=False):
             raise ValueError
         if action == 'transition' and not {'outcome', 'attention'} & value.keys():
             raise ValueError
-        if action == 'save' and not {'title', 'description', 'due', 'note_id', 'placement'} & value.keys():
+        if action == 'save' and not {'title', 'description', 'due', 'note_id', 'placement', 'urgency'} & value.keys():
             raise ValueError
         for key in ('due', 'day'):
             if key in value and value[key] is not None:
@@ -71,7 +72,9 @@ def validate(value, *, manual=False):
             if key in value and not (key == 'note_id' and value[key] is None):
                 if not isinstance(value[key], str) or re.fullmatch('[0-9a-f]{32}', value[key]) is None:
                     raise ValueError
-        for key, options in (('outcome', OUTCOMES), ('attention', ATTENTION)):
+        if 'order' in value and value['order'] not in ('due','urgency'):
+            raise ValueError
+        for key, options in (('outcome', OUTCOMES), ('attention', ATTENTION), ('urgency', URGENCIES)):
             if key in value and value[key] not in options + (('all',) if action == 'list' else ()):
                 raise ValueError
         for key, low, high in (('offset', 0, 10000), ('limit', 1, 50)):
@@ -84,10 +87,10 @@ def validate(value, *, manual=False):
         # Fixed, action-specific help, never echo private malformed arguments.
         action = value.get('action') if isinstance(value, dict) else None
         help_text = {
-            'list': 'list accepts query, outcome, attention, offset, limit and day; all is a list-only filter.',
+            'list': 'list accepts query, outcome, attention, urgency, order, offset, limit and day; all is a list-only filter.',
             'read': 'read needs read_ref and returns the current task. For older revisions use view=history; '
                     'for supporting sources use view=sources. offset/limit page the selected view.',
-            'save': 'save uses title/description/due/note_id/placement and source_quote; add read_ref for edits. '
+            'save': 'save uses title/description/due/urgency/note_id/placement and source_quote; add read_ref for edits. '
                     'Outcome/attention belong to transition, not save.',
             'transition': 'transition needs read_ref and outcome and/or attention. '
                     'Park: attention=parked; reactivate: attention=active. '
@@ -113,12 +116,12 @@ def schema(write=False):
     return {'type': 'function', 'function': {
         'name': 'personal_tasks',
         'description': 'User action commitments, separate from notes and reminders. '
-            'list: query/outcome/offset/limit/day and optional project_id/section_id; defaults to all open tasks. Attention is legacy metadata, not a user workflow. '
+            'list: query/outcome/urgency/order/offset/limit/day and optional project_id/section_id; defaults to all open tasks. Attention is legacy metadata, not a user workflow. '
             'read: read_ref returns the current task only; view=history adds older revisions, '
             'view=sources adds supporting sources; offset/limit page that view. ' + (
             'Use read_ref from this turn\'s list or read result to change that task; no extra read after list. '
-            'save: create with title and exact current-user source_quote, optional Markdown description (32 KiB), due/note_id; '
-            'edit with read_ref, source_quote and title/description/due/note_id only. Preserve formatting and checklist state. Use university task_link records to change project/section links. '
+            'save: create with title and exact current-user source_quote, optional Markdown description (32 KiB), due/urgency/note_id; '
+            'edit with read_ref, source_quote and title/description/due/urgency/note_id only. Preserve formatting and checklist state. Use university task_link records to change project/module links. '
             'transition: read_ref plus outcome and/or attention ONLY; omit source_quote, title, due, note_id. '
             'Complete outcome=done; reopen outcome=open; remove outcome=cancelled. '
             'Outcome and attention are independent; the omitted axis is unchanged. Change only on user intent. '
@@ -130,8 +133,11 @@ def schema(write=False):
                 'read_ref': {'type': 'string', 'description': 'Copy read_ref from list/read unchanged, never the task id. A current-turn list is enough for updates.'},
                 'query': {'type': 'string', 'description': 'List only: title filter.'},
                 'description': {'type': 'string', 'description': 'Save only: full Markdown description, paragraphs, lists, links and checklists; at most 32768 UTF-8 bytes. Empty clears it; omitted preserves it.'},
-                'project_id': {'type':'string','description':'List only: tasks in this project, including its sections.'},
-                'section_id': {'type':'string','description':'List only: tasks in this section.'},
+                'project_id': {'type':'string','description':'List only: tasks in this project, including its modules.'},
+                'section_id': {'type':'string','description':'List only: tasks in this module.'},
+                'urgency': {'type':'string','enum':['all',*URGENCIES],
+                    'description':'Save or list filter; all is list-only. Default medium; omitted edits preserve it. Independent of due date/outcome.'},
+                'order': {'type':'string','enum':['due','urgency'],'description':'List only: due date (default), or high urgency first.'},
                 'title': {'type': 'string', 'description': 'Save only: required for creation.'},
                 'source_quote': {'type': 'string', 'description': 'Save only: exact words from the current user message. Omit for transition.'},
                 'due': {'type': ['string', 'null'], 'description': 'Save only: YYYY-MM-DD; null means no due date, not a reminder.'},

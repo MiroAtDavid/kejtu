@@ -2,6 +2,8 @@
 import json
 
 from ...core.budget import message_cost
+from ...core.reference import tool_schema
+from ...core.tools import schemas
 from ...core.providers import provider as provider_spec
 from ...core.records import Failure, Message, ToolCall
 from ...core.vision import wire_content, MAX_REQUEST_IMAGES
@@ -50,9 +52,13 @@ def decode_calls(value, provider: str, *, allowed: bool, names=('read_reference'
 
 
 def _ollama_system_prefix(messages: list[dict]) -> list[dict]:
+    return system_prefix(messages, 'Ollama')
+
+
+def system_prefix(messages: list[dict], label: str) -> list[dict]:
     """One system slot; exact later metadata is anchored to wire-message indices.
 
-    RVN/Qwen's native template refuses a system role anywhere except index zero.
+    Some dialects accept system instructions only in a leading slot.
     App history notices/identities therefore share that first slot. An anchor is
     the zero-based index of the following message in the projected wire list
     (which includes system at zero), not a new archive/history ordinal. No user,
@@ -61,9 +67,9 @@ def _ollama_system_prefix(messages: list[dict]) -> list[dict]:
     if not any(row['role'] == 'system' for row in messages[1:]):
         return messages
     if messages[0]['role'] != 'system':
-        raise Failure('provider_configuration', 'Ollama system projection requires an initial system message.')
+        raise Failure('provider_configuration', f'{label} system projection requires an initial system message.')
     if set(messages[0]) != {'role', 'content'}:
-        raise Failure('provider_configuration', 'Ollama cannot fold a system message with additional native fields.')
+        raise Failure('provider_configuration', f'{label} cannot fold a system message with additional native fields.')
     first = dict(messages[0])
     result = [first]
     parts = [first['content']]
@@ -72,13 +78,13 @@ def _ollama_system_prefix(messages: list[dict]) -> list[dict]:
             result.append(row)
             continue
         if set(row) != {'role', 'content'}:
-            raise Failure('provider_configuration', 'Ollama cannot fold a system message with additional native fields.')
+            raise Failure('provider_configuration', f'{label} cannot fold a system message with additional native fields.')
         framing = f'\n\n[before message {len(result)}]\n'
         # Spend only the frame already charged for this removed system slot.
         # This reuses the ledger's estimator; no second window or admission rule.
         original_cost = message_cost(Message('system', row['content']))
         if len((framing + row['content']).encode('utf-8')) > original_cost:
-            raise Failure('context_limit', 'Ollama system framing exceeds its admitted message cost.')
+            raise Failure('context_limit', f'{label} system framing exceeds its admitted message cost.')
         parts.extend((framing, row['content']))
     first['content'] = ''.join(parts)
     return result
@@ -111,3 +117,15 @@ def wire_messages(messages: list[dict], provider: str, *, model=None) -> list[di
             row[key] = message[key]
         result.append(row)
     return _ollama_system_prefix(result) if provider == 'ollama' else result
+
+
+def tool_specs(values):
+    if not values.get('tools'):
+        return []
+    if not values.get('history'):
+        return [tool_schema()]
+    flags = {name: values.get(name, False) for name in (
+        'reference', 'memory', 'notes', 'notes_write', 'tasks', 'notebook_only',
+        'web_only', 'reminders', 'people', 'people_write', 'web', 'mcp', 'skills', 'workspace')}
+    return schemas(history=True, hybrid=values.get('hybrid_memory', False),
+                   web_provider=values.get('web_provider', 'searxng'), **flags)

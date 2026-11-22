@@ -98,3 +98,20 @@ export function toggleTaskCheck(
     source.slice(position + 1)
   );
 }
+
+/** The first line of task prose as plain text, for a one-line list preview. */
+export function descriptionPreview(source: string): string {
+  for (const raw of source.split("\n")) {
+    if (/^\s*([-*_])\1{2,}\s*$/.test(raw)) continue;
+    const line = raw
+      .replace(
+        /^\s*(?:#{1,6}\s+|>\s*|(?:[-+*]|\d+[.)])\s+(?:\[[ xX]\]\s*)?)/,
+        "",
+      )
+      .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+      .replace(/\*+|`+|~~/g, "")
+      .trim();
+    if (line) return Array.from(line).slice(0, 160).join("");
+  }
+  return "";
+}

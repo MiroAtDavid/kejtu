@@ -39,8 +39,10 @@ def prepare(root: Path, profile_path: Path | None = None, standing_path: Path | 
         sys.path.insert(0, str(ROOT))
         from tools.setup_web import install as install_web
         from tools.setup_files import install as install_files
+        from tools.setup_terminals import install as install_terminals
         install_web(root)
         install_files(root)
+        install_terminals(root)
     state.mkdir(mode=0o700, parents=True, exist_ok=True)
     # Exclusive creation protects concurrent setup. Partial inputs stay visible
     # for inspection; rerunning never overwrites a user's existing inputs.

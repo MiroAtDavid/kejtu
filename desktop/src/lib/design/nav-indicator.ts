@@ -26,6 +26,13 @@ export function navIndicator(node: HTMLElement, selector: string) {
 
   function place() {
     pending = 0;
+    // A renderer can clear all children when a filtered list becomes empty.
+    // Keep our decorative node attached when its rows return; the selected
+    // rows stay transparent because this action owns their shared background.
+    if (marker.parentNode !== node) {
+      node.prepend(marker);
+      shown = false;
+    }
     const target = node.querySelector<HTMLElement>(selector);
     // A hidden row (collapsed sidebar, compact layout) has no box to follow.
     if (!target || !target.getClientRects().length) {

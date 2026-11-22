@@ -18,7 +18,9 @@ def build_fingerprint():
     # The shipped guide is application context through skill reads; include it
     # so a desktop/backend mismatch cannot silently serve another manual version.
     for path in (sorted((root / 'src').rglob('*.py')) +
+                 sorted((root / 'src/kejtu_next/adapters/web').glob('*.cjs')) +
                  sorted((root / 'src/kejtu_next/help').glob('*.md')) +
+                 sorted((root / 'src/kejtu_next/shelf').glob('*.json')) +
                  [root / 'contracts/native-v1.json']):
         digest.update(path.relative_to(root).as_posix().encode() + b'\0' + path.read_bytes() + b'\0')
     return digest.hexdigest()
@@ -35,6 +37,11 @@ async def serve(application, *, lifecycle_event_handle=None) -> int:
                 loop.add_signal_handler(getattr(signal, name), stop.set)
             except NotImplementedError:
                 pass
+    update = getattr(application, 'update', None)
+    if update is not None and update.enabled:
+        # Installed Linux only: the package step rings this doorbell after writing a
+        # request; the capability file below tells it this backend understands it.
+        loop.add_signal_handler(signal.SIGUSR1, update.doorbell)
     lifetime = None
     try:
         if lifecycle_event_handle is not None:
@@ -42,6 +49,8 @@ async def serve(application, *, lifecycle_event_handle=None) -> int:
             lifetime = LifecycleEvent(lifecycle_event_handle, loop, stop)
         port = await server.start()
         application.start_maintenance()
+        if update is not None:
+            update.advertise()
         # This pipe is consumed privately by the owning Rust process. The token
         # is never forwarded to the WebView, argv, environment, URL or logs.
         print(json.dumps({'kind': 'ready', 'port': port, 'session_token': server.token,

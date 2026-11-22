@@ -4,7 +4,6 @@ export const widgetDefinitions: Record<
   Widget["kind"],
   { title: string; description: string }
 > = {
-  radio: { title: "Radio", description: "A station beside your writing." },
   note: {
     title: "Notebook note",
     description: "Keep an original note close at hand.",
@@ -19,7 +18,7 @@ export const widgetDefinitions: Record<
   },
   university: {
     title: "Projects",
-    description: "Your projects, sections and calendar.",
+    description: "Your projects, modules and calendar.",
   },
   tasks: {
     title: "Personal tasks",

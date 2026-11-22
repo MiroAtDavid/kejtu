@@ -74,6 +74,33 @@ MEMORY_SCHEMA += '''CREATE TRIGGER memory_grant_epoch AFTER UPDATE OF enabled,ba
 
 
 class MemoryStore:
+    @staticmethod
+    def workspace_predicate(revision, field):
+        """Indexed retained-origin filter for authored and user-saved memories.
+
+        Arguments are fixed application column expressions/field names, never
+        model SQL. Both identity parameters are supplied separately by callers.
+        """
+        assert field in ('project_id','module_id')
+        return """(EXISTS(SELECT 1 FROM note_metadata context WHERE context.revision_id="""+revision+"""
+            AND json_extract(context.body,'$.workspace."""+field+"""')=?) OR
+            EXISTS(SELECT 1 FROM memory_revisions original
+                JOIN memory_edges edge ON edge.revision_id=original.id
+                JOIN manual_memory_sources source ON source.source_id=edge.source_revision_id
+                JOIN context_events context ON context.turn_id=source.turn_id
+                WHERE original.id="""+revision+""" AND original.author='user' AND original.origin='manual_memory'
+                AND edge.relation='user_saved_from_exchange'
+                AND json_extract(context.record,'$.kind')='workspace_scope'
+                AND json_extract(context.record,'$."""+field+"""')=?))"""
+
+    def manual_workspace(self, revision, ledger):
+        rows=self.query(ledger,"""SELECT source.turn_id FROM memory_edges edge
+            JOIN manual_memory_sources source ON source.source_id=edge.source_revision_id
+            WHERE edge.revision_id=? AND edge.relation='user_saved_from_exchange' LIMIT 2""",(revision,)).fetchall()
+        if len(rows)>1:
+            raise Failure('memory_integrity','The saved memory has ambiguous workspace provenance.')
+        return self.store._history.workspace_context(rows[0][0],ledger) if rows else {}
+
     def automatic_query(self, snapshot, question, ledger):
         return self.store.recall.automatic_query(snapshot,question,ledger)
 
@@ -116,7 +143,9 @@ class MemoryStore:
             archive_epoch = self.query(ledger,'SELECT epoch FROM recall_epoch').fetchone()[0] if hybrid else 0
             if hybrid:
                 self._size_recall_work(ledger)
-            return MemorySnapshot(conversation_id, bank_id, row['epoch'], row['grant_epoch'],hybrid,archive_epoch)
+            context=self.store.planner.memory_context(conversation_id,ledger) if hybrid else {}
+            return MemorySnapshot(conversation_id, bank_id, row['epoch'], row['grant_epoch'],hybrid,archive_epoch,
+                                  project_id=context.get('project_id'),module_id=context.get('module_id'))
 
     def research_snapshot(self, conversation_id, bank_id, ledger):
         if not ledger.web_only:
@@ -150,6 +179,9 @@ class MemoryStore:
         if row is None:
             raise Failure('memory_source_changed', 'Memory authority changed during this turn; no further call may send the frozen results.')
         if snapshot.hybrid:
+            context=self.store.planner.memory_context(snapshot.conversation_id,ledger)
+            if (snapshot.project_id,snapshot.module_id)!=(context.get('project_id'),context.get('module_id')):
+                raise Failure('memory_source_changed','The conversation workspace changed; rediscover its context.')
             append_safe = ledger.web_only and snapshot.archive_sources is not None
             # One SQL statement observes epoch and count atomically. Two reads
             # could let a concurrent insertion conceal an intervening revocation.

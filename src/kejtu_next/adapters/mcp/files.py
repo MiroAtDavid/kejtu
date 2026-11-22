@@ -13,6 +13,7 @@ from ...core.records import Failure
 
 FILES_SERVER = 'kejtu-files'
 SHARED_ROOT = '${KEJTU_SHARED_ROOT}'
+WORKING_FOLDER = '${KEJTU_WORKING_FOLDER}'
 VERSION = '1.0.0'
 WINDOWS_VERSION = '2.0.1'
 READ_TOOLS = ['read_text_file','read_media_file','read_multiple_files','list_directory',
@@ -44,6 +45,13 @@ def grants(value):
     return ([dict(path=value['workspace'],access='write')] if value['workspace'] else [])+value['folders']
 
 
+def bind_working_folder(row, workspace):
+    # A shell starts in its own scratch directory unless this exact working
+    # folder is actually mounted for it. Substitution never creates a grant.
+    if row['transport'] == 'stdio' and WORKING_FOLDER in row['args']:
+        row['args'] = [(workspace or '.') if arg == WORKING_FOLDER else arg for arg in row['args']]
+
+
 def bind_shared_root(row, shared):
     """Resolve a server's root argument from Files, without granting its parent.
 
@@ -63,6 +71,41 @@ def bind_shared_root(row, shared):
     row['shared_root'] = root
 
 
+def bind_shared_environment(row):
+    """Resolve explicit folder bindings after keys, without interpreting account input.
+
+    Package environment values live in the keyring, so the Files settings reader
+    cannot resolve them. The launch owner uses its existing folder snapshot here.
+    An unselected package keeps its own data folder; folder permission is never
+    inferred from a recipe requesting this value.
+    """
+    if row['transport'] != 'stdio':
+        return row
+    inputs = {field['name'] for field in row.get('inputs', [])}
+    names = [name for name, value in row.get('env', {}).items()
+             if name not in inputs and value == SHARED_ROOT]
+    if not names:
+        return row
+    shared = row.get('shared_folders', [])
+    if shared:
+        root = os.path.commonpath([item['path'] for item in shared])
+        # A root of / would also admit /proc and the program's credential-bearing
+        # process environment to a tool's file-input field. No wider root fallback.
+        if root == '/':
+            raise Failure('files_required',
+                'This connection needs shared folders beneath one common directory. '
+                'The selected folders only share the filesystem root; no program was started.')
+    elif row.get('installation') and row.get('data'):
+        root = '/plugin-data'
+    else:
+        raise Failure('files_required',
+            'Select this tool for a shared folder in Settings → Files before using it.')
+    bound = dict(row, env={**row['env'], **{name: root for name in names}})
+    if shared:
+        bound['shared_root'] = root
+    return bound
+
+
 class Files:
     def __init__(self, host):
         self.host=host
@@ -74,7 +117,9 @@ class Files:
     def private_roots(self):
         # Installation state includes backups, logs, launch inputs and runtimes.
         # The archive may also be explicitly located outside that installation.
-        roots={(self.host.root/'.state').resolve(),self.private}
+        from .layout import private_data
+        roots={(self.host.root/'.state').resolve(),self.private,
+               private_data(self.private,self.host.root).resolve()}
         if sys.platform == 'linux':
             from .desktop_paths import linux_desktop_paths
             roots.update(path.resolve() for path in linux_desktop_paths())
@@ -245,8 +290,14 @@ class Files:
 
     def settings(self):
         value=self.host.connections.read();config=value.get('files')
+        from .config import available
+        for row in value['servers'].values():
+            # Keep the saved permission, but withhold a connection whose program is
+            # missing, as an unbound shared root is withheld. The others are unaffected.
+            if not available(row):row['enabled']=False
         if not config:
             for row in value['servers'].values():
+                bind_working_folder(row, None)
                 bind_shared_root(row, [])
                 self.protect(row)
                 if sys.platform == 'win32':
@@ -262,6 +313,7 @@ class Files:
                 if known(row.get('command')):continue
             row['shared_folders']=shared if name in config['servers'] else []
             self.protect(row)
+            bind_working_folder(row, config['workspace'] if row['shared_folders'] else None)
             bind_shared_root(row, row['shared_folders'])
         if shared:
             try:root,entry,node=self.runtime()

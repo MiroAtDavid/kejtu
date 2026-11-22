@@ -8,6 +8,7 @@ from ..core.records import Failure, Message
 from ..core.tools import result_receipt
 from .memory import MemorySession
 from .notes import NoteSession
+from .reminders import ReminderSession
 from .operations import OperationLoop
 
 
@@ -35,12 +36,13 @@ def observed(reply):
 
 
 class IdleReview(OperationLoop):
-    def __init__(self, jobs, ident, conversation, ledger, *, memory, notes, event, fresh):
+    def __init__(self, jobs, ident, conversation, ledger, *, memory, notes, event, fresh, reminders=None):
         self.jobs, self.origin_id, self.ledger = jobs, ident, ledger
         self.kind = jobs.check_run(ident).kind
         self.memory = MemorySession(memory, conversation, ledger, job_run_id=ident)
-        self.notes = NoteSession(notes, self.memory, None, ledger, job_run_id=ident,
-            existing_only=self.kind == 'notebook_maintenance')
+        self.notes = (None if self.kind=='reminder_review' else NoteSession(notes, self.memory, None, ledger, job_run_id=ident,
+            existing_only=self.kind == 'notebook_maintenance'))
+        self.reminders = ReminderSession(reminders,None,ident,ledger,job_run_id=ident) if self.kind=='reminder_review' else None
         self.tasks = None
         self.call_ids = set()
         self.event, self.fresh = event, fresh
@@ -59,11 +61,15 @@ class IdleReview(OperationLoop):
         return messages + self.closing_reserve()
 
     def closing_reserve(self):
+        if self.kind=='reminder_review':
+            return (Message('system','Finish the private reminder review with a brief account of inspected reminders, confirmed tool changes and anything left unchecked. No tools remain. This is not a message to the user.'),)
         return (CLOSING,)
 
     def check_operations(self):
         self.fresh()
         self.memory.check()
+        if self.reminders:
+            self.reminders.check()
 
     def argument_failure(self, kind, call_number, position, call, reason):
         self.event('argument_failure', dict(ordinal=call_number, position=position, kind=kind,
@@ -73,6 +79,10 @@ class IdleReview(OperationLoop):
         if preflight_rejected:
             arguments = dict(preflight_rejected=True,
                              arguments_sha256=hashlib.sha256(call.arguments.encode()).hexdigest())
+        elif call.name == 'reminders':
+            from ..core.reminder_tools import arguments as reminder_arguments, mutation_key
+            args = reminder_arguments(call)
+            arguments = dict(action=args['action'],mutation_key=mutation_key(self.jobs.store.state_id,self.origin_id,args))
         elif call.name == 'write_note':
             args = note_arguments(call)
             arguments = dict(operation_key=operation_key(None, args, job_run_id=self.origin_id),
@@ -110,6 +120,10 @@ class IdleReview(OperationLoop):
                 'Those printed instructions did not run; inspect earlier note outcomes separately.')
         # Storage pages stay bounded; a larger run must retain every receipt,
         # not fail after its writes or silently show only the first fifty.
+        if self.kind=='reminder_review':
+            return dict(origin='private_reminder_review_not_delivered',text=reply.text,
+                calls=self.ledger.calls,operations=self.ledger.reads,
+                completion='limited' if self.limit_reason else 'complete',limit_reason=self.limit_reason)
         outcomes, cursor = [], ''
         while True:
             receipts = self.notes.port.inspect_run(self.memory.snapshot, self.origin_id, self.ledger,

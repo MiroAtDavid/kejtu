@@ -24,6 +24,8 @@ from ..core.search_providers import PROVIDERS as SEARCH_PROVIDERS
 from .conversation_titles import TitleRunner
 from .streaming import ForegroundStream
 from .skills import SkillControls
+from .shelf import ShelfControls
+from .installed_update import InstalledUpdate
 
 
 def canonical_digest(value) -> str:
@@ -44,6 +46,7 @@ class NativeApplication:
         self.web_backends = web_backends
         self.mcp_host = mcp_host
         self.skill_controls = SkillControls(store,skill_importer)
+        self.shelf_controls = ShelfControls(store, self.skill_controls, mcp_host)
         self.hybrid_memory = hybrid_memory
         self.maintenance_loop = None
         self.maintenance_active = None
@@ -57,7 +60,8 @@ class NativeApplication:
                                    reply_guide=REPLY_GUIDE, mcp_host=mcp_host)
         self.background = BackgroundRunner(store.jobs, model, provider=launch_profile.provider,
             reminders=store.reminders, memory=store.memory, notes=store.notes, research=store.research, web_backends=web_backends, mcp_host=mcp_host, before_run=self._before_background,
-            blocked=lambda: self.research_changes.locked() or self.model_controls is not None and self.model_controls.lock.locked())
+            blocked=lambda: self.research_changes.locked() or self.model_controls is not None and self.model_controls.lock.locked()
+                or self.update.holding)
         self.titles = TitleRunner(self, model)
         self.job_controls = JobControls(self)
         self.reminder_controls = ReminderControls(self)
@@ -78,8 +82,10 @@ class NativeApplication:
         self.build_fingerprint = build_fingerprint
         self.workspace_controls = workspace_factory(self) if workspace_factory is not None else None
         self.service.workspace = self.workspace_controls
+        # Installed Linux only: holds new work while the package is being replaced.
+        self.update = InstalledUpdate.for_app(self, store)
 
-    def creation_intent(self):
+    def creation_intent(self,project_id=None,module_id=None):
         value = {'profile': asdict(self.profile), 'history': self.history,
                  'memory': self.memory, 'notes_write': self.notes_write, 'hybrid_memory':self.hybrid_memory and self.memory}
         if self.task_tools:
@@ -89,7 +95,12 @@ class NativeApplication:
         # Bind the selected prompt in every mode: a pending create from an older
         # default must not resolve to different instructions after an update.
         value['system_prompt_sha256'] = hashlib.sha256(self._system_prompt().encode('utf-8')).hexdigest()
-        return canonical_digest(value)
+        base=canonical_digest(value)
+        if project_id is not None or module_id is not None:
+            scope=dict(creation_intent_sha256=base,project_id=project_id)
+            if module_id is not None:scope['module_id']=module_id
+            return canonical_digest(scope)
+        return base
 
     @property
     def ingress_context_limit(self):
@@ -98,23 +109,32 @@ class NativeApplication:
         # saved Profile and the existing Ledger for admission and budgeting.
         return max(self.profile.context_limit, self.store.maximum_profile_context())
 
-    def start_maintenance(self):
-        if self.workspace_controls is not None:self.workspace_controls.media.start()
-        if self.web_backends is not None:
+    def start_restores(self, *, missing_only=False):
+        """Restore saved search and model keys from the desktop keyring, then start the
+        scheduler. After a package update that stopped them, only the stopped ones run again."""
+        def needed(task):
+            return not missing_only or task is not None and task.cancelled()
+        if self.web_backends is not None and needed(self.web_restore):
             self.web_restore = asyncio.create_task(self.web_backends.restore(), name="restore-search-credential")
         if self.model_controls is None:
-            self.background.start()
-        else:
+            if not missing_only:
+                self.background.start()
+        elif needed(self.model_restore):
             async def restore_models():
                 await self.model_controls.session.restore()
                 self.background.start()
             self.model_restore = asyncio.create_task(restore_models(), name='restore-model-credential')
+
+    def start_maintenance(self):
+        if self.workspace_controls is not None:self.workspace_controls.media.start()
+        self.start_restores()
         if not self.hybrid_memory or self.maintenance_loop is not None:
             return
         async def run():
             while True:
                 await asyncio.sleep(5)
-                if self.tasks or self.store.active_turn_id() is not None or self.background.active is not None or self.titles.active is not None:
+                if (self.tasks or self.store.active_turn_id() is not None or self.background.active is not None
+                        or self.titles.active is not None or self.update.holding):
                     continue
                 self.maintenance_active = asyncio.create_task(self.store.maintain_memory())
                 try:
@@ -131,6 +151,18 @@ class NativeApplication:
         if self.maintenance_active is not None:
             self.maintenance_active.cancel()
             await asyncio.gather(self.maintenance_active,return_exceptions=True)
+
+    async def _settle_background(self, reason, busy, refusal):
+        """Cancel and join background work before a tool-settings mutation.
+
+        The reason must cancel: the foreground/activity reasons only pause research.
+        Native dispatch is concurrent, so foreground work can be admitted while the
+        cancellation is awaited. The caller's own busy rule is checked again here,
+        and its synchronous mutation follows with no further await.
+        """
+        await self.background.interrupt(reason)
+        if busy() or self.background.active is not None:
+            raise refusal
 
     def _system_prompt(self):
         return system_prompt(self.standing_profile, with_history=self.history,
@@ -214,15 +246,32 @@ class NativeApplication:
             self.streams.terminal(turn_id, 'failed')
 
     async def dispatch(self, operation: str, args: dict) -> dict:
-        if operation == 'conversation.title':
-            return await self._dispatch(operation, args)
-        self.dispatching += 1
+        # One admission point for every operation: during a package update only
+        # watching, reading and stopping work are admitted.
+        self.update.admit(operation)
+        counted = self.update.counted(operation)
+        if counted:
+            self.update.working += 1
         try:
-            return await self._dispatch(operation, args)
+            if operation == 'conversation.title':
+                return await self._dispatch(operation, args)
+            self.dispatching += 1
+            try:
+                result = await self._dispatch(operation, args)
+            finally:
+                self.dispatching -= 1
+            if operation == 'hello' and self.update.enabled:
+                result = dict(result, update=self.update.status())
+            return result
         finally:
-            self.dispatching -= 1
+            if counted:
+                self.update.working -= 1
 
     async def _dispatch(self, operation: str, args: dict) -> dict:
+        if operation == 'update.status':
+            if not self.update.enabled:
+                raise Failure('unsupported_operation', 'Package updates apply to the installed app only.')
+            return self.update.status()
         if operation == 'workspace':
             if self.workspace_controls is None:raise Failure('workspace_unavailable','Workspace adapters are not configured.')
             return await self.workspace_controls.dispatch(args['action'],args['payload_json'])
@@ -247,6 +296,51 @@ class NativeApplication:
                         await self.background.interrupt('job_definition_changed')
                     return self.store.research.local(change)
             return self.store.research.local(dict(action=action,**args))
+        if operation.startswith('shelf.'):
+            if operation == 'shelf.catalogue':
+                return self.shelf_controls.catalogue()
+            if operation == 'shelf.status':
+                return self.shelf_controls.status()
+            if operation == 'shelf.describe':
+                # Reads a package folder in the disposable reader; nothing is recorded or changed.
+                return await self.shelf_controls.describe(args)
+            # What a backup takes of packages. A choice is a small settings file of its own: it changes
+            # no connection, skill or record, so it does not wait for a reply to finish.
+            if operation == 'shelf.data':
+                return await self.shelf_controls.data()
+            if operation == 'shelf.data_choice':
+                return await self.shelf_controls.data_choice(args)
+            if operation == 'shelf.restored_seen':
+                return await self.shelf_controls.restored_seen()
+            busy = lambda: (self.tasks or self.store.active_turn_id() is not None or self.skill_controls.lock.locked()
+                            or self.shelf_controls.lock.locked() or (self.mcp_host is not None and self.mcp_host.lock.locked()))
+            refusal = Failure('native_busy', 'Finish the current reply or import before changing installed packages.')
+            if busy():
+                raise refusal
+            # The intent covers every argument but the key, so a reused key with a
+            # different request is refused rather than mistaken for a retry.
+            intent = canonical_digest(dict({k: v for k, v in args.items() if k != 'mutation_key'}, operation=operation))
+            if self.shelf_controls.changes_connections(operation, args):
+                # As for any connection change: settle background users first. The
+                # coordinator then changes connections with no wait in between.
+                await self._settle_background('job_connections_changed', busy, refusal)
+            # Package credential preparation owns the MCP lock during its awaits.
+            # The final settlement therefore excludes that lock, but still joins
+            # background users and checks foreground/skill work before publication.
+            inside = lambda: (self.tasks or self.store.active_turn_id() is not None or self.skill_controls.lock.locked())
+            settle = lambda: self._settle_background('job_connections_changed', inside, refusal)
+            if operation == 'shelf.install':
+                return await self.shelf_controls.install(args, intent, settle=settle)
+            if operation == 'shelf.update':
+                # The coordinator prepares the new version first, which waits on a download,
+                # so it settles background work once more right before it switches connections.
+                # It holds its own lock by then; a reply or import that began meanwhile still
+                # stops the switch, and the old version stays in use.
+                return await self.shelf_controls.update(args, intent, settle=settle)
+            if operation == 'shelf.repair':
+                return await self.shelf_controls.repair(args, intent, settle=settle)
+            if operation == 'shelf.remove':
+                return await self.shelf_controls.remove(args, intent, settle=settle)
         if operation.startswith('skills.'):
             library=self.store.skills
             if operation=='skills.status':return library.status(enabled=args.get('enabled_only',False),offset=args.get('offset',0),limit=20)
@@ -274,15 +368,24 @@ class NativeApplication:
                 value=self.mcp_host.files.disable(args['expected_revision'])
                 await self.background.interrupt('job_files_changed')
                 return value
-            if self.tasks or self.store.active_turn_id() is not None or self.mcp_host.lock.locked():
-                raise Failure('native_busy','Finish or stop the current reply before changing shared folders. Disable remains available.')
-            await self.background.interrupt('job_files_changed')
+            busy=lambda:self.tasks or self.store.active_turn_id() is not None or self.mcp_host.lock.locked()
+            refusal=Failure('native_busy','Finish or stop the current reply before changing shared folders. Disable remains available.')
+            if busy():raise refusal
+            await self._settle_background('job_files_changed',busy,refusal)
             if operation=='files.save':return self.mcp_host.files.save(args)
         if operation.startswith('mcp.'):
             if self.mcp_host is None:
                 raise Failure('mcp_unavailable', 'MCP connections are not available in this session.')
             if operation == 'mcp.status':
                 return self.mcp_host.connections.status()
+            if operation == 'mcp.schema':
+                return self.mcp_host.schema_page(args['server'], args['tool'],
+                    args['expected_revision'], args['sha256'], args['offset'])
+            if operation == 'mcp.sign_in.read':
+                return self.mcp_host.oauth.status(args['server'])
+            if operation == 'mcp.sign_in' and args['action'] == 'cancel':
+                await self.mcp_host.oauth.cancel()
+                return self.mcp_host.oauth.status(args['server'])
             if operation == 'mcp.results':
                 return dict(items=self.store.mcp.list(args['turn_id']))
             if operation == 'mcp.result':
@@ -290,19 +393,38 @@ class NativeApplication:
                 value = self.store.mcp.load(args['result_id'], args['turn_id'])
                 page = exact_page(args['result_id'], value['body'], args['offset'], args['maximum_bytes']).envelope()
                 return dict(content=page['content'], next_offset=page['next_offset'], total_bytes=page['total_bytes'])
-            busy = self.tasks or self.store.active_turn_id() is not None or self.mcp_host.lock.locked()
-            if busy and not (operation == 'mcp.update' and args['action'] == 'disable'):
-                raise Failure('busy', 'Finish or stop current work before configuring or testing a connection.')
+            busy = lambda: self.tasks or self.store.active_turn_id() is not None or self.mcp_host.lock.locked()
+            refusal = Failure('busy', 'Finish or stop current work before configuring or testing a connection.')
+            if busy() and not (operation == 'mcp.update' and args['action'] == 'disable'):
+                raise refusal
             if operation == 'mcp.inspect':
                 return await self.mcp_host.inspect(args['server'], args['offset'])
+            # A saved change revokes live sessions only on their next observation.
+            # Settle background users first; disabling stays an immediate revocation.
+            if operation in ('mcp.browser', 'mcp.setup', 'mcp.import', 'mcp.sign_in') or (
+                    operation == 'mcp.update' and args['action'] != 'disable'):
+                await self._settle_background('job_connections_changed', busy, refusal)
             if operation == 'mcp.browser':
                 return self.mcp_host.add_browser(args['expected_revision'])
             if operation == 'mcp.setup':
                 return self.mcp_host.setup(args['server'], args['expected_revision'], use_shared_folders=args['use_shared_folders'])
+            def recheck():
+                # Saving or deleting keys waits for the desktop keyring. Work admitted
+                # during that wait refuses the change before anything is written.
+                if self.tasks or self.store.active_turn_id() is not None or self.background.active is not None:
+                    raise refusal
             if operation == 'mcp.import':
-                return self.mcp_host.import_config(args['configuration'], args['expected_revision'])
+                return await self.mcp_host.import_configuration(args['configuration'], args['expected_revision'],
+                                                                before_save=recheck)
+            if operation == 'mcp.sign_in':
+                if args['action'] == 'start':
+                    return await self.mcp_host.oauth.begin(args['server'], args['expected_revision'], recheck)
+                if args['action'] == 'finish':
+                    return await self.mcp_host.oauth.finish(args['server'], recheck)
+                if args['action'] == 'disconnect':
+                    return await self.mcp_host.oauth.disconnect(args['server'], args['expected_revision'], recheck)
             if operation == 'mcp.update':
-                return self.mcp_host.update(args)
+                return await self.mcp_host.change(args, before_save=recheck)
         if operation in ('web.status', 'web.key'):
             if self.web_backends is None:
                 raise Failure('web_provider_unavailable', 'Web adapters are unavailable in this session.')
@@ -357,6 +479,16 @@ class NativeApplication:
                 return self.store.onboarding.change(**args)
             finally:
                 self.service.working_context.clear()
+        if operation == 'interests.list':
+            return self.store.interests.list()
+        if operation == 'interests.change':
+            if self.tasks or self.store.active_turn_id() is not None:
+                raise Failure('busy', 'Finish the reply before changing an interest.')
+            async with self.research_changes:
+                await self.background.foreground()
+                result = self.store.interests.control(**args, now=self.background.wall())
+                self.service.working_context.clear()
+                return result
         if operation == 'preferences.read':
             return self.store.memory.preference_settings.read()
         if operation == 'preferences.save':
@@ -401,13 +533,15 @@ class NativeApplication:
                 'creation_intent_sha256': self.creation_intent()}
         if operation == 'conversation.create':
             key = self._id(args['mutation_key'])
-            intent = self.creation_intent()
+            project_id = self._id(args['project_id']) if 'project_id' in args else None
+            module_id = self._id(args['module_id']) if 'module_id' in args else None
+            intent = self.creation_intent(project_id,module_id)
             conversation_id = await self.service.create_conversation(self.profile,
                 self._system_prompt(),
                 history_enabled=self.history, history_policy=HistoryPolicy.STANDARD if self.history else None,
                 tasks_enabled=self.task_tools and self.memory,
                 memory_enabled=self.memory, notes_enabled=self.notes_write, hybrid_memory=self.hybrid_memory and self.memory,
-                mutation_key=key, intent_sha256=intent)
+                mutation_key=key, intent_sha256=intent, project_id=project_id, module_id=module_id)
             config_id = self.store.configuration_id(conversation_id)
             return {'conversation_id': conversation_id, 'configuration_id': config_id,
                     'mutation_key': key, 'intent_sha256': intent}
@@ -478,6 +612,8 @@ class NativeApplication:
                 conversation_id = self._id(args.get('conversation_id'))
                 result = self.store.note_removal_status(conversation_id, self._id(args['mutation_key']), include_intent=True)
                 return self._removal_receipt(result, result) if result['status'] == 'removed' else {'status': 'absent'}
+            if kind == 'shelf.operation':
+                return self.shelf_controls.lookup(self._id(args['mutation_key']))
             if kind not in ('conversation.create', 'turn.submit'):
                 raise Failure('invalid_request', 'Mutation lookup kind is invalid.')
             return self.store.lookup_mutation(kind, self._id(args['mutation_key']))
@@ -573,6 +709,8 @@ class NativeApplication:
         if operation == 'turn.cancel':
             turn_id = self._id(args['turn_id'])
             row = self.store.turn_metadata(turn_id)
+            if self.mcp_host is not None:
+                await self.mcp_host.close_terminals(row['conversation_id'])
             if row['status'] != 'running':
                 return {'status': 'already_terminal', 'turn_status': row['status']}
             task = self.tasks.get(turn_id)
@@ -593,6 +731,10 @@ class NativeApplication:
                 {key: intent[key] for key in ('conversation_id', 'note_id', 'preview_token')})}
 
     async def close(self):
+        await self.update.close()
+        if self.mcp_host is not None:
+            await self.mcp_host.close_terminals(shutdown=True)
+            await self.mcp_host.oauth.cancel()
         if self.model_controls is not None:
             await self.model_controls.chatgpt.cancel()
         if self.workspace_controls is not None:await self.workspace_controls.media.close()

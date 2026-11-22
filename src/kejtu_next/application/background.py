@@ -24,6 +24,8 @@ from .review import IdleReview, observed as review_observed
 from .care import NotebookCare
 from .research import ResearchRun, GUIDANCE as RESEARCH_GUIDANCE
 from .research_pause import ResearchPause
+from .interests import InterestRun
+from ..core.interests import KIND as INTEREST_KIND
 from .web import WebSession
 
 
@@ -237,8 +239,9 @@ class BackgroundRunner:
         ident = reservation['id']
         definition = JobDefinition.from_record(reservation['definition'])
         started = self.clock()
-        reviewing = definition.kind in REVIEW_KINDS
+        reviewing = definition.kind in (*REVIEW_KINDS, 'reminder_review')
         researching = definition.kind == 'research'
+        following = definition.kind == INTEREST_KIND
         # Still inside _execute's owned task: failures below are settled by the
         # same terminal handler, including missing review ports before any IO.
         ledger = Ledger(definition.profile, started, execution_limits=ExecutionLimits(**reservation['execution_limits']) if 'execution_limits' in reservation else ExecutionLimits(
@@ -264,7 +267,7 @@ class BackgroundRunner:
                 full_generation_reserve=request.profile.generation_limit, deadline_seconds=max(0, ledger.deadline - self.clock()))
             # A note tool's exact bodies already have source/revision owners.
             # Do not turn its transient model transcript into undeletable copies.
-            if reviewing or researching:
+            if reviewing or researching or following:
                 attempt['transcript'] = dict(messages=len(inputs), exact_request_fingerprint=attempt['accounting']['request_fingerprint'])
             else:
                 attempt['messages'] = [message_record(m) for m in inputs]
@@ -279,7 +282,7 @@ class BackgroundRunner:
             if self.clock() >= ledger.deadline:
                 raise Failure('timeout', 'Background provider exceeded its shared deadline.')
             ledger.account(reply)
-            event('model_observed', dict(ordinal=ledger.calls, reply=review_observed(reply) if reviewing or researching else asdict(reply)))
+            event('model_observed', dict(ordinal=ledger.calls, reply=review_observed(reply) if reviewing or researching or following else asdict(reply)))
             ledger.accounting.observe(inputs, reply)
             if (reply.input_tokens is not None and reply.input_tokens + definition.profile.generation_limit
                     + definition.profile.safety_margin + 64 > definition.profile.context_limit):
@@ -298,6 +301,21 @@ class BackgroundRunner:
                 fresh()
                 if not self.owns_provider(definition.profile.provider):
                     raise Failure('job_provider', 'This native session does not own the explicitly selected job provider.')
+                if following:
+                    if self.research is None or self.web_backends is None:
+                        raise Failure('interest_unavailable', 'Interest following requires the shared memory and web owners.')
+                    ledger = Ledger(definition.profile, started, with_history=True, with_memory=True,
+                        hybrid_memory=True, web_only=True, execution_limits=ledger.execution_limits)
+                    ledger.accounting = RequestAccounting(definition.profile, request_schema(),
+                        counter=getattr(self.model, 'count_request_tokens', None))
+                    ledger.accounting.provider_first = await model_context_capability(self.model, definition.profile, ledger.deadline)
+                    procedure = InterestRun(self.research.store.interests, ident, ledger, self.web_backends,
+                        fresh=fresh, wall=self.wall, clock=self.clock)
+                    result = await procedure.run(complete)
+                    procedure.check_operations()
+                    event('procedure_result', result)
+                    self.jobs.finish(ident, status='completed', now=self.wall(), result=json.dumps(result))
+                    return
                 if researching:
                     if self.research is None:
                         raise Failure('research_unavailable','Background assignment adapters are unavailable.')
@@ -346,16 +364,17 @@ class BackgroundRunner:
                     self.jobs.finish(ident,status='completed',now=self.wall(),result=json.dumps(result,ensure_ascii=False,separators=(',',':')))
                     return
                 if reviewing:
-                    if self.memory is None or self.notes is None:
+                    if self.memory is None or (self.notes is None and definition.kind!='reminder_review'):
                         raise Failure('job_procedure_unavailable', 'The private review requires the shared memory and note owners.')
                     conversation = self.jobs.review_conversation(ident)
                     ledger = Ledger(definition.profile, started, with_history=True, with_memory=True,
-                        with_notes=True, notes_write=definition.permissions.write_notes,
+                        with_notes=definition.kind!='reminder_review', notes_write=definition.permissions.write_notes,
+                        with_reminders=definition.kind=='reminder_review',
                         hybrid_memory=conversation.hybrid_memory if conversation else True,
                         history_policy=conversation.history_policy if conversation else None,
                         notebook_only=True, execution_limits=ledger.execution_limits)
                     ledger.accounting = RequestAccounting(definition.profile, request_schema(history=True,
-                        memory=True, notes=True, notes_write=ledger.notes_write,
+                        memory=True, notes=ledger.with_notes, notes_write=ledger.notes_write, reminders=ledger.with_reminders,
                         hybrid=ledger.hybrid_memory, notebook_only=True), counter=getattr(self.model, 'count_request_tokens', None))
                     if definition.kind == 'notebook_care':
                         ledger.accounting = RequestAccounting(definition.profile, request_schema(),
@@ -377,6 +396,15 @@ class BackgroundRunner:
                 ledger.accounting.provider_first = await model_context_capability(self.model, definition.profile, ledger.deadline)
                 fresh(snapshot)
                 if reviewing:
+                    if definition.kind=='reminder_review':
+                        if self.reminders is None:
+                            raise Failure('reminder_unavailable','The reminder owner is unavailable.')
+                        with self.reminders.model.actor(None,ident,ledger,ident):
+                            self.reminders.poll(self.wall())
+                            page=self.reminders.store.reminder_attention.model_page(None,now=self.wall(),limit=20)
+                        if not page['items'] and page['next_cursor'] is None:
+                            self.jobs.finish(ident,status='completed',now=self.wall(),result=json.dumps(dict(origin='private_reminder_review_not_delivered',text='No eligible due reminders to review.',calls=0,operations=0)))
+                            return
                     if definition.kind == 'notebook_care':
                         review = NotebookCare(self.jobs.care, ident, ledger, self.memory, self.notes,
                             fresh=lambda: self._eligible(self.jobs.check_run(ident), epoch), wall=self.wall, clock=self.clock)
@@ -388,6 +416,7 @@ class BackgroundRunner:
                         return
                     review = IdleReview(self.jobs, ident, conversation, ledger,
                         memory=self.memory, notes=self.notes, event=event,
+                        reminders=self.reminders.model if self.reminders else None,
                         # Original-input revalidation surrounds each provider
                         # call and publication. Each write also checks its exact
                         # origin inside the note transaction. Between operations,

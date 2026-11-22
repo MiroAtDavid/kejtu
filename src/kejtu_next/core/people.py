@@ -66,6 +66,24 @@ def terms(value):
     return sorted(set(re.findall(r'\w+', value.casefold())))[:64]
 
 
+def read_identity(value):
+    """Exact delivered assertion/source identities, without names or quotations.
+
+    Follow only the owned read structure, including relationship paths and merge
+    evidence. Quoted text and signed read authority never enter dependency audit.
+    """
+    record = {key: value[key] for key in (
+        'id', 'assertion_id', 'revision', 'person_id', 'declared_person_id',
+        'subject', 'declared_subject', 'object', 'declared_object', 'target_id',
+        'artifact_id', 'conversation_id', 'turn_id', 'sha256', 'offset', 'end') if key in value}
+    if 'source' in value:
+        record['source'] = read_identity(value['source'])
+    for key in ('identity_sources', 'path'):
+        if key in value:
+            record[key] = [read_identity(item) for item in value[key]]
+    return record
+
+
 def validate(value):
     try:
         if not isinstance(value, dict) or not isinstance(value.get('action'), str) or value['action'] not in FIELDS:

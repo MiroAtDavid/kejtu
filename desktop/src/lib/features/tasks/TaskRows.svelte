@@ -1,19 +1,31 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
   import type { TaskRecord } from "$lib/api/wire.generated";
+  import { descriptionPreview } from "./task-description";
   export let items: TaskRecord[] = [];
   export let disabled = false;
   export let completionDisabled = false;
-  export let selectedId = "";
-  export let editor: Snippet | undefined = undefined;
-  export let editorId = "";
+  /** The completion tick; a summary elsewhere (a project page) leaves it to
+   *  the Tasks page, which owns the durable change. */
+  export let completion = true;
+  /** Open tasks in due order read as Today / This week / Later. */
+  export let grouped = false;
+  /** Or headings of the caller's choosing (a project's modules), in the
+   *  order the rows arrive. */
+  export let groupBy: ((task: TaskRecord) => string) | null = null;
   export let onOpen: (task: TaskRecord) => void;
-  export let onComplete: (task: TaskRecord, done: boolean) => void;
+  export let onComplete: (task: TaskRecord, done: boolean) => void = () => {};
   export let placementLabel: (task: TaskRecord) => string = () => "";
-  const today = () => {
+  /** A small control at the end of each row (the Calendar's Reserve). */
+  export let action: Snippet<[TaskRecord]> | undefined = undefined;
+  const stamp = (d: Date) =>
+    `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const today = () => stamp(new Date());
+  function weekEnd() {
     const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  };
+    d.setDate(d.getDate() + 7);
+    return stamp(d);
+  }
   function dateLabel(value: string) {
     if (value === today()) return "Today";
     return new Intl.DateTimeFormat(undefined, {
@@ -24,14 +36,46 @@
         : {}),
     }).format(new Date(value + "T12:00:00"));
   }
+  // Carried-forward work stays on today's plate; undated work waits in Later.
+  const labels = ["Today", "This week", "Later"];
+  function groupOf(task: TaskRecord) {
+    if (!task.due) return 2;
+    if (task.due <= today()) return 0;
+    return task.due <= weekEnd() ? 1 : 2;
+  }
+  function byLabel(rows: TaskRecord[], label: (task: TaskRecord) => string) {
+    const map = new Map<string, TaskRecord[]>();
+    for (const task of rows) {
+      const key = label(task);
+      map.set(key, [...(map.get(key) ?? []), task]);
+    }
+    return [...map].map(([label, rows]) => ({ label, rows }));
+  }
+  $: sections = groupBy
+    ? byLabel(items, groupBy)
+    : grouped
+      ? labels
+          .map((label, index) => ({
+            label,
+            rows: items.filter((task) => groupOf(task) === index),
+          }))
+          .filter((section) => section.rows.length)
+      : [{ label: "", rows: items }];
 </script>
 
-<ul class="task-list">
-  {#each items as task (task.id)}
-    <li class:selected={selectedId === task.id}>
-      <div class="task-row-heading">
-        {#if task.outcome !== "cancelled"}<input
+{#each sections as section (section.label)}
+  {#if section.label}<h3 class="cp-cap">{section.label}</h3>{/if}
+  <ul class="task-list cp-lines" aria-label={section.label || undefined}>
+    {#each section.rows as task (task.id)}
+      {@const urgency = task.urgency ?? "medium"}
+      {@const earlier =
+        task.outcome === "open" && !!task.due && task.due < today()}
+      {@const note = descriptionPreview(task.description ?? "")}
+      {@const place = placementLabel(task)}
+      <li class="cp-line" data-task={task.id}>
+        {#if completion && task.outcome !== "cancelled"}<input
             type="checkbox"
+            class="cp-tick"
             checked={task.outcome === "done"}
             disabled={disabled || completionDisabled}
             aria-label={`${task.outcome === "done" ? "Reopen" : "Complete"} ${task.title}`}
@@ -40,113 +84,115 @@
         <button
           class="task-row"
           aria-label={task.title}
-          aria-pressed={selectedId === task.id}
-          aria-expanded={selectedId === task.id}
-          aria-controls={selectedId === task.id ? editorId : undefined}
           {disabled}
           on:click={() => onOpen(task)}
         >
-          <span class="task-main"
-            ><span class:done={task.outcome === "done"}>{task.title}</span
-            >{#if placementLabel(task)}<small>{placementLabel(task)}</small
-              >{/if}</span
+          <span class="title" class:done={task.outcome === "done"}
+            >{task.title}</span
           >
+          <!-- Every row names its urgency, Medium included (owner, 19 Nov). -->
           <span
-            class="date"
-            class:earlier={task.outcome === "open" &&
-              !!task.due &&
-              task.due < today()}
-            >{#if task.due}<time datetime={task.due}>{dateLabel(task.due)}</time
-              >{#if task.outcome === "open" && task.due < today()}<small
-                  >Still open</small
-                >{/if}{:else}<small>No due date</small>{/if}</span
+            class="cp-tag urgency"
+            data-urgency={urgency}
+            aria-label={`Urgency: ${urgency}`}
+            >{urgency === "high"
+              ? "High"
+              : urgency === "low"
+                ? "Low"
+                : "Medium"}</span
+          >
+          <span class="note">{note}</span>
+          {#if place}<span class="place">{place}</span>{/if}
+          <span class="date" class:earlier
+            >{#if task.due}<time datetime={task.due}
+                >{earlier ? "From " : ""}{dateLabel(task.due)}</time
+              >{:else}Anytime{/if}</span
           >
         </button>
-      </div>
-      {#if selectedId === task.id && editor}
-        <div class="task-row-editor">{@render editor()}</div>
-      {/if}
-    </li>
-  {/each}
-</ul>
+        {#if action}{@render action(task)}{/if}
+      </li>
+    {/each}
+  </ul>
+{/each}
 
 <style>
-  .task-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  h3.cp-cap {
+    margin: 20px 0 7px;
   }
-  li {
-    min-width: 0;
-    border-bottom: 1px solid var(--ke-border);
-  }
-  .task-row-heading {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 10px;
-  }
-  li.selected > .task-row-heading,
-  .task-row-heading:hover {
-    background: var(--ke-accent-soft);
-    border-radius: var(--ke-radius-sm);
-  }
-  .task-row-editor {
-    min-width: 0;
-  }
-  .task-row-editor :global(.task-editor) {
-    margin: 8px 0 16px;
-  }
-  input {
-    width: 17px;
-    height: 17px;
-    flex: none;
-    accent-color: var(--ke-accent);
-    cursor: pointer;
-  }
-  input:disabled {
-    cursor: default;
+  h3.cp-cap:first-child {
+    margin-top: 0;
   }
   .task-row {
     display: flex;
+    flex: 1;
     align-items: center;
-    gap: 16px;
-    width: 100%;
+    gap: 10px;
     min-width: 0;
-    text-align: left;
-    padding: 15px 2px;
+    min-height: 42px;
     margin: 0;
+    padding: 0;
     border: 0;
+    border-radius: var(--ke-radius-sm);
     background: transparent;
     color: var(--ke-text-primary);
     font: inherit;
+    text-align: left;
     cursor: pointer;
   }
-  .task-main {
-    flex: 1;
-    min-width: 0;
-    font-size: var(--ke-text-base);
-    overflow-wrap: anywhere;
+  .task-row:hover:not(:disabled) {
+    background: transparent;
   }
-  small {
-    display: block;
-    font-size: var(--ke-text-xs);
+  .title,
+  .note,
+  .place {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .title {
+    flex: 0 1 auto;
+    font-size: var(--ke-text-sm);
+  }
+  .note {
+    flex: 1 1 0;
     color: var(--ke-text-tertiary);
-    margin-top: 3px;
+  }
+  .place {
+    flex: 0 1 auto;
+    max-width: 34%;
+    color: var(--ke-text-tertiary);
+    font-size: 11.5px;
   }
   .date {
     flex: none;
+    min-width: 64px;
+    color: var(--ke-text-tertiary);
+    font-size: 11.5px;
     text-align: right;
-    font-size: var(--ke-text-xs);
-    color: var(--ke-text-secondary);
+    white-space: nowrap;
   }
-  /* Carried-forward open work stays visible with its date, without an alarm
+  /* Carried-forward open work keeps its date, a touch firmer, without an alarm
      word or warning colour that makes the list feel like a backlog of failure. */
-  .earlier small {
-    font-style: italic;
+  .earlier {
+    color: var(--ke-text-primary);
+    font-weight: 500;
+  }
+  .urgency[data-urgency="high"] {
+    color: var(--ke-text-primary);
+    font-weight: 600;
   }
   .done {
-    text-decoration: line-through;
     color: var(--ke-text-secondary);
+    text-decoration: line-through;
+  }
+  @media (max-width: 560px) {
+    .note,
+    .place {
+      display: none;
+    }
+    .title {
+      flex: 1 1 auto;
+    }
   }
 </style>

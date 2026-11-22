@@ -74,7 +74,7 @@ class Course:
     folder: str | None = None
 
     def __post_init__(self):
-        text(self.title, 'Section title')
+        text(self.title, 'Module title')
         identity(self.semester_id, optional=True)
         if self.folder is not None:
             text(self.folder, 'Resources folder', 4096)

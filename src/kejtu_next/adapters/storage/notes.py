@@ -183,7 +183,7 @@ class NoteStore:
             raise Failure('note_origin_invalid', 'The origin is not this conversation\'s running turn.')
         # Bind to the exact existing source, not a model-authored provenance label.
         self.store._history.body(row['user_id'], 'user_message', ledger, 4 * ledger.profile.context_limit)
-        return row
+        return dict(row,workspace=self.store._history.workspace_context(turn_id,ledger))
 
     def scope_job(self, snapshot, run_id, ledger):
         """Genuine private-review origin; never a surrogate foreground turn."""
@@ -407,7 +407,7 @@ class NoteStore:
         # Earlier work keeps its admission-time bounds when current settings change.
         limits = self.store.execution.for_turn(turn_id)
         names = {'write_note', 'note_outcome', 'search_memory', 'read_memory',
-                 'search_history', 'read_history', 'read_reference', 'personal_tasks', 'research_tasks', 'reminders', 'people', 'web_search', 'web_read', 'mcp_tools', 'mcp_call', 'mcp_read','list_skills','read_skill','skill_files',
+                 'search_history', 'read_history', 'read_reference', 'personal_tasks', 'research_tasks', 'reminders', 'background_interests', 'people', 'web_search', 'web_read', 'mcp_tools', 'mcp_call', 'mcp_read','list_skills','read_skill','skill_files',
                  'university', 'media'}
         deliveries = {'started', 'prepared', 'submitted', 'failed', 'interrupted'}
         statuses = {'complete', 'page', 'not_delivered', 'not_executed', 'committed',

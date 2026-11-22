@@ -108,7 +108,20 @@ pub fn create_main(app: &mut tauri::App) -> tauri::Result<()> {
         .iter()
         .find(|w| w.label == "main")
         .expect("main window configuration");
-    WebviewWindowBuilder::from_config(app, config)?
+    let builder = WebviewWindowBuilder::from_config(app, config)?;
+    // Kejtu draws its own frame. Where the desktop composites windows, the
+    // corners outside the page's rounded surface show through (chat.css owns
+    // the shape); without a compositor they would be black, so the frame stays
+    // square. The mark is set before the page's first script.
+    #[cfg(target_os = "linux")]
+    let builder = if gtk::gdk::Screen::default().is_some_and(|screen| screen.is_composited()) {
+        builder
+            .transparent(true)
+            .initialization_script("document.documentElement.dataset.windowFrame = \"rounded\";")
+    } else {
+        builder
+    };
+    builder
         .on_new_window(move |url, features| {
             if !chat_url(&url, &origin)
                 || handle

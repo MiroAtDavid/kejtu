@@ -62,7 +62,9 @@
       else
         error =
           $workspace.error ||
-          "The section folder could not be saved. Resolve any pending section change before trying again.";
+          // A package update refused it before anything ran; Save elsewhere still works.
+          $workspace.notice ||
+          "The module folder could not be saved. Resolve any pending module change before trying again.";
     } catch (caught) {
       if (pending === current) error = String(caught);
     } finally {
@@ -83,7 +85,7 @@
 >
   {#if pending}
     <p class="eyebrow">{pending.course.data.title}</p>
-    <h2 id="project-save-title">Give this section a folder?</h2>
+    <h2 id="project-save-title">Give this module a folder?</h2>
     <p class="description">
       Keep its documents together, or save this copy somewhere else.
     </p>
@@ -98,7 +100,7 @@
         disabled={locked || !selected}
         on:click={useFolder}
       >
-        {saving ? "Saving section folder…" : "Use folder and continue"}
+        {saving ? "Saving module folder…" : "Use folder and continue"}
       </button>
     {:else}
       <button
@@ -106,7 +108,7 @@
         disabled={locked}
         on:click={() => (choosing = true)}
       >
-        Choose or create a section folder…
+        Choose or create a module folder…
       </button>
     {/if}
     {#if error}<p class="error" role="alert">{error}</p>{/if}

@@ -1,11 +1,8 @@
 /* Keep document controls above the generic Study button rules, independent of
  * route CSS import order. The embedded PDF uses the same 32px control row. */
-/* Reader geometry: 70px page gutters, 14px palette inset and a 44px rail.
- * A 14px paper inset separates the Markdown surface from surrounding controls. */
 .workspace {
   --document-page-side: 70px;
   --document-page-top: 14px;
-  --document-rail-width: 44px;
   --document-tool-inset: 14px;
   --document-paper-shadow: 0 2px 8px rgb(0 0 0 / 0.055);
 }
@@ -51,6 +48,28 @@
   width: 30px;
   height: 32px;
   padding: 0;
+}
+/* One segmented view choice for every document: Markdown Write/Source/Preview
+ * and the PDF reader's rendered page/exact text. */
+.workspace .document-toolbar .mode-rail {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 1px;
+}
+.workspace .document-toolbar .mode-rail button {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  padding: 0;
+  border: 1px solid transparent;
+}
+.workspace .document-toolbar .mode-rail button[aria-pressed="true"] {
+  border-color: var(--ke-border-strong);
+}
+.workspace .document-toolbar .mode-rail button:focus-visible {
+  outline-offset: -1px;
 }
 .workspace .document-toolbar .state,
 .workspace .document-toolbar .status {
@@ -105,4 +124,25 @@
 .markdown-editor .surface .cm-scroller,
 .markdown-editor .surface .preview {
   overscroll-behavior: contain;
+}
+
+/* Markdown is a document on the window surface. Keep PDF and Word paper tokens
+ * unchanged; override the embedded Markdown bundle with scoped selectors. */
+.workspace .markdown-editor {
+  --document-page-side: 0px;
+  --document-page-top: 0px;
+  --document-rich-padding-block: 18px;
+  --document-rich-padding-inline: 20px;
+  --document-paper-shadow: none;
+}
+.markdown-editor .surface .cm-content,
+.markdown-editor .surface .kejtu-mdx .kejtu-rich-paper[contenteditable] {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  padding: 18px 20px;
+}
+.markdown-editor .surface .cm-content {
+  width: 100%;
+  margin: 0;
 }

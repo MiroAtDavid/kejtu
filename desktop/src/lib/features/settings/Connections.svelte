@@ -1,5 +1,18 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import RemoteSignIn from "./RemoteSignIn.svelte";
+  import PackageIcon from "./PackageIcon.svelte";
+  import ShelfItemLayout from "./ShelfItemLayout.svelte";
+  import ShelfItemHeading from "./ShelfItemHeading.svelte";
+  import ShelfCard from "./ShelfCard.svelte";
+  import ShelfDialog from "./ShelfDialog.svelte";
+  import {
+    partIcon,
+    partTitle,
+    packageFacts,
+    type ShelfOwner,
+  } from "./shelf-library";
+  import ConnectionSchema from "./ConnectionSchema.svelte";
   import { request } from "$lib/api/client";
   import type {
     McpStatus,
@@ -9,25 +22,53 @@
     Arguments,
   } from "$lib/api/wire.generated";
   import {
-    connectionName,
+    bundledTerminals,
     includedConnections,
     inspectConnection,
-    presetRepeatable,
+    setUpIncludedTools,
   } from "./connections";
 
   export let ownerBusy = false;
   export let busy = false;
   export let active = true;
   export let onOpenFiles: () => void = () => {};
+  /** A connection another panel asks to open; the tick changes with each request. */
+  export let focus: { name: string; tick: number } = { name: "", tick: 0 };
+  export let filter = "";
+  export let owners = new Map<string, ShelfOwner[]>();
+  export let parent: ShelfOwner | undefined = undefined;
+  export let onOpenItem: ((name: string) => void) | undefined = undefined;
+  /** The name shown for a connection; its exact key stays its identity. */
+  function title(id: string) {
+    return partTitle("connection", id, owners.get(id)?.[0] ?? parent);
+  }
+  $: visible =
+    saved?.servers.filter((row) =>
+      [
+        row.id,
+        title(row.id),
+        row.description,
+        ...(owners.get(row.id) ?? []).map((owner) => owner.title),
+      ]
+        .join(" ")
+        .toLowerCase()
+        .includes(filter.trim().toLowerCase()),
+    ) ?? [];
   const windows =
     typeof navigator !== "undefined" && /Windows/i.test(navigator.userAgent);
-  let saved: McpStatus | null = null;
+  const linux =
+    typeof navigator !== "undefined" && /Linux/i.test(navigator.userAgent);
+  export let saved: McpStatus | null = null;
   let files: FilesStatus | null = null;
+  let readingFiles = false;
   let error = "";
   let notice = "";
-  let adding = false;
+  /** On the Shelf, the page's Add connection button opens the import window. */
+  export let adding = false;
   let configuration = "";
-  let network = true;
+  // Matches the backend default: an imported local server gets no network until
+  // the person allows it here, or the pasted configuration says so explicitly.
+  let network = false;
   let selected = "";
   let tools: McpTool[] = [];
   let allowed: string[] = [];
@@ -42,13 +83,40 @@
   let checked: Record<string, string> = {};
   let mounted = false;
   let wasActive = false;
+  let focused = 0;
   $: if (mounted && active && !wasActive) {
     wasActive = true;
-    void refresh();
+    if (onOpenItem) void readFiles();
+    else void refresh();
   } else if (!active) wasActive = false;
+  // Opened from Packages: select that connection once the saved list is read.
+  $: if (focus.tick !== focused && saved && !busy) {
+    focused = focus.tick;
+    const row = saved.servers.find((item) => item.id === focus.name);
+    if (row) choose(row);
+    else {
+      selected = "";
+      error = "This connection is no longer configured.";
+    }
+  }
   $: server = saved?.servers.find((row) => row.id === selected);
+  // A connection saved before keys moved to the keyring; never an included tool,
+  // whose own launch settings are not credentials.
+  $: keysInSettings =
+    server?.credential_storage === "settings" &&
+    !(includedConnections as readonly string[]).includes(server.id);
   $: missing = includedConnections.filter(
     (name) => !saved?.servers.some((row) => row.id === name),
+  );
+  $: missingTerminals = bundledTerminals.filter(
+    (name) => !saved?.servers.some((row) => row.id === name),
+  );
+  // On the Shelf, each tool that comes with Kejtu but is missing gets a card.
+  $: notSetUp = [...missing, ...(linux ? missingTerminals : [])].filter(
+    (name) =>
+      `${name} ${title(name)}`
+        .toLowerCase()
+        .includes(filter.trim().toLowerCase()),
   );
   $: matchingTools = tools.filter((tool) =>
     `${tool.name} ${tool.description}`
@@ -87,15 +155,23 @@
       busy = false;
     }
   }
+  async function readFiles() {
+    readingFiles = true;
+    try {
+      files = await request("files.status", {});
+    } catch {
+      files = null;
+    } finally {
+      readingFiles = false;
+    }
+  }
   async function refresh() {
     await action(async () => {
-      receive(await request("mcp.status", {}));
+      const value = await request("mcp.status", {});
+      if (focus.name) selected = focus.name;
+      receive(value);
       checked = {};
-      try {
-        files = await request("files.status", {});
-      } catch {
-        files = null;
-      }
+      await readFiles();
     });
   }
   function choose(row: McpServer) {
@@ -175,57 +251,48 @@
           grants.includes(name),
         ),
       });
-      notice = `${connectionName(row)} is on.`;
+      notice = `${title(row.id)} is on.`;
     });
   }
-  async function setupIncluded() {
+  async function addTerminal(name: (typeof bundledTerminals)[number]) {
     if (ownerBusy || !saved) return;
     await action(async () => {
-      const failures: string[] = [];
-      for (const name of [...missing]) {
-        if (!saved) break;
-        // A conflict read-back can reveal a newly imported connection under a
-        // later preset's name. It is no longer ours to set up or grant tools.
-        if (saved.servers.some((row) => row.id === name)) continue;
-        let result: McpStatus;
-        try {
-          result = await request("mcp.setup", {
+      try {
+        receive(
+          await request("mcp.setup", {
             server: name,
-            expected_revision: saved.revision,
-            use_shared_folders: !windows && !!files?.enabled,
-          });
-        } catch (caught) {
-          // Setup may have committed before a lost reply. Read back once;
-          // never retry a mutation or continue with an unknown revision.
-          receive(await request("mcp.status", {}));
-          failures.push(
-            `${connectionName({ id: name })}: ${caught instanceof Error ? caught.message : "Setup failed."}`,
-          );
-          continue;
-        }
-        receive(result);
-        const row = result.servers.find((item) => item.id === name)!;
-        // Browser's fixed safe grant is owned by its existing setup endpoint.
-        // New document presets are inspected once, then receive exact names.
-        try {
-          const catalogue = await discover(row);
-          if (!row.enabled)
-            await saveUpdate({
-              action: "permissions",
-              server: name,
-              expected_revision: saved!.revision,
-              enabled: true,
-              allowed_tools: catalogue.map((tool) => tool.name),
-              repeatable_tools: presetRepeatable(name, catalogue),
-            });
-        } catch (caught) {
-          failures.push(
-            `${connectionName(row)}: ${caught instanceof Error ? caught.message : "Connection check failed."}`,
-          );
-        }
+            expected_revision: saved!.revision,
+            use_shared_folders: false,
+          }),
+        );
+      } catch (caught) {
+        receive(await request("mcp.status", {}));
+        throw caught;
       }
+    });
+  }
+  /** Sets up the given included tools; a Not set up card passes only its own. */
+  async function setupIncluded(
+    names: readonly (typeof includedConnections)[number][] = missing,
+  ) {
+    if (ownerBusy || readingFiles || !saved) return;
+    await action(async () => {
+      const failures = await setUpIncludedTools({
+        names,
+        saved: saved!,
+        sharedFolders: !windows && !!files?.enabled,
+        status: (value) => (value ? receive(value) : (saved = null)),
+        checked: (name, ok) =>
+          (checked = {
+            ...checked,
+            [name]: ok ? "Connection checked" : "Needs attention",
+          }),
+      });
       notice = "Included tools checked. Existing choices are kept.";
-      if (failures.length) error = failures.join("\n");
+      if (failures.length)
+        error = failures
+          .map((failure) => `${title(failure.name)}: ${failure.message}`)
+          .join("\n");
     });
   }
   async function importConfig() {
@@ -263,8 +330,19 @@
       }
       configuration = "";
       adding = false;
+      // A confirmed import consumed this choice; the next one starts off again.
+      // Failed or unconfirmed imports keep it with the draft they belong to.
+      network = false;
+      const names = Object.keys(value?.mcpServers ?? {});
+      const keyring = saved?.servers.some(
+        (item) =>
+          names.includes(item.id) && item.credential_storage === "keyring",
+      );
       notice =
-        "Connection added. Open it and choose Use all available tools, or choose a smaller selection in Advanced.";
+        "Connection added. Open it and choose Use all available tools, or choose a smaller selection in Advanced." +
+        (keyring
+          ? " Its keys are kept in the system keyring, not in the settings file."
+          : "");
     });
   }
   function toggle(name: string, enabled: boolean) {
@@ -276,43 +354,90 @@
   });
 </script>
 
+{#snippet power(row: McpServer)}
+  <button
+    class="power"
+    role="switch"
+    aria-checked={row.enabled}
+    aria-label={title(row.id)}
+    disabled={busy ||
+      (ownerBusy && !row.enabled) ||
+      (!row.available && !row.enabled)}
+    on:click={() =>
+      row.enabled
+        ? update({
+            action: "disable",
+            server: row.id,
+            expected_revision: saved!.revision,
+          })
+        : enable(row)}>{row.enabled ? "On" : "Off"}</button
+  >
+{/snippet}
+
 <section class="connections">
-  <h2 class="settings-title">Connections</h2>
-  <p class="hint">
-    Let Kejtu browse websites and work with documents. Turn on the connections
-    you want to use.
-  </p>
-  <div class="actions">
-    {#if saved && missing.length}<button
-        disabled={busy || ownerBusy}
-        on:click={setupIncluded}>Set up included tools</button
-      >{/if}
-    <button disabled={busy} on:click={refresh}>Refresh</button>
-    <button
-      disabled={busy || ownerBusy || !saved}
-      aria-expanded={adding}
-      on:click={() => (adding = !adding)}>Add connection</button
+  {#if focus.name && (server?.id === focus.name || error)}
+    <ShelfItemHeading
+      title={title(focus.name)}
+      icon={partIcon("connection", focus.name, parent)}
+      category={parent?.category}
+      subtitle={parent ? parent.title + " · Connection" : "Connection"}
     >
-  </div>
-  {#if !windows && saved && missing.some((name) => name !== "playwright")}
-    <p class="hint">
-      Document setup uses the folders already shared in Files, with their
-      existing read/write permissions.
-    </p>
-    {#if !files?.enabled}<button disabled={busy} on:click={onOpenFiles}
-        >Choose folders in Files</button
-      >{/if}
+      {#if server?.id === focus.name && saved}{@render power(server)}{/if}
+    </ShelfItemHeading>
   {/if}
-  {#if error}<p class="error" role="alert">{error}</p>{/if}
-  {#if notice}<p class="hint" role="status">{notice}</p>{/if}
-  {#if busy}<p class="hint" role="status">
-      Checking and saving… Each connection check can take up to 30 seconds.
-    </p>{/if}
+  {#if !focus.name}
+    {#if !onOpenItem}<div class="actions">
+        {#if saved && missing.length}<button
+            disabled={busy || ownerBusy || readingFiles}
+            on:click={() => setupIncluded()}>Set up included tools</button
+          >{/if}
+        <button disabled={busy} on:click={refresh}>Refresh</button>
+        {#if linux && saved}
+          {#each missingTerminals as name}
+            <button
+              disabled={busy || ownerBusy}
+              on:click={() => addTerminal(name)}>Add {title(name)}</button
+            >
+          {/each}
+        {/if}
+        <button
+          disabled={busy || ownerBusy || !saved}
+          aria-expanded={adding}
+          on:click={() => (adding = !adding)}>Add connection</button
+        >
+      </div>
+    {:else if error}<div class="actions">
+        <button disabled={busy} on:click={refresh}>Refresh</button>
+      </div>{/if}
+    {#if !windows && saved && missing.some((name) => name !== "playwright")}
+      <p class="hint">
+        Document setup uses the folders already shared in Files, with their
+        existing read/write permissions.
+      </p>
+      {#if !files?.enabled}<button disabled={busy} on:click={onOpenFiles}
+          >Choose folders in Files</button
+        >{/if}
+    {/if}
+  {:else if error}
+    <button disabled={busy} on:click={refresh}>Refresh</button>
+  {/if}
+  {#if !adding}
+    {#if error}<p class="error" role="alert">{error}</p>{/if}
+    {#if notice}<p class="hint" role="status">{notice}</p>{/if}
+    {#if busy}<p class="hint" role="status">
+        Checking and saving… Each connection check can take up to 30 seconds.
+      </p>{/if}
+  {/if}
   {#if adding}
-    <div class="editor">
-      <h3>Add a connection</h3>
+    <ShelfDialog
+      title="Add connection"
+      closeLabel="Close add connection"
+      {busy}
+      onClose={() => (adding = false)}
+    >
       <label
         >Server configuration<textarea
+          data-first
           rows="8"
           spellcheck="false"
           bind:value={configuration}
@@ -335,233 +460,370 @@
           Personal folders are shared through Files. Use a trusted package and a
           fixed version.{/if}
       </p>
-      <button
-        disabled={busy || ownerBusy || !configuration.trim() || !saved}
-        on:click={importConfig}>Save disabled</button
-      >
-    </div>
+      {#if error}<p class="error" role="alert">{error}</p>{/if}
+      {#if busy}<p class="hint" role="status">
+          Checking and saving… Each connection check can take up to 30 seconds.
+        </p>{/if}
+      <svelte:fragment slot="footer">
+        <button disabled={busy} on:click={() => (adding = false)}>Cancel</button
+        >
+        <button
+          class="primary"
+          disabled={busy || ownerBusy || !configuration.trim() || !saved}
+          on:click={importConfig}>Save disabled</button
+        >
+      </svelte:fragment>
+    </ShelfDialog>
   {/if}
-  {#if saved}
+  {#if saved && !focus.name && onOpenItem}
+    <div class="cp-cards">
+      {#each visible as row (row.id)}
+        {@const owner = owners.get(row.id)?.[0]}
+        <ShelfCard
+          title={title(row.id)}
+          state={!row.available
+            ? "Needs attention"
+            : row.enabled
+              ? "On"
+              : "Off"}
+          summary={owners
+            .get(row.id)
+            ?.map((owner) => owner.title)
+            .join(" · ") || "Connection"}
+          icon={partIcon("connection", row.id, owner)}
+          category={owner?.category}
+          part={"connection:" + row.id}
+          disabled={busy}
+          onOpen={() => onOpenItem?.(row.id)}
+        />
+      {/each}
+      {#each notSetUp as name (name)}
+        <ShelfCard
+          title={title(name)}
+          state="Not set up"
+          summary="Connection"
+          icon={partIcon("connection", name)}
+          part={"connection:" + name}
+          action="Set up"
+          actionLabel={`Set up ${title(name)}`}
+          actionDisabled={busy ||
+            ownerBusy ||
+            ((missing as readonly string[]).includes(name) && readingFiles)}
+          onAction={() =>
+            (bundledTerminals as readonly string[]).includes(name)
+              ? addTerminal(name as (typeof bundledTerminals)[number])
+              : setupIncluded([name as (typeof includedConnections)[number]])}
+        />
+      {/each}
+    </div>
+  {:else if saved && !focus.name}
     {#if !saved.servers.length}<p class="hint">
         Set up the included tools to get started.
       </p>{/if}
     <div class="list">
-      {#each saved.servers as row (row.id)}
+      {#each visible as row (row.id)}
+        {@const owner = owners.get(row.id)?.[0]}
         <div class="server" class:selected={selected === row.id}>
           <button
             class="connection-summary"
+            data-part={"connection:" + row.id}
             disabled={busy}
-            on:click={() => choose(row)}
+            on:click={() => (onOpenItem ? onOpenItem(row.id) : choose(row))}
           >
-            <strong>{connectionName(row)}</strong>
+            <span class="connection-name"
+              ><PackageIcon
+                compact
+                name={partIcon("connection", row.id, owner)}
+                category={owner?.category}
+              /><strong>{title(row.id)}</strong></span
+            >
             {#if row.description}<span>{row.description}</span>{/if}
+            {#if owners.has(row.id)}<small
+                >{owners
+                  .get(row.id)
+                  ?.map((owner) => owner.title)
+                  .join(" · ")}</small
+              >{/if}
             {#if checked[row.id]}<small>{checked[row.id]}</small>{/if}
             {#if !row.allowed_tools.length}<small>No tools selected</small>{/if}
+            {#if !row.available}<small class="attention"
+                >Needs attention: its program is missing</small
+              >{/if}
           </button>
-          <button
-            class="power"
-            role="switch"
-            aria-checked={row.enabled}
-            aria-label={connectionName(row)}
-            disabled={busy || (ownerBusy && !row.enabled)}
-            on:click={() =>
-              row.enabled
-                ? update({
-                    action: "disable",
-                    server: row.id,
-                    expected_revision: saved!.revision,
-                  })
-                : enable(row)}>{row.enabled ? "On" : "Off"}</button
-          >
+          {@render power(row)}
         </div>
       {/each}
     </div>
   {/if}
+  {#if saved && !focus.name && filter.trim() && !visible.length && !notSetUp.length}<p
+      class="cp-empty"
+    >
+      No matching connections.
+    </p>{/if}
   {#if server && saved}
-    <div class="editor">
-      <h3>{connectionName(server)}</h3>
-      {#if server.requires_web}<p class="hint">
-          Uses Web access and a separate temporary browser, without your
-          personal logins.
-        </p>{/if}
-      {#if server.address.startsWith("@kejtu/") && !server.requires_web}
-        <p class="hint">
-          This document app uses your Windows account’s file and network access.
-          The folder restrictions in Files apply to Kejtu’s built-in Files
-          tools.
-        </p>
-      {:else if ["gridcraft", "pdfcraft", "wordcraft", "craft_files"].includes(server.id)}
-        <p class="hint">
-          Choose which folders this connection can use in Settings → Privacy
-          &amp; access → Files.
-        </p>
-        {#if !files?.enabled || !files.servers.includes(server.id)}<button
-            disabled={busy}
-            on:click={onOpenFiles}>Choose folders in Files</button
-          >{/if}
-      {/if}
-      <div class="actions">
-        <button
-          disabled={busy || ownerBusy}
-          on:click={() => enable(server!, true)}>Use all available tools</button
-        >
-        <button disabled={busy || ownerBusy} on:click={inspect}
-          >Check connection</button
-        >
-        <button
-          disabled={busy}
-          aria-expanded={advanced}
-          on:click={() => (advanced = !advanced)}>Advanced</button
-        >
-      </div>
-      <p class="hint">
-        Turning a connection back on keeps your saved tool choices. “Use all
-        available tools” checks and enables its complete current set.
-      </p>
-      {#if advanced}
-        <h4>Tool selection</h4>
-        <p class="hint">
-          {server.allowed_tools.length} tools allowed. Select fewer tools here if
-          you prefer.
-        </p>
-        {#if !inspected}<button disabled={busy || ownerBusy} on:click={inspect}
-            >Load tool choices</button
-          >{:else}
-          <label
-            >Find a tool<input
-              bind:value={toolFilter}
-              on:input={() => (toolLimit = 32)}
-              placeholder="Search tools…"
-            /></label
+    <ShelfItemLayout
+      inline={!focus.name}
+      label="Connection details"
+      facts={[
+        {
+          label: "State",
+          value: !server.available
+            ? "Needs attention"
+            : server.enabled
+              ? "On"
+              : "Off",
+        },
+        { label: "Name", value: server.id },
+        { label: "Allowed tools", value: String(server.allowed_tools.length) },
+        ...packageFacts(parent),
+      ]}
+    >
+      <div class={focus.name ? "cp-section" : "editor"}>
+        {#if focus.name && server.description}<p>{server.description}</p>{/if}
+        {#if !focus.name}<h3>{title(server.id)}</h3>{/if}
+        {#if server.transport === "http" && !windows}
+          {#key server.id}
+            <RemoteSignIn
+              server={server.id}
+              revision={saved.revision}
+              disabled={ownerBusy || !active}
+              bind:busy
+              onChanged={refresh}
+            />
+          {/key}
+        {/if}
+        {#if !server.available}<p class="hint attention">
+            Needs attention: this connection’s program is missing ({server.address}).
+            Reinstall it, or remove the connection under Advanced. Its saved
+            tool choices are kept and apply again once the program is back.
+          </p>{/if}
+        {#if server.transport === "http"}<p class="hint">
+            Connects to the service’s online MCP server.{server.requires_web
+              ? " Follows the Web access setting."
+              : ""}
+          </p>
+        {:else if server.requires_web}<p class="hint">
+            Uses Web access and a separate temporary browser, without your
+            personal logins.
+          </p>{/if}
+        {#if server.address.startsWith("@kejtu/") && !server.requires_web}
+          <p class="hint">
+            This document app uses your Windows account’s file and network
+            access. The folder restrictions in Files apply to Kejtu’s built-in
+            Files tools.
+          </p>
+        {:else if ["gridcraft", "pdfcraft", "wordcraft", "craft_files", ...bundledTerminals].includes(server.id)}
+          <p class="hint">
+            Choose which folders this connection can use in Settings → Privacy
+            &amp; access → Files.
+          </p>
+          {#if !files?.enabled || !files.servers.includes(server.id)}<button
+              disabled={busy}
+              on:click={onOpenFiles}>Choose folders in Files</button
+            >{/if}
+        {/if}
+        <div class="actions">
+          <button
+            disabled={busy || ownerBusy || !server.available}
+            on:click={() => enable(server!, true)}
+            >Use all available tools</button
           >
-          <div class="actions">
-            <button
-              disabled={busy}
-              on:click={() => (allowed = tools.map((tool) => tool.name))}
-              >Select all</button
-            ><button
-              disabled={busy}
-              on:click={() => {
-                allowed = [];
-                repeatable = [];
-              }}>Select none</button
+          <button
+            disabled={busy || ownerBusy || !server.available}
+            on:click={inspect}>Check connection</button
+          >
+          <button
+            disabled={busy}
+            aria-expanded={advanced}
+            on:click={() => (advanced = !advanced)}>Advanced</button
+          >
+        </div>
+        <p class="hint">
+          Turning a connection back on keeps your saved tool choices. “Use all
+          available tools” checks and enables its complete current set.
+        </p>
+        {#if advanced}
+          <h4>Tool selection</h4>
+          <p class="hint">
+            {server.allowed_tools.length} tools allowed. Select fewer tools here if
+            you prefer.
+          </p>
+          {#if !inspected}<button
+              disabled={busy || ownerBusy || !server.available}
+              on:click={inspect}>Load tool choices</button
+            >{:else}
+            <label
+              >Find a tool<input
+                bind:value={toolFilter}
+                on:input={() => (toolLimit = 32)}
+                placeholder="Search tools…"
+              /></label
             >
-          </div>
-          {#each matchingTools.slice(0, toolLimit) as tool (tool.name)}
-            <div class="tool">
-              <label class="check"
-                ><input
-                  type="checkbox"
-                  checked={allowed.includes(tool.name)}
-                  disabled={busy}
-                  on:change={(event) =>
-                    toggle(tool.name, event.currentTarget.checked)}
-                /><strong>{tool.name}</strong></label
+            <div class="actions">
+              <button
+                disabled={busy}
+                on:click={() => (allowed = tools.map((tool) => tool.name))}
+                >Select all</button
+              ><button
+                disabled={busy}
+                on:click={() => {
+                  allowed = [];
+                  repeatable = [];
+                }}>Select none</button
               >
-              <p class="hint">{tool.description}</p>
-              <details>
-                <summary>Technical details</summary>
+            </div>
+            {#each matchingTools.slice(0, toolLimit) as tool (tool.name)}
+              <div class="tool">
                 <label class="check"
                   ><input
                     type="checkbox"
-                    checked={repeatable.includes(tool.name)}
-                    disabled={!allowed.includes(tool.name) || busy}
+                    checked={allowed.includes(tool.name)}
+                    disabled={busy}
                     on:change={(event) =>
-                      (repeatable = event.currentTarget.checked
-                        ? [...repeatable, tool.name]
-                        : repeatable.filter((n) => n !== tool.name))}
-                  />Allow identical calls more than once per message</label
+                      toggle(tool.name, event.currentTarget.checked)}
+                  /><strong>{tool.name}</strong></label
                 >
-                <pre>{tool.input_schema}</pre>
-              </details>
-            </div>
-          {/each}
-          {#if matchingTools.length > toolLimit}<button
-              disabled={busy}
-              on:click={() => (toolLimit += 32)}>Show more tools</button
-            >{/if}
-          <button
-            disabled={busy || ownerBusy}
-            on:click={() =>
-              update({
-                action: "permissions",
-                server: selected,
-                expected_revision: saved!.revision,
-                enabled: true,
-                allowed_tools: allowed,
-                repeatable_tools: repeatable,
-              })}>Save selection and enable</button
-          >
-        {/if}
-        <h4>Connection access</h4>
-        <p class="hint">
-          {server.transport === "stdio" ? "Local program" : "Remote service"}: {server.address}
-        </p>
-        {#if server.credential_fields.length}<p class="hint">
-            Configured credential fields: {server.credential_fields.join(", ")}.
-            Values are hidden. Import the configuration again to replace
-            credentials or the connection address.
-          </p>{/if}
-        {#if server.transport === "stdio" && !server.address.startsWith("@kejtu/")}
-          <label class="check"
-            ><input type="checkbox" bind:checked={localNetwork} />Allow network
-            access</label
-          >
-          <label
-            >Folders the server may read<textarea
-              rows="2"
-              bind:value={readPaths}
-            ></textarea></label
-          >
-          <label
-            >Folders the server may change<textarea
-              rows="2"
-              bind:value={writePaths}
-            ></textarea></label
-          >
+                <p class="hint">{tool.description}</p>
+                <!-- A publisher's word, shown as such. It grants and limits nothing. -->
+                {#if tool.annotations?.read_only}<p class="hint">
+                    Marked read-only by its publisher.
+                  </p>{:else if tool.annotations?.destructive}<p class="hint">
+                    Marked by its publisher as able to delete or overwrite.
+                  </p>{/if}
+                <details>
+                  <summary>Technical details</summary>
+                  <label class="check"
+                    ><input
+                      type="checkbox"
+                      checked={repeatable.includes(tool.name)}
+                      disabled={!allowed.includes(tool.name) || busy}
+                      on:change={(event) =>
+                        (repeatable = event.currentTarget.checked
+                          ? [...repeatable, tool.name]
+                          : repeatable.filter((n) => n !== tool.name))}
+                    />Allow identical calls more than once per message</label
+                  >
+                  {#key tool}
+                    <ConnectionSchema
+                      server={server.id}
+                      revision={saved.revision}
+                      {tool}
+                    />
+                  {/key}
+                </details>
+              </div>
+            {/each}
+            {#if matchingTools.length > toolLimit}<button
+                disabled={busy}
+                on:click={() => (toolLimit += 32)}>Show more tools</button
+              >{/if}
+            <button
+              disabled={busy || ownerBusy}
+              on:click={() =>
+                update({
+                  action: "permissions",
+                  server: selected,
+                  expected_revision: saved!.revision,
+                  enabled: true,
+                  allowed_tools: allowed,
+                  repeatable_tools: repeatable,
+                })}>Save selection and enable</button
+            >
+          {/if}
+          <h4>Connection access</h4>
           <p class="hint">
-            One absolute folder path per line. Manage shared writable folders in
-            Files. Changing access disables the connection and clears tool
-            permissions.
+            {server.transport === "stdio" ? "Local program" : "Remote service"}: {server.address}
+          </p>
+          {#if server.credential_fields.length}<p class="hint">
+              Configured credential fields: {server.credential_fields.join(
+                ", ",
+              )}.
+              {#if server.credential_storage === "keyring"}Values are kept in
+                the system keyring and hidden here.{:else if keysInSettings}Values
+                are hidden. Some are still stored in Kejtu’s connection settings
+                file, as an earlier version saved them. Importing the
+                configuration again moves them to the system keyring.{:else}Values
+                are hidden.{/if}
+              Import the configuration again to replace credentials or the connection
+              address.
+            </p>{/if}
+          {#if server.transport === "stdio" && !server.address.startsWith("@kejtu/")}
+            <label class="check"
+              ><input type="checkbox" bind:checked={localNetwork} />Allow
+              network access</label
+            >
+            <label
+              >Folders the server may read<textarea
+                rows="2"
+                bind:value={readPaths}
+              ></textarea></label
+            >
+            {#if files?.configured}
+              <p class="hint">
+                Writable folders are managed in Settings → Files, even when file
+                access is off. Read-only program folders can still be edited
+                here.
+              </p>
+              <button disabled={busy} on:click={onOpenFiles}
+                >Manage folders in Files</button
+              >
+            {:else}
+              <label
+                >Folders the server may change<textarea
+                  rows="2"
+                  bind:value={writePaths}
+                ></textarea></label
+              >
+            {/if}
+            <p class="hint">
+              One absolute folder path per line. Manage shared writable folders
+              in Files. Changing access disables the connection and clears tool
+              permissions.
+            </p>
+            <button
+              disabled={busy || ownerBusy}
+              on:click={() =>
+                update({
+                  action: "access",
+                  server: selected,
+                  expected_revision: saved!.revision,
+                  network: localNetwork,
+                  read_paths: readPaths
+                    .split("\n")
+                    .map((p) => p.trim())
+                    .filter(Boolean),
+                  write_paths: files?.configured
+                    ? []
+                    : writePaths
+                        .split("\n")
+                        .map((p) => p.trim())
+                        .filter(Boolean),
+                })}>Save access and disable</button
+            >
+          {/if}
+          <p class="hint">
+            Removing a connection removes its settings and credentials. Saved
+            chat results remain.
           </p>
           <button
             disabled={busy || ownerBusy}
             on:click={() =>
               update({
-                action: "access",
+                action: "remove",
                 server: selected,
                 expected_revision: saved!.revision,
-                network: localNetwork,
-                read_paths: readPaths
-                  .split("\n")
-                  .map((p) => p.trim())
-                  .filter(Boolean),
-                write_paths: writePaths
-                  .split("\n")
-                  .map((p) => p.trim())
-                  .filter(Boolean),
-              })}>Save access and disable</button
+              })}>Remove connection</button
           >
         {/if}
-        <p class="hint">
-          Removing a connection removes its settings and credentials. Saved chat
-          results remain.
-        </p>
-        <button
-          disabled={busy || ownerBusy}
-          on:click={() =>
-            update({
-              action: "remove",
-              server: selected,
-              expected_revision: saved!.revision,
-            })}>Remove connection</button
-        >
-      {/if}
-    </div>
+      </div>
+    </ShelfItemLayout>
   {/if}
 </section>
 
 <style>
+  .cp-section > :first-child {
+    margin-top: 0;
+  }
   .connections {
     max-width: 48rem;
   }
@@ -570,6 +832,9 @@
     color: var(--ke-text-secondary);
     line-height: 1.6;
     font-size: var(--ke-text-base);
+  }
+  .attention {
+    color: var(--ke-warning);
   }
   .actions {
     display: flex;
@@ -607,6 +872,12 @@
     font-size: var(--ke-text-sm);
     color: var(--ke-text-secondary);
     font-weight: normal;
+  }
+  .connection-summary .connection-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--ke-text-primary);
   }
   .power {
     min-width: 3.5rem;
@@ -649,11 +920,6 @@
     padding-bottom: 0.6rem;
     margin-block: 0.7rem;
     overflow-wrap: anywhere;
-  }
-  pre {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    font-size: var(--ke-text-xs);
   }
   .error {
     color: var(--ke-danger);

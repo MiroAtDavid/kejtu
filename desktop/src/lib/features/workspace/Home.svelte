@@ -10,8 +10,8 @@
   } from "./workspace";
   import { dayInZone, timeLabel, type Occurrence } from "./calendar-view";
   import { agendaZone } from "./upcoming";
-  import Icon from "$lib/design/Icon.svelte";
   import HomeResearch from "./HomeResearch.svelte";
+  import { greetDay } from "$lib/design/companion";
 
   export let workspace: Workspace;
   export let active = true;
@@ -80,7 +80,7 @@
     })),
     ...courses
       .filter((row) => !row.data.semester_id)
-      .map((row) => ({ ...row, destination: "course" as const })),
+      .map((row) => ({ ...row, destination: "module" as const })),
   ];
   $: shownProjects = projectEntries.slice(
     projectPage * projectPageSize,
@@ -112,6 +112,9 @@
     void refresh();
   }
   $: if (!active) seen = "";
+  // Kejtu says hello once a day, on the first visit here. Wait for the saved
+  // timezone so "today" is the same day the greeting above shows.
+  $: if (mounted && active && $workspace.snapshot) greetDay(today);
 
   async function refresh() {
     const token = ++generation;
@@ -193,20 +196,15 @@
     <div>
       <p class="eyebrow">{date}</p>
       <h1>{firstRun ? "Make yourself at home." : greeting}</h1>
+      <!-- Waiting reminders continue the greeting as one quiet line. -->
+      <slot />
     </div>
-    <button
-      class="refresh"
-      disabled={loading}
-      on:click={refresh}
-      aria-label="Refresh Home"
-      title="Refresh Home"><Icon name="refresh" size={15} /></button
-    >
   </header>
   {#if firstRun}
     <div class="start" aria-label="Getting started">
       <p>Choose a model in Settings, then start with a conversation.</p>
       <button class="primary" {disabled} on:click={onSettings}
-        >Open Settings <span aria-hidden="true">→</span></button
+        >Open Settings</button
       >
       <button class="text-button" {disabled} on:click={onHelp}
         >Getting started & capabilities</button
@@ -237,8 +235,7 @@
             {#if projects}<button
                 class="text-button more"
                 {disabled}
-                on:click={() => onOpen("overview")}
-                >Calendar <span aria-hidden="true">→</span></button
+                on:click={() => onOpen("overview")}>Calendar</button
               >{/if}
           </header>
           {#if loading}<p class="muted" role="status">Reading today’s plans…</p>
@@ -250,7 +247,7 @@
               class="text-button"
               {disabled}
               on:click={() => onOpen("workspace-settings")}
-              >Set up Projects →</button
+              >Set up Projects</button
             >
           {:else}
             <ol class="agenda">
@@ -287,7 +284,7 @@
             <button
               class="text-button more"
               {disabled}
-              on:click={() => onOpen("tasks")}>All tasks →</button
+              on:click={() => onOpen("tasks")}>All tasks</button
             >
           </header>
           {#if loading}<p class="muted" role="status">Reading your tasks…</p>
@@ -347,7 +344,7 @@
               {disabled}
               on:click={() =>
                 onOpen(projects ? "semesters" : "workspace-settings")}
-              >{projects ? "All projects" : "Set up Projects"} →</button
+              >{projects ? "Projects" : "Set up Projects"}</button
             >
             {#if projectPages > 1}
               <nav class="project-pages" aria-label="Project pages">
@@ -375,7 +372,10 @@
                 <button
                   class="project"
                   {disabled}
-                  on:click={() => onOpen(course.destination, course.id)}
+                  on:click={() =>
+                    course.destination === "module"
+                      ? onOpen("semesters", "module:" + course.id)
+                      : onOpen(course.destination, course.id)}
                 >
                   <span class="project-index" aria-hidden="true"
                     >{String(projectPage * projectPageSize + i + 1).padStart(
@@ -386,9 +386,9 @@
                   <span class="project-title" title={course.data.title}
                     >{course.data.title}</span
                   ><span class="project-action"
-                    >{course.destination === "course"
-                      ? "Open section"
-                      : "Open project"} <span aria-hidden="true">↗</span></span
+                    >{course.destination === "module"
+                      ? "Open module"
+                      : "Open project"}</span
                   >
                 </button>
               </li>{:else}<li class="muted">
@@ -442,19 +442,6 @@
   button:focus-visible {
     outline: 2px solid var(--ke-focus-ring);
     outline-offset: 4px;
-  }
-  .refresh {
-    display: grid;
-    place-items: center;
-    width: 30px;
-    height: 30px;
-    border: 0;
-    border-radius: var(--ke-radius-sm);
-    background: none;
-    color: var(--ke-text-secondary);
-  }
-  .refresh:hover {
-    background: var(--ke-surface-inset);
   }
   .home-grid {
     display: grid;
@@ -664,11 +651,6 @@
   .home-heading > div:first-child {
     min-width: 0;
   }
-  .home-heading .refresh {
-    align-self: flex-start;
-    margin-top: 16px;
-    flex: none;
-  }
   .home-section {
     padding: 20px 0;
   }
@@ -710,11 +692,6 @@
     .eyebrow {
       font-size: var(--ke-text-3xs);
       letter-spacing: 0.5px;
-    }
-    .home-heading .refresh {
-      position: absolute;
-      top: -6px;
-      right: 0;
     }
   }
   .home-grid {

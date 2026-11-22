@@ -2,7 +2,12 @@
   import { choiceSelect } from "$lib/design/choice-select";
   import { onMount } from "svelte";
   import { chooseFolder, request } from "$lib/api/client";
-  import type { FilesStatus, SharedFolder } from "$lib/api/wire.generated";
+  import type {
+    Arguments,
+    FilesStatus,
+    SharedFolder,
+  } from "$lib/api/wire.generated";
+  import { saveFiles, workingFolderSetup } from "./files";
 
   export let ownerBusy = false;
   export let busy = false;
@@ -81,32 +86,21 @@
     adding = false;
     error = "";
   }
-  async function save() {
+  async function save(changes?: Arguments["files.save"]) {
     if (!saved || ownerBusy || busy) return;
-    const revision = saved.revision;
+    const args = changes ?? {
+      expected_revision: saved.revision,
+      enabled,
+      workspace: workspaceMode === "none" ? null : workspace,
+      create_workspace: workspaceMode === "create",
+      folders,
+      servers,
+    };
     await action(async () => {
-      try {
-        receive(
-          await request("files.save", {
-            expected_revision: revision,
-            enabled,
-            workspace: workspaceMode === "none" ? null : workspace,
-            create_workspace: workspaceMode === "create",
-            folders,
-            servers,
-          }),
-        );
-        notice =
-          "File access saved. Your existing files stayed where they were.";
-      } catch (caught) {
-        // Reconcile a lost acknowledgement before offering another permission save.
-        try {
-          saved = await request("files.status", {});
-        } catch {
-          saved = null;
-        }
-        throw caught;
-      }
+      // A failure reconciles a lost acknowledgement before offering another
+      // permission save.
+      receive(await saveFiles(args, (status) => (saved = status)));
+      notice = "File access saved. Your existing files stayed where they were.";
     });
   }
   async function disable() {
@@ -287,7 +281,9 @@
             </p>
             <button
               disabled={busy || ownerBusy || !saved.runtime_available || adding}
-              on:click={save}>Set up working folder</button
+              on:click={() =>
+                saved && save(workingFolderSetup(saved, workspace))}
+              >Set up working folder</button
             >
           {/if}
         {:else}<p class="empty">No working folder selected.</p>{/if}
@@ -454,7 +450,7 @@
             !hasChanges ||
             (enabled && !saved.runtime_available) ||
             adding}
-          on:click={save}>{busy ? "Working…" : "Save changes"}</button
+          on:click={() => save()}>{busy ? "Working…" : "Save changes"}</button
         >
         <span class="help"
           >{adding

@@ -1,17 +1,26 @@
 <script lang="ts">
+  import MainNavigation from "./MainNavigation.svelte";
   import Icon from "$lib/design/Icon.svelte";
   import SidebarIdentity from "$lib/design/SidebarIdentity.svelte";
   import { quietScrollbar } from "$lib/design/quiet-scrollbar";
+  import { disclosure } from "$lib/design/disclosure";
+  import { navIndicator } from "$lib/design/nav-indicator";
   import type { IndexConversation } from "./index-rows";
 
   // Conversation and entry labels retain their backend identity and order.
   export let conversations: IndexConversation[] = [];
   export let selected = "";
+  export let unread: string[] = [];
   export let cursor: string | null = null;
   export let listing = false;
   export let disabled = false;
 
   export let active = true;
+  export let homeActive = false;
+  export let reminderWaiting = false;
+  export let onHome: () => void = () => {};
+  /** A reply is being worked on (keeps the sidebar Kejtu awake). */
+  export let working = false;
   export let initialConversationsOpen = false;
   let conversationsOpen = initialConversationsOpen;
   let enteredConversations = initialConversationsOpen;
@@ -32,8 +41,6 @@
     }
     conversationsOpen = !conversationsOpen;
   }
-  export let canCreate = false;
-  export let onCreate: () => void = () => {};
   export let onOpen: (id: string) => void = () => {};
   export let onMore: () => void = () => {};
 
@@ -53,15 +60,14 @@
      index is being scrolled, then fades. It never changes the gutter, so revealing
      it cannot shift the rows. -->
 <div class="index" use:quietScrollbar>
-  <SidebarIdentity />
+  <SidebarIdentity {working} />
 
-  <button
-    type="button"
-    class="sidebar-menu-row"
-    aria-label="Start a new conversation"
-    disabled={!canCreate || disabled}
-    on:click={onCreate}><Icon name="plus" size={15} />New conversation</button
-  >
+  <MainNavigation
+    view={homeActive ? "home" : "journal"}
+    {reminderWaiting}
+    {disabled}
+    onOpen={onHome}
+  />
   <nav class="collections" aria-label="Conversations">
     <button
       type="button"
@@ -77,7 +83,7 @@
     <div
       id="index-conversations"
       class="conversation-list"
-      hidden={!conversationsOpen}
+      use:disclosure={conversationsOpen}
     >
       {#if conversations.length === 0}
         <p class="empty">No conversations yet.</p>
@@ -90,7 +96,7 @@
           bind:value={query}
         />
       {/if}
-      <ol use:quietScrollbar>
+      <ol use:quietScrollbar use:navIndicator={".row.active"}>
         {#each shown as conversation (conversation.id)}
           <li>
             <button
@@ -103,6 +109,12 @@
               on:click={() => onOpen(conversation.id)}
             >
               <span class="name">{conversation.label}</span>
+              {#if unread.includes(conversation.id)}<span
+                  class="unread"
+                  aria-label="Unread reminder or check-in"
+                >
+                  ·</span
+                >{/if}
             </button>
           </li>
         {/each}
@@ -119,6 +131,15 @@
 <style>
   .row.active {
     background: var(--ke-surface-inset);
+  }
+  /* Like the menu above it, the chosen conversation's background slides from
+     row to row (design/nav-indicator.ts); rows sit above it. */
+  ol:global(.has-nav-indicator) .row {
+    position: relative;
+    z-index: 1;
+  }
+  ol:global(.has-nav-indicator) .row.active {
+    background: transparent;
   }
 
   .index {
@@ -143,13 +164,15 @@
     display: flex;
     flex-direction: column;
     gap: var(--ke-space-1);
+    /* Indentation alone marks the nested list; the rows keep the position they
+       had beside the former one-pixel rule. */
     margin: 4px 0 8px 10px;
-    padding: 2px 0 8px 10px;
-    border-left: 1px solid var(--ke-border);
+    padding: 2px 0 8px 11px;
   }
 
-  /* Explicit display is needed because the flex rule overrides native hidden. */
-  .conversation-list[hidden] {
+  /* Explicit display is needed because the flex rule overrides native hidden.
+     The disclosure action sets `hidden`, so the selector is kept global. */
+  .conversation-list:global([hidden]) {
     display: none;
   }
 
@@ -168,31 +191,64 @@
     overscroll-behavior-y: contain;
   }
 
+  /* A soft field without lines: half the tint of the selected row, its text in
+     line with the conversation names below. The system search frame is removed. */
   .history-search {
+    box-sizing: border-box;
     width: 100%;
     margin: 0 0 6px;
-    padding: 6px 0;
+    padding: 7px 10px;
     border: 0;
-    border-bottom: 1px solid var(--ke-border);
-    background: transparent;
+    border-radius: var(--ke-radius-sm);
+    appearance: none;
+    -webkit-appearance: none;
+    background: var(--ke-soft-fill);
     color: var(--ke-text-primary);
     font: inherit;
     font-size: var(--ke-text-2xs);
+  }
+
+  .history-search::-webkit-search-decoration {
+    -webkit-appearance: none;
+  }
+
+  /* Keep the clear control, drawn as a small × in the palette instead of the
+     engine's own icon. */
+  .history-search::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    margin: 0;
+    cursor: pointer;
+    background: var(--ke-text-tertiary);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M7 7l10 10M17 7 7 17'/%3E%3C/svg%3E")
+      center / 12px no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='M7 7l10 10M17 7 7 17'/%3E%3C/svg%3E")
+      center / 12px no-repeat;
+  }
+
+  .history-search::-webkit-search-cancel-button:hover {
+    background: var(--ke-text-primary);
   }
 
   .history-search::placeholder {
     color: var(--ke-text-tertiary);
   }
 
+  /* Typing shows as the full highlight tint, never a ring: a text field matches
+     focus-visible on every click, so a ring here read as a hard frame. */
   .history-search:focus {
+    background: var(--ke-surface-inset);
     outline: none;
-    border-bottom-color: var(--ke-text-tertiary);
   }
 
   /* Compact row: the name only, 11px and regular. No icon, no timestamp — the
      journal shows those in its full list, which this index does not use. */
   .row {
-    display: block;
+    display: flex;
+    align-items: center;
+    gap: var(--ke-space-1);
     width: 100%;
     min-width: 0;
     padding: calc(9px * var(--ke-density)) 10px;
@@ -217,9 +273,15 @@
 
   .name {
     display: block;
+    flex: 1;
     min-width: 0;
-    white-space: normal;
-    overflow-wrap: anywhere;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .unread {
+    flex: none;
   }
 
   .row:disabled {

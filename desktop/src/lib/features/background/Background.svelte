@@ -2,6 +2,7 @@
   import Care from "./Care.svelte";
   import Reflection from "./Reflection.svelte";
   import Jobs from "./Jobs.svelte";
+  import Interests from "./Interests.svelte";
   import type { Profile } from "$lib/api/wire.generated";
   export let stateId: string;
   export let conversationId = "";
@@ -12,8 +13,9 @@
   let visited = new Set([selected]);
   let careLock = false,
     reflectionLock = false,
-    jobsLock = false;
-  $: locked = careLock || reflectionLock || jobsLock;
+    jobsLock = false,
+    interestsLock = false;
+  $: locked = careLock || reflectionLock || jobsLock || interestsLock;
   $: navigationLocked = locked;
   function choose(value: string) {
     if (locked) return;
@@ -44,6 +46,12 @@
         on:click={() => choose("reflection")}>Reflection</button
       >
       <button
+        class:selected={selected === "interests"}
+        aria-pressed={selected === "interests"}
+        disabled={locked}
+        on:click={() => choose("interests")}>Interests</button
+      >
+      <button
         class:selected={selected === "advanced"}
         aria-pressed={selected === "advanced"}
         disabled={locked}
@@ -65,6 +73,14 @@
         {profile}
         {busy}
         bind:navigationLocked={reflectionLock}
+      />
+    </div>{/if}
+  {#if visited.has("interests")}<div hidden={selected !== "interests"}>
+      <Interests
+        {stateId}
+        {profile}
+        {busy}
+        bind:navigationLocked={interestsLock}
       />
     </div>{/if}
   {#if visited.has("advanced")}<div hidden={selected !== "advanced"}>

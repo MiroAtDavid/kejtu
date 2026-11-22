@@ -92,7 +92,7 @@ class Ledger:
         if self.turn_limits is not None and (type(self.turn_limits) is not TurnLimits or self.execution_limits is not None):
             raise ValueError('Foreground and background limits have separate admission owners.')
         if type(self.notebook_only) is not bool or self.notebook_only and (
-                self.execution_limits is None or not self.with_memory or self.with_reference or self.with_tasks or self.with_reminders or self.with_people or self.with_web or self.with_mcp or self.with_skills):
+                self.execution_limits is None or not self.with_memory or self.with_reference or self.with_tasks or self.with_people or self.with_web or self.with_mcp or self.with_skills):
             raise ValueError('Private-review tools require an explicit bounded memory procedure.')
         if type(self.web_only) is not bool or self.web_only and (self.execution_limits is None or self.notebook_only or self.with_reference or self.with_notes or self.notes_write or self.people_write):
             raise ValueError('Background assignments need explicit limits and read-only internal context.')

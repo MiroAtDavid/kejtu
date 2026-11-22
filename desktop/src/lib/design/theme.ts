@@ -14,7 +14,7 @@ export type ChatAppearance = {
   rotateKejtu: boolean;
 };
 const DEFAULT_CHAT: ChatAppearance = {
-  userThumbnail: true,
+  userThumbnail: false,
   kejtuThumbnail: true,
   rotateKejtu: true,
 };
@@ -68,6 +68,7 @@ export function restoreTheme(): void {
   try {
     const saved = JSON.parse(window.localStorage.getItem(CHAT_KEY) ?? "null");
     if (saved && typeof saved === "object" && !Array.isArray(saved)) {
+      // Retired per-move flags are ignored; the saved master switch owns all motion.
       for (const key of Object.keys(chatValue) as (keyof ChatAppearance)[]) {
         if (typeof saved[key] === "boolean") chatValue[key] = saved[key];
       }

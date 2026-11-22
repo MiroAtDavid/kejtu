@@ -203,14 +203,20 @@
 <style>
   .skill-chooser {
     min-width: 0;
-    max-width: calc(100% - 36px);
+    max-width: 100%;
   }
+  /* The chosen skill is a chip like the conversation's project. */
   .selection {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 2px;
     min-width: 0;
     max-width: 100%;
+    min-height: 28px;
+    padding: 0 3px 0 10px;
+    box-sizing: border-box;
+    border-radius: var(--ke-radius-md);
+    background: var(--ke-soft-fill);
     font-size: var(--ke-text-xs);
     color: var(--ke-text-secondary);
   }
@@ -225,9 +231,19 @@
     cursor: pointer;
   }
   .clear {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
     border: 0;
+    border-radius: var(--ke-radius-sm);
     background: transparent;
-    padding: 3px 6px;
+  }
+  .clear:hover:not(:disabled) {
+    background: var(--ke-surface-inset);
+    color: var(--ke-text-primary);
   }
   button:disabled {
     opacity: 0.4;

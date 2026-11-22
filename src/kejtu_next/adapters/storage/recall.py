@@ -252,7 +252,7 @@ class RecallStore:
             body=encoded(dict(row))
             return dict(kind=kind,source_id=ident,record_id=ident,bank_id=None,conversation_id=row['conversation_id'],
                 source_hash=hashlib.sha256(body.encode()).hexdigest(),role='tool',created_at=row['created_at'],
-                body=body,bytes=len(body.encode()))
+                body=body,bytes=len(body.encode()),turn_id=row['turn_id'])
         if kind == 'memory':
             entry = mem.query(ledger, 'SELECT record_id FROM memory_revisions WHERE id=?', (ident,)).fetchone()
             if entry is None:
@@ -281,7 +281,8 @@ class RecallStore:
         return dict(kind='message', source_id=ident, record_id=ident, bank_id=None,
             conversation_id=row['conversation_id'], source_hash=row['sha256'], role=row['role'],
             created_at=mem.query(ledger,'SELECT created_at FROM artifacts WHERE id=?',(ident,)).fetchone()[0] or None,
-            bytes=row['bytes'], artifact_kind=row['kind'])
+            bytes=row['bytes'], artifact_kind=row['kind'],
+            turn_id=row['turn_id'] if row['role'] in ('user','assistant') else None)
 
     def _body(self, snapshot, source, ledger):
         self.metrics['source_reads'] += 1
@@ -434,8 +435,8 @@ class RecallStore:
             WHERE i.bank_id=? AND r.bank_id=i.bank_id AND v.readable=1
             AND r.readable=1 AND r.validity IN ('current','superseded')'''
         if scope=='notebook':
-            eligible += ' AND (EXISTS(SELECT 1 FROM note_records n WHERE n.record_id=r.id) OR EXISTS(SELECT 1 FROM historical_notes h WHERE h.record_id=r.id))'
-            memory_where += ' AND (EXISTS(SELECT 1 FROM note_records n WHERE n.record_id=s.record_id) OR EXISTS(SELECT 1 FROM historical_notes h WHERE h.record_id=s.record_id))'
+            eligible += " AND (EXISTS(SELECT 1 FROM note_records n WHERE n.record_id=r.id) OR EXISTS(SELECT 1 FROM historical_notes h WHERE h.record_id=r.id) OR v.author='user' AND v.origin='manual_memory')"
+            memory_where += " AND (EXISTS(SELECT 1 FROM note_records n WHERE n.record_id=s.record_id) OR EXISTS(SELECT 1 FROM historical_notes h WHERE h.record_id=s.record_id) OR EXISTS(SELECT 1 FROM memory_revisions manual WHERE manual.id=s.source_id AND manual.author='user' AND manual.origin='manual_memory'))"
         preference_mode = args.get('_preference_mode')
         if preference_mode:
             # Filter before the candidate cap. Otherwise unrelated notes can
@@ -516,6 +517,21 @@ class RecallStore:
             historical="EXISTS(SELECT 1 FROM memory_records r JOIN historical_note_revisions n ON n.revision_id="+revision+" WHERE r.id=s.record_id AND "+' AND '.join(predicates).replace('n.body','n.metadata').replace("'$.flags'","'$.tags'")+')'
             params.extend(params[filter_start:])
             where += " AND s.kind='memory' AND ("+ordinary+' OR '+historical+')'
+        for field in ('project_id','module_id'):
+            for name,excluded in ((field,False),('_exclude_'+field,True)):
+                if name not in args:
+                    continue
+                revision='s.source_id' if args['mode']=='historical' else 'r.head_revision'
+                predicate='''(s.kind='memory' AND EXISTS(SELECT 1 FROM memory_records r
+                    WHERE r.id=s.record_id AND '''+mem.workspace_predicate(revision,field)+''') OR
+                    s.kind IN ('message','operation') AND EXISTS(SELECT 1 FROM context_events context
+                    WHERE context.turn_id=CASE WHEN s.kind='operation' THEN substr(s.source_id,1,32)
+                        ELSE (SELECT h.turn_id FROM history_sources h WHERE h.artifact_id=s.source_id
+                            AND h.role IN ('user','assistant')) END
+                    AND json_extract(context.record,'$.kind')='workspace_scope'
+                    AND json_extract(context.record,'$.'''+field+'''')=?))'''
+                where+=' AND '+('NOT ' if excluded else '')+predicate
+                params.extend([args[name]]*3)
         if args.get('conversation_id'):
             where += ''' AND (s.conversation_id=? OR s.kind='memory' AND EXISTS
                 (SELECT 1 FROM note_revisions n LEFT JOIN recall_turns t ON t.id=n.turn_id
@@ -657,6 +673,9 @@ class RecallStore:
                 item['record_kind']='authored_note'
                 details=self.store.notes.metadata_summary(snapshot,target['id'],ledger)
                 if details: item['note']=details
+            if target['author']=='user' and target['origin']=='manual_memory':
+                context=mem.manual_workspace(target['id'],ledger)
+                if context: item['workspace']=context
             if target['historical_note'] is not None:
                 item.update(record_kind='historical_note',historical_note=self.store.historical_notes.summary(snapshot,target['id'],ledger))
         else:
@@ -668,6 +687,8 @@ class RecallStore:
                 preview_offset=offset,preview_end=page['end'],record_kind='tool_record' if row['kind']=='operation' else 'conversation_message',
                 conversation_id=source['conversation_id'],role=source['role'],created_at=source['created_at'],
                 **source_info(self.store,source['source_id'],ledger))
+            context=self.store._history.workspace_context(source['turn_id'],ledger) if source.get('turn_id') else {}
+            if context: item['workspace']=context
             # Keep the original discovery page while selecting hits. If this
             # indexed segment is the whole message, retain its already-verified
             # original for optional expansion after selection. No new source IO,
@@ -695,6 +716,42 @@ class RecallStore:
                 result = candidate
         return result
 
+    def _context_search(self, snapshot, args, ledger, maximum, **kwargs):
+        """Disjoint discovery stages within the existing automatic room/ledger.
+
+        Scope is filtered before each ranked candidate cap. Explicit search is
+        unchanged unless the caller supplies a context filter. No new encoder or
+        model call; all stages use the same already-prepared query vector.
+        """
+        project=getattr(snapshot,'project_id',None)
+        module=getattr(snapshot,'module_id',None)
+        if not project and not module:
+            return self.search(snapshot,args,ledger,maximum,**kwargs)
+        stages=[]
+        if module: stages.append({'module_id':module})
+        if project: stages.append(dict(project_id=project,**({'_exclude_module_id':module} if module else {})))
+        stages.append({'_exclude_project_id':project} if project else {'_exclude_module_id':module})
+        result=None; seen=set()
+        for filters in stages:
+            remaining=args.get('limit',8)-len(seen)
+            if not remaining: break
+            page=self.search(snapshot,dict(args,**filters,limit=remaining),ledger,maximum,**kwargs)
+            if result is None:
+                result=dict(page,results=[],delivered_count=0,next_cursor=None,status='complete')
+            else:
+                for key in ('semantic_used','indexing_pending','embedding_pending'):
+                    result['retrieval'][key] |= page['retrieval'][key]
+            for item in page['results']:
+                ident=(item['record_id'],item['revision_id'])
+                if ident in seen: continue
+                candidate=dict(result,results=result['results']+[item],delivered_count=len(seen)+1)
+                if len(encoded(candidate).encode())>maximum:
+                    return result
+                result=candidate;seen.add(ident)
+            if page.get('reason') and not result['results']:
+                result['reason']=page['reason']
+        return result
+
     def automatic(self, snapshot, args, ledger, maximum):
         """Two eligibility lanes, one existing automatic-recall allowance.
 
@@ -715,16 +772,18 @@ class RecallStore:
         similarity = {}
         # Look further than the room holds, so repeats collapsed below cannot
         # use up the candidates; the final fit below still enforces `maximum`.
-        ordinary = self.search(snapshot, dict(base, _preference_mode='exclude', limit=AUTOMATIC_POOL), ledger,
+        ordinary = self._context_search(snapshot, dict(base, _preference_mode='exclude', limit=AUTOMATIC_POOL), ledger,
             4*maximum, complete_messages=complete_messages, semantic_scores=similarity)
         # Notes are ranked among notes for their share; the same exclusion keeps
         # scoped preferences behind their own gate.
-        notes = self.search(snapshot, dict(base, scope='notebook', limit=NOTE_SHARE,
+        notes = self._context_search(snapshot, dict(base, scope='notebook', limit=NOTE_SHARE,
             _preference_mode='exclude'), ledger, maximum)
         result = dict(ordinary, results=[], delivered_count=0, next_cursor=None, status='complete')
         result.pop('reason', None)
         result['retrieval'] = dict(ordinary['retrieval'], preference_strength=strength,
             preference_count=0, selection='bounded_automatic')
+        if getattr(snapshot,'module_id',None) or getattr(snapshot,'project_id',None):
+            result['retrieval']['context_order']=(['module'] if snapshot.module_id else [])+(['project'] if snapshot.project_id else [])+['all']
         # These internal searches are not publicly continuable. Missing items
         # can be rediscovered through the ordinary explicit search tool.
         def extended(items):
@@ -744,7 +803,15 @@ class RecallStore:
         for item in notes['results']:
             if len(encoded(extended(reserved+[item])).encode()) <= maximum:
                 reserved.append(item)
-        for item in self._automatic_order(ordinary['results'], notes['results'], similarity):
+        ordered=self._automatic_order(ordinary['results'], notes['results'], similarity)
+        if getattr(snapshot,'module_id',None) or getattr(snapshot,'project_id',None):
+            def tier(item):
+                context=item.get('workspace',item.get('note',{}).get('workspace',{}))
+                if snapshot.module_id and context.get('module_id')==snapshot.module_id: return 0
+                if snapshot.project_id and context.get('project_id')==snapshot.project_id: return 1
+                return 2
+            ordered.sort(key=tier)  # Stable relevance/share order within each scope.
+        for item in ordered:
             pending = [note for note in reserved
                 if (note['record_id'],note['revision_id']) != (item['record_id'],item['revision_id'])]
             if len(encoded(extended([item]+pending)).encode()) <= maximum:
@@ -896,6 +963,11 @@ class RecallStore:
                         and 'user-rejected' in item.get('note',{}).get('flags',[])):
                     continue
                 details=item.get('note',{})
+                context=item.get('workspace',details.get('workspace',{}))
+                if any((field in args and context.get(field)!=args[field]) or
+                       ('_exclude_'+field in args and context.get(field)==args['_exclude_'+field])
+                       for field in ('project_id','module_id')):
+                    continue
                 if args.get('_preference_mode')=='exclude' and details.get('preference_scope'):
                     continue  # Supersession cannot bypass the preference gate.
                 if args.get('_preference_mode')=='only':

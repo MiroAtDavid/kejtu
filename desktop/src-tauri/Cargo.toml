@@ -24,6 +24,11 @@ tokio = { version = "1", features = ["sync", "time"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 gtk = "0.18.2"
+# Installed builds only: a second launch shows the open window. 2.4.0 is the
+# newest release that supports the pinned Tauri 2.11.
+tauri-plugin-single-instance = "=2.4.0"
+# Already in the tree through tao; used to present the window with a fresh X11 time.
+gdkx11 = "0.18.2"
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"

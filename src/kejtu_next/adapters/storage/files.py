@@ -308,6 +308,16 @@ if os.name == 'nt':
                 _kernel.CloseHandle(parent)
             raise
 
+    @contextmanager
+    def held_windows_directory(path):
+        """Pin the full checked directory chain for path-based Windows operations."""
+        parents = _parent_handles(Path(path) / '_')
+        try:
+            yield
+        finally:
+            for handle in reversed(parents):
+                _kernel.CloseHandle(handle)
+
     def _windows_regular(path, writable, create, exclusive, *, new=False,
                          delete=False, write_through=False, private=False):
         if private and not new:

@@ -1,6 +1,7 @@
 import type {
   Arguments,
   ResearchCounts,
+  ResearchResult,
   ResearchSearch,
 } from "$lib/api/wire.generated";
 import { localZone, runLabel } from "../background/editor";
@@ -16,6 +17,21 @@ export function researchTime(timestamp: string, zone = localZone()): string {
         date.getFullYear() === new Date().getFullYear() ? undefined : "numeric",
       hour: "2-digit",
       minute: "2-digit",
+    }).format(date);
+  } catch {
+    return timestamp;
+  }
+}
+/** Day only, for cards where the hour would crowd the line. */
+export function researchDay(timestamp: string, zone = localZone()): string {
+  try {
+    const date = new Date(timestamp);
+    return new Intl.DateTimeFormat(undefined, {
+      timeZone: zone,
+      day: "numeric",
+      month: "short",
+      year:
+        date.getFullYear() === new Date().getFullYear() ? undefined : "numeric",
     }).format(date);
   } catch {
     return timestamp;
@@ -51,4 +67,21 @@ export function searchStatus(item: ResearchSearch) {
     return item.new_report ? "Paused · Report ready" : "Paused";
   if (item.new_report) return "Report ready";
   return item.last_run ? "Up to date" : "Waiting for first check";
+}
+/** The source's host for display; an unreadable address is shown as it is. */
+export function findingHost(url: string) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+export function findingState(finding: ResearchResult) {
+  return finding.attention === "new"
+    ? "New"
+    : finding.attention === "changed"
+      ? "Changed"
+      : finding.attention === "dismissed"
+        ? "Dismissed"
+        : "Reviewed";
 }

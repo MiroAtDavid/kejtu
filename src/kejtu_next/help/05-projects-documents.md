@@ -1,127 +1,53 @@
 # Projects, documents and learning
 
-## Projects
+## Open a file beside chat
 
-Fresh installations show Projects and let Kejtu read and update your workspace
-when you ask. In **Settings → Planning → Workspace**, **Kejtu’s help in conversation**
-chooses **Read and update**, **Read only** or **Off**. Existing installations keep
-their saved choices. **Use recommended setup** stages Projects on, read-and-update
-access, the computer’s timezone and a 15-minute planning buffer; **Save workspace
-settings** applies it. It keeps your widgets, media choices, external calendars
-and Files permissions. Radio, video and external desktop-calendar access have separate switches
-and start off. Manual controls remain available.
-Create a **Project** for the overall work. **Sections / Modules** divide it when
-useful; **Add section** creates one. Existing standalone sections remain available.
-Project dates and breaks are optional under **Schedule**. Creating records does
-not create folders or grant filesystem access. A task can belong to the whole
-project or to a section; **Project tasks** opens the combined task list.
+1. Open **Projects** in the main sidebar. It opens the project you used last; choose another one from the list beside it. On **Overview**, click a module’s name to expand it. Choose **Conversation** in that module to start a new chat linked to both the project and the module.
+2. To use the conversation you are already in, open the project selector beside the message field and choose the project and its module. The conversation sidebar shows **Current module** and a collapsible **Resources** file list.
+3. Expand **Resources** and click a file. It opens in a tab to the right of the conversation. If you just added a file to the module folder, use **Refresh folder**. The plus button, **New Markdown document**, opens a blank draft.
 
-Share a folder in **Files**, then select it as the section's Resources folder.
-Use the section sidebar and the **Overview**, **Resources**, **Practice** and
-**Tasks** tabs. Paths and access should remain visible when choosing a folder.
+The file list shows the module’s assigned folder. If the list is empty, check which module the conversation is linked to and which Resources folder that module uses. Drag the divider to resize the document pane, or focus it and use the arrow keys. **Close document pane** hides the pane and keeps its open tabs and drafts. Drag tabs to reorder them, or focus a tab and press Alt+Shift+Left or Right.
 
-On the first **Resources** visit, an editable **project_name.md** starter opens.
-It includes the saved section name, project and Resources folder when available,
-plus prompts for the purpose, background, decisions and next steps. These prompts
-are not a generated factual summary. An existing matching file is opened instead
-when it can be found in the shared folder.
+## Edit Markdown or ask about a passage
 
-Add your own context or use the document's **Ask Kejtu** control to develop it from
-information you provide and material Kejtu can actually read. The starter is
-**unsaved** until you use **Save a Markdown copy** and choose a destination.
-Save it in the Resources folder to make it available through the normal file and
-workspace tools. Existing permissions still apply; it is not silently loaded into
-every conversation. Closing a changed starter uses the usual unsaved-edit check.
+Open a Markdown file and type directly in **Write**, the formatted editor. **Preview** shows the formatted result and **Compare** shows changes against the opened document. For raw Markdown, open **Document options** (···) and choose **Edit Markdown source** or **Source and preview**.
 
-Save dialogs start in the section's Resources folder when it is available.
-If no folder is assigned, **Choose or create a section folder…** lets you select
-an existing shared folder or create a subfolder, then assign it to the section.
-**Save elsewhere…** keeps that choice optional: the dialog starts in your system's
-Documents folder if available, otherwise your home folder. **Cancel** keeps the
-document open without saving. Selecting a destination does not grant new Files
-permissions, and saving a copy never replaces an existing file.
+- **Ask a question.** Select text in the editor and choose **Ask Kejtu…** from the selection menu. In Preview you can also right-click a paragraph and choose **Edit paragraph…**. Both put the passage in the ordinary conversation composer. Type a question such as “What does the author mean here?” and send it. The answer appears in chat.
+- **Ask for an edit.** Select the passage the same way and send an instruction such as “Shorten this paragraph and keep the dates.” **Insert after…** targets the position after the passage. An edit Kejtu can apply updates the open draft. Check the result with **Compare** or use **Undo**. If an edit conflicts with the current draft, open **Document options → Unapplied change** to read the proposal.
+- **Discuss the whole draft.** Choose **Discuss document in chat** in the toolbar. If a passage is already targeted, choose **Document options → Use whole document**.
+- **Save your work.** Use **Save a Markdown copy** or Ctrl+S (⌘S on Mac), then choose an unused filename. The original stays on disk. Cancelling the chooser keeps the draft open. Save before restarting Kejtu.
 
-## Documents
+## Read a PDF and ask about it
 
-While Kejtu works on Markdown, the three activity dots sit beside the word rather
-than above it. They use clear space after or before the word, or a free line gutter
-when neighbouring text is tight. If no safe space is visible, the Ask Kejtu rail
-still shows activity. Clicking the dots opens Ask Kejtu.
+In the PDF reader, hover over a paragraph on the rendered page and click to mark it. To include adjoining paragraphs on that page, Shift-click another paragraph or drag across them. The **Marked passage** card in the chat composer identifies the file, page and quoted text. Type your question and send it. Marking text leaves your question editable until you send it. Click the marked paragraph again or remove the card to clear it.
 
-When editing Markdown, drag the **Ask Kejtu** panel by its heading outside the
-main window to open it as a separate desktop window. The **Open chat in separate
-window** button does the same. Your draft and live reply stay in the same document
-conversation. Use **Return to document**, or close that window, to bring the panel
-back. Closing the document also closes its separate chat window.
+For a whole page, choose **Explain** or **Practise**. These prepare a source-linked request in chat for you to send. **Exact text** shows the extracted page text. An image-only scan may have no paragraphs Kejtu can mark. If a question needs another page, open that page and mark the relevant text there.
 
-Resources keeps each opened document in its own tab. Open more files without
-closing earlier ones; each tab keeps its own edits and reading position. The ×
-closes that document and checks for unsaved changes. These tabs last for the
-current application session, so save edits before restarting Kejtu.
+Marking a passage gives the conversation a reference. To save a highlight in the PDF itself, change its contents, fill a form, or combine pages, ask in chat. The operation requires a connected PDF tool that supports it and a writable destination. Scanned text may need OCR from that tool. Ask where the result was saved and reopen it to check.
 
-**Wide view** expands reading across the window and temporarily hides the sidebar
-and widgets; **Exit wide view** restores them. Use **Files** in wide view to open
-another resource. With two or more documents open, **Show documents side by side**
-displays a pair, including two PDFs or two editors. Choose the right document,
-then drag the divider to adjust their widths. Drag a document tab along the tab
-strip to reorder it, or drop it on the left or right reading area to place it
-there. Moving one visible document onto the other side swaps the pair; **Swap
-sides** does the same without dragging. Alt+Shift+Left/Right reorders a focused
-tab with the keyboard. Selecting a visible pane makes it the target when choosing
-another tab. Narrow windows show one pane until there is room for both again.
+## Word, code and text files
 
-Resources can open supported files from permitted folders. PDFs open in **PDF
-Craft** by default. **Read & annotate** keeps highlights, notes and drawing tools
-available; **Edit text** lets you change existing selectable text and images in
-the same open PDF. **All tools** exposes the other PDF tools. Switching modes
-keeps your edits. **Save a PDF copy** exports the result without overwriting the
-original. Scanned text is an image and cannot be edited as ordinary text in this
-bundled reader. Choose **Simple reader** as the reading-only fallback. Word documents use
-the integrated Word editor; Markdown has its own editor. Save/export controls and
-unsaved-change prompts matter: opening, discussing or previewing a document is
-not a saved edit. Complex documents may render or round-trip differently, so
-check an exported result before relying on its fidelity.
+- **Word (.docx).** Open the file for a read-only preview. Select a passage and choose **Discuss in chat** to put it in the composer. To change the Word file, ask Kejtu to use an available document tool with write access. **Reload document** shows changes saved to disk.
+- **Code and plain text.** Edit the file in its tab and save with the toolbar button or Ctrl+S (⌘S on Mac). Select lines and choose **Ask in chat**, or choose **Use whole file in chat** from the file’s ··· menu. Read-only files can still be discussed. If another program saves the file first, your draft stays open and **Reload from disk** lets you load the disk version.
 
-Document discussion can link a retained source and page to a conversation. Kejtu
-can explain or work from the exact source when its tools and grants make it
-available. A PDF being visible on screen does not mean the model has read the
-whole file. Scanned pages, unsupported content and missing extraction tools can
-limit what it can read; it should identify the gap.
+## Projects, modules and conversations
 
-Conversational creation/editing additionally requires the relevant Files or
-document connection, allowed tools and a writable destination. The embedded
-reader/editor and a Craft MCP connection serve different roles. A bundled editor
-does not silently install or authorize an MCP server. Ask for a concrete output
-and destination, then check the saved file or export.
+**Projects** opens the project you used last. The list beside it holds your other active projects, **Without a project** for modules on their own, and **Finished** for projects whose end date has passed; choose **New project** there to create one. In a narrow window the list is the **Projects** chooser beside the tabs. The line under the project title shows its dates, the current or next break and its number of modules. Its **Overview** contains **Modules** and **Open tasks**. Expand a module to see its schedule, **Schedule work time**, **Add event**, or start a **Conversation**. **Project tasks** opens the task list filtered to the project and its modules. Click a task title to open that task. The project’s **Conversations** view lists linked chats. Choose **New conversation** there to start one for the project as a whole.
 
-With the corresponding PDF tools enabled, you can ask Kejtu to edit text, add
-highlights or notes, fill forms, create PDFs, rearrange or combine pages, and save
-the result in a writable shared folder. Scanned PDFs may need the connected
-tool's OCR support. Kejtu should check the available capabilities before saying
-an operation is unavailable, and distinguish a saved result from an unsaved edit.
+Use **Add module** to divide work that needs its own materials or schedule. Existing modules without a project are under **Without a project** in the Projects list and **No project** in the chat selector. Project dates and breaks are optional under **Schedule**. Creating a project or module record grants no file access.
 
-## Calendar and planning
+Beside the message field, the project selector lets you choose a whole project or one of its modules. A saved conversation changes at once. A new chat keeps its choice through the first message. Kejtu gives accessible memories from the linked module and then the project priority. Moving a conversation leaves older memories attached to their original context.
 
-The Kejtu calendar stores local commitments, project schedules and work/study
-sessions. Its initial timezone follows the computer, with UTC as a fallback when
-it cannot be detected. In Workspace, search the timezone dropdown or choose
-**Use computer timezone**, then **Save workspace settings**. An existing saved
-zone is kept on restart, including after travel. **Planning preferences** contains
-the break/travel buffer. **Media & external calendars** contains the radio, video
-and external-calendar switches. To connect desktop calendars, switch on
-**Show desktop calendar appointments**, choose **Save and find calendars**, select
-the calendars and save. The Kejtu calendar works without this external connection. Describe
-preferred work hours in conversation; there is no weekly-hours settings editor.
-Suggested slots are proposals until saved. Empty calendar space is not proof
-that you are free. External calendar widgets are separate from this timetable
-and are not automatically included in scheduling conflict checks.
+## Folders and permissions
 
-## Practice
+When editing a module on Linux, **Browse folder…** selects an existing Resources folder and **Create folder…** makes one immediately. Both share the chosen folder with read/write access. If Files access was off, these actions turn it back on for saved folders too. A folder already in the dropdown keeps its saved access. **Save module** stores the link. Cancelling leaves any folder you already created on disk.
 
-Kejtu can explain material, offer a hint, ask one source-linked question and
-discuss your attempt. Ask directly for an answer when that is what you want.
-Practice records and self-reported confidence do not prove mastery or constitute
-official grades. Source-specific explanations should name the material used.
+A new document’s save dialog starts in the assigned module folder when available. For a module without a folder, **Choose or create a module folder…** lets you assign one. **Save elsewhere…** starts in the system Documents folder when available, otherwise in your home folder. Choosing a destination for a copy grants no additional Files access.
 
-Optional radio, video and calendar widgets require their own local runtimes,
-sources and settings. They are not enabled merely by opening Home.
+In **Settings → Planning → Workspace**, **Kejtu’s help in conversation** controls whether Kejtu may read and update your workspace, read it only, or have that access switched off. Fresh installations start with Projects and read-and-update access. **Use recommended setup** stages those choices alongside the computer timezone and a 15-minute planning buffer. **Save workspace settings** applies them. External calendars and Files have their own permissions. The included **Projects** and **Learning & study** packages provide guidance you can switch off in Shelf.
+
+## Calendar and practice
+
+The local Calendar holds commitments, project schedules and work or study sessions. Suggested slots become commitments when saved. In Workspace, choose a timezone or **Use computer timezone**, then **Save workspace settings**. **Planning preferences** contains the break/travel buffer. Describe preferred work hours in chat. To display read-only desktop calendars, enable **Show desktop calendar appointments** under **External calendars**, choose **Save and find calendars**, select calendars and save. External appointments are not automatically included in scheduling conflict checks.
+
+To practise, open material beside chat and ask for a hint, a source-linked question or feedback on your attempt. In a PDF, **Practise** starts from the displayed page. Confidence ratings record how the practice felt to you.

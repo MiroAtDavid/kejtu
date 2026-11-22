@@ -1,8 +1,9 @@
 <script lang="ts">
-  import Icon from "$lib/design/Icon.svelte";
-  import PageHeading from "$lib/design/PageHeading.svelte";
+  import "$lib/design/collection.css";
   import { onMount } from "svelte";
   import { request } from "$lib/api/client";
+  import type { TaskRecord } from "$lib/api/wire.generated";
+  import TaskRows from "$lib/features/tasks/TaskRows.svelte";
   import {
     civilInstant,
     localDate,
@@ -13,6 +14,7 @@
     type Source,
   } from "./workspace";
   import WeekCalendar from "./WeekCalendar.svelte";
+  import MonthCalendar from "./MonthCalendar.svelte";
   import {
     dayInZone,
     clockTime,
@@ -23,6 +25,8 @@
     type Deadline,
   } from "./calendar-view";
   import EventEditor from "./EventEditor.svelte";
+  import Timeline from "$lib/design/Timeline.svelte";
+  import { dueTimelineItem, eventTimelineItem } from "./course-timeline";
   export let workspace: Workspace;
   export let busy = false;
   export let active = true;
@@ -46,8 +50,8 @@
   $: if (!active) wasActive = false;
   export let initial: Partial<Event> | null = null;
   export let onTasks: () => void = () => {};
-  export let onCourse: (id: string) => void = () => {};
-  export let onProject: (id: string) => void = () => {};
+  /** Open one task (its read reference) on the Tasks page. */
+  export let onTask: (ref: string) => void = () => {};
   type Calendar = {
     occurrences: Occurrence[];
     deadlines: Deadline[];
@@ -71,7 +75,7 @@
       [],
     suggestionNotice = "",
     suggestionError = "";
-  let tasks: { id: string; title: string; due: string | null }[] = [],
+  let tasks: TaskRecord[] = [],
     links: RecordRow<{
       task_id: string;
       course_id: string | null;
@@ -142,7 +146,83 @@
     const date = new Date(value + "T12:00:00Z");
     return addDay(value, -((date.getUTCDay() + 6) % 7));
   }
+  // Week or month view. The month shows whole weeks (Monday first), so a few
+  // days of the neighbouring months appear with their plans; totals and the
+  // slot search cover the month itself.
+  const VIEW_KEY = "kejtu.calendar.view";
+  let mode: "week" | "month" = "week";
+  try {
+    if (localStorage.getItem(VIEW_KEY) === "month") mode = "month";
+  } catch {
+    // A per-viewer convenience only; the week is the default.
+  }
+  let month = localDate().slice(0, 7);
+  $: period = mode === "month" ? "month" : "week";
+  const nextMonth = (first: string) => {
+    const date = new Date(first + "T12:00:00Z");
+    date.setUTCMonth(date.getUTCMonth() + 1, 1);
+    return date.toISOString().slice(0, 10);
+  };
+  const previousMonth = (first: string) => {
+    const date = new Date(first + "T12:00:00Z");
+    date.setUTCMonth(date.getUTCMonth() - 1, 1);
+    return date.toISOString().slice(0, 10);
+  };
+  function shownDays() {
+    if (mode === "week")
+      return Array.from({ length: 7 }, (_, i) => addDay(start, i));
+    const first = month + "-01";
+    const until = addDay(firstMonday(addDay(nextMonth(first), -1)), 7);
+    const result: string[] = [];
+    for (let day = firstMonday(first); day < until; day = addDay(day, 1))
+      result.push(day);
+    return result;
+  }
+  function bounds(firstDay: string, endDay: string) {
+    return {
+      first: civilInstant(firstDay + "T00:00", zone),
+      last: civilInstant(endDay + "T00:00", zone),
+      timezone: zone,
+    };
+  }
+  /** Everything displayed: the week, or the month's whole weeks. */
+  function shownRange() {
+    return bounds(days[0], addDay(days[days.length - 1], 1));
+  }
+  function setMode(value: "week" | "month") {
+    if (value === mode || loading) return;
+    const anchor = selectedDay || start;
+    if (value === "month") month = anchor.slice(0, 7);
+    else
+      start = firstMonday(
+        anchor.slice(0, 7) === month ? anchor : month + "-01",
+      );
+    mode = value;
+    try {
+      localStorage.setItem(VIEW_KEY, value);
+    } catch {
+      // Not remembered; the choice still applies now.
+    }
+    void refresh();
+  }
+  function step(direction: -1 | 1) {
+    if (mode === "month")
+      month = (
+        direction < 0 ? previousMonth(month + "-01") : nextMonth(month + "-01")
+      ).slice(0, 7);
+    else start = addDay(start, 7 * direction);
+    void refresh();
+  }
+  function current() {
+    const today = dayInZone(new Date(), zone);
+    month = today.slice(0, 7);
+    start = firstMonday(today);
+    void refresh();
+  }
+  /** The period itself: one week, or one month. */
   function range() {
+    if (mode === "month")
+      return bounds(month + "-01", nextMonth(month + "-01"));
     return {
       first: civilInstant(start + "T00:00", zone),
       last: civilInstant(addDay(start, 7) + "T00:00", zone),
@@ -184,15 +264,20 @@
     links = [];
     taskNext = linkNext = null;
     try {
-      days = Array.from({ length: 7 }, (_, i) => addDay(start, i));
+      days = shownDays();
       if (!days.includes(selectedDay))
         selectedDay = days.includes(dayInZone(new Date(), zone))
           ? dayInZone(new Date(), zone)
-          : start;
-      const dates = range();
-      firstMs = Date.parse(dates.first);
-      lastMs = Date.parse(dates.last);
-      calendar = await workspaceRequest<Calendar>("calendar.view", dates);
+          : mode === "month"
+            ? month + "-01"
+            : start;
+      const counted = range();
+      firstMs = Date.parse(counted.first);
+      lastMs = Date.parse(counted.last);
+      calendar = await workspaceRequest<Calendar>(
+        "calendar.view",
+        shownRange(),
+      );
       const result = await request("tasks", {
         action: "list",
         outcome: "open",
@@ -216,7 +301,7 @@
     if (!calendar?.deadline_next_offset) return;
     try {
       const result = await workspaceRequest<Calendar>("calendar.view", {
-        ...range(),
+        ...shownRange(),
         deadline_offset: calendar.deadline_next_offset,
       });
       calendar = {
@@ -244,7 +329,7 @@
         suggestions = [];
         suggestionNotice = before
           ? `No future time remains in this search. The cutoff excludes ${showDate(before)}; clear it or choose a later date.`
-          : "No future time remains in this week. Choose a later week.";
+          : `No future time remains in this ${period}. Choose a later ${period}.`;
         return;
       }
       dates.first = new Date(first).toISOString();
@@ -259,8 +344,8 @@
         (result.found
           ? `${result.found} suitable ${result.found === 1 ? "slot" : "slots"} found. Select one to preview and reserve it.`
           : before
-            ? `No study slots fit this week's search before ${showDate(before)}. That day is excluded. Clear the date or choose a later one to include it.`
-            : "No study slots fit the remaining time in this week. Try another week or a shorter session.") +
+            ? `No study slots fit this ${period}'s search before ${showDate(before)}. That day is excluded. Clear the date or choose a later one to include it.`
+            : `No study slots fit the remaining time in this ${period}. Try another ${period} or a shorter session.`) +
         (result.notice ? ` ${result.notice}` : "");
     } catch (caught) {
       // Search feedback belongs beside its controls, not above the calendar.
@@ -336,6 +421,7 @@
       Intl.DateTimeFormat().resolvedOptions().timeZone ||
       "UTC";
     start = firstMonday(dayInZone(new Date(), zone));
+    month = dayInZone(new Date(), zone).slice(0, 7);
     mounted = true;
     if (initial) create(initial);
   });
@@ -345,105 +431,232 @@
     .filter((item) => item.kind === "study")
     .reduce((sum, item) => sum + duration(item), 0);
   $: locked = busy || $workspace.busy || !!$workspace.pending;
+  // The selected day as the module appointments show theirs: the same
+  // timeline rows, events first, then the tasks due that day.
+  $: dayItems = onDay(calendar?.occurrences || [], selectedDay, zone);
+  $: dayDue =
+    calendar?.deadlines.filter((item) => item.due === selectedDay) || [];
+  $: dayEntries = [
+    // An occurrence has no repeat rule or zone of its own: it is shown in the
+    // Calendar's zone, as the week above shows it.
+    ...dayItems.map((item) =>
+      eventTimelineItem(item.id, {
+        ...item,
+        timezone: zone,
+        repeat: "none",
+        interval: 1,
+        until: null,
+      }),
+    ),
+    ...dayDue.map((item) =>
+      dueTimelineItem("due:" + item.id, item.title, item.due),
+    ),
+  ];
+  // The line under the title, as on the other pages: the week, what it holds,
+  // and the zone only when it is not this computer's.
+  const localZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  $: classes = timed.filter((item) => item.kind === "class").length;
+  $: status = [
+    mode === "month"
+      ? new Date(month + "-15T12:00:00Z").toLocaleDateString(undefined, {
+          month: "long",
+          year: "numeric",
+          timeZone: "UTC",
+        })
+      : `${showDate(start)} – ${showDate(addDay(start, 6))}`,
+    ...(calendar
+      ? [
+          `${classes} ${classes === 1 ? "class" : "classes"}`,
+          `${Math.round(studyMinutes / 6) / 10} h reserved`,
+        ]
+      : []),
+    ...(zone !== localZone ? [zone] : []),
+  ].join(" · ");
+  // A task's place, as the task rows name it elsewhere: its module, else its project.
+  function placeOf(task: TaskRecord) {
+    const place = task.placements?.[0];
+    if (!place) return "";
+    return (
+      $workspace.snapshot?.courses.find((row) => row.id === place.section_id)
+        ?.data.title ??
+      $workspace.snapshot?.semesters.find((row) => row.id === place.project_id)
+        ?.data.title ??
+      ""
+    );
+  }
+  // The "···" options close on a click outside them, or on Escape.
+  let calendarMenu: HTMLDetailsElement | undefined;
+  function dismissMenu(event: PointerEvent | KeyboardEvent) {
+    if (!calendarMenu?.open) return;
+    if (event instanceof KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      if (calendarMenu.contains(document.activeElement))
+        calendarMenu.querySelector("summary")?.focus({ preventScroll: true });
+    } else if (
+      event.target instanceof Node &&
+      calendarMenu.contains(event.target)
+    )
+      return;
+    calendarMenu.open = false;
+  }
 </script>
 
-<section class="uni study-week" aria-label="Weekly overview">
-  <PageHeading
-    title="Weekly overview"
-    subtitle="Events, deadlines and time for your projects."
-  />
-  <div class="calendar-toolbar">
-    <div class="row">
-      <button
-        disabled={loading}
-        aria-label="Previous week"
-        on:click={() => {
-          start = addDay(start, -7);
-          void refresh();
-        }}>‹</button
-      >
-      <button
-        disabled={loading}
-        on:click={() => {
-          start = firstMonday(dayInZone(new Date(), zone));
-          void refresh();
-        }}>This week</button
-      >
-      <button
-        disabled={loading}
-        aria-label="Next week"
-        on:click={() => {
-          start = addDay(start, 7);
-          void refresh();
-        }}>›</button
-      >
-      <span class="date-range"
-        >{showDate(start)} – {showDate(addDay(start, 6))}</span
-      >
+<svelte:window on:pointerdown={dismissMenu} on:keydown={dismissMenu} />
+
+{#snippet pencil()}
+  <svg
+    width="13"
+    height="13"
+    viewBox="0 0 20 20"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.3"
+    aria-hidden="true"><path d="m4 12 9-9 4 4-9 9-5 1 1-5ZM11 5l4 4" /></svg
+  >
+{/snippet}
+
+{#snippet reserveButton(task: TaskRecord)}
+  {@const taskLinks = links.filter((row) => row.data.task_id === task.id)}
+  {@const link =
+    taskLinks.length === 1 && linkNext === null ? taskLinks[0] : null}
+  {@const planned = minutesFor(task.id)}
+  <span class="reserve">
+    {#if planned}<span class="reserved">{planned} min this {period}</span>{/if}
+    <button
+      class="mini"
+      disabled={locked}
+      title="Reserve a session"
+      aria-label={`Reserve a session for ${task.title}`}
+      on:click={() =>
+        create({
+          kind: "study",
+          title: task.title,
+          task_id: task.id,
+          course_id: link?.data.course_id || null,
+          material: link?.data.material || [],
+        })}>Reserve</button
+    >
+  </span>
+{/snippet}
+
+<section class="uni study-week" aria-label="Calendar">
+  <div class="collection-page calendar-head">
+    <div class="cp-head">
+      <div>
+        <h1 class="cp-title">Calendar</h1>
+        <p class="cp-status">{status}</p>
+      </div>
     </div>
-    <div class="row">
-      <button
-        class="workspace-action"
-        disabled={locked || loading}
-        on:click={() => create()}
-        ><Icon name="plus" size={14} /> Add event</button
-      ><button
-        class="workspace-action"
-        disabled={locked}
-        aria-expanded={planningOpen}
-        on:click={() => (planningOpen = !planningOpen)}>Plan work time</button
-      >
+    <div class="cp-bar calendar-bar">
+      <div class="week-nav" role="group" aria-label={`Change ${period}`}>
+        <button
+          disabled={loading}
+          aria-label={`Previous ${period}`}
+          on:click={() => step(-1)}>‹</button
+        >
+        <button disabled={loading} on:click={current}>This {period}</button>
+        <button
+          disabled={loading}
+          aria-label={`Next ${period}`}
+          on:click={() => step(1)}>›</button
+        >
+        <span class="view-switch" role="group" aria-label="Calendar view">
+          <button
+            disabled={loading}
+            aria-pressed={mode === "week"}
+            on:click={() => setMode("week")}>Week</button
+          ><button
+            disabled={loading}
+            aria-pressed={mode === "month"}
+            on:click={() => setMode("month")}>Month</button
+          >
+        </span>
+      </div>
+      <div class="bar-actions">
+        <button disabled={locked || loading} on:click={() => create()}
+          >Add event</button
+        >
+        <button
+          disabled={locked}
+          aria-expanded={planningOpen}
+          on:click={() => (planningOpen = !planningOpen)}>Plan work time</button
+        >
+        <details class="calendar-menu" bind:this={calendarMenu}>
+          <summary aria-label="Calendar options" title="Calendar options"
+            >···</summary
+          >
+          <div class="calendar-menu-list">
+            <button
+              class="plain"
+              aria-expanded={expanded}
+              aria-controls="study-week-calendar"
+              on:click={() => (expanded = !expanded)}
+              >{expanded ? "Collapse calendar" : "Expand calendar"}</button
+            >
+            <label class="week-pick"
+              >{mode === "month" ? "Month" : "Week"} containing<input
+                type="date"
+                disabled={loading}
+                value={mode === "month" ? month + "-01" : start}
+                on:change={(event) => {
+                  const value = event.currentTarget.value;
+                  if (value) {
+                    if (mode === "month") month = value.slice(0, 7);
+                    else start = firstMonday(value);
+                    void refresh();
+                  }
+                }}
+              /></label
+            >
+            <button class="plain" disabled={loading} on:click={refresh}
+              >{loading ? "Loading…" : "Refresh"}</button
+            >
+            <p class="muted">
+              This view holds your Kejtu schedule. Selected desktop calendars
+              are shown separately in the Upcoming widget and do not block work
+              suggestions.{#if calendar}{" "}
+                {calendar.reminder_notice} A calendar block creates no reminder automatically.{/if}
+            </p>
+          </div>
+        </details>
+      </div>
     </div>
   </div>
-  <details class="calendar-options">
-    <summary>Calendar options</summary>
-    <div class="calendar-controls">
-      <button
-        class="plain"
-        aria-expanded={expanded}
-        aria-controls="study-week-calendar"
-        on:click={() => (expanded = !expanded)}
-        >{expanded ? "Collapse calendar" : "Expand calendar"}</button
-      >
-      <input
-        aria-label="Week containing"
-        type="date"
-        disabled={loading}
-        value={start}
-        on:change={(event) => {
-          if (event.currentTarget.value) {
-            start = firstMonday(event.currentTarget.value);
-            void refresh();
-          }
-        }}
-      /><button class="plain refresh" disabled={loading} on:click={refresh}
-        >{loading ? "Loading…" : "Refresh"}</button
-      >
-    </div>
-  </details>
   {#if error}<p class="error" role="alert">{error}</p>{/if}
   <div id="study-week-calendar">
-    <WeekCalendar
-      {days}
-      items={calendar?.occurrences || []}
-      deadlines={calendar?.deadlines || []}
-      {zone}
-      {selectedDay}
-      compact={!expanded}
-      {loading}
-      unavailable={!!error && !calendar}
-      busy={locked || loading}
-      onEdit={edit}
-      {onTasks}
-      onSelect={selectDay}
-    />
-  </div>
-  <div class="calendar-caption">
-    <span>Kejtu schedule · {zone}</span>{#if calendar}<span
-        >{timed.filter((item) => item.kind === "class").length} classes · {Math.round(
-          studyMinutes / 6,
-        ) / 10}h reserved for study</span
-      >{/if}
+    {#if mode === "month"}
+      <MonthCalendar
+        {days}
+        {month}
+        items={calendar?.occurrences || []}
+        deadlines={calendar?.deadlines || []}
+        {zone}
+        {selectedDay}
+        compact={!expanded}
+        {loading}
+        unavailable={!!error && !calendar}
+        busy={locked || loading}
+        onEdit={edit}
+        {onTasks}
+        onSelect={selectDay}
+      />
+    {:else}
+      <WeekCalendar
+        {days}
+        items={calendar?.occurrences || []}
+        deadlines={calendar?.deadlines || []}
+        {zone}
+        {selectedDay}
+        compact={!expanded}
+        {loading}
+        unavailable={!!error && !calendar}
+        busy={locked || loading}
+        onEdit={edit}
+        {onTasks}
+        onSelect={selectDay}
+      />
+    {/if}
   </div>
   {#if calendar?.deadline_next_offset !== null && calendar?.deadline_next_offset !== undefined}<button
       disabled={loading}
@@ -451,10 +664,7 @@
     >{/if}
   <div class="planning-panel" hidden={!planningOpen}>
     <div class="row spread">
-      <div>
-        <p class="eyebrow">Make a little time</p>
-        <h2>Find time to work</h2>
-      </div>
+      <h2>Find time to work</h2>
       <button
         class="plain"
         disabled={locked}
@@ -502,7 +712,7 @@
               aria-describedby="study-cutoff-help"
             /></label
           ><button type="submit" disabled={loading || locked}
-            >Find slots this week</button
+            >Find slots this {period}</button
           >
         </div>
         <div class="cutoff-help">
@@ -543,124 +753,71 @@
       tabindex="-1"
       aria-label="Selected day agenda"
     >
-      <div class="row spread">
-        <div>
-          <p class="eyebrow">Day at a glance</p>
-          <h2>{selectedDay ? dayLabel(selectedDay) : "Your day"}</h2>
-        </div>
-        <button
-          class="workspace-action"
-          disabled={locked || loading}
-          on:click={() => create()}
-          ><Icon name="plus" size={14} /> Add event</button
-        >
+      <div class="section-head">
+        <h2>{selectedDay ? dayLabel(selectedDay) : "Your day"}</h2>
       </div>
       <div
         class="agenda-list"
         role="region"
         aria-label="All events for the selected day"
       >
-        {#each onDay(calendar?.occurrences || [], selectedDay, zone) as item (item.id)}
-          <button
-            class="agenda-event"
-            disabled={locked || loading}
-            on:click={() => edit(item)}
-            ><span class="agenda-time"
-              >{timeLabel(item, selectedDay, zone)}{#if !item.all_day}<small
-                  >– {time(item.ends_at)}</small
-                >{/if}</span
-            ><span
-              ><strong>{item.title}</strong><small
-                >{item.location ||
-                  item.meeting_type ||
-                  (item.kind === "study" ? "Work session" : item.kind)}</small
-              ></span
-            ></button
+        {#if dayEntries.length}<Timeline
+            compact
+            items={dayEntries}
+            label={`Schedule for ${selectedDay ? dayLabel(selectedDay) : "the day"}`}
           >
-        {:else}<p class="empty-day">
+            <svelte:fragment slot="actions" let:item={entry}>
+              {@const occurrence = dayItems.find((row) => row.id === entry.id)}
+              {#if occurrence}<button
+                  class="timeline-edit"
+                  title={`Edit ${occurrence.repeat === "none" ? "event" : "series"}: ${entry.title}`}
+                  aria-label={`Edit ${occurrence.repeat === "none" ? "event" : "series"}: ${entry.title}`}
+                  disabled={locked || loading}
+                  on:click={() => edit(occurrence)}>{@render pencil()}</button
+                >{:else}<button
+                  class="timeline-edit"
+                  title={`Open task: ${entry.title}`}
+                  aria-label={`Open task: ${entry.title}`}
+                  on:click={onTasks}>{@render pencil()}</button
+                >{/if}
+            </svelte:fragment>
+          </Timeline>{:else}<p class="empty-day">
             {loading
               ? "Loading your day…"
               : error && !calendar
                 ? "The schedule could not be loaded."
                 : "Nothing scheduled. A little breathing room."}
-          </p>{/each}
-        {#each calendar?.deadlines.filter((item) => item.due === selectedDay) || [] as item}<button
-            class="agenda-event due"
-            on:click={onTasks}
-            ><span class="agenda-time">Due</span><strong>{item.title}</strong
-            ></button
-          >{/each}
+          </p>{/if}
       </div>
     </section>
     <section class="task-backlog">
-      <div class="row spread">
-        <div>
-          <p class="eyebrow">Make progress</p>
-          <h2>Tasks to plan</h2>
-        </div>
-        <button class="workspace-action" on:click={onTasks}
-          ><Icon name="arrow" size={14} /> All tasks</button
-        >
+      <div class="section-head">
+        <h2>Tasks to plan</h2>
+        <button disabled={locked} on:click={onTasks}>All tasks</button>
       </div>
       {#if linkNext !== null}<p class="notice">
-          Task links are partially loaded. Load more before choosing a section
-          or estimate.
+          Task links are partially loaded. Load more before choosing a module or
+          estimate.
         </p>
         <button disabled={loading} on:click={moreLinks}>More task links</button
         >{/if}
-      {#each tasks.slice(0, visibleTasks) as task}{@const taskLinks =
-          links.filter((row) => row.data.task_id === task.id)}{@const link =
-          taskLinks.length === 1 && linkNext === null
-            ? taskLinks[0]
-            : null}{@const planned = minutesFor(task.id)}
-        <div class="task-line">
-          <strong>{task.title}</strong>
-          <p class="muted">
-            {task.due ? `Due ${task.due} · ` : ""}{planned
-              ? `${planned} min reserved this week`
-              : "No session this week"}{link
-              ? ` · Estimate ${link.data.estimate_minutes} min`
-              : ""}
-          </p>
-          {#if taskLinks.length > 1}<p class="muted">
-              Linked to multiple places. Choose a section when reserving a
-              session.
-            </p>{/if}
-          <button
+      {#if tasks.length}<div class="collection-page task-plan">
+          <TaskRows
+            items={tasks.slice(0, visibleTasks)}
+            grouped
+            completion={false}
             disabled={locked}
-            on:click={() =>
-              create({
-                kind: "study",
-                title: task.title,
-                task_id: task.id,
-                course_id: link?.data.course_id || null,
-                material: link?.data.material || [],
-              })}>Reserve a session</button
-          >{#each taskLinks as courseLink}<button
-              class="plain"
-              on:click={() =>
-                courseLink.data.course_id
-                  ? onCourse(courseLink.data.course_id)
-                  : onProject(courseLink.data.semester_id!)}
-              >{taskLinks.length === 1
-                ? courseLink.data.course_id
-                  ? "Open section"
-                  : "Open project"
-                : $workspace.snapshot?.courses.find(
-                    (row) => row.id === courseLink.data.course_id,
-                  )?.data.title ||
-                  $workspace.snapshot?.semesters.find(
-                    (row) => row.id === courseLink.data.semester_id,
-                  )?.data.title ||
-                  "Open linked project"}</button
-            >{/each}
+            placementLabel={placeOf}
+            onOpen={(task) => onTask(task.read_ref)}
+            action={reserveButton}
+          />
         </div>{:else}<p class="muted">
           {loading
             ? "Loading tasks…"
             : tasksReady
               ? "No open tasks on this page."
               : "Tasks could not be loaded. Try Refresh."}
-        </p>{/each}
+        </p>{/if}
       {#if tasks.length > visibleTasks}<button
           class="plain"
           on:click={() => (visibleTasks += 6)}
@@ -671,16 +828,6 @@
         >{/if}
     </section>
   </div>
-  <details class="calendar-notes">
-    <summary>Calendar sources &amp; reminders</summary>
-    <p class="muted">
-      This view contains your Kejtu schedule. Selected desktop calendars are
-      shown separately in the Upcoming widget and do not block work suggestions.
-    </p>
-    {#if calendar}<p class="muted">
-        {calendar.reminder_notice} A calendar block creates no reminder automatically.
-      </p>{/if}
-  </details>
   {#if editor}<EventEditor
       {workspace}
       busy={locked}
@@ -697,65 +844,128 @@
 </section>
 
 <style>
-  .calendar-options {
-    margin: 0 0 12px;
-    font-size: var(--ke-text-2xs);
-    color: var(--ke-text-tertiary);
+  /* The width of the other pages: the shared 800px column, head to tasks. */
+  .study-week {
+    max-width: 800px;
   }
-  .calendar-options summary {
-    width: fit-content;
-    margin-left: auto;
-    cursor: pointer;
+  .view-switch {
+    display: inline-flex;
+    margin-left: 8px;
+    border: 1px solid var(--ke-border);
+    border-radius: var(--ke-radius-sm);
+    overflow: hidden;
   }
-  .calendar-controls {
-    justify-content: flex-end;
-    margin-top: 8px;
+  .view-switch button {
+    border: 0;
+    border-radius: 0;
   }
-
-  .eyebrow {
-    font: var(--ke-label-font);
-    text-transform: uppercase;
-    letter-spacing: var(--ke-label-tracking);
-    color: var(--ke-text-tertiary);
-    margin: 0 0 12px;
+  .view-switch button[aria-pressed="true"] {
+    background: var(--ke-surface-inset);
+    font-weight: 600;
   }
-  .calendar-toolbar {
-    display: flex;
+  .calendar-bar {
     justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
   }
-  .calendar-controls {
+  .week-nav,
+  .bar-actions {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
   }
-  .calendar-controls input {
-    width: 142px;
-    flex: 0 0 142px;
-    font-size: var(--ke-text-2xs);
-    padding: 5px;
+  .calendar-menu {
+    position: relative;
   }
-  .calendar-toolbar button:not(.workspace-action) {
-    font-size: var(--ke-text-2xs);
+  .calendar-menu summary {
     padding: 5px 9px;
+    border-radius: var(--ke-radius-sm);
+    color: var(--ke-text-secondary);
+    cursor: pointer;
+    list-style: none;
   }
-  .date-range {
-    font-size: var(--ke-text-xs);
-    margin-left: 10px;
+  .calendar-menu summary::-webkit-details-marker {
+    display: none;
   }
-  .calendar-caption {
+  .calendar-menu-list {
+    position: absolute;
+    z-index: 6;
+    top: calc(100% + 6px);
+    right: 0;
     display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    width: max-content;
+    max-width: min(300px, 80vw);
+    padding: 10px 12px;
+    border: 1px solid var(--ke-border);
+    border-radius: var(--ke-radius-md);
+    background: var(--ke-surface-raised);
+    box-shadow: var(--ke-overlay-shadow);
+  }
+  .week-pick {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: var(--ke-text-2xs);
+    color: var(--ke-text-secondary);
+  }
+  /* Half a page wide: the title keeps the room the note preview would take. */
+  .task-plan :global(.task-row .note) {
+    display: none;
+  }
+  .week-pick input {
+    width: 150px;
+    padding: 5px;
+    font-size: var(--ke-text-2xs);
+  }
+  .calendar-menu-list .muted {
+    margin: 2px 0 0;
+    font-size: var(--ke-text-3xs);
+    white-space: normal;
+  }
+  /* Both section heads are rows of one height, so the two titles line up
+     whether or not a button sits beside them. */
+  .section-head {
+    display: flex;
+    align-items: center;
     justify-content: space-between;
-    gap: 16px;
+    gap: 12px;
+    min-height: var(--ke-control-height);
+    margin-bottom: 16px;
+  }
+  .section-head h2 {
+    margin: 0;
+  }
+  /* Reserve sits at the end of a task row, a small button as on the project page. */
+  .reserve {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 8px;
+  }
+  .reserved {
     color: var(--ke-text-tertiary);
     font-size: var(--ke-text-3xs);
-    padding: 10px 0 24px;
+    white-space: nowrap;
   }
+  .mini {
+    min-height: 24px;
+    padding: 0 9px;
+    border: 0;
+    border-radius: 6px;
+    background: var(--ke-surface-inset);
+    color: var(--ke-text-primary);
+    font-size: 11.5px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .mini:hover:not(:disabled) {
+    background: var(--ke-border-strong);
+  }
+
   .week-bottom {
+    margin-top: 20px;
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: calc(36px * var(--ke-density));
@@ -766,62 +976,20 @@
     letter-spacing: var(--ke-title-section-tracking);
     margin: 0 0 16px;
   }
-  .week-bottom .eyebrow {
-    margin-bottom: 8px;
-  }
   .week-bottom > section {
     min-width: 0;
     border-top: 1px solid var(--ke-border);
     padding-top: 20px;
   }
-  .agenda-event {
-    display: grid;
-    grid-template-columns: 80px minmax(0, 1fr);
-    gap: 12px;
-    width: 100%;
-    text-align: left;
-    border: 0;
-    border-bottom: 1px solid var(--ke-border);
-    border-radius: 0;
-    padding: 12px 0;
-    background: none;
-  }
-  .agenda-event strong {
-    font-size: var(--ke-text-xs);
-    font-weight: 500;
-    overflow-wrap: anywhere;
-  }
-  .agenda-event small {
-    display: block;
-    font-size: var(--ke-text-3xs);
-    margin-top: 4px;
-    color: var(--ke-text-tertiary);
-  }
-  .agenda-time {
-    font-size: var(--ke-text-2xs);
-    color: var(--ke-text-secondary);
+  .timeline-edit {
+    min-width: 28px;
+    min-height: 28px;
+    justify-content: center;
   }
   .empty-day {
     font-size: var(--ke-text-xs);
     color: var(--ke-text-tertiary);
     padding: 12px 0;
-  }
-  .task-line {
-    padding: 12px 0;
-    border-bottom: 1px solid var(--ke-border);
-  }
-  .task-line strong {
-    font-size: var(--ke-text-xs);
-    font-weight: 500;
-  }
-  .task-line p {
-    font-size: var(--ke-text-2xs);
-    margin: 5px 0;
-  }
-  .task-line button {
-    font-size: var(--ke-text-2xs);
-    padding: 4px 8px;
-    margin-right: 8px;
   }
   .planning-panel {
     border: 1px solid var(--ke-border);
@@ -831,9 +999,6 @@
   }
   .planning-panel[hidden] {
     display: none;
-  }
-  .planning-panel .eyebrow {
-    margin-bottom: 8px;
   }
   .cutoff-help {
     display: flex;
@@ -852,13 +1017,6 @@
     margin-top: 8px;
     font-size: var(--ke-text-xs);
   }
-  .calendar-notes {
-    margin-top: 24px;
-    color: var(--ke-text-tertiary);
-  }
-  .calendar-notes summary {
-    font-size: var(--ke-text-3xs);
-  }
   .day-agenda:focus-visible {
     outline: 2px solid var(--ke-accent);
     outline-offset: 4px;
@@ -867,13 +1025,6 @@
     .week-bottom {
       grid-template-columns: 1fr;
       gap: 22px;
-    }
-    .date-range {
-      margin-left: 0;
-    }
-    .calendar-caption {
-      flex-wrap: wrap;
-      gap: 5px;
     }
   }
 </style>

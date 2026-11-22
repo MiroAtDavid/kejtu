@@ -52,11 +52,22 @@ def prepare(notes,snapshot,args,origin,ledger):
     parent=args.get('expected_revision')
     previous=load(notes,snapshot,parent,ledger) if parent else {}
     supplied=args.get('fields',{})
-    if not previous and not (set(supplied)&FIELDS):
+    context=origin.get('workspace',{})
+    if not previous and not (set(supplied)&FIELDS) and not (context and not parent):
         return {},False
     value=dict(title='',purpose='notebook',tags=[],thread_status=None,basis='unspecified')|previous
     for name in ('title','purpose','tags','thread_status','basis','flags','preference_scope'):
         if name in supplied: value[name]=supplied[name]
+    selection=supplied.get('workspace_scope')
+    if selection is not None:
+        if selection=='global':
+            value.pop('workspace',None)
+        elif selection+'_id' not in context:
+            raise Failure('note_fields_invalid','The current turn has no matching project/module context; no note changed.')
+        else:
+            value['workspace']={k:v for k,v in context.items() if selection=='module' or k=='project_id'}
+    elif not parent and context and value['purpose']!='about_user':
+        value['workspace']=context
     if 'tags' in supplied: value['tags']=[tag_key(tag) for tag in supplied['tags']]
     if value['purpose']=='open_thread':
         value['thread_status']=value.get('thread_status') or 'open'
@@ -135,4 +146,5 @@ def summary(value):
         result['last_correction_revision']=value['correction']['to_revision']
     if value.get('flags'): result['flags']=value['flags']
     if value.get('preference_scope'): result['preference_scope']=value['preference_scope']
+    if value.get('workspace'): result['workspace']=value['workspace']
     return result

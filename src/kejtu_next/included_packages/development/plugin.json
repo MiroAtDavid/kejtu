@@ -1,0 +1,15 @@
+{
+  "name": "development",
+  "title": "Development",
+  "version": "1",
+  "skills": [
+    "skills/kejtu-development"
+  ],
+  "description": "Develop and verify code with the granted terminal connection.",
+  "icon": "terminal",
+  "author": {
+    "name": "Kejtu"
+  },
+  "license": "MIT",
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json"
+}

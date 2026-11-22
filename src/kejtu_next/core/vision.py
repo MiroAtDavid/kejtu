@@ -21,15 +21,20 @@ ENCODING = 'MCP visual result v1'
 DATA_URL = re.compile(r'(?m)^data:(image/(?:png|jpeg));base64,([A-Za-z0-9+/=]+)[ \t]*\r?$')
 IMAGE_LINE = re.compile(r'(?m)^data:image/[^\r\n]*\r?$')
 SUPPORTED_MODELS = frozenset(('deepseek-flash', 'deepseek-v4-flash', 'deepseek-v4-flash-vision-exp'))
-OPENAI_MODELS = frozenset(('gpt-6.1-sol', 'gpt-6-astra', 'gpt-6-luna'))
+OPENAI_MODELS = frozenset(('gpt-6.2-sol', 'gpt-6.2-astra', 'gpt-6.1-sol', 'gpt-6-astra', 'gpt-6-luna'))
+ANTHROPIC_MODELS = frozenset(('claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5', 'claude-fable-5-2'))
 
 
 def supported(provider, model):
     return (provider == 'deepseek' and model in SUPPORTED_MODELS
-            or provider in ('openai', 'chatgpt') and model in OPENAI_MODELS)
+            or provider in ('openai', 'chatgpt') and model in OPENAI_MODELS
+            or provider == 'anthropic' and model in ANTHROPIC_MODELS)
 
 
 def image_token_bound(image, provider=None):
+    if provider == 'anthropic':
+        # Unresized 28px patches plus framing: a bound, not provider billing.
+        return ((image['width'] + 27) // 28) * ((image['height'] + 27) // 28) + 64
     if provider not in ('openai', 'chatgpt'):
         return IMAGE_TOKENS
     # A development bound, not billing: count unresized 32px patches with a
@@ -141,10 +146,14 @@ def wire_content(message, provider, model):
     text,images=projection(message['role'],message['content'],message.get('tool_name'))
     if not images: return message['content']
     if not supported(provider,model):
-        raise ValueError('Image input is not available for this selected model. Use a supported OpenAI model or DeepSeek Flash.')
+        raise ValueError('Image input is not available for this selected model. Use a supported Claude or OpenAI model, or DeepSeek Flash.')
     if provider in ('openai', 'chatgpt'):
         return [dict(type='input_text',text=text)]+[
             dict(type='input_image',image_url='data:'+i['mime_type']+';base64,'+i['data'],detail='high')
+            for i in images]
+    if provider == 'anthropic':
+        return ([dict(type='text', text=text)] if text else [])+[
+            dict(type='image', source=dict(type='base64', media_type=i['mime_type'], data=i['data']))
             for i in images]
     return [dict(type='text',text=text)]+[
         dict(type='image_url',image_url=dict(url='data:'+i['mime_type']+';base64,'+i['data'],detail='original'))

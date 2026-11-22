@@ -13,9 +13,19 @@ pub async fn exchange(port: u16, token: &str, request: &Value) -> Result<Value, 
         .redirect(Policy::none())
         .no_proxy()
         .timeout(Duration::from_secs(match request["operation"].as_str() {
-            Some("models.key") => 30,     // Desktop keyring may request an unlock.
-            Some("skills.import") => 40,  // Import IO is bounded to 35 seconds.
-            Some("mcp.inspect") => 35,    // SDK discovery has a 30-second bound.
+            Some("models.key") => 30,    // Desktop keyring may request an unlock.
+            Some("skills.import") => 40, // Import IO is bounded to 35 seconds.
+            // A package may download a pinned program within its 240-second allowance.
+            Some("shelf.install") | Some("shelf.update") => 300,
+            Some("shelf.repair") if request["arguments"]["reinstall"] == true => 300,
+            Some("shelf.describe") => 15, // Reading a package folder is bounded to 10 seconds.
+            // Each package's data folder is measured for at most three seconds.
+            Some("shelf.data") | Some("shelf.data_choice") | Some("shelf.restored_seen") => 60,
+            // Inspection may hash an installed program tree of up to 1 GiB.
+            Some("shelf.repair") | Some("shelf.remove") => 60,
+            Some("mcp.inspect") => 35, // SDK discovery has a 30-second bound.
+            // Saving or deleting connection keys may request a keyring unlock.
+            Some("mcp.import") | Some("mcp.update") => 30,
             Some("models.chatgpt") => 45, // Bounded discovery and session revocation.
             Some("models.check")
                 if request

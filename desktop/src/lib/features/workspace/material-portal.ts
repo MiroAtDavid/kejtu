@@ -1,12 +1,15 @@
 // Keep the file browser in its Material owner's lifetime while placing its DOM
-// in the shared sidebar. Returning inline must not remount the reader or lose
-// expanded folders when Focus, window width or the active course changes.
+// in the shared sidebar. Keep its expanded folders when switching modules or
+// opening the conversation.
 export function materialPortal(node: HTMLElement, target: HTMLElement | null) {
   const home = document.createComment("course material files");
   node.before(home);
   function place(destination: HTMLElement | null) {
-    if (destination) destination.append(node);
-    else home.after(node);
+    // Re-inserting a node that is already in place still removes it first,
+    // which drops focus and WebKit scroll offsets. Only move it when needed.
+    if (destination) {
+      if (node.parentNode !== destination) destination.append(node);
+    } else if (home.nextSibling !== node) home.after(node);
   }
   place(target);
   return {

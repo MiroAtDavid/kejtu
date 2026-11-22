@@ -29,6 +29,15 @@ def sha(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def content_fingerprint(manifest):
+    """Digest of a package's exact file paths, sizes and hashes, without its origin.
+
+    The revision binds provenance too; two revisions with one fingerprint carry the
+    same instructions from different sources or commits.
+    """
+    return sha(encode(manifest['files']).encode())
+
+
 def name(value):
     if (not isinstance(value, str) or not 1 <= len(value) <= 64 or value != value.lower()
             or value.startswith('-') or value.endswith('-') or '--' in value

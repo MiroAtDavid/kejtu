@@ -10,6 +10,7 @@
  * (`[data-native-window]`, `.shell` padding and the `body::after` client edge)
  * and the radio-input appearance overrides. Those encode assumptions about the
  * old window chrome and its form controls, which this surface does not have.
+ * The rounded window corners below are this surface's own frame rule.
  */
 
 *,
@@ -31,6 +32,27 @@ body {
   color: var(--ke-text-primary);
   background: var(--ke-surface);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Rounded window corners. The native window marks the page only where the
+   desktop can show through it (document_popout.rs); everything outside the
+   shell is then see-through. Maximized and full screen windows stay square.
+   A clip path, unlike an overflow clip, also clips the shell's fixed layers
+   (the narrow sidebar and its scrim). The body keeps its full-window box, so
+   presses in the corners still reach WindowControls' resize edges. */
+:root[data-window-frame="rounded"]:not([data-window-maximized="true"]),
+:root[data-window-frame="rounded"]:not([data-window-maximized="true"]) body {
+  background: transparent;
+}
+
+:root[data-window-frame="rounded"]:not([data-window-maximized="true"]) .shell {
+  clip-path: inset(0 round var(--ke-window-radius));
+}
+
+/* Modal dimming covers the whole window; it takes the same corners. */
+:root[data-window-frame="rounded"]:not([data-window-maximized="true"])
+  ::backdrop {
+  border-radius: var(--ke-window-radius);
 }
 
 button,

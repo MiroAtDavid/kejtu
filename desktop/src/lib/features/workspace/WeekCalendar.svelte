@@ -91,10 +91,11 @@
 </div>
 
 <style>
+  /* No frame, as elsewhere: a rule above, thin lines between the days; the
+     sections below bring their own rule. */
   .calendar-scroll {
     overflow-x: auto;
-    border: 1px solid var(--ke-border);
-    border-radius: var(--ke-radius-md);
+    border-top: 1px solid var(--ke-border);
   }
   .week-board {
     display: grid;

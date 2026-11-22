@@ -1,6 +1,5 @@
-# Preserve sealed assets and original third-party license bytes on checkout.
-desktop/static/private/pdfcraft/** -text
-desktop/static/private/wordcraft/** -text
+# Keep the bundled Word reader notices portable without rewriting their line endings.
+desktop/static/private/word-preview/LICENSES.txt -text
 
 # Upstream notice whitespace is retained verbatim; authored code keeps normal checks.
 desktop/static/private/*/*LICENSE* -whitespace

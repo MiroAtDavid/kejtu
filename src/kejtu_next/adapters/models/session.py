@@ -8,6 +8,7 @@ from ...core.records import Failure
 from ...core.providers import PROVIDERS, provider
 from .chat_completions import ChatCompletions
 from .openai import OpenAIResponses
+from .anthropic import AnthropicMessages, headers as anthropic_headers
 from .deepseek import DeepSeek
 from ._secrets import validate_key, credential_echo
 from .ollama import Ollama
@@ -23,7 +24,7 @@ class ModelSession:
         # Factories are injectable for offline controls. Every actual request is
         # routed by its immutable conversation/job profile, never the UI default.
         self.factories = {'ollama': lambda: Ollama(), 'chat_completions': ChatCompletions,
-                          'responses': OpenAIResponses}
+                          'responses': OpenAIResponses, 'anthropic': AnthropicMessages}
         self.overrides = {'deepseek': deepseek_factory} | (factories or {})
         self.models = {'ollama': ollama or Ollama()}
         self.keyrings = {name: keyring.for_provider(name) for name, spec in PROVIDERS.items() if spec.requires_key}
@@ -126,6 +127,9 @@ class ModelSession:
         # embedding, ambient proxies or redirected credentials.
         endpoint = profile.endpoint.rstrip('/') + ('/models' if key is not None else '/api/tags')
         headers = {'Accept': 'application/json', 'Accept-Encoding': 'identity'}
+        if profile.provider == 'anthropic':
+            headers.update(anthropic_headers(key))
+            endpoint += '?limit=1000'
         if key is not None:
             headers['Authorization'] = 'Bearer ' + key
         try:
@@ -149,7 +153,7 @@ class ModelSession:
             displayed = [name for name in preferred if name in models]
             displayed.extend(name for name in models if name not in preferred)
             return {'models': displayed[:50], 'model_available': profile.model in models,
-                    'has_more': len(models) > 50}
+                    'has_more': len(models) > 50 or data.get('has_more') is True}
         except HTTPError as error:
             code = 'provider_auth' if error.code in (401, 403) else 'provider_unavailable'
             error.close()

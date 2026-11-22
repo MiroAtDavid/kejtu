@@ -23,6 +23,8 @@ class MemorySnapshot:
     archive_epoch: int = 0
     job_run_id: str | None = None
     archive_sources: int | None = None  # Research-only append-safe archive authority.
+    project_id: str | None = None  # Preference only; bank/grants still own access.
+    module_id: str | None = None
 
 
 MEMORY_ARGUMENT_REASONS = frozenset({
@@ -62,7 +64,7 @@ def memory_arguments(call: ToolCall, *, defaults=False, hybrid=False) -> dict:
             elif call.name == 'read_memory':
                 value = dict(offset=0, max_bytes=65536) | value
         if call.name == 'search_memory':
-            optional = {'scope','collection','conversation_id','role','since','until','order','limit','purpose','tag','tags','tag_mode','thread_status','flag','include_rejected'} if hybrid else set()
+            optional = {'scope','collection','conversation_id','role','since','until','order','limit','purpose','tag','tags','tag_mode','thread_status','flag','include_rejected','project_id','module_id'} if hybrid else set()
             if not {'query','mode','cursor'} <= set(value) or set(value)-{'query','mode','cursor'}-optional:
                 raise MemoryArgumentFailure('search_fields')
             if (not isinstance(value['query'], str) or '\x00' in value['query']
@@ -104,6 +106,9 @@ def memory_arguments(call: ToolCall, *, defaults=False, hybrid=False) -> dict:
             if 'conversation_id' in value and (not isinstance(value['conversation_id'],str)
                     or not re.fullmatch('[0-9a-f]{32}',value['conversation_id'])):
                 raise MemoryArgumentFailure('search_fields')
+            for field in ('project_id','module_id'):
+                if field in value and (not isinstance(value[field],str) or not re.fullmatch('[0-9a-f]{32}',value[field])):
+                    raise MemoryArgumentFailure('search_fields')
             for field in ('since','until'):
                 if field in value:
                     from datetime import datetime
@@ -145,6 +150,8 @@ def memory_schemas(*, hybrid=False) -> list[dict]:
              'cursor': {'type': 'string'}, 'scope':{'type':'string','enum':['all','notebook','memories','conversations','tools','tags','tag_cleanup']},
              'collection':{'type':'string','enum':['all','current','historical'],
                            'description':'Notebook/memories only: current excludes the imported historical collection. Empty current-mode notebook query pages the complete eligible inventory.'},
+             'project_id':{'type':'string','description':'Retained origin; omit both context IDs for all granted memory.'},
+             'module_id':{'type':'string','description':'Retained origin; broaden to project_id, then omit both.'},
              'conversation_id':{'type':'string'},'role':{'type':'string','enum':['user','assistant'],
                  'description':'Only with scope:conversations; omit for other scopes.'},
              'since':{'type':'string'},'until':{'type':'string'},'order':{'type':'string','enum':['relevance','asc','desc']},

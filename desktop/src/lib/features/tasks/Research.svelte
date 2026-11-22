@@ -1,6 +1,8 @@
 <script lang="ts">
-  import "./planning.css";
-  import { onMount } from "svelte";
+  import "$lib/design/collection.css";
+  import { onMount, tick } from "svelte";
+  import Icon from "$lib/design/Icon.svelte";
+  import { toPageTop } from "$lib/design/collection";
   import { identity, NativeFailure, request } from "$lib/api/client";
   import {
     isNativeRequest,
@@ -14,11 +16,14 @@
   import { when, runLabel } from "../background/editor";
 
   import FindingCard from "./FindingCard.svelte";
+  import ResearchProse from "./ResearchProse.svelte";
   import KejtuMark from "$lib/design/KejtuMark.svelte";
   import { rotatingKejtu } from "$lib/design/theme";
   import {
     changes,
     emptyCounts,
+    findingHost,
+    findingState,
     unread,
     searchStatus,
     researchTime,
@@ -31,6 +36,8 @@
   export let navigationLocked = false;
   export let onDiscuss: (text: string) => void = () => {};
   export let onChanged: () => void = () => {};
+  /** Searches are set up by asking Kejtu: this starts a conversation for one. */
+  export let onNew: () => void = () => {};
   type Change =
     | {
         operation: "research.pause" | "research.resume" | "research.delete";
@@ -64,7 +71,7 @@
   const pageSize = 8;
   const tabs: { view: FindingView; label: string }[] = [
     { view: "inbox", label: "To review" },
-    { view: "all", label: "All findings" },
+    { view: "all", label: "All" },
     { view: "saved", label: "Saved" },
     { view: "reviewed", label: "Reviewed" },
     { view: "dismissed", label: "Dismissed" },
@@ -74,6 +81,26 @@
   let notice = "";
   let findingsElement: HTMLDivElement | undefined;
   let findingsHeight = 0;
+  // A finding has its own page: while it is open the list is not shown.
+  let opened: ResearchResult | null = null;
+  let criteriaOpen = false,
+    reportOpen = false;
+  let root: HTMLElement;
+  let findingTitle: HTMLElement;
+  async function openFinding(finding: ResearchResult) {
+    if (busy || pending) return;
+    opened = finding;
+    await tick();
+    findingTitle?.focus({ preventScroll: true });
+    toPageTop(root);
+  }
+  // Back returns to the card the finding was opened from.
+  async function back() {
+    const id = opened?.id;
+    opened = null;
+    await tick();
+    root?.querySelector<HTMLElement>(`[data-finding="${id}"] .open`)?.focus();
+  }
   const journalKey = `kejtu-next.research.v1.${stateId}`;
   $: navigationLocked = busy || pending !== null;
   $: if (ready && !navigationLocked && target && target.token !== seenTarget) {
@@ -105,6 +132,20 @@
       busy = false;
     }
   }
+  // A row's next check, short like a task's date: "Nov 20, 08:00".
+  function nextLabel(at: string, zone: string) {
+    try {
+      return new Intl.DateTimeFormat(undefined, {
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: zone,
+      }).format(new Date(at));
+    } catch {
+      return when(at, zone);
+    }
+  }
   async function list(append = false) {
     const page = await request("research.overview", {
       offset: append ? (next ?? 0) : 0,
@@ -124,6 +165,8 @@
       findings = [];
       findingsHeight = 0;
       selected = null;
+      opened = null;
+      criteriaOpen = reportOpen = false;
     }
     const value = await request("research.read", { job_id: id });
     selected = value.task;
@@ -177,6 +220,15 @@
     counts = page.counts;
     totalFindings = page.total;
     findingsNext = page.next_offset;
+    if (opened) {
+      // The open page follows the current record. Only this page of the list
+      // was read: a finding missing from it may have left the view (reviewed,
+      // dismissed) or moved to another page. Its page closes, since its
+      // current record is not known, and the list says just that much.
+      const title = opened.title;
+      opened = findings.find((item) => item.id === opened?.id) ?? null;
+      if (!opened) notice = `“${title}” is no longer on this page.`;
+    }
   }
   function chooseView(value: FindingView) {
     if (busy || pending) return;
@@ -258,6 +310,7 @@
     onChanged();
     if (sent.operation === "research.delete") {
       selected = null;
+      opened = null;
       findings = [];
       findingsNext = null;
       summary = coverage = null;
@@ -309,145 +362,330 @@
   });
 </script>
 
-<section aria-label="Kejtu's research" class="research planning-page">
-  <header class="heading">
-    <div>
-      <h2 class="settings-title planning-title">Research</h2>
-    </div>
-    <button
-      disabled={busy || !!pending}
-      on:click={() =>
-        run(async () => {
-          await list();
-          if (selected) await read(selected.id);
-          onChanged();
-        })}>Refresh</button
-    >
-  </header>
-
-  {#if error && !selected}<p role="alert" class="error">{error}</p>{/if}
-  {#if notice}<p role="status">{notice}</p>{/if}
-  {#if pending}<p role="status">
-      A change is awaiting confirmation. <button
-        disabled={busy}
-        on:click={() => run(() => send())}>Check saved change</button
+<section
+  aria-label="Kejtu's research"
+  class="research collection-page"
+  bind:this={root}
+>
+  {#if opened && selected}
+    {@const saved = opened.disposition === "saved"}
+    <div class="finding-page" role="region" aria-label="Finding">
+      <button
+        class="cp-back"
+        aria-label="Back to findings"
+        disabled={busy || !!pending}
+        on:click={back}><Icon name="left" size={13} />{selected.title}</button
       >
-    </p>{/if}
-  <div class="overview" aria-label="Across all research searches">
-    <div><strong>{unread(allCounts)}</strong><span>To review</span></div>
-    <div><strong>{allCounts.saved}</strong><span>Saved</span></div>
-    <div>
-      <strong>{totalSearches}</strong><span
-        >{totalSearches === 1 ? "Search" : "Searches"}</span
+      <div class="finding-head">
+        <h3 class="finding-title" tabindex="-1" bind:this={findingTitle}>
+          {opened.title}
+        </h3>
+        <div class="actions">
+          {#if opened.new && opened.disposition !== "dismissed"}<button
+              class="cp-action primary"
+              disabled={ownerBusy || busy || !!pending}
+              on:click={() => opened && review(opened)}>Mark reviewed</button
+            >{/if}
+          <button
+            class="cp-action"
+            disabled={ownerBusy || busy || !!pending}
+            on:click={() =>
+              opened && disposition(opened, saved ? "open" : "saved")}
+            >{saved ? "Unsave" : "Save"}</button
+          >
+          <button
+            class="cp-action"
+            disabled={ownerBusy || busy || !!pending}
+            on:click={() =>
+              opened &&
+              disposition(
+                opened,
+                opened.disposition === "dismissed" ? "open" : "dismissed",
+              )}
+            >{opened.disposition === "dismissed"
+              ? "Restore"
+              : "Dismiss"}</button
+          >
+          <button
+            class="cp-action"
+            disabled={ownerBusy || busy || !!pending}
+            on:click={() => opened && discuss(opened)}>Discuss</button
+          >
+        </div>
+      </div>
+      {#if error}<p role="alert" class="cp-note">{error}</p>{/if}
+      {#if pending}<p role="status" class="cp-note">
+          A change is awaiting confirmation. <button
+            disabled={busy}
+            on:click={() => run(() => send())}>Check saved change</button
+          >
+        </p>{/if}
+      {#if busy}<p class="cp-hint updating" role="status">
+          Updating research…
+        </p>{/if}
+      <div class="cp-item">
+        <div class="cp-main">
+          <section class="cp-section">
+            <h4 class="cp-cap">Summary</h4>
+            <ResearchProse source={opened.details} />
+          </section>
+          {#if opened.unknowns}<section class="cp-section">
+              <h4 class="cp-cap">Still to verify</h4>
+              <ResearchProse source={opened.unknowns} />
+            </section>{/if}
+        </div>
+        <dl class="cp-side facts">
+          <div class="cp-row">
+            <dt class="cp-key">Status</dt>
+            <dd>{findingState(opened)}{saved ? " · Saved" : ""}</dd>
+          </div>
+          <div class="cp-row">
+            <dt class="cp-key">Source</dt>
+            <dd>
+              <a href={opened.url} target="_blank" rel="noreferrer"
+                >{findingHost(opened.url)}<span aria-hidden="true"> ↗</span></a
+              >
+            </dd>
+          </div>
+          <div class="cp-row">
+            <dt class="cp-key">First found</dt>
+            <dd>{when(opened.first_seen)}</dd>
+          </div>
+          <div class="cp-row">
+            <dt class="cp-key">Last seen</dt>
+            <dd>{when(opened.last_seen)}</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  {:else}
+    <div class="cp-head">
+      <div>
+        <h2 class="cp-title">Research</h2>
+        <p class="cp-status">
+          {#if ready}{totalSearches}
+            {totalSearches === 1 ? "search" : "searches"} · {unread(allCounts)} to
+            review · {allCounts.saved} saved{:else}&nbsp;{/if}<!-- Progress shares
+            this line and shows only when the wait is noticeable, so returning
+            to the page neither moves nor flashes the cards. -->{#if busy}<span
+              class="cp-late"
+              ><span aria-hidden="true"> · </span><span role="status"
+                >Updating research…</span
+              ></span
+            >{/if}
+        </p>
+      </div>
+      <button
+        class="cp-action"
+        disabled={ownerBusy || busy || !!pending}
+        on:click={onNew}>New research</button
       >
     </div>
-  </div>
-  {#if ready && !items.length}<div class="empty">
-      <h3>A place for what Kejtu finds.</h3>
-      <p>
-        Try “Check daily for a flat matching these requirements…” and describe
-        what matters to you.
-      </p>
-    </div>{/if}
-  <div class="workspace">
-    <nav class="searches" aria-label="Research searches">
-      {#each items as item (item.id)}
+    <!-- The same bar as the Shelf's: the selected search's Criteria and Report
+         where the Shelf has its views, then Find and Refresh. -->
+    {#if items.length || selected}<div class="cp-bar research-bar">
+        <div class="cp-pills" role="group" aria-label="Selected search">
+          {#if selected}<button
+              class="cp-pill"
+              aria-pressed={criteriaOpen}
+              aria-expanded={criteriaOpen}
+              on:click={() => (criteriaOpen = !criteriaOpen)}>Criteria</button
+            >{#if summary}<button
+                class="cp-pill"
+                aria-pressed={reportOpen}
+                aria-expanded={reportOpen}
+                on:click={() => (reportOpen = !reportOpen)}
+                >{#if selected.new_result}<span class="dot" aria-hidden="true"
+                  ></span>{/if}Report{coverage === "partial"
+                  ? " · incomplete"
+                  : ""}</button
+              >{/if}{/if}
+        </div>
+        {#if selected}<form
+            class="cp-find"
+            role="search"
+            on:submit|preventDefault={() => {
+              if (busy || pending) return;
+              query = searchText.trim();
+              offset = 0;
+              void run(findingPage);
+            }}
+          >
+            <button
+              class="cp-icon"
+              aria-label="Find"
+              title="Find"
+              disabled={busy || !!pending}
+              ><Icon name="search" size={14} /></button
+            >
+            <input
+              type="search"
+              aria-label="Search findings"
+              placeholder="Find"
+              bind:value={searchText}
+              maxlength="200"
+              disabled={busy || !!pending}
+            />
+            {#if query}<button
+                type="button"
+                class="cp-text"
+                disabled={busy || !!pending}
+                on:click={() => {
+                  query = searchText = "";
+                  offset = 0;
+                  void run(findingPage);
+                }}>Clear</button
+              >{/if}
+          </form>{/if}
         <button
-          class="assignment"
-          class:chosen={selected?.id === item.id}
-          aria-pressed={selected?.id === item.id}
+          class="cp-icon"
+          aria-label="Refresh"
+          title="Refresh"
           disabled={busy || !!pending}
-          on:click={() => run(() => read(item.id, true))}
+          on:click={() =>
+            run(async () => {
+              await list();
+              if (selected) await read(selected.id);
+              onChanged();
+            })}><Icon name="refresh" size={14} /></button
         >
-          <span class="name-row"
-            ><span class="name">{item.title}</span
-            >{#if item.last_run?.status === "running" && item.last_run.error_code !== "research_paused"}<span
-                class="run-mark"
-                title="Checking now"
-                ><KejtuMark
-                  state={$rotatingKejtu ? "desk" : "idle"}
-                  size={20}
-                /></span
-              >{/if}</span
-          >
-          <span class="change-count" class:has-updates={unread(item.counts) > 0}
-            >{changes(item.counts) || `${item.counts.total} findings`}</span
-          >
-          <span class="muted"
-            >{searchStatus(item)}{#if item.next_at && item.enabled}<span
-                class="next-check"
-                title={when(item.next_at, item.timezone)}
-                >Next {researchTime(item.next_at, item.timezone)}</span
-              >{/if}</span
-          >
-        </button>
-      {/each}
+      </div>{/if}
+
+    {#if error && !selected}<p role="alert" class="cp-note">{error}</p>{/if}
+    {#if notice}<p role="status" class="cp-note">{notice}</p>{/if}
+    {#if pending}<p role="status" class="cp-note">
+        A change is awaiting confirmation. <button
+          disabled={busy}
+          on:click={() => run(() => send())}>Check saved change</button
+        >
+      </p>{/if}
+    {#if ready && !items.length}<div class="empty">
+        <h3>A place for what Kejtu finds.</h3>
+        <p>
+          Try “Check daily for a flat matching these requirements…” and describe
+          what matters to you.
+        </p>
+      </div>{/if}
+    {#if items.length}<ul
+        class="cp-lines search-list"
+        aria-label="Research searches"
+      >
+        {#each items as item (item.id)}
+          {@const status = searchStatus(item)}
+          {@const fresh = unread(item.counts) > 0}
+          <li class="cp-line" class:selected={selected?.id === item.id}>
+            <button
+              class="search-row"
+              aria-pressed={selected?.id === item.id}
+              disabled={busy || !!pending}
+              on:click={() => run(() => read(item.id, true))}
+            >
+              <!-- Like a task's tick: empty, or filled when findings are new. -->
+              <span class="news" class:fresh aria-hidden="true"></span>
+              <span class="name" title={item.title}>{item.title}</span>
+              <!-- A search that is checking right now shows Kejtu at the desk. -->
+              {#if item.last_run?.status === "running" && item.last_run.error_code !== "research_paused"}<span
+                  class="run-mark"
+                  title="Checking now"
+                  ><KejtuMark
+                    state={$rotatingKejtu ? "desk" : "idle"}
+                    size={16}
+                  /></span
+                >{/if}
+              <span class="count">{fresh ? changes(item.counts) : ""}</span>
+              <span class="state">{status !== "Up to date" ? status : ""}</span>
+              <span class="next"
+                >{item.enabled && item.next_at
+                  ? `Next ${nextLabel(item.next_at, item.timezone)}`
+                  : ""}</span
+              >
+            </button>
+          </li>
+        {/each}
+      </ul>
       {#if next !== null}<button
+          class="cp-chip more-searches"
           disabled={busy || !!pending}
           on:click={() => run(() => list(true))}>More searches</button
-        >{/if}
-    </nav>
+        >{/if}{/if}
     {#if selected}<article class="detail" aria-label="Selected search">
         <!-- A linked search can be outside the current overview page. Only
-               show its name here when no visible selection card identifies it. -->
+               show its name here when no visible pill identifies it. -->
         {#if !items.some((item) => item.id === selected?.id)}
           <h3 class="search-context">{selected.title}</h3>
         {/if}
-        <details class="criteria">
-          <summary>Search criteria & controls</summary>
-          <p class="body">{selected.instructions}</p>
-          <p class="muted">
-            {selected.schedule.repeat === "none"
-              ? "Once"
-              : `Repeats ${selected.schedule.repeat}, every ${selected.schedule.interval}`}
-            · {when(selected.schedule.starts_at, selected.schedule.timezone)}
-          </p>
-          <div class="actions">
-            <button
-              disabled={ownerBusy || busy || !!pending}
-              on:click={() =>
-                selected &&
-                run(() =>
-                  send({
-                    operation: selected!.enabled
-                      ? "research.pause"
-                      : "research.resume",
-                    args: {
-                      job_id: selected!.id,
-                      expected_revision: selected!.revision,
-                      mutation_key: identity(),
-                    },
-                  }),
-                )}>{selected.enabled ? "Pause" : "Resume"}</button
-            >
-            <button
-              disabled={ownerBusy || busy || !!pending}
-              on:click={() => discuss()}>Discuss in chat</button
-            >
-            <button
-              class="delete"
-              disabled={ownerBusy || busy || !!pending || !!deleting}
-              on:click={() =>
-                (deleting = {
-                  id: selected!.id,
-                  revision: selected!.revision,
-                  title: selected!.title,
-                })}>Delete task…</button
-            >
-          </div>
-        </details>
-        {#if deleting}
-          <section
-            class="delete-confirmation"
-            aria-label="Confirm task deletion"
+        <div class="cp-chips">
+          <nav class="cp-chip-group" aria-label="Finding views">
+            {#each tabs as tab}<button
+                class="cp-chip"
+                aria-pressed={view === tab.view}
+                disabled={busy || !!pending}
+                on:click={() => chooseView(tab.view)}
+                >{tab.label}
+                <span class="cp-count">{tabCount(tab.view, counts)}</span
+                ></button
+              >{/each}
+          </nav>
+        </div>
+        {#if criteriaOpen}<section
+            class="cp-section panel"
+            aria-label="Search criteria & controls"
           >
-            <h4>Delete “{deleting.title}”?</h4>
+            <h4 class="cp-cap">Search criteria & controls</h4>
+            <p class="body">{selected.instructions}</p>
+            <p class="cp-hint">
+              {selected.schedule.repeat === "none"
+                ? "Once"
+                : `Repeats ${selected.schedule.repeat}, every ${selected.schedule.interval}`}
+              · {when(selected.schedule.starts_at, selected.schedule.timezone)}
+              {#if selected.enabled && selected.next_at}· Next check {researchTime(
+                  selected.next_at,
+                  selected.schedule.timezone,
+                )}{/if}
+            </p>
+            <div class="actions">
+              <button
+                disabled={ownerBusy || busy || !!pending}
+                on:click={() =>
+                  selected &&
+                  run(() =>
+                    send({
+                      operation: selected!.enabled
+                        ? "research.pause"
+                        : "research.resume",
+                      args: {
+                        job_id: selected!.id,
+                        expected_revision: selected!.revision,
+                        mutation_key: identity(),
+                      },
+                    }),
+                  )}>{selected.enabled ? "Pause" : "Resume"}</button
+              >
+              <button
+                disabled={ownerBusy || busy || !!pending}
+                on:click={() => discuss()}>Discuss in chat</button
+              >
+              <button
+                class="delete"
+                disabled={ownerBusy || busy || !!pending || !!deleting}
+                on:click={() =>
+                  (deleting = {
+                    id: selected!.id,
+                    revision: selected!.revision,
+                    title: selected!.title,
+                  })}>Delete task…</button
+              >
+            </div>
+          </section>{/if}
+        {#if deleting}
+          <section class="cp-section panel" aria-label="Confirm task deletion">
+            <h4 class="confirm-title">Delete “{deleting.title}”?</h4>
             <p>
               This permanently removes the task, its schedule, run history and
               all findings, including saved findings. A running check will be
               stopped. This cannot be undone.
             </p>
-            <p class="muted">
+            <p class="cp-hint">
               Files it created and messages already in chat remain.
             </p>
             <div class="actions">
@@ -472,7 +710,7 @@
           </section>
         {/if}
         {#if selected.last_run && selected.last_run.status !== "completed"}
-          <p class="check-status">
+          <p class="cp-note check-status">
             Latest check: {runLabel(
               selected.last_run.status,
               selected.last_run.error_code,
@@ -488,29 +726,28 @@
           </p>
         {/if}
 
-        {#if summary}<details class="report">
-            <summary
-              ><span
-                >{coverage === "partial"
-                  ? "Search report · Incomplete search"
-                  : "Search report"}</span
-              ></summary
-            >
-            {#if coverage === "partial"}<p class="muted">
+        {#if reportOpen && summary}<section
+            class="cp-section panel"
+            aria-label="Search report"
+          >
+            <h4 class="cp-cap">
+              {coverage === "partial"
+                ? "Search report · Incomplete search"
+                : "Search report"}
+            </h4>
+            {#if coverage === "partial"}<p class="cp-hint">
                 This report covers only part of the requested search. Read the
                 summary below for details.
               </p>{/if}
-            {#if selected.last_run?.finished_at}<p class="muted">
+            {#if selected.last_run?.finished_at}<p class="cp-hint">
                 Report saved <time
                   datetime={selected.last_run.finished_at}
                   title={when(selected.last_run.finished_at)}
                   >{researchTime(selected.last_run.finished_at)}</time
                 >
               </p>{/if}
-            <p class="body">{summary}</p>
-            {#if selected.new_result && selected.last_run}<div
-                class="report-actions"
-              >
+            <ResearchProse source={summary} />
+            {#if selected.new_result && selected.last_run}<div class="actions">
                 <button
                   disabled={ownerBusy || busy || !!pending}
                   on:click={() =>
@@ -524,66 +761,29 @@
                         },
                       }),
                     )}>Mark report reviewed</button
-                ><span class="muted"
+                ><span class="cp-hint"
                   >Also reviews findings added or changed in this report.</span
                 >
               </div>{/if}
-            <p class="muted">
+            <p class="cp-hint">
               Last full check: {selected.last_checked
                 ? researchTime(selected.last_checked)
                 : "Not yet"}. Listings may have changed since they were checked.
             </p>
-          </details>{/if}
-        <nav class="filters" aria-label="Finding views">
-          {#each tabs as tab}<button
-              class:active={view === tab.view}
-              aria-pressed={view === tab.view}
-              disabled={busy || !!pending}
-              on:click={() => chooseView(tab.view)}
-              >{tab.label} <span>{tabCount(tab.view, counts)}</span></button
-            >{/each}
-        </nav>
-        <form
-          class="find"
-          on:submit|preventDefault={() => {
-            if (busy || pending) return;
-            query = searchText.trim();
-            offset = 0;
-            void run(findingPage);
-          }}
-        >
-          <input
-            aria-label="Search findings"
-            placeholder="Search findings"
-            bind:value={searchText}
-            maxlength="200"
-            disabled={busy || !!pending}
-          />
-          <button disabled={busy || !!pending}>Find</button>
-          {#if query}<button
-              type="button"
-              disabled={busy || !!pending}
-              on:click={() => {
-                query = searchText = "";
-                offset = 0;
-                void run(findingPage);
-              }}>Clear</button
-            >{/if}
-        </form>
+          </section>{/if}
         <div
           class="finding-results"
           bind:this={findingsElement}
           style:min-height={`${findingsHeight}px`}
         >
-          {#if error}<p role="alert" class="error">{error}</p>{/if}
-          {#if busy}<p class="muted" role="status">Updating research…</p>{/if}
+          {#if error}<p role="alert" class="cp-note">{error}</p>{/if}
           <div class="findings" aria-busy={busy}>
             {#each findings as finding (finding.id)}<FindingCard
                 {finding}
                 disabled={ownerBusy || busy || !!pending}
+                onOpen={() => openFinding(finding)}
                 onReview={() => review(finding)}
                 onDisposition={(value) => disposition(finding, value)}
-                onDiscuss={() => discuss(finding)}
               />{/each}
           </div>
           {#if !busy && !error && !findings.length}<div class="empty">
@@ -636,214 +836,167 @@
             </footer>{/if}
         </div>
       </article>{/if}
-  </div>
+  {/if}
 </section>
 
 <style>
   .research {
     margin: 0 0 2rem;
-    color: var(--ke-text-primary);
   }
-  .heading,
   .actions,
-  .pagination,
-  .report-actions {
+  .pagination {
     display: flex;
-    align-items: center;
-    gap: 10px;
     flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
   }
-  .heading,
   .pagination {
     justify-content: space-between;
+    margin-top: 16px;
+    color: var(--ke-text-secondary);
   }
-
-  .heading h2 {
+  /* Searches as rows, like the Tasks list: same length, details at the end. */
+  /* Below the bar at the Shelf's spacing (its chips follow its bar). */
+  .search-list {
+    margin-top: 12px;
+  }
+  .search-list .cp-line {
+    padding: 0;
+  }
+  .search-list .cp-line.selected {
+    border-color: var(--ke-text-tertiary);
+  }
+  .search-row {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 42px;
     margin: 0;
-  }
-
-  button {
-    font-size: var(--ke-text-xs);
-    border: 1px solid var(--ke-border);
-    border-radius: var(--ke-radius-sm);
-    padding: 7px 10px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
     color: var(--ke-text-primary);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .search-row:hover:not(:disabled) {
     background: transparent;
   }
-  button:hover:not(:disabled) {
-    background: var(--ke-surface-inset);
-  }
-  button:focus-visible,
-  input:focus-visible,
-  summary:focus-visible {
-    outline: 2px solid var(--ke-focus-ring);
-    outline-offset: 3px;
-  }
-  .overview {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px 24px;
-    margin: 12px 0 24px;
-  }
-  .overview > div {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-  }
-  .overview strong {
-    font: 500 16px/1.4 var(--ke-font-ui);
-    font-variant-numeric: tabular-nums;
-  }
-  .overview span {
-    font-size: var(--ke-text-2xs);
-    color: var(--ke-text-secondary);
-  }
-  .workspace {
-    display: grid;
-    gap: 24px;
-    min-width: 0;
-  }
-  .searches {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
-    gap: 10px;
-    align-items: stretch;
-  }
-  .assignment {
-    display: grid;
-    grid-template-rows: 1fr auto auto;
-    gap: 6px;
-    text-align: left;
-    width: 100%;
-    padding: 12px;
-    border-radius: var(--ke-radius-md);
-  }
-  /* A search that is checking right now shows Kejtu at the desk. */
-  .name-row {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 10px;
-    min-width: 0;
-  }
-  .run-mark {
+  .news {
     flex: none;
-    margin: 3px 8px 0 0;
-    color: var(--ke-accent);
+    box-sizing: border-box;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid var(--ke-border-strong);
+    border-radius: 50%;
   }
-  .assignment.chosen {
-    background: var(--ke-surface-inset);
-    border-color: var(--ke-border-strong);
+  .news.fresh {
+    border-color: var(--ke-accent);
+    background: var(--ke-accent);
   }
   .name {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     font-size: var(--ke-text-sm);
-    font-weight: 550;
-    line-height: 1.5;
-    overflow-wrap: anywhere;
   }
-  .change-count {
-    font-size: var(--ke-text-2xs);
-    color: var(--ke-text-secondary);
+  .selected .name {
+    font-weight: 500;
   }
-  .has-updates {
+  .count,
+  .state,
+  .next {
+    flex: none;
+    color: var(--ke-text-tertiary);
+    font-size: 11.5px;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .count {
+    min-width: 48px;
     color: var(--ke-text-primary);
+    font-weight: 500;
   }
-  .next-check {
-    display: block;
-    margin-top: 4px;
-    font-size: var(--ke-text-3xs);
+  .state {
+    min-width: 92px;
   }
-  .muted {
-    color: var(--ke-text-secondary);
-    font-size: var(--ke-text-2xs);
-    line-height: 1.6;
+  .next {
+    min-width: 104px;
+  }
+  .more-searches {
+    margin-top: 8px;
+  }
+  @media (max-width: 560px) {
+    .next {
+      display: none;
+    }
+    .state {
+      min-width: 0;
+    }
+  }
+  .run-mark {
+    display: inline-flex;
+    flex: none;
+    color: var(--ke-accent);
+  }
+  .dot {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ke-marker-sage);
   }
   .detail {
     min-width: 0;
   }
   .search-context {
+    margin: 16px 0 0;
     font: 500 13px/1.5 var(--ke-font-ui);
-    margin: 0 0 12px;
     overflow-wrap: anywhere;
   }
-  .criteria {
-    margin-bottom: 18px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid var(--ke-border);
+  .panel {
+    margin-top: 12px;
+    border-top: 1px solid var(--ke-border);
+    padding: 12px 0;
   }
-  summary {
-    cursor: pointer;
-    font-size: var(--ke-text-xs);
-    color: var(--ke-text-secondary);
+  .panel p {
+    margin: 0 0 8px;
+  }
+  .panel .actions {
+    margin-top: 10px;
+  }
+  .confirm-title {
+    margin: 0 0 8px;
+    font: 500 13px/1.5 var(--ke-font-ui);
   }
   .body {
+    margin: 0 0 8px;
+    font-size: var(--ke-text-sm);
+    line-height: 1.7;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
-    font-size: var(--ke-text-sm);
-    line-height: 1.8;
   }
-  .report {
-    background: color-mix(in srgb, var(--ke-marker-sage) 7%, var(--ke-surface));
-    padding: 14px 16px;
-    border-radius: var(--ke-radius-md);
-    margin: 16px 0 22px;
+  .check-status {
+    line-height: 1.7;
   }
-  .report summary {
-    color: var(--ke-text-primary);
-  }
-  .report-actions {
-    align-items: baseline;
-  }
-  .report-actions .muted {
-    font-size: var(--ke-text-3xs);
-  }
-  .filters {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 3px;
-    border-bottom: 1px solid var(--ke-border);
-    padding-bottom: 10px;
-    margin-top: 26px;
-  }
-  .filters button {
-    border-color: transparent;
-    font-size: var(--ke-text-2xs);
-  }
-  .filters button.active {
-    background: var(--ke-surface-inset);
-  }
-  .filters span {
-    margin-left: 4px;
-    color: var(--ke-text-secondary);
-    font-variant-numeric: tabular-nums;
-  }
-  .find {
-    display: flex;
-    gap: 8px;
-    margin: 16px 0;
-  }
-  .find input {
-    min-width: 0;
-    flex: 1;
-    font-size: var(--ke-text-xs);
-    padding: 8px 10px;
-    background: transparent;
-    border: 1px solid var(--ke-border);
-    border-radius: var(--ke-radius-sm);
-    color: var(--ke-text-primary);
-  }
-  .findings {
-    display: grid;
-    gap: 12px;
+  .updating {
+    margin: 0 0 8px;
   }
   .finding-results {
     display: flow-root;
+    margin-top: 16px;
     overflow-anchor: none;
   }
-  .pagination {
-    font-size: var(--ke-text-2xs);
-    color: var(--ke-text-secondary);
-    margin-top: 18px;
+  .findings {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr));
+    gap: 12px;
   }
   .empty {
     padding: 26px 0;
@@ -851,29 +1004,69 @@
     font-size: var(--ke-text-sm);
     line-height: 1.7;
   }
-  .empty h4 {
+  .empty :is(h3, h4) {
+    margin: 0;
     color: var(--ke-text-primary);
-    font-weight: 500;
+    font: 500 var(--ke-text-sm) / 1.7 var(--ke-font-ui);
+  }
+  .empty p {
     margin: 0;
   }
-  .delete,
-  .error {
+  .delete {
     color: var(--ke-danger);
   }
-  .error {
+  [role="alert"] {
     overflow-wrap: anywhere;
   }
-  .delete-confirmation {
-    border: 1px solid var(--ke-border);
-    border-radius: var(--ke-radius-md);
-    padding: 16px;
-    margin: 16px 0;
-    font-size: var(--ke-text-sm);
+  /* A finding's own page. */
+  .finding-page .cp-section > .cp-cap {
+    margin-bottom: 8px;
+    color: var(--ke-text-primary);
+    font: 500 var(--ke-text-sm)/1.5 var(--ke-font-ui);
   }
-  .check-status {
-    font-size: var(--ke-text-xs);
-    line-height: 1.8;
-    border-left: 2px solid var(--ke-marker-sand);
-    padding-left: 12px;
+  .finding-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px 16px;
+    margin-top: 10px;
+  }
+  .finding-title {
+    flex: 1 1 280px;
+    min-width: 0;
+    margin: 0;
+    outline: 0;
+    font: 400 28px/1.3 var(--ke-font-heading);
+    letter-spacing: -0.5px;
+    overflow-wrap: anywhere;
+  }
+  .finding-page .updating {
+    margin: 12px 0 0;
+  }
+  .facts {
+    margin: 0;
+  }
+  .facts .cp-row {
+    display: block;
+    min-height: 0;
+    padding: 5px 12px;
+  }
+  .facts dd {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .facts a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--ke-border-strong);
+    text-underline-offset: 3px;
+  }
+  @media (max-width: 650px) {
+    .finding-title {
+      font-size: 24px;
+    }
   }
 </style>

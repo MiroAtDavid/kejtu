@@ -3,8 +3,14 @@ import os
 from pathlib import Path
 
 
-# Keep aligned with the native identifier; a control checks tauri.conf.json.
+# Keep aligned with the native identifiers; controls check both Tauri configs.
 DESKTOP_ID = 'dev.kejtu.next.development'
+INSTALLED_DESKTOP_ID = 'app.kejtu.desktop'  # packaging/linux/tauri.conf.json
+
+
+def desktop_id():
+    from .layout import installed
+    return INSTALLED_DESKTOP_ID if installed() else DESKTOP_ID
 
 
 def linux_desktop_paths():
@@ -22,5 +28,5 @@ def linux_desktop_paths():
                                ('XDG_CONFIG_HOME', '.config')):
         value = os.environ.get(variable, '')
         base = Path(value) if Path(value).is_absolute() else Path(home) / fallback
-        roots.append((base / DESKTOP_ID).absolute())
+        roots.append((base / desktop_id()).absolute())
     return tuple(roots)

@@ -334,26 +334,30 @@ def validate_runtime_writes(row, root, *, runtime=None, check_links=True, _cance
     budget = _Budget(_cancelled)
     protected = execution_roots(root, runtime, _budget=budget)
     _check_write_roots(writes, protected | startup_roots(_budget=budget))
-    cache = row.get('cache')
-    if cache:
-        path = Path(cache).resolve()
+    cache, data = row.get('cache'), row.get('data')
+    for owned in (cache, data):
+        if not owned:
+            continue
+        path = Path(owned).resolve()
         installation = Path(root).resolve()
-        # The host owns this dedicated cache, never imports it, and may keep it
-        # below the installation/private archive. It cannot alias Python inputs.
+        # The host owns this dedicated cache, and a package's data folder, never
+        # imports them, and may keep them below the installation/private archive.
+        # Neither can alias Python inputs.
         for code in protected:
             if _within(code, path) or code != installation and _within(path, code):
                 _refuse('The connection cache overlaps Kejtu’s Python runtime. '
                         'Repair this connection before using it. No tool was started.')
     if check_links:
-        _validate_links(row, writes, cache, _budget=budget)
+        _validate_links(row, writes, cache, data=data, _budget=budget)
     budget.check()
 
 
-def _validate_links(row, writes, cache, *, _budget=None):
+def _validate_links(row, writes, cache, *, data=None, _budget=None):
     # A pre-existing inode alias can bypass path mounts. Count every writable
     # name of a linked inode, refusing any reference outside that write view.
     # Cache links must be contained within that cache independently: a later
     # connection may reuse the cache with a different document permission set.
+    # A package's data folder is held to the same rule, on its own.
     budget = _budget or _Budget()
     private = [Path(value) for value in row.get('private_paths', [])]
     dependencies = [Path(value) for value in row.get('read_paths', [])]
@@ -376,7 +380,7 @@ def _validate_links(row, writes, cache, *, _budget=None):
                 mode = grant['access']
         return mode == 'write'
 
-    for roots, cached in ((writes, False), ([cache] if cache else [], True)):
+    for roots, cached in ((writes, False), ([cache] if cache else [], True), ([data] if data else [], True)):
         seen, walked, linked = set(), set(), {}
         # Visit every explicit write root. A RO/private subtree is never walked;
         # an explicit write below a RO parent is reached directly instead. Seen

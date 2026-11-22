@@ -4,8 +4,6 @@
   import { workspaceRequest, type Workspace, type Settings } from "./workspace";
 
   export let workspace: Workspace;
-  export let onArrange: () => void = () => {};
-  export let onMedia: () => void = () => {};
   export let busy = false;
   let draft: Settings | null = null,
     revision = -1,
@@ -49,7 +47,7 @@
   function recommended() {
     if (!draft || locked) return;
     // This explicit staged preset never replaces saved permissions at startup.
-    // Media, external-calendar grants and widgets keep their existing owners.
+    // External-calendar grants and widgets keep their existing owners.
     draft = {
       ...draft,
       university_enabled: true,
@@ -187,42 +185,9 @@
           </p>
         </div>
       </fieldset>
-      <fieldset disabled={locked}>
-        <legend>Widgets</legend>
-        <p class="hint">
-          Choose what appears beside your conversations and projects.
-        </p>
-        <button type="button" disabled={locked} on:click={onArrange}
-          >Edit widgets</button
-        >
-      </fieldset>
+
       <details class="workspace-options">
-        <summary>Media &amp; external calendars</summary>
-        <fieldset disabled={locked}>
-          <legend>Media</legend>
-          <label
-            ><input
-              type="checkbox"
-              bind:checked={draft.radio_enabled}
-            />Radio</label
-          >
-          <label
-            ><input
-              type="checkbox"
-              bind:checked={draft.video_enabled}
-            />Video</label
-          >
-          <p class="hint">
-            Use the installed media player. Turning these on does not start
-            playback. Conversational access also lets Kejtu control enabled
-            media.
-          </p>
-          {#if $workspace.snapshot?.settings.radio_enabled || $workspace.snapshot?.settings.video_enabled}
-            <button type="button" disabled={locked} on:click={onMedia}
-              >Open media player</button
-            >
-          {/if}
-        </fieldset>
+        <summary>External calendars</summary>
         <fieldset disabled={locked}>
           <legend>External calendars</legend>
           <label

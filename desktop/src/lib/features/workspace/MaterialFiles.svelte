@@ -1,23 +1,54 @@
 <script lang="ts">
+  import Icon from "$lib/design/Icon.svelte";
   import MaterialFolder from "./MaterialFolder.svelte";
   export let courseId: string;
   export let courseTitle = "";
   export let selected = "";
   export let sidebar = false;
-  export let onSelect: (path: string) => void;
+  export let disabled = false;
+  export let onNewMarkdown: () => void;
+  export let onSelect: (path: string, code?: boolean) => void;
   let expanded = true,
     refresh = 0;
   export function refreshFiles() {
     refresh++;
   }
+  // WebKit resets scrollTop when a mounted subtree becomes display:none.
+  // Keep its last visible offset when hiding the sidebar or collapsing the file tree.
+  function retainScroll(node: HTMLElement) {
+    let visible = node.clientHeight > 0;
+    let offset = node.scrollTop;
+    function remember() {
+      if (visible && node.clientHeight > 0) offset = node.scrollTop;
+    }
+    const observer =
+      typeof ResizeObserver === "undefined"
+        ? null
+        : new ResizeObserver(() => {
+            const nextVisible = node.clientHeight > 0;
+            if (nextVisible && !visible) node.scrollTop = offset;
+            visible = nextVisible;
+          });
+    node.addEventListener("scroll", remember);
+    observer?.observe(node);
+    return {
+      destroy() {
+        node.removeEventListener("scroll", remember);
+        observer?.disconnect();
+      },
+    };
+  }
 </script>
 
-<section class="material-files" class:sidebar aria-label="Section files">
-  {#if !sidebar && courseTitle}<p class="course-name">{courseTitle}</p>{/if}
+<section class="material-files" class:sidebar aria-label="Module files">
+  {#if courseTitle}<div class="sidebar-module">
+      <span>Current module</span>
+      <p>{courseTitle}</p>
+    </div>{/if}
   <div class="heading">
     <button
       class="toggle"
-      aria-label="Section files"
+      aria-label="Module files"
       aria-expanded={expanded}
       on:click={() => (expanded = !expanded)}
     >
@@ -35,6 +66,13 @@
     </button>
     <button
       class="refresh"
+      {disabled}
+      title="New Markdown document"
+      aria-label="New Markdown document"
+      on:click={onNewMarkdown}><Icon name="plus" size={14} /></button
+    >
+    <button
+      class="refresh"
       title="Refresh folder"
       aria-label="Refresh folder"
       on:click={() => refresh++}
@@ -50,8 +88,8 @@
       >
     </button>
   </div>
-  <div class="contents" hidden={!expanded}>
-    <MaterialFolder {courseId} {selected} {refresh} {onSelect} />
+  <div class="contents" hidden={!expanded} use:retainScroll>
+    <MaterialFolder {disabled} {courseId} {selected} {refresh} {onSelect} />
   </div>
 </section>
 
@@ -62,14 +100,19 @@
     padding-bottom: 12px;
   }
   .material-files.sidebar {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
     padding-top: calc(18px * var(--ke-density));
   }
-  .course-name {
-    margin: 0 8px 10px;
-    font-size: var(--ke-text-2xs);
-    line-height: 1.6;
-    color: var(--ke-text-tertiary);
-    overflow-wrap: anywhere;
+  .sidebar-module,
+  .heading {
+    flex: none;
+  }
+  /* The shared "Current module" block (shell.css) above the documents. */
+  .material-files .sidebar-module {
+    margin: 0 0 calc(12px * var(--ke-density));
   }
   .heading {
     display: flex;
@@ -112,8 +155,10 @@
     scrollbar-width: thin;
   }
   .sidebar .contents {
+    flex: 1;
+    min-height: 0;
     max-height: none;
-    overflow: visible;
+    overscroll-behavior-y: contain;
   }
   [hidden] {
     display: none;

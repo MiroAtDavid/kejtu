@@ -12,13 +12,11 @@ from urllib.request import ProxyHandler, Request as HttpRequest, build_opener
 
 from ...core.providers import provider
 from ...core.records import Failure, ModelProgress, Profile, Reply, Request
-from ...core.reference import tool_schema
-from ...core.tools import schemas
 from ...core.vision import wire_content, MAX_REQUEST_IMAGES
 from ._secrets import CredentialText, credential_echo, validate_key
 from ._streaming import sse, invalid
 from ._responses_output import ResponseOutput
-from ._tools import decode_calls
+from ._tools import decode_calls, tool_specs
 from ._transport import NoRedirect, request_bytes, worker as transport_worker
 
 STATE_FORMAT = 'openai_responses_v1'
@@ -52,20 +50,11 @@ def subscription_failure(code, status=None):
     return Failure(reason, message + suffix + ' No automatic retry or API billing fallback was used.')
 
 
-def tool_specs(values):
-    if not values.get('tools'):
-        return []
-    if not values.get('history'):
-        return [tool_schema()]
-    flags = {name: values.get(name, False) for name in (
-        'reference', 'memory', 'notes', 'notes_write', 'tasks', 'notebook_only',
-        'web_only', 'reminders', 'people', 'people_write', 'web', 'mcp', 'skills', 'workspace')}
-    return schemas(history=True, hybrid=values.get('hybrid_memory', False),
-                   web_provider=values.get('web_provider', 'searxng'), **flags)
-
 
 def _output(items, *, allow_tools, names, maximum, incomplete=False, subscription=False):
     """Validate an entire response before any native call can be dispatched."""
+    # Keep supported item kinds aligned with core.reply_presentation.response_text
+    # and Presentation.test_response_item_contract when this dialect expands.
     if not isinstance(items, list):
         raise ValueError('missing output')
     text, calls = [], []
@@ -197,7 +186,7 @@ def wire_input(messages, profile):
                     raise ValueError('reasoning identity mismatch')
                 result.extend(state['output'])
             except (ValueError, TypeError, KeyError, Failure):
-                raise Failure('provider_configuration', 'OpenAI reasoning state does not match its assistant message.') from None
+                raise Failure('provider_state_integrity', 'OpenAI reasoning state does not match its assistant message.') from None
         elif role == 'tool':
             # Responses accepts typed image output on the original function
             # result: retain its call identity and lower-authority tool role.

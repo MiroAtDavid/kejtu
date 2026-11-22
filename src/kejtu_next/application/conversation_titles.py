@@ -30,7 +30,9 @@ class TitleRunner:
                 and state[1] and not state[3] and not state[4]
                 and activity.seen is not None and 0 <= now - activity.seen <= 15
                 and now - activity.last_input >= 2
-                and (app.model_controls is None or not app.model_controls.lock.locked()))
+                and (app.model_controls is None or not app.model_controls.lock.locked())
+                # No new title request while the installed package is being updated.
+                and not getattr(getattr(app, 'update', None), 'holding', False))
 
     async def read(self, cid):
         self.app.store.configuration_id(cid)

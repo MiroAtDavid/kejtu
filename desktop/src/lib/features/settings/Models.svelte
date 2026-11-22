@@ -273,6 +273,12 @@
         Use an OpenAI API key. Usage is billed to your API account.
       </p>
     {/if}
+    {#if selected === "anthropic"}
+      <p class="muted">
+        Use an Anthropic API key scoped to one workspace. Usage is billed to
+        your API account, separately from a Claude subscription.
+      </p>
+    {/if}
     {#if selected === "chatgpt"}
       {#if saved.active === "chatgpt"}<p class="muted">
           Using ChatGPT plan for new conversations.

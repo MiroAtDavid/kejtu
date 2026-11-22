@@ -2,10 +2,21 @@
 import asyncio
 import json
 
+from ...core.context import text_bound
 from ...core.records import Failure, Reply, ToolCall
 
 
 class DevelopmentModel:
+    def count_request_tokens(self, profile, messages, schema):
+        """This fake's own tokenizer, exact by definition: one token per four bytes
+        of the conservative request bound, the rule its replies already use for
+        output tokens. Real adapters keep the byte bound or provider measurements;
+        no real model's tokenizer is inferred from this.
+        """
+        size = (sum(text_bound(message, provider=profile.provider) for message in messages)
+                + len(json.dumps(schema, ensure_ascii=False).encode()) + 32)
+        return -(-size // 4)
+
     async def complete(self, request):
         user = next((message.content for message in reversed(request.messages) if message.role == 'user'), '')
         if user.startswith('[[delay]]'):

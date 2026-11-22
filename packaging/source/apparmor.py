@@ -73,16 +73,28 @@ def quoted_path(path):
     return '"' + text + '"'
 
 
+# AppArmor 4.0 (Ubuntu 24.04) has every rule kind used here; Ubuntu's own
+# unprivileged_userns profile pairs the same rules with this ABI. Sandbox profiles
+# written before 13 Nov 2026 declared 5.0, which 24.04 cannot parse; ensure() still
+# recognises those exact bytes as its own predecessor.
+ABI = 'abi <abi/4.0>,'
+EARLIER_SANDBOX_ABI = 'abi <abi/5.0>,'
+
+
 def policy(root, receipt, sandbox=None):
     root = Path(root).resolve()
-    if receipt.get('schema') != 1 or receipt.get('kind') != 'kejtu-web-prepared' or receipt.get('root') != str(root):
+    if receipt.get('schema') not in (1, 2) or receipt.get('kind') != 'kejtu-web-prepared' or receipt.get('root') != str(root):
         raise ValueError('The browser receipt belongs to a different checkout; relocation is not supported.')
     identifier = hashlib.sha256(os.fsencode(str(root))).hexdigest()[:24]
     rows = receipt['browsers']
-    if [row.get('role') for row in rows] != ['page_reader', 'browser']:
-        raise ValueError('The browser receipt must contain exactly the two managed browser roles.')
-    body = '# Kejtu managed browser user namespaces. Regenerate with the source installer.\nabi <abi/4.0>,\n'
-    for row, directory in zip(rows, (root / '.state/playwright', root / '.state/mcp-runtime/browsers')):
+    # Schema 1 is read only to reproduce the exact profile an earlier install owns.
+    layout = [('browser', root / '.state/mcp-runtime/browsers')]
+    if receipt['schema'] == 1:
+        layout.insert(0, ('page_reader', root / '.state/playwright'))
+    if [row.get('role') for row in rows] != [role for role, _ in layout]:
+        raise ValueError('The browser receipt has unexpected managed browser roles.')
+    body = f'# Kejtu managed browser user namespaces. Regenerate with the source installer.\n{ABI}\n'
+    for row, (_, directory) in zip(rows, layout):
         path = Path(row['executable'])
         if not path.is_absolute() or not path.is_relative_to(directory) or '..' in path.parts:
             raise ValueError('The policy executable is outside its managed browser directory.')
@@ -97,7 +109,6 @@ def policy(root, receipt, sandbox=None):
             expected = root / '.state/apps/bubblewrap' / ('bubblewrap-' + version) / 'bin' / ('bwrap-' + role)
             if value != str(expected):
                 raise ValueError('Sandbox policy attachment is outside its exact managed role path.')
-        body = body.replace('abi <abi/4.0>,', 'abi <abi/5.0>,')
         tools, child, browser = (f'kejtu-{identifier}-{name}' for name in ('tools', 'tool-child', 'browser-launch'))
         # Preserve Ubuntu's child capability restriction for generic tools. NNP
         # requires a stacked transition; no local/global bwrap policy is edited.
@@ -137,7 +148,7 @@ def ensure(root, receipt_path, run, *, allow_system=True, env=None):
     destination, body = policy(root, receipt, sandbox)
     current = dict(prepared=receipt, sandbox=sandbox)
     marker = root / '.state/source-install/apparmor.json'
-    previous = None
+    previous = old = None
     if marker.is_symlink():
         raise ValueError('The AppArmor installation receipt must not be a symlink.')
     if marker.exists():
@@ -150,9 +161,17 @@ def ensure(root, receipt_path, run, *, allow_system=True, env=None):
         if pending is not None and old != current:
             raise ValueError('An earlier browser policy update is unfinished. Complete that installation before changing browser versions.')
         previous = pending if old == current else old
-    previous_body = policy(root, previous['prepared'], previous['sandbox'])[1] if previous is not None else None
+    # Only bytes this installer generates for an identity it recorded may be replaced.
+    owned = []
+    for identity in (previous, old):
+        if identity is not None:
+            text = policy(root, identity['prepared'], identity['sandbox'])[1]
+            owned.append(text)
+            if identity['sandbox'] is not None:
+                owned.append(text.replace(ABI, EARLIER_SANDBOX_ABI, 1))
     matching = existing_policy(destination, body)
-    if destination.exists() and not matching and (previous_body is None or not existing_policy(destination, previous_body)):
+    predecessor = None if matching else next((text for text in owned if existing_policy(destination, text)), None)
+    if destination.exists() and not matching and predecessor is None:
         raise ValueError(f'The existing AppArmor profile was changed outside the installer; preserved: {destination}')
     if not allow_system:
         if not matching:
@@ -165,10 +184,10 @@ def ensure(root, receipt_path, run, *, allow_system=True, env=None):
     web.write_receipt(marker, dict(schema=2, **current, policy_sha256=digest(body), previous=previous))
     before_unconfined = UNCONFINED_RESTRICTION.read_text() if UNCONFINED_RESTRICTION.exists() else None
     print(f'Installing sandbox/browser AppArmor policy: {destination}\n'
-          'Exact attachments: two managed browsers and two role copies of one Bubblewrap build. '
+          'Exact attachments: one managed browser and two role copies of one Bubblewrap build. '
           'Ordinary tools retain the child capability restriction; the trusted browser chain can create its nested sandbox.', flush=True)
     run(['sudo', '/bin/sh', '-c', APPLY, 'kejtu-browser-policy', destination,
-         digest(body), digest(previous_body) if previous_body else '-', body])
+         digest(body), digest(predecessor) if predecessor else '-', body])
     if not existing_policy(destination, body):
         raise ValueError('The browser AppArmor policy did not match after installation.')
     if RESTRICTION.read_text().strip() != '1':

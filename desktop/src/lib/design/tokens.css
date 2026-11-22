@@ -121,6 +121,8 @@
   --ke-radius-md: 7px;
   --ke-radius-lg: 10px;
   --ke-radius-pill: 999px;
+  /* The window's own corners where Kejtu draws them rounded (chat.css). */
+  --ke-window-radius: var(--ke-radius-lg);
 
   /* One page-action surface for every workspace (Projects, Calendar, Tasks,
      Research and Settings). Components set layout; these set the look. */
@@ -136,6 +138,8 @@
   --ke-control-text: var(--ke-text-secondary);
   --ke-control-font-size: var(--ke-label-size);
   --ke-control-bg-selected: var(--ke-accent-soft);
+  /* A quiet fill for small inline fields and chips: half the selected-row tint. */
+  --ke-soft-fill: color-mix(in srgb, var(--ke-surface-inset) 55%, transparent);
 
   /* Floating surfaces: menus, pickers, popovers, dialogs and side sheets. */
   --ke-overlay-radius: var(--ke-radius-lg);

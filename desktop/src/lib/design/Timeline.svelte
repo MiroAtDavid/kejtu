@@ -21,9 +21,11 @@
 <script lang="ts">
   export let items: TimelineItem[] = [];
   export let label = "Timeline";
+  /** The same timeline a step smaller, for a summary inside another page. */
+  export let compact = false;
 </script>
 
-<ol class="timeline" aria-label={label}>
+<ol class="timeline" class:compact aria-label={label}>
   {#each items as item (item.id)}
     <li
       class="timeline-entry"
@@ -197,6 +199,27 @@
   .timeline-actions :global(button:disabled) {
     opacity: 0.5;
     cursor: default;
+  }
+  .compact {
+    --date-width: 64px;
+    --rail-gap: 34px;
+    margin: var(--ke-space-3) 0 var(--ke-space-1);
+  }
+  .compact .timeline-entry {
+    padding-bottom: var(--ke-space-5);
+  }
+  .compact .day {
+    font-size: 22px;
+  }
+  .compact .timeline-time,
+  .compact h3 {
+    font-size: var(--ke-text-sm);
+  }
+  .compact h3 {
+    margin: var(--ke-space-1) 0;
+  }
+  .compact .timeline-details {
+    font-size: var(--ke-text-2xs);
   }
   @media (max-width: 650px) {
     .timeline {

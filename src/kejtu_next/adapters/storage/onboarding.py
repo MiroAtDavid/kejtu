@@ -57,7 +57,8 @@ class Onboarding:
             if not conversation.history_enabled or self.store.imported_conversation(conversation_id):
                 raise Failure('onboarding_state', 'Use a new conversation with tools for the guided introduction.')
             updated = dict(status='active', conversation_id=conversation_id)
-        elif action == 'complete' and status == 'active':
+        elif action == 'complete' and status in ('available', 'active'):
+            # Finishing the welcome window needs no guided conversation.
             updated = dict(status='completed', conversation_id=self.value['conversation_id'])
         elif action == 'skip' and status in ('available', 'active'):
             updated = dict(status='skipped', conversation_id=self.value['conversation_id'])

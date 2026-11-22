@@ -29,6 +29,9 @@ class HistoryUnit:
     actions_without_ids: Message | None = None
     action_ids_omitted: bool = False
     deliveries: tuple[Message, ...] = ()
+    deliveries_without_bodies: tuple[Message, ...] = ()
+    action_dependencies: tuple[str, ...] = ()
+    delivery_dependencies: tuple[str, ...] = ()
 
     def cue(self) -> Message:
         return Message('system', 'Application history identity: ' + json.dumps({

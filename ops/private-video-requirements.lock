@@ -1,3 +1,0 @@
-# Private optional child runtime; deliberately absent from the public core deps.
-yt-dlp==2026.8.19
-yt-dlp-ejs==0.8.0

@@ -1,7 +1,9 @@
 /**
  * What the Kejtu mark shows. Each working state names the kind of work so the
  * mark can show it instead of spinning: eyes and a few small props move, the
- * outline never rotates.
+ * outline never rotates while work goes on. "Chasing" is the one playful
+ * working loop: the eyes chase each other round the inside of the outline.
+ * "Sleeping" is a quiet idle: eyes closed, slow breaths.
  */
 export type KejtuState =
   | "idle"
@@ -13,6 +15,8 @@ export type KejtuState =
   | "writing"
   | "remembering"
   | "desk"
+  | "chasing"
+  | "sleeping"
   | "done";
 
 export const WORKING_STATES: ReadonlySet<KejtuState> = new Set([
@@ -24,7 +28,42 @@ export const WORKING_STATES: ReadonlySet<KejtuState> = new Set([
   "writing",
   "remembering",
   "desk",
+  "chasing",
 ]);
+
+/**
+ * One-shot moves the mark can play on top of any state, each once, then back
+ * to the state's own loop. Small places keep every gesture inside the outline.
+ */
+export type KejtuGesture =
+  | "blink"
+  | "wink"
+  | "glance"
+  | "nod"
+  | "hop"
+  | "hello"
+  | "squish"
+  | "love"
+  | "wake"
+  | "peek"
+  | "spin"
+  | "roll";
+
+/** How long each gesture plays. The CSS keyframes use the same durations. */
+export const GESTURE_MS: Readonly<Record<KejtuGesture, number>> = {
+  blink: 380,
+  wink: 800,
+  glance: 1600,
+  nod: 1000,
+  hop: 1100,
+  hello: 1600,
+  squish: 900,
+  love: 1700,
+  wake: 900,
+  peek: 2200,
+  spin: 1700,
+  roll: 2800,
+};
 
 /**
  * Map the reply phase the native stream already reports to a mark state.

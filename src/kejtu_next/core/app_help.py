@@ -5,8 +5,9 @@ from .skills import encode, sha
 
 
 NAME = 'kejtu-app-help'
-DESCRIPTION = ('Explain Kejtu capabilities, onboarding, settings, memory, documents, '
-               'tools and limitations; troubleshoot unavailable app actions.')
+DESCRIPTION = ('Help with Kejtu capabilities, onboarding, settings, projects, modules, tasks, research and Shelf. '
+               'Get help with documents in the chat sidebar, Markdown editing, PDF passages, Word previews, '
+               'memory, terminal setup, tools, limitations and troubleshooting.')
 PATHS = ('SKILL.md', '01-start.md', '02-capabilities.md', '03-memory.md',
          '04-web-files-skills.md', '05-projects-documents.md',
          '06-tasks-background.md', '07-settings-troubleshooting.md', '08-privacy-limits.md')

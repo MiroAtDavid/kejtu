@@ -18,7 +18,7 @@ is partial and distinguish verified page contents from an inference.
 ## Interactive browsing and other MCP connections
 
 The standard setup installs and enables a temporary browser connection.
-**Settings → Skills & connections → Connections** manages it and other MCP servers. MCP is a way
+**Shelf → Installed → Connections** manages it and other MCP servers. MCP is a way
 to expose another application's tools to Kejtu. Configure/install the server,
 inspect its actual tools, select allowed tools and grant the required network and
 folder access. Enabled web access is additionally required for connections marked
@@ -36,7 +36,9 @@ no working folder. Add other shared folders with **Read only** or **Read & write
 access. **Save changes** applies the choices; opening the panel shares nothing.
 Use **Change…** to change an assigned working folder. The shared file access
 switch turns access off immediately, even during a reply. Turning it back on
-requires **Save changes**. Folder edits are kept when switching access off.
+uses **Save changes** here. The module editor’s Browse/Create folder actions can
+also turn it on while sharing the chosen folder for reading and writing.
+Folder edits are kept when switching access off.
 The working folder is writable. Subfolders inherit access unless a more specific
 share overrides it. Expand **Tools using these folders** to choose which local
 connections may use them. Separate read-only connection grants remain available
@@ -89,11 +91,11 @@ unavailable in that build; sharing a folder does not enable them.
 New desktop installations include **topic-research**, enabled and ready to use.
 It guides web research, comparisons and checking claims against sources. Kejtu
 can choose it for a relevant request, or you can select it in the message box.
-Inspect or disable it in **Settings → Skills**; reopening preserves your choice.
+Inspect or disable it in **Shelf → Installed → Skills**; reopening preserves your choice.
 It uses existing permissions and does not schedule work or save notes by itself.
 
 A skill is a reusable procedure plus reference files. It adds instructions,
-not permissions or a new executable tool. **Settings → Skills & connections → Skills**
+not permissions or a new executable tool. **Shelf → Installed → Skills → Add skill**
 imports a local SKILL.md folder, pasted instructions or a public GitHub folder.
 For GitHub, you can paste a repository link if it contains one skill. When it
 contains several, open the skill folder on GitHub and paste that folder's URL.
@@ -107,23 +109,72 @@ or click a single-line entry. The selection appears beside the message box;
 clear it to return to Automatic. Escape closes the picker without sending.
 
 The built-in **kejtu-app-help** skill reads this guide without installing anything.
-Project organization, planning, tutoring and course-research procedures are also
-built in when Projects is enabled. They still need actual source/tool access.
+Shelf includes three packages. **Projects** helps organize work and find linked
+files and conversations. **Learning & study** helps with tutoring, study
+planning and course research. **Development** helps Kejtu work on code using
+the terminal connection when you have enabled it and granted its tools. The
+packages update with Kejtu. In Shelf you can disable a package or individual
+skills and keep your projects, conversations and files. Tool permissions still apply.
 Installed scripts are preserved as files; the skill library does not execute them.
 Complete main instructions must fit the current context or refuse explicitly.
 
-Earlier installations can import the shipped
-`src/kejtu_next/starter_skills/topic-research` folder in Skills, then enable it.
-An additional demo MCP is not yet included. Browser runtimes are installed by the
-first-run helper. An earlier installation can install them with `./kejtu setup-web`
-from the Kejtu folder, then select **Connections → Set up included tools**.
+## Shelf
+
+**Shelf** in the main sidebar opens **Browse**, the catalogue of optional packages.
+Select a package to see its source and parts.
+
+Choose **Installed** to see your packages alongside standalone skills and MCP
+connections, including ones switched off. Each package appears once.
+Use **Find** to search by name or description. Searching for a package part also
+finds its package. Open a package to see its parts or choose the **Skills** or
+**Connections** filter to go straight to an individual item. The shortcuts in
+**Settings → Skills & connections** open those same filters. A local import appears
+on your own Shelf.
+Names on the Shelf read as words: a skill called `lab-writing` shows as
+**Lab writing**, and a package's own connection shows the package's title. Each
+item's page lists its exact **Name**, which the **/** picker also uses.
+On the **Skills** and **Connections** filters the button at the top reads
+**Add skill** or **Add connection**.
+**Install from** also accepts a local package folder.
+Choose the whole plugin folder, not its hidden metadata folder. Kejtu reads
+Agent Plugins, Claude and Codex plugins, unpacked MCPB bundles and single skill
+folders. **Preview package** shows its skills, connections and unsupported parts.
+
+You can find these optional packages by name in **Browse**.
+
+- **Context7** looks up current documentation for programming libraries. Public lookups use Context7’s online service and work without signing in.
+- **Anti-AI Writing** helps you review or rewrite formulaic passages in English and Spanish.
+- **Obsidian Markdown** helps you write notes with wikilinks, properties and callouts. To save a note into your vault, grant write access to its folder.
+- **JSON Canvas** helps you create a `.canvas` diagram of connected notes or ideas. Open the file in Obsidian or another JSON Canvas viewer.
+
+**Install & enable** sets up the included skills and tools. Account sign-in, when
+needed, stays in Shelf. Open an installed package to see its individual skills
+and connections. **Advanced** starts expanded and lets you collapse or reopen that list.
+Product-specific app registrations, agents and hooks are not imported. Skills
+keep their original instructions and files; instructions for tools Kejtu does not
+have cannot grant that access. A package cannot replace an existing connection
+with saved credentials. The preview warns about existing package, skill or
+connection names, and connections using the same remote service host.
+A name conflict requires removal first; switching it off does not free the name.
+A shared host only suggests similar tools. Review the existing connection before
+enabling the new one, and disable or remove it if you are replacing it. New parts
+start off; the warning does not decide that the integrations are interchangeable.
+Open the existing item to make that choice; no login or ownership transfers.
+Use the installed package's **Look for an update** action when you intend an update.
+Updating or removing a package uses its recorded parts
+and preserves connections independently replaced by the user.
+
+After restoring a backup, connections stay off. **Shelf** lists programs to
+reinstall and connections needing a fresh sign-in or keys. Account passwords,
+keys and login tokens are not recovered from the backup. Open **Connections** to
+sign in or enter keys yourself, then enable the tools you want.
 
 ## Connections
 
-**Settings → Skills & connections → Connections** shows simple On/Off controls
-for Browser, Spreadsheets, PDFs and Documents. **Set up included tools** finds
-missing installed tools, checks their connection and enables their full tool
-selection. It keeps existing disabled or limited choices. On Linux the setup
+**Shelf → Installed → Connections** shows each connection as a card with its
+state. Open one to switch it on or off. When Browser, Spreadsheets, PDFs or
+Documents is missing, its card says **Not set up**; **Set up** checks that tool
+and enables its full tool selection. It keeps existing disabled or limited choices. On Linux the setup
 uses the folders already shared in Files, with their saved read/write access;
 if no folder is shared, choose **Choose folders in Files**, then use
 **Set up working folder** there or choose another folder. It does not download a
@@ -134,6 +185,24 @@ checked toolset. **Advanced** contains individual tool choices, repeat-call
 controls and technical configuration. Switching a connection off and on keeps
 its saved selection. Connection checks discover capabilities; they do not prove
 that a particular document operation has succeeded.
+
+### Terminal Use and Quick Terminal on Linux
+
+Open **Shelf → Installed → Connections**, open the terminal you want and turn it
+on. Both are included and start off. On an existing installation, a missing
+terminal shows as **Not set up**; **Set up** on its card restores the entry
+after updating Kejtu.
+
+**Quick Terminal** runs one Bash command per call and reports its output and exit
+code. It uses Kejtu’s included Python. **Terminal Use** also supports interactive
+terminal sessions and reading long command output in pages. It uses the system
+Node.js at `/usr/bin/node`. If Kejtu reports an older version, update the system
+Node.js package to **22.12 or newer**, then turn on Terminal Use again. Quick
+Terminal works while you keep your current Node.js version.
+
+Each terminal starts in its own sandbox with network access off. To work on your
+files, open **Settings → Privacy & access → Files**, choose the terminal, and save
+your folder choices. If you shared a working folder with it, commands start there.
 
 ### Windows test-build connections
 

@@ -41,6 +41,7 @@
   $: visibleItems = items.filter(
     (item) =>
       item.kind !== "research" &&
+      item.kind !== "interest_following" &&
       (showArchived ||
         (!item.cancelled &&
           item.kind !== "notebook_care" &&
@@ -83,21 +84,25 @@
   $: resultText = bodySequence === null ? privateResult(body) : null;
   $: access = !editor?.permissions.read_memory
     ? "off"
-    : isReview(editor.kind)
-      ? editor.permissions.write_notes
-        ? "write"
-        : "read"
-      : editor.permissions.deliver
-        ? "deliver"
-        : "read";
+    : editor.kind === "reminder_review"
+      ? "resolve"
+      : isReview(editor.kind)
+        ? editor.permissions.write_notes
+          ? "write"
+          : "read"
+        : editor.permissions.deliver
+          ? "deliver"
+          : "read";
   $: sourceValid =
     !!editor?.conversation_id ||
     (editor !== null &&
-      isReview(editor.kind) &&
+      (isReview(editor.kind) || editor.kind === "reminder_review") &&
       editor.conversation_id === null);
   $: canEnable =
     !!editor?.permissions.read_memory &&
-    (isReview(editor.kind) || editor.permissions.deliver);
+    (isReview(editor.kind) ||
+      editor.kind === "reminder_review" ||
+      editor.permissions.deliver);
   const limitFields = [
     {
       name: "calls" as const,
@@ -597,7 +602,7 @@
                   ),
                 )}
             >
-              {#each Object.entries(procedures).filter(([kind]) => (kind !== "research" && kind !== "notebook_care" && kind !== "notebook_maintenance") || kind === editor?.kind) as [value, procedure]}<option
+              {#each Object.entries(procedures).filter(([kind]) => (kind !== "research" && kind !== "interest_following" && kind !== "notebook_care" && kind !== "notebook_maintenance") || kind === editor?.kind) as [value, procedure]}<option
                   {value}>{procedure.title}</option
                 >{/each}
             </select>
@@ -683,7 +688,7 @@
                   : "Use this conversation as context for the review. It is a focus, not an exclusive limit on accessible notebook notes."}
               </p>
             {/if}
-            {#if editor.conversation_id !== null || !isReview(editor.kind)}
+            {#if editor.kind !== "reminder_review" && (editor.conversation_id !== null || !isReview(editor.kind))}
               <label for="job-source">Source conversation</label>
               <select
                 use:choiceSelect={editor.conversation_id}
@@ -733,7 +738,11 @@
               value={access}
               on:change={(e) => setAccess(e.currentTarget.value)}
             >
-              {#if isReview(editor.kind)}
+              {#if editor.kind === "reminder_review"}
+                <option value="resolve"
+                  >Review and clear leftover reminders</option
+                >
+              {:else if isReview(editor.kind)}
                 <option value="read">Review only</option><option value="write"
                   >{editor.kind === "notebook_maintenance"
                     ? "Review and update existing notes"
@@ -748,15 +757,17 @@
               <option value="off">No source access (cannot run)</option>
             </select>
             <p class="help">
-              {isReview(editor.kind)
-                ? editor.permissions.write_notes
-                  ? editor.kind === "notebook_maintenance"
-                    ? "May shorten or reorganise existing notes after reading them. Does not create or delete notes. Conversation focus also requires that conversation’s write permission."
-                    : editor.conversation_id === null
-                      ? "May create or revise notebook notes. No outgoing messages."
-                      : "May save or revise notes. The conversation must also allow note writing. No outgoing messages."
-                  : "Keeps a private review result. Does not change notes or send a message."
-                : "May prepare a message for delivery. Chat display is not available yet; read the private result here."}
+              {editor.kind === "reminder_review"
+                ? "May resolve due occurrences whose source conversations still allow reminder access. Keeps a private run report; sends no messages and changes no tasks or future reminders."
+                : isReview(editor.kind)
+                  ? editor.permissions.write_notes
+                    ? editor.kind === "notebook_maintenance"
+                      ? "May shorten or reorganise existing notes after reading them. Does not create or delete notes. Conversation focus also requires that conversation’s write permission."
+                      : editor.conversation_id === null
+                        ? "May create or revise notebook notes. No outgoing messages."
+                        : "May save or revise notes. The conversation must also allow note writing. No outgoing messages."
+                    : "Keeps a private review result. Does not change notes or send a message."
+                  : "May deliver a quiet message to its conversation when allowed."}
             </p>
           </div>
         </div>
@@ -968,7 +979,9 @@
                       id={`job-limit-${field.name}`}
                       type="number"
                       min={field.min}
-                      max={!isReview(editor.kind) && field.name === "operations"
+                      max={!isReview(editor.kind) &&
+                      editor.kind !== "reminder_review" &&
+                      field.name === "operations"
                         ? 0
                         : field.max}
                       value={editor.limits[field.name]}
@@ -1123,7 +1136,8 @@
                 <select
                   use:choiceSelect={editor.delivery}
                   id="job-channel"
-                  disabled={isReview(editor.kind)}
+                  disabled={isReview(editor.kind) ||
+                    editor.kind === "reminder_review"}
                   value={editor.delivery}
                   on:change={(e) =>
                     change(
@@ -1136,8 +1150,9 @@
                   ></select
                 >
                 <p class="help">
-                  Requested channel for permitted check-ins and reminders. Chat
-                  display is not available yet. Notebook reviews remain private.
+                  Permitted check-ins appear quietly in their conversation.
+                  Requested reminders are delivered directly without waiting for
+                  this job. Notebook reviews remain private.
                 </p>
               </div>
               {#if editor.conversation_id !== null}

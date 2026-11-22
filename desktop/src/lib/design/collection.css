@@ -1,0 +1,515 @@
+/* Shared look of the collection pages (Tasks first; Research, Shelf and
+   Projects follow): one page frame, pills, chips, slim lines and small raised
+   cards. Presentation only: the page components keep every state and request.
+
+   Generic control rules sit inside :where(), so a component's own styles and
+   every .cp-* class below always win without an exclusion list. */
+.collection-page {
+  max-width: 800px;
+  min-width: 0;
+  color: var(--ke-text-primary);
+  font-size: var(--ke-text-xs);
+  line-height: 1.6;
+}
+.collection-page :where(button, input, select, textarea) {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  font-family: var(--ke-font-ui);
+}
+.collection-page :where(button) {
+  min-height: var(--ke-control-height);
+  padding: var(--ke-control-padding);
+  font-size: var(--ke-control-font-size);
+  line-height: 1.5;
+  border: 1px solid transparent;
+  border-radius: var(--ke-control-radius);
+  background: var(--ke-control-bg);
+  color: var(--ke-control-text);
+  cursor: pointer;
+}
+.collection-page :where(button:hover:not(:disabled)) {
+  color: var(--ke-text-primary);
+  background: var(--ke-control-bg-hover);
+}
+/* Controls are held while a page reads or saves. They dim only when that
+   lasts: a quick read on returning to a page must not make the list blink. */
+.collection-page :where(button:disabled, input.cp-tick:disabled) {
+  opacity: 0.5;
+  cursor: default;
+  animation: cp-held 120ms ease 250ms both;
+}
+@keyframes cp-held {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.5;
+  }
+}
+/* The same for a progress note: it shows only when the wait is noticeable. */
+.collection-page .cp-late {
+  animation: cp-late 120ms ease 250ms both;
+}
+@keyframes cp-late {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.collection-page
+  :where(
+    input:not([type="checkbox"], [type="radio"], [type="range"]),
+    select,
+    textarea
+  ) {
+  min-height: 32px;
+  padding: 5px 9px;
+  font-size: var(--ke-text-xs);
+  line-height: 1.5;
+  border: 1px solid var(--ke-border);
+  border-radius: var(--ke-radius-sm);
+  background: var(--ke-surface-raised);
+  color: var(--ke-text-primary);
+}
+.collection-page :where(input, textarea)::placeholder {
+  color: var(--ke-text-tertiary);
+  opacity: 1;
+}
+.collection-page
+  :where(button, input, select, textarea, summary, a):focus-visible {
+  outline: 2px solid var(--ke-focus-ring);
+  outline-offset: 2px;
+}
+.collection-page .cp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Page frame: title and one line of status, the main action on the right. */
+.collection-page .cp-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 16px;
+}
+.collection-page .cp-title {
+  margin: 0;
+  font: var(--ke-title-page);
+  letter-spacing: var(--ke-title-page-tracking);
+  color: var(--ke-text-primary);
+}
+.collection-page .cp-status {
+  margin: 4px 0 0;
+  color: var(--ke-text-secondary);
+}
+.collection-page .cp-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: var(--ke-radius-md);
+  background: var(--ke-surface-inset);
+  color: var(--ke-text-primary);
+  font-size: var(--ke-text-xs);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.collection-page .cp-action:hover:not(:disabled) {
+  background: var(--ke-border-strong);
+}
+.collection-page .cp-action.primary {
+  border-color: var(--ke-border-strong);
+  background: var(--ke-control-bg-selected);
+  color: var(--ke-text-primary);
+}
+.collection-page .cp-action.primary:hover:not(:disabled) {
+  background: var(--ke-control-bg-hover);
+}
+
+/* Use the same quiet, underlined tabs as the workspace navigation. */
+.collection-page .cp-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 20px;
+}
+.collection-page .cp-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 18px;
+  min-width: 0;
+  margin-right: auto;
+}
+.collection-page .cp-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  max-width: 100%;
+  padding: 4px 1px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ke-text-secondary);
+  font-size: var(--ke-text-xs);
+}
+.collection-page .cp-pill:hover:not(:disabled),
+.collection-page .cp-pill[aria-pressed="true"] {
+  background: transparent;
+  color: var(--ke-text-primary);
+}
+.collection-page .cp-pill[aria-pressed="true"] {
+  border-bottom-color: var(--ke-text-secondary);
+  font-weight: 500;
+}
+.collection-page .cp-count {
+  color: var(--ke-text-tertiary);
+  font-weight: 400;
+}
+.collection-page .cp-pill[aria-pressed="true"] .cp-count {
+  color: inherit;
+  opacity: 0.75;
+}
+.collection-page .cp-find {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 8px 0 2px;
+  border: 1px solid var(--ke-border);
+  border-radius: var(--ke-radius-md);
+  background: var(--ke-surface-raised);
+}
+.collection-page .cp-find:focus-within {
+  border-color: var(--ke-border-strong);
+}
+.collection-page .cp-find input {
+  width: 140px;
+  min-height: 0;
+  padding: 0 0 0 2px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: var(--ke-text-xs);
+}
+.collection-page .cp-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  min-height: 30px;
+  padding: 0;
+  border-radius: var(--ke-radius-md);
+  background: transparent;
+  color: var(--ke-text-tertiary);
+}
+.collection-page .cp-icon:hover:not(:disabled) {
+  background: var(--ke-surface-inset);
+  color: var(--ke-text-primary);
+}
+.collection-page .cp-find .cp-icon {
+  width: 28px;
+  min-height: 28px;
+}
+.collection-page .cp-find .cp-icon:hover:not(:disabled) {
+  background: transparent;
+}
+
+/* Filters: quiet chips, the chosen one filled. */
+.collection-page .cp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 12px;
+}
+.collection-page .cp-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-right: auto;
+}
+.collection-page .cp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--ke-radius-md);
+  background: transparent;
+  color: var(--ke-text-secondary);
+  font-size: var(--ke-text-xs);
+  white-space: nowrap;
+}
+.collection-page
+  .cp-chip:hover:not(:disabled, [aria-pressed="true"], [aria-expanded="true"]) {
+  background: transparent;
+  color: var(--ke-text-primary);
+}
+.collection-page .cp-chip[aria-pressed="true"],
+.collection-page .cp-chip[aria-expanded="true"],
+.collection-page .cp-chip[aria-pressed="true"]:hover,
+.collection-page .cp-chip[aria-expanded="true"]:hover {
+  background: var(--ke-surface-inset);
+  color: var(--ke-text-primary);
+  font-weight: 500;
+}
+
+/* Lists: a small caption per group, then slim one-line cards. */
+.collection-page .cp-cap {
+  margin: 0;
+  color: var(--ke-text-tertiary);
+  font-family: var(--ke-font-ui);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.collection-page .cp-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.collection-page .cp-card,
+.collection-page .cp-line {
+  border: 1px solid var(--ke-border);
+  border-radius: var(--ke-radius-lg);
+  background: var(--ke-surface-raised);
+  box-shadow: var(--ke-shadow-raised);
+}
+/* The Shelf's card grid: packages, skills and connections alike. */
+.collection-page .cp-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(230px, 100%), 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+/* A card's one small action (Install, Set up). */
+.collection-page .cp-mini {
+  min-height: 24px;
+  padding: 0 9px;
+  border-radius: 6px;
+  background: var(--ke-surface-inset);
+  color: var(--ke-text-primary);
+  font-size: 11.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.collection-page .cp-mini:hover:not(:disabled) {
+  background: var(--ke-border-strong);
+}
+.collection-page .cp-line {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 14px;
+}
+.collection-page .cp-line:hover {
+  border-color: var(--ke-border-strong);
+}
+.collection-page .cp-tag {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: var(--ke-radius-sm);
+  background: var(--ke-surface-inset);
+  color: var(--ke-text-secondary);
+  font-size: 10.5px;
+  line-height: 1;
+  white-space: nowrap;
+}
+/* Completion stays a native checkbox, drawn as a round tick. */
+.collection-page .cp-tick {
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-content: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  border: 1.5px solid var(--ke-border-strong);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+.collection-page .cp-tick:hover:not(:disabled) {
+  border-color: var(--ke-text-secondary);
+}
+.collection-page .cp-tick:checked {
+  border-color: var(--ke-text-tertiary);
+  background: var(--ke-text-tertiary);
+}
+.collection-page .cp-tick:checked::before {
+  content: "";
+  width: 7px;
+  height: 4px;
+  border-bottom: 1.5px solid var(--ke-surface-raised);
+  border-left: 1.5px solid var(--ke-surface-raised);
+  transform: translateY(-1px) rotate(-45deg);
+}
+.collection-page .cp-tick:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.collection-page .cp-text {
+  min-height: 24px;
+  padding: 0 4px;
+  margin-left: -4px;
+  background: transparent;
+  color: var(--ke-text-secondary);
+  font-size: var(--ke-text-xs);
+}
+.collection-page .cp-text:hover:not(:disabled) {
+  background: transparent;
+  color: var(--ke-text-primary);
+}
+.collection-page .cp-hint {
+  margin: 0;
+  color: var(--ke-text-secondary);
+  font-size: var(--ke-text-xs);
+}
+.collection-page .cp-note {
+  margin: 12px 0 0;
+  padding: 9px 12px;
+  border-radius: var(--ke-radius-md);
+  background: var(--ke-surface-inset);
+  color: var(--ke-text-primary);
+}
+.collection-page .cp-note[role="alert"] {
+  color: var(--ke-danger);
+}
+.collection-page .cp-empty {
+  margin: 0;
+  padding: 28px 4px;
+  color: var(--ke-text-secondary);
+}
+
+/* Detail pages share the window surface and a narrow column for properties. */
+.collection-page .cp-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 24px;
+  padding: 0 6px 0 2px;
+  margin-left: -2px;
+  background: transparent;
+  color: var(--ke-text-secondary);
+  font-size: var(--ke-text-xs);
+}
+.collection-page .cp-back:hover:not(:disabled) {
+  background: transparent;
+  color: var(--ke-text-primary);
+}
+.collection-page .cp-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 24px;
+  margin-top: 24px;
+  container-type: inline-size;
+}
+.collection-page .cp-main {
+  display: flex;
+  flex: 999 1 350px;
+  flex-direction: column;
+  gap: 24px;
+  min-width: 0;
+}
+.collection-page .cp-side {
+  flex: 1 1 196px;
+  box-sizing: border-box;
+  min-width: 0;
+  margin: 0;
+  padding: 0 0 0 8px;
+  border-inline-start: 1px solid var(--ke-border);
+}
+.collection-page .cp-section {
+  min-width: 0;
+}
+.collection-page .cp-main > .cp-section + .cp-section {
+  padding-top: 16px;
+  border-top: 1px solid var(--ke-border);
+}
+.collection-page .cp-section > .cp-cap {
+  margin-bottom: 8px;
+  color: var(--ke-text-secondary);
+  font-size: var(--ke-text-xs);
+}
+@container (max-width: 569px) {
+  .collection-page .cp-item > .cp-main,
+  .collection-page .cp-item > .cp-side {
+    flex-basis: 100%;
+  }
+  .collection-page .cp-side {
+    border-inline-start: 0;
+    border-top: 1px solid var(--ke-border);
+    padding: 12px 0 0;
+  }
+}
+.collection-page .cp-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 8px 0 14px;
+}
+.collection-page .cp-key {
+  flex: 0 0 62px;
+  color: var(--ke-text-tertiary);
+  font-size: 11.5px;
+}
+.collection-page .cp-row > input {
+  flex: 1;
+  min-height: 30px;
+  padding: 4px 6px;
+  border-color: transparent;
+  background: transparent;
+  font-size: var(--ke-text-xs);
+}
+.collection-page .cp-row > input:hover:not(:disabled) {
+  background: var(--ke-soft-fill);
+}
+/* The shared picker inside a details row: label left, value right. */
+.collection-page .cp-row .choice-picker {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 10px;
+}
+.collection-page .cp-row .choice-picker .choice-label {
+  flex: 0 0 62px;
+  margin: 0;
+  color: var(--ke-text-tertiary);
+  font-size: 11.5px;
+}
+.collection-page .cp-row .choice-picker .choice-trigger {
+  flex: 1;
+  width: auto;
+  min-height: 30px;
+  gap: 8px;
+  padding: 4px 6px;
+  background: transparent;
+  font-size: var(--ke-text-xs);
+}
+.collection-page .cp-row .choice-picker .choice-trigger:hover:not(:disabled),
+.collection-page .cp-row .choice-picker .choice-trigger[aria-expanded="true"] {
+  background: var(--ke-soft-fill);
+}

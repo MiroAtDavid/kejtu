@@ -14,6 +14,7 @@
   import { outcomeLabel } from "./document-conversation";
   export let model: Readable<DocumentDiscussionState | null>;
   export let actions: DocumentDiscussionActions;
+  export let inChat = false;
 </script>
 
 {#if $model}
@@ -104,7 +105,7 @@
         label="Dismiss editing message"
         onDismiss={actions.dismissError}>{$model.assistError}</ReaderNotice
       >{/if}
-    {#if ($model.answer || $model.liveAnswer) && !$model.expanded}<div
+    {#if !inChat && ($model.answer || $model.liveAnswer) && !$model.expanded}<div
         class="document-answer"
         role="status"
       >
@@ -127,33 +128,39 @@
           ><Icon name="close" size={12} /></button
         >
       </div>{/if}
-    <div class="instruction-row">
-      <textarea
-        aria-label="Ask Kejtu"
-        placeholder="Ask a question or describe a change…"
-        value={$model.instruction}
-        on:input={(event) => actions.input(event.currentTarget.value)}
-        rows="4"
-        on:keydown={actions.instructionKeys}
-        disabled={!$model.ready}
-      ></textarea>
-      {#if $model.asking}<button
-          class="submit"
+    {#if !inChat}<div class="instruction-row">
+        <textarea
+          aria-label="Ask Kejtu"
+          placeholder="Ask a question or describe a change…"
+          value={$model.instruction}
+          on:input={(event) => actions.input(event.currentTarget.value)}
+          rows="4"
+          on:keydown={actions.instructionKeys}
+          disabled={!$model.ready}
+        ></textarea>
+        {#if $model.asking}<button
+            class="submit"
+            aria-label="Stop document edit"
+            disabled={$model.stopped}
+            on:click={actions.stop}><Icon name="stop" size={15} /></button
+          >
+        {:else}<button
+            class="submit"
+            aria-label="Send document instruction"
+            title="Send · Ctrl/⌘ Enter"
+            disabled={!$model.ready ||
+              !$model.available ||
+              !$model.instruction.trim()}
+            on:click={actions.ask}><Icon name="arrow-up" size={15} /></button
+          >{/if}
+      </div>
+    {/if}
+    <div class="assist-foot">
+      {#if inChat && $model.asking}<button
           aria-label="Stop document edit"
           disabled={$model.stopped}
-          on:click={actions.stop}><Icon name="stop" size={15} /></button
-        >
-      {:else}<button
-          class="submit"
-          aria-label="Send document instruction"
-          title="Send · Ctrl/⌘ Enter"
-          disabled={!$model.ready ||
-            !$model.available ||
-            !$model.instruction.trim()}
-          on:click={actions.ask}><Icon name="arrow-up" size={15} /></button
+          on:click={actions.stop}>Stop</button
         >{/if}
-    </div>
-    <div class="assist-foot">
       <span class="assist-phase"
         >{#if $model.kejtu}<span class="assist-mark"
             ><KejtuMark

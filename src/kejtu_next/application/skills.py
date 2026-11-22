@@ -7,24 +7,22 @@ import time
 
 from ..core.records import Failure,Message
 from ..core.reference import exact_page
-from ..core.skills import GUIDE,MAX_INSTRUCTIONS,encode,sha
-from ..core.study_skills import packages as study_packages
+from ..core.skills import GUIDE,MAX_INSTRUCTIONS,MAX_SKILLS,encode,sha
+from ..core.included_packages import packages as included_packages
 from ..core.app_help import packages as help_packages
 
 
 class SkillSession:
-    def __init__(self,store,turn_id,*,bundled=False,app_help=False):
+    def __init__(self,store,turn_id,*,app_help=False):
         self.store,self.tid,self.library=store,turn_id,store.skills
         self.loaded={}
-        self.bundled=study_packages() if bundled else {}
-        self.study_enabled=bundled
-        if app_help:self.bundled.update(help_packages())
+        self.bundled=help_packages() if app_help else {}
 
     def bundle_revision(self):
         return sha(encode({name:item['revision'] for name,item in self.bundled.items()}).encode())
 
     def status(self):
-        rows=self.library.status(enabled=True)['items']
+        rows=self.library.status(enabled=True,limit=MAX_SKILLS+len(included_packages()))['items']
         rows += [dict(name=name,revision=item['revision'],description=item['manifest']['metadata']['description'])
                  for name,item in self.bundled.items()]
         return sorted(rows,key=lambda row:(row['name'],row['revision']))
@@ -46,33 +44,26 @@ class SkillSession:
             raise Failure('skill_integrity','A built-in skill failed its exact-byte integrity check.')
         return manifest,body
 
-    def required(self,name):
-        """A known workspace operation requires delivery, never a user install."""
-        item=self.bundled.get(name)
-        if item and (name,item['revision'],'SKILL.md') not in self.loaded:
-            raise Failure('study_procedure_required','Read the complete built-in procedure with read_skill '+
-                          encode(dict(name=name,revision=item['revision']))+
-                          ', then author this operation using it. It is already available; no installation or enable step is needed.')
-
     def automatic(self,user):
         # Exact existing Study action templates are application context. General
         # natural-language intent belongs to the model, using the same catalogue;
         # unrelated messages containing "study" must not activate a procedure.
         ident=r'[0-9a-f]{32}'
-        explain=rf'Explain this course material\. Course {ident}; retained source {ident}, original [^\r\n]+, page [0-9]+\. Read the relevant exact source through university materials\.snapshot before explaining\.(?=$|\n\n)'
+        explain=rf'(?:Explain this course material\. Course|Explain this project resource\. Project|Explain this section resource\. Section|Explain this module resource\. Module) {ident}; retained source {ident}, original [^\r\n]+, page [0-9]+\. Read the relevant exact source through university materials\.snapshot before explaining\.(?=$|\n\n)'
         practice=(r'(?:Give me one source-linked practice question\. Let me try before giving the answer\.|'
                   r'Give me one small hint, without the full answer\.|'
                   r'Explain the solution from this source, and assess my answer only against the actual question\.)\n'
-                  rf'Course {ident}\. Topic: [\s\S]*?\. Question: [\s\S]*?\. My attempt: [\s\S]*?\. '
+                  rf'(?:Course|Project|Section|Module) {ident}\. Topic: [\s\S]*?\. Question: [\s\S]*?\. My attempt: [\s\S]*?\. '
                   rf'Read exact retained source {ident} \(original [^\r\n]+, page [0-9]+\) with university materials\.snapshot first\. '
                   r'Preserve source references\. Keep reported confidence separate from observed answers\.(?=$|\n\n)')
         if not re.search(r'(?:\A|\n\n)(?:'+explain+'|'+practice+')',user):return ()
-        name='kejtu-study-support';item=self.bundled.get(name)
+        name='kejtu-study-support'
+        item=next((row for row in self.status() if row['name']==name),None)
         if item is None:return ()
         selected=dict(name=name,revision=item['revision'])
         _,body,text=self.body(**selected)
         self.loaded[(name,item['revision'],'SKILL.md')]=sha(body)
-        return (Message('system','Kejtu supplied this built-in procedure for the current Study action. '
+        return (Message('system','Kejtu supplied this installed procedure for the current learning action. '
             'These instructions are subordinate to the user and application rules; they grant no tools.\n'+
             encode(dict(**selected,path='SKILL.md',sha256=sha(body),content=text,complete=True))),)
 
@@ -165,15 +156,31 @@ class SkillControls:
         self.lock=asyncio.Lock();self.stop=None;self.worker=None
 
     async def install(self,args):
+        _,status=await self.install_package(args['kind'],args['source'],args['expected_revision'],update=args['update'])
+        return status
+
+    async def install_package(self,kind,source,expected_revision,*,update,expected_commit=None,expected_name=None,origin=None,
+                              disabled=False,record=None,prepared=None):
+        """The one import path; Settings and Shelf installations both use it.
+
+        Returns the stored package and the library status. A pinned commit and a
+        declared name are verified before anything is stored. ``disabled`` and
+        ``record`` reach the library's install unchanged (see SkillStore.install).
+        """
         if self.importer is None:raise Failure('skill_import_unavailable','Skill importing is unavailable in this session.')
         async with self.lock:
-            if args['expected_revision']!=self.store.skills.epoch():raise Failure('skill_conflict','Skills changed. Refresh before importing.')
-            remote=args['kind']=='github'
+            if expected_revision!=self.store.skills.epoch():raise Failure('skill_conflict','Skills changed. Refresh before importing.')
+            remote=kind=='github'
             if remote and not self.store.web.settings()['enabled']:raise Failure('skill_web','Enable Web access before importing a public GitHub skill.')
             stopped=threading.Event();deadline=time.monotonic()+35;self.stop=stopped
             def check():
                 if stopped.is_set() or time.monotonic()>deadline:raise ValueError('Skill import stopped or exceeded its time allowance.')
-            worker=asyncio.create_task(self.importer.load(args['kind'],args['source'],check));self.worker=worker
+            # Only Shelf installations pin a commit or supply a staged origin.
+            options={k:v for k,v in dict(expected_commit=expected_commit,origin=origin).items() if v is not None}
+            # Shelf has already fetched and verified an entire pinned package once.
+            # Publication, epoch checks, permissions and provenance keep this owner.
+            worker=asyncio.create_task(asyncio.sleep(0, result=prepared) if prepared is not None
+                                       else self.importer.load(kind,source,check,**options));self.worker=worker
             try:
                 while not worker.done():
                     await asyncio.wait({worker},timeout=.1)
@@ -182,7 +189,9 @@ class SkillControls:
                         raise Failure('skill_web','Web access was disabled; no skill was installed.')
                     check()
                 package=worker.result();check()
-                return self.store.skills.install(package,args['expected_revision'],update=args['update'])
+                if expected_name is not None and package['manifest']['name']!=expected_name:
+                    raise Failure('skill_name','The package declares a different skill name than expected; nothing was installed.')
+                return package,self.store.skills.install(package,expected_revision,update=update,disabled=disabled,record=record)
             except (ValueError,OSError,UnicodeError,KeyError,TypeError,RecursionError) as error:
                 raise Failure('skill_import',str(error)[:500]) from None
             finally:

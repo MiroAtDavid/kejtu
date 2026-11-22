@@ -45,6 +45,7 @@ class MemorySession:
         before, after = self.snapshot, result.memory
         if (before.job_run_id != after.job_run_id or before.hybrid != after.hybrid or before.archive_epoch != after.archive_epoch
                 or before.conversation_id != after.conversation_id or before.bank_id != after.bank_id
+                or before.project_id != after.project_id or before.module_id != after.module_id
                 or before.grant_epoch != after.grant_epoch or after.epoch < before.epoch
                 or after.epoch != before.epoch and (result.outcome.get('status') != 'committed'
                     or result.outcome.get('bank_epoch') != after.epoch)):

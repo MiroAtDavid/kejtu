@@ -22,7 +22,7 @@
   const chatChoices: { key: keyof ChatAppearance; label: string }[] = [
     { key: "userThumbnail", label: "Show your thumbnail" },
     { key: "kejtuThumbnail", label: "Show Kejtu’s thumbnail" },
-    { key: "rotateKejtu", label: "Animate Kejtu while working" },
+    { key: "rotateKejtu", label: "Animate Kejtu" },
   ];
   const palettes: {
     id: PaletteChoice;
@@ -142,7 +142,9 @@
     {/each}
   </div>
   <p class="hint">
-    Three dots show activity when animation or Kejtu’s thumbnail is off.
+    One switch controls Kejtu’s animations throughout the app. Double-click
+    Kejtu to spin. Three dots show activity when animation or Kejtu’s thumbnail
+    is off. Your computer’s reduced-motion setting is respected.
   </p>
   {#if !saved}
     <p role="status">

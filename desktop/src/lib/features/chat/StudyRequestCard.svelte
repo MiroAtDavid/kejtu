@@ -8,9 +8,17 @@
     ((reference: StudyReference) => Promise<void>) | undefined = undefined;
   export let onRemove: (() => void) | undefined = undefined;
   export let onEdit: (() => void) | undefined = undefined;
+  /** Where in the source, instead of the page (a Markdown passage has no
+   *  page); "" shows none. */
+  export let place: string | undefined = undefined;
+  /** "Full request" with the raw text; a mark not yet sent has none. */
+  export let details = true;
   let opening = false,
     error = "";
   $: file = request.reference.path.split(/[\\/]/).at(-1) || "Source material";
+  $: where =
+    place ??
+    (request.reference.page ? `Page ${request.reference.page}` : "Text source");
   async function open() {
     if (!onOpen || disabled || opening) return;
     opening = true;
@@ -42,18 +50,12 @@
           title={request.reference.path}
           on:click={open}
         >
-          {opening ? "Opening source…" : file}<span class="page"
-            >{request.reference.page
-              ? `Page ${request.reference.page}`
-              : "Text source"}</span
-          ><Icon name="arrow" size={13} />
+          {opening ? "Opening source…" : file}{#if where}<span class="page"
+              >{where}</span
+            >{/if}<Icon name="arrow" size={13} />
         </button>
       {:else}<span class="source-label"
-          >{file}<span class="page"
-            >{request.reference.page
-              ? `Page ${request.reference.page}`
-              : "Text source"}</span
-          ></span
+          >{file}{#if where}<span class="page">{where}</span>{/if}</span
         >{/if}
     </div>
     {#if onRemove}<button
@@ -65,18 +67,21 @@
         on:click={onRemove}><Icon name="close" size={13} /></button
       >{/if}
   </div>
-  <details>
-    <summary>Full request</summary>
-    <div class="request-details">
-      <div class="details-actions">
-        {#if onEdit}<button type="button" {disabled} on:click={onEdit}
-            >Edit full request</button
-          >{/if}
-        <CopyButton text={request.raw} label="Copy full request" />
+  {#if request.passage}<blockquote class="passage">
+      {request.passage}
+    </blockquote>{/if}
+  {#if details}<details>
+      <summary>Full request</summary>
+      <div class="request-details">
+        <div class="details-actions">
+          {#if onEdit}<button type="button" {disabled} on:click={onEdit}
+              >Edit full request</button
+            >{/if}
+          <CopyButton text={request.raw} label="Copy full request" />
+        </div>
+        <pre>{request.raw}</pre>
       </div>
-      <pre>{request.raw}</pre>
-    </div>
-  </details>
+    </details>{/if}
   {#if error}<p class="source-error" role="alert">{error}</p>{/if}
 </div>
 
@@ -91,6 +96,18 @@
     color: var(--ke-text-primary);
     white-space: normal;
     font: 12px/1.6 var(--ke-font-ui);
+  }
+  .passage {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    margin: 6px 0 0 26px;
+    padding-left: 9px;
+    border-left: 3px solid var(--ke-marker-blue);
+    color: var(--ke-text-secondary);
+    overflow-wrap: anywhere;
   }
   .request-heading {
     display: flex;

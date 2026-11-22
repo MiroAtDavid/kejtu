@@ -2,7 +2,8 @@
   import { userAvatar } from "./user-avatar";
   import { rotatingKejtu } from "./theme";
   import KejtuMark from "./KejtuMark.svelte";
-  import { replyState } from "./kejtu-state";
+  import { replyState, type KejtuGesture } from "./kejtu-state";
+  import { spinOnDoubleClick } from "./companion";
 
   export let role: "user" | "assistant";
   export let working = false;
@@ -18,6 +19,14 @@
       : phase === "complete"
         ? "done"
         : "idle";
+
+  // A reply that took this long ends with a hop instead of the blink.
+  const LONG_REPLY = 30_000;
+  let mark: { play: (gesture: KejtuGesture) => Promise<void> } | undefined;
+  $: spin =
+    role === "assistant" && $rotatingKejtu
+      ? (gesture: KejtuGesture) => mark?.play(gesture)
+      : null;
 </script>
 
 <span
@@ -25,6 +34,7 @@
   role={role === "user" && !$userAvatar ? undefined : "img"}
   aria-hidden={role === "user" && !$userAvatar ? "true" : undefined}
   aria-label={role === "user" ? ($userAvatar ? "You" : undefined) : "Kejtu"}
+  use:spinOnDoubleClick={spin}
 >
   {#if role === "user"}
     {#if $userAvatar}<img
@@ -35,7 +45,12 @@
         draggable="false"
       />{/if}
   {:else}
-    <KejtuMark {state} />
+    <KejtuMark
+      bind:this={mark}
+      {state}
+      moves={$rotatingKejtu}
+      celebrateAfter={$rotatingKejtu ? LONG_REPLY : 0}
+    />
   {/if}
 </span>
 

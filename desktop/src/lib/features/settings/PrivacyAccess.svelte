@@ -25,7 +25,7 @@
       id: "reminders",
       title: "Reminders",
       description:
-        "Let Kejtu read and manage reminders you ask for. Desktop notification pop-ups are not connected yet.",
+        "Let Kejtu read and manage reminders you ask for. Requested reminders appear quietly in chat while Kejtu is open.",
     },
     {
       id: "tasks",

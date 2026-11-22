@@ -2,8 +2,19 @@
   export let name = "file";
   export let size = 16;
   const paths: Record<string, string> = {
+    shelf:
+      "M3 4v17M21 4v17M3 12h18M3 21h18M6 5h4v7H6ZM13 4l4-1 2 8-4 1ZM7 16h10v5H7Z",
+    settings:
+      "m9 3-.5 2.5-2 1.2L4 6l-2 3.5 2 1.8v2.4l-2 1.8L4 19l2.5-.7 2 1.2L9 22h6l.5-2.5 2-1.2 2.5.7 2-3.5-2-1.8v-2.4l2-1.8L20 6l-2.5.7-2-1.2L15 3ZM12 8.5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z",
     home: "M3 10 12 3l9 7v11h-6v-7H9v7H3Z",
     folder: "M3 5h7l2 3h9v12H3Z",
+    terminal: "M3 4h18v16H3ZM6 9l3 3-3 3m6 0h5",
+    "quick-terminal": "M3 4h18v16H3ZM6 9l3 3-3 3m10-8-3 5h4l-3 5",
+    globe:
+      "M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0ZM3 12h18m-9-9c-5 5-5 13 0 18 5-5 5-13 0-18Z",
+    pdf: "M13 2H4v20h16V9ZM13 2v7h7M6.5 17.5V13h1a1.2 1.2 0 0 1 0 2.4h-1m4.2 2.1V13h.5c2.6 0 2.6 4.5 0 4.5zm4.7 0V13h2m-2 2h1.6",
+    spreadsheet: "M3 4h18v16H3ZM3 9h18M3 14h18M9 9v11m6-11v11",
+    download: "M12 3v12m-5-5 5 5 5-5M4 16v4h16v-4",
     code: "m8 6-6 6 6 6m8-12 6 6-6 6M14 3l-4 18",
     compare: "M4 3h16v18H4ZM12 3v18M6 8h4M14 14h4M16 12v4",
     text: "M4 5h16M12 5v14M8 19h8",
@@ -28,8 +39,12 @@
     "arrow-up": "M12 19V5m-6 6 6-6 6 6",
     arrow: "M4 12h15m-6-6 6 6-6 6",
     left: "m15 6-6 6 6 6",
+    right: "m9 6 6 6-6 6",
+    image: "M5 3h14v18H5ZM5 17l4.5-5 3.5 3.5 2-2 4 4.5M14.5 8h.01",
+    info: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18ZM12 11v5M12 8v.01",
     down: "m7 10 5 5 5-5",
     check: "m5 12 4 4L19 6",
+    bookmark: "M7 4h10v16l-5-4-5 4Z",
     refresh: "M20 11a8 8 0 1 0-2 7M20 4v7h-7",
     clock: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18ZM12 6v6l4 2",
     expand: "M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5",

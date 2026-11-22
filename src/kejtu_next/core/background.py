@@ -64,6 +64,13 @@ Finish with a short private account of what you considered or actually changed, 
 Your closing account is an inspectable run result, not a message already sent to the user.'''
 
 
+REMINDER_REVIEW = """This is the user's enabled private review of leftover reminders. It is not an outgoing message.
+Use reminders attention and its cursor to inspect current due occurrences. Read relevant accessible conversation evidence with search_memory/read_memory when needed.
+Use reminders resolve with reason=handled only when the conversation supports that the reminder was already given or dealt with. Use reason=obsolete when there is a clear reason it no longer applies. Merely being overdue is not enough; leave useful or uncertain reminders pending. Do not treat this private review as giving the user a reminder.
+Work through the supplied pages within the saved allowance; unexamined items remain pending. Resolution changes only one occurrence, never tasks, event dates or future repetitions. Use committed tool receipts for claims of changes. Do not retry uncertain effects; use outcome.
+Finish with a short private report of what you inspected, resolved and left unchecked. Nothing here is a user acknowledgement."""
+
+
 @dataclass(frozen=True)
 class BackgroundDecision:
     decision: str
@@ -115,7 +122,7 @@ def accepted(reply):
 
 
 def messages(snapshot, kind, now, *, proposed=None):
-    instruction = MAINTENANCE if kind == 'notebook_maintenance' else IDLE_REVIEW if kind == 'idle_review' else CHECK_IN if kind == 'check_in' else REMINDER
+    instruction = REMINDER_REVIEW if kind == 'reminder_review' else MAINTENANCE if kind == 'notebook_maintenance' else IDLE_REVIEW if kind == 'idle_review' else CHECK_IN if kind == 'check_in' else REMINDER
     context = dict(origin='background_source_records_not_a_new_user_message', now=now,
                    conversation=snapshot['conversation'], reminders=snapshot['reminders'])
     if proposed is not None:

@@ -88,12 +88,16 @@ class ReminderAccess:
         if time.monotonic() >= ledger.deadline:
             raise Failure('timeout', 'Reminder operation reached the shared turn deadline.')
         ledger.spend_sql(100)
-        current = self.status(cid)
         if job_run_id is not None:
             definition=self.store.jobs.check_run(job_run_id)
+            if definition.kind=='reminder_review' and definition.conversation_id is None and cid is None and tid==job_run_id:
+                self.store.jobs.notebook_grant(job_run_id)
+                return
+            current = self.status(cid)
             if definition.kind!='research' or definition.conversation_id!=cid or tid!=job_run_id or not current['enabled'] or not current['readable']:
                 raise Failure('reminder_forbidden','This run has no current reminder read permission.')
             return
+        current = self.status(cid)
         turn = self.db.execute('SELECT status,conversation_id FROM recall_turns WHERE id=?', (tid,)).fetchone()
         if not current['enabled'] or not current['readable'] or turn is None or turn['status'] != 'running' or turn['conversation_id'] != cid:
             raise Failure('reminder_forbidden', 'Current reminder permission and a genuine running foreground turn are required.')
@@ -142,6 +146,10 @@ class ReminderAccess:
         self.owner._state(value)
         return row, value
 
+    @staticmethod
+    def _source_ids(value):
+        return [source.user_id for source in value.support]
+
     def _read_ref(self, row, value):
         return self._sign(['read', row['id'], row['revision'], bool(row['cancelled']), value.digest])
 
@@ -159,16 +167,19 @@ class ReminderAccess:
     def execute(self, args, *, cid, tid, ledger, budget, reads, notices, job_run_id=None):
         now = datetime.now(timezone.utc).isoformat()
         action = args['action']
-        if job_run_id is not None and action not in ('list','read','pending','outcome'):
-            raise Failure('reminder_forbidden','Background tasks have read-only reminder access.')
+        if job_run_id is not None:
+            kind = self.store.jobs.check_run(job_run_id).kind
+            allowed = ('attention','resolve','outcome') if kind=='reminder_review' else ('list','read','pending','attention','outcome')
+            if action not in allowed:
+                raise Failure('reminder_forbidden','This background procedure cannot make that reminder change.')
         with self.actor(cid, tid, ledger, job_run_id):
-            if action in ('save', 'cancel', 'dismiss'):
-                support = self._support(cid, tid, args['source_quote'])
+            if action in ('save', 'cancel', 'dismiss', 'acknowledge', 'later', 'resolve'):
+                support = self._support(cid, tid, args['source_quote']) if action!='resolve' else None
                 # Reserve the worst whole receipt before an effect; the shared
                 # ledger owns actual escaped-envelope fit, never a second limit.
                 envelope = dict(status='committed', outcome='acknowledged', reminder_id='f'*32,
                     revision=9007199254740991, occurrence_id='f'*32, occurrence_version=9007199254740991,
-                    channel='explicit', replayed=False, mutation_key='f'*32)
+                    channel='explicit', replayed=False, mutation_key='f'*32, id='f'*32, due_at='9999-12-31T23:59:59.000000Z', intent_sha256='f'*64)
                 if not budget.fits(envelope):
                     raise Failure('reminder_result_capacity', 'The complete mutation receipt does not fit; nothing changed.')
                 ledger.spend_payload(len(encoded(envelope).encode()))
@@ -178,7 +189,7 @@ class ReminderAccess:
                     row, old = self._from_ref(args['read_ref'], reads) if 'read_ref' in args else (None, None)
                     try:
                         value = replace(value, support=(support,), note_id=old.note_id if old else None,
-                                        task_id=old.task_id if old else None)
+                                        task_id=old.task_id if old else None,task_revision=old.task_revision if old else None)
                     except ValueError as error:
                         raise Failure('reminder_definition', str(error)) from None
                     result = self.owner.save(value, mutation_key=key, now=now,
@@ -187,6 +198,15 @@ class ReminderAccess:
                 elif action == 'cancel':
                     row, _ = self._from_ref(args['read_ref'], reads)
                     result = self.owner.cancel(row['id'], expected_revision=row['revision'], mutation_key=key, now=now)
+                elif action in ('acknowledge','later','resolve'):
+                    if (args['occurrence_id'],args['receipt']) not in notices:
+                        raise Failure('reminder_read_required','Read current attention in this turn before changing it.')
+                    change = dict(action=action,id=args['occurrence_id'],receipt=args['receipt'],mutation_key=key)
+                    if action=='later':
+                        change['until']=args['until']
+                    elif action=='resolve':
+                        change['reason']=args['reason']
+                    result = self.store.reminder_attention.change(change,now=now)
                 else:
                     if (args['occurrence_id'], args['receipt']) not in notices:
                         raise Failure('reminder_read_required', 'Read this pending notice in the current turn before an explicit dismissal.')
@@ -198,7 +218,11 @@ class ReminderAccess:
                     result = dict(status='not_recorded', mutation_key=args['mutation_key'])
                 else:
                     with self.owner._transaction():
-                        self._current(result['reminder_id'])
+                        _, value = self._current(result['reminder_id'])
+                        if job_run_id is not None and cid is None and (not value.support or any(
+                                not self.status(source.conversation_id)['enabled'] or not self.status(source.conversation_id)['readable']
+                                for source in value.support)):
+                            raise Failure('reminder_forbidden','The reminder source is no longer granted to this private review.')
                     result = dict(result, outcome=result['status'], status='unchanged' if result['status']=='unchanged' else 'committed',
                                   mutation_key=args['mutation_key'])
             elif action == 'read':
@@ -206,32 +230,39 @@ class ReminderAccess:
                     row, value = self._current(args['reminder_id'])
                     result = dict(status='complete', reminder=dict(id=row['id'], revision=row['revision'], cancelled=bool(row['cancelled']),
                         title=value.title, text=value.text, schedule=value.record()['schedule'],
-                        enabled=bool(row['enabled']), read_ref=self._read_ref(row, value)), now=now)
-            elif action in ('list', 'pending'):
+                        enabled=bool(row['enabled']), event_at=value.event_at, timing=value.timing, origin=value.origin, read_ref=self._read_ref(row, value)),
+                        source_dependencies=self._source_ids(value), now=now)
+            elif action in ('list', 'pending', 'attention'):
                 scope = action
                 start = self._decode(args['cursor']) if args.get('cursor') else [scope, '' if action=='list' else 0]
                 if not isinstance(start, list) or len(start) != 2 or start[0] != scope:
                     raise Failure('reminder_page', 'This cursor belongs to a different reminder page.')
-                if action == 'pending':
+                if action == 'attention':
+                    page = self.store.reminder_attention.model_page(cid,now=now,after=start[1],limit=args.get('limit',5))
+                    items = [dict(item,occurrence_id=item['id']) for item in page['items']]
+                elif action == 'pending':
                     page = self.owner.pending(after=start[1], limit=args.get('limit', 20))
-                    items = [{k:v for k,v in row.items() if k != 'links'} for row in page['items']]
+                    items = [dict({k:v for k,v in row.items() if k != 'links'},
+                        source_dependencies=self._source_ids(self.owner._definition(row['reminder_id'], row['reminder_revision'])))
+                        for row in page['items']]
                 else:
-                    page = self.owner.page(after=start[1], limit=args.get('limit', 20))
+                    page = self.owner.page(after=start[1], limit=args.get('limit', 20), include_companion=True)
                     items = []
                     with self.owner._transaction():
                         for row in page['items']:
                             try:
-                                self._current(row['id'])
+                                _, value = self._current(row['id'])
                             except Failure as error:
                                 if error.code in ('reminder_source_unavailable', 'reminder_source_changed'):
                                     continue
                                 raise
-                            items.append(dict(id=row['id'], title=row['title'], enabled=bool(row['enabled']), cancelled=bool(row['cancelled'])))
+                            items.append(dict(id=row['id'], title=row['title'], enabled=bool(row['enabled']), cancelled=bool(row['cancelled']),
+                                revision=row['revision'], origin=value.origin, source_dependencies=self._source_ids(value)))
                 result = dict(status='complete', items=items,
                     next_cursor=self._sign([scope, page['next_cursor']]) if page['next_cursor'] is not None else None, now=now)
             else:
                 raise Failure('reminder_arguments', 'Unsupported reminder action.')
-            if action not in ('save', 'cancel', 'dismiss'):
+            if action not in ('save', 'cancel', 'dismiss', 'acknowledge', 'later', 'resolve'):
                 ledger.spend_payload(len(encoded(result).encode()))
             if not budget.fits(result):
                 # Reads are whole records/pages, never cropped into false write
@@ -262,10 +293,10 @@ class ReminderAccess:
                         result.append(dict(mutation_key=key,status='not_recorded'))
                         continue
                     with self.owner._transaction():
-                        self._current(receipt['reminder_id'])
-                    if receipt['status'] not in ('committed','unchanged','cancelled','acknowledged'):
+                        _, value = self._current(receipt['reminder_id'])
+                    if receipt['status'] not in ('committed','unchanged','cancelled','acknowledged','resolved'):
                         raise ValueError
-                    result.append(dict(mutation_key=key,status=receipt['status'],reminder_id=receipt['reminder_id']))
+                    result.append(dict(mutation_key=key,status=receipt['status'],reminder_id=receipt['reminder_id'], source_dependencies=self._source_ids(value)))
                 except Failure as error:
                     if error.code in ('history_work_limit','timeout','reminder_forbidden'):
                         raise

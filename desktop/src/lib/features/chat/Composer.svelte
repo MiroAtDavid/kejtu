@@ -4,6 +4,7 @@
     draftStudyRequests,
     withStudyRequests,
     type StudyReference,
+    type StudyRequest,
   } from "./study-requests";
   export let onOpenStudy:
     ((reference: StudyReference) => Promise<void>) | undefined = undefined;
@@ -11,7 +12,10 @@
   $: if (!draft) showRequestText = false;
   import SkillChooser from "./SkillChooser.svelte";
   import type { SkillSelection } from "$lib/api/wire.generated";
+  import type { Snippet } from "svelte";
   export let selectedSkill: SkillSelection | null = null;
+  /** Conversation-level chips beside the chosen skill (the project chip). */
+  export let tools: Snippet | undefined = undefined;
   import { afterUpdate, onDestroy, onMount, tick } from "svelte";
   import { CompositionGuard, composerAction } from "./keys";
   import {
@@ -36,6 +40,10 @@
 
   /** Draft text. Owned by the coordinator so it survives view switches. */
   export let draft = "";
+  export let documentMode = false;
+  /** A Markdown document's marked passage, shown like a marked PDF passage. */
+  export let documentCard: StudyRequest | null = null;
+  export let onRemoveDocumentCard: (() => void) | undefined = undefined;
   export let conversationId = "";
   /** No usable conversation is loaded: the field cannot accept input at all. */
   export let disabled = false;
@@ -63,7 +71,7 @@
     dismissedSlash = "";
   let imageProgress = "";
   function syncSkillQuery() {
-    if (!field || guard.composing) return;
+    if (documentMode || !field || guard.composing) return;
     const before = field.value.slice(0, field.selectionStart);
     const start = before.lastIndexOf("\n") + 1;
     const line = before.slice(start);
@@ -153,6 +161,10 @@
   $: visibleDraft = draftImages(draft);
   $: studyDraft = draftStudyRequests(visibleDraft.text);
   async function attach(files: File[]) {
+    if (documentMode) {
+      imageError = "Return to ordinary chat to attach images.";
+      return;
+    }
     try {
       // File metadata gives us the whole batch size before FileReader or image decoding.
       checkImageCapacity(
@@ -173,6 +185,10 @@
     count: number,
     read: (index: number) => Promise<string | null>,
   ) {
+    if (documentMode) {
+      imageError = "Return to ordinary chat to attach images.";
+      return;
+    }
     if (disabled || readOnly || sending || readingImage || !count) return;
     const before = draft,
       identity = conversationId;
@@ -462,6 +478,13 @@
       on:click={() => (showRequestText = false)}>Show source card</button
     >
   {/if}
+  {#if documentCard}<StudyRequestCard
+      request={documentCard}
+      place=""
+      details={false}
+      disabled={disabled || readOnly || sending}
+      onRemove={onRemoveDocumentCard}
+    />{/if}
   <div class="search-field" class:blank={!draft} class:focused>
     {#if focused && !draft && !disabled && !readOnly && !sending}
       <span class="terminal-caret" aria-hidden="true"></span>
@@ -537,19 +560,22 @@
       sending.
     </p>{/if}
   <div class="composer-tools">
-    <SkillChooser
-      bind:this={skills}
-      bind:activeOptionId
-      bind:selectedSkill
-      anchor={field}
-      query={skillQuery}
-      disabled={disabled || readOnly || sending}
-      onChoose={chooseSkill}
-      onDismiss={() => {
-        dismissedSlash = field?.value.slice(slashStart, slashEnd) ?? "";
-        skillQuery = null;
-      }}
-    />
+    <div class="composer-chips">
+      {#if tools}{@render tools()}{/if}
+      {#if !documentMode}<SkillChooser
+          bind:this={skills}
+          bind:activeOptionId
+          bind:selectedSkill
+          anchor={field}
+          query={skillQuery}
+          disabled={disabled || readOnly || sending}
+          onChoose={chooseSkill}
+          onDismiss={() => {
+            dismissedSlash = field?.value.slice(slashStart, slashEnd) ?? "";
+            skillQuery = null;
+          }}
+        />{/if}
+    </div>
     <button
       class="send"
       type="submit"
@@ -629,6 +655,14 @@
   }
   .composer-tools .send {
     margin-left: auto;
+  }
+  .composer-chips {
+    display: flex;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
   }
   .composer-tools button:hover {
     background: var(--ke-surface-inset);

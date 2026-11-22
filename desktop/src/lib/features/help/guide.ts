@@ -50,7 +50,8 @@ export const topicNotes: Record<
     label: "Web",
   },
   "05-projects-documents.md": {
-    summary: "Organize a project, read sources and work on documents.",
+    summary:
+      "Open module files beside chat, edit Markdown and ask about PDF passages.",
     icon: "folder",
     destination: "workspace",
     label: "Workspace",

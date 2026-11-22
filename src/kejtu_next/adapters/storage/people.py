@@ -14,7 +14,7 @@ import sqlite3
 import time
 import uuid
 
-from ...core.people import RELATIONS, SYMMETRIC, WRITES, family_paths, identity, terms, validate, relation_qualifiers
+from ...core.people import RELATIONS, SYMMETRIC, WRITES, family_paths, identity, terms, validate, relation_qualifiers, read_identity
 from ...core.records import Failure
 from .history import encoded
 
@@ -400,20 +400,24 @@ class PeopleStore:
         if value['object']:
             value['declared_object'] = value['object']
             value['object'] = self.root(value['object'])
-        value['identity_sources'] = []
-        for original in (row['subject'],row['object']):
+        value['identity_sources'] = self.identity_sources(row['subject'], row['object'])
+        if reference:
+            value['read_ref'] = self.token(['assertion',row['id'],row['revision']])
+        return value
+
+    def identity_sources(self, *identities):
+        sources = []
+        for original in identities:
             visited=set()
             while original and original not in visited and self.root(original)!=original:
                 visited.add(original)
                 link=self.query('''SELECT p.merged_into,m.*,a.bytes AS total_bytes,t.id AS turn_id,t.conversation_id
                     FROM people_ids p JOIN people_merge_sources m ON m.person_id=p.id
                     JOIN artifacts a ON a.id=m.artifact_id JOIN recall_turns t ON t.user_id=a.id WHERE p.id=?''',(original,)).fetchone()
-                value['identity_sources'].append(dict(person_id=original,target_id=link['merged_into'],
+                sources.append(dict(person_id=original,target_id=link['merged_into'],
                     source=self.source_page(link)))
                 original=link['merged_into']
-        if reference:
-            value['read_ref'] = self.token(['assertion',row['id'],row['revision']])
-        return value
+        return sources
 
     def neighbors(self, person, *, project=True):
         members=self.members(person)
@@ -466,9 +470,13 @@ class PeopleStore:
                     ' WHERE v.kind=\'name\' AND v.sequence>? AND v.withdrawn=0 AND '+ELIGIBLE+
                     ' ORDER BY v.sequence LIMIT ?',(after,limit+1)).fetchall()
             def project(row):
-                self.source(row)  # Verify only matched evidence, never scan other people.
-                return dict(person_id=self.root(row['subject']),declared_person_id=row['subject'],
-                            name=row['value'],assertion_id=row['id'],certainty=row['certainty'],status=row['status'])
+                # Name cues retain the precise source and identity-merge basis.
+                # They still deliver no fact bodies or source quotations.
+                claim = read_identity(self.project(row, reference=False))
+                return dict(person_id=claim['subject'],declared_person_id=row['subject'],
+                            name=row['value'],assertion_id=row['id'],revision=row['revision'],
+                            source=claim['source'],identity_sources=claim['identity_sources'],
+                            certainty=row['certainty'],status=row['status'])
             extra['identity_policy']='Matches may include distinct people with the same name. Read and clarify; never auto-merge.'
         elif action=='read':
             members=self.members(args['person_id'])
@@ -479,7 +487,10 @@ class PeopleStore:
                 ('1' if historical else 'v.withdrawn=0')+' AND '+ELIGIBLE+' ORDER BY v.sequence LIMIT ?',
                 (after,*members,*members,limit+1)).fetchall()
             project=lambda row:self.project(row,reference=not historical)
-            extra.update(person_id=self.root(args['person_id']),view='history' if historical else 'current')
+            # Resolving the requested identity can depend on a merge even when
+            # this page contains only claims declared on the target identity.
+            extra.update(person_id=self.root(args['person_id']),view='history' if historical else 'current',
+                         identity_sources=self.identity_sources(args['person_id']))
         elif action=='kinship':
             start,end=self.root(args['relative_to']),self.root(args['person_id'])
             cache={}
@@ -491,6 +502,7 @@ class PeopleStore:
             rows=[dict(sequence=i+1,**path) for i,path in enumerate(paths) if i+1>after][:limit+1]
             project=lambda row:{k:v for k,v in row.items() if k!='sequence'}
             extra.update(as_of=args['as_of'],exhaustive=exhaustive,visited=work,
+                         identity_sources=self.identity_sources(args['relative_to'], args['person_id']),
                          scope='Supported family paths only; no social transitivity or unstated intermediate people.',
                          limitation=None if exhaustive else 'Traversal bound reached. Missing paths do not establish absence.')
         else:

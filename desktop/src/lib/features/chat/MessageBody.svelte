@@ -1,5 +1,6 @@
 <script lang="ts">
   import DocumentEditCard from "./DocumentEditCard.svelte";
+  import { workProgress } from "$lib/features/workspace/document-work-progress";
   import { replySummary } from "$lib/features/workspace/document-assist";
   import StudyRequestText from "./StudyRequestText.svelte";
   import RichText from "./RichText.svelte";
@@ -19,6 +20,11 @@
   export let streaming = false;
   export let working = false;
   export let turnId = "";
+  export let documentRequestId = "";
+  $: documentProgress =
+    documentRequestId && (working || streaming || !complete)
+      ? workProgress(content, documentRequestId)
+      : null;
   export let onMore: () => void = () => {};
 
   $: label =
@@ -36,7 +42,7 @@
       <div class="answer-copy">
         {#if !hideCopy && !working && !streaming && content}
           <CopyButton
-            text={content}
+            text={replySummary(content)?.explanation ?? content}
             label={!complete ? "Copy visible answer" : "Copy answer"}
           />
         {/if}
@@ -61,7 +67,14 @@
       />
     </div>{:else}
     <div class="text formatted">
-      {#if complete && !working && !streaming && state === "ready" && role === "answer" && replySummary(content)}<DocumentEditCard
+      {#if documentRequestId && (working || streaming || !complete)}
+        {#if documentProgress?.action === "reply"}<RichText
+            source={documentProgress.text}
+            {turnId}
+            complete={false}
+          />
+        {/if}
+      {:else if complete && !working && !streaming && state === "ready" && role === "answer" && replySummary(content)}<DocumentEditCard
           text={content}
           answer
         />{:else}<RichText

@@ -10,6 +10,27 @@ mod unix {
     pub(crate) struct OwnedChild(pub(crate) Child);
     impl OwnedChild {
         pub(crate) fn spawn(command: &mut Command, _: bool) -> io::Result<Self> {
+            // Linux: the backend receives SIGTERM if the thread that started it
+            // ends, so a crashed window never leaves it holding the archive.
+            // The backend is started once, on the main thread, during setup.
+            #[cfg(target_os = "linux")]
+            {
+                use std::os::unix::process::CommandExt;
+                let owner = unsafe { libc::getpid() };
+                // Only async-signal-safe calls run between fork and exec.
+                unsafe {
+                    command.pre_exec(move || {
+                        if libc::prctl(libc::PR_SET_PDEATHSIG, libc::SIGTERM) != 0 {
+                            return Err(io::Error::last_os_error());
+                        }
+                        // The owner may have exited before the hook was set.
+                        if libc::getppid() != owner {
+                            libc::_exit(1);
+                        }
+                        Ok(())
+                    });
+                }
+            }
             command.spawn().map(Self)
         }
     }

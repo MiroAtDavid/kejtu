@@ -4,6 +4,7 @@ import type { Results } from "$lib/api/wire.generated";
 import type { Readable } from "svelte/store";
 
 import type { DocumentHistory } from "./document-conversation";
+import type { DocumentDiscussion } from "./document-discussion";
 import type { DocumentSource } from "./document-source";
 
 export const DOCUMENT_ASSIST = Symbol("document-assist");
@@ -57,6 +58,9 @@ export type EditReply = {
   explanation: string;
 };
 export type DocumentAssistant = {
+  discussion?: Readable<DocumentDiscussion | null>;
+  discuss?: (discussion: DocumentDiscussion) => Promise<void>;
+  releaseDiscussion?: (sessionId: string) => void;
   progress?: Readable<Results["turn.stream"] | null>;
   history?: Readable<DocumentHistory>;
   earlier?: () => Promise<void>;
@@ -68,7 +72,12 @@ export type DocumentAssistant = {
   ) => () => void;
   available: Readable<boolean>;
   pending: Readable<boolean>;
-  ask: (text: string, signal: AbortSignal) => Promise<string>;
+  /** Notify the draft owner once durable submission is confirmed, before reply reads. */
+  ask: (
+    text: string,
+    signal: AbortSignal,
+    onAccepted?: () => void,
+  ) => Promise<string>;
   resolve: () => Promise<void>;
 };
 const prefix = "Edit the open Markdown draft with me.\n";
@@ -350,7 +359,13 @@ export function validDocument(value: unknown): value is DocumentReference {
 }
 export type DocumentSummary = Pick<
   EditRequest,
-  "kind" | "request_id" | "name" | "instruction" | "mode" | "document"
+  | "kind"
+  | "request_id"
+  | "name"
+  | "instruction"
+  | "mode"
+  | "document"
+  | "focus_hint"
 >;
 export function editSummary(text: string): DocumentSummary | null {
   const head = text.startsWith(discussPrefix) ? discussPrefix : prefix;
@@ -370,6 +385,23 @@ export function editSummary(text: string): DocumentSummary | null {
   } catch {
     return null;
   }
+}
+/**
+ * The passage the user marked in the Markdown document for this request, as
+ * the chat shows it under their question: the visible text they selected or
+ * clicked (focus_hint), else an exact selected range of an older request.
+ * "" when the request is about the whole document.
+ */
+export function markedPassage(text: string): string {
+  const summary = editSummary(text);
+  if (!summary) return "";
+  if (summary.focus_hint?.trim()) return summary.focus_hint;
+  const full = readEditRequest(text);
+  if (!full || full.mode !== "replace" || !full.selected.trim()) return "";
+  // A work request without a range carries the whole draft as "selected".
+  if (full.kind === "kejtu.markdown.work.v3" && !full.before && !full.after)
+    return "";
+  return full.selected;
 }
 export function readDocumentReply(text: string, id?: string): DocumentReply {
   const value = JSON.parse(text);

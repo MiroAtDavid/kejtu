@@ -37,16 +37,18 @@ The Manjaro build was checked with 8 GB RAM and two build jobs; its installation
 used about 5.3 GB, excluding system packages and shared toolchain caches.
 
 On Ubuntu, setup also uses `sudo` for a per-installation AppArmor profile covering
-the two downloaded browser executables and two sandbox launcher paths. Ordinary
+the shared Chromium headless shell and two sandbox launcher paths. Ordinary
 tools retain their restrictions; the browser launcher permits Chromium's nested
 sandbox. Ubuntu's global restrictions stay enabled. These are user-writable paths,
 and another program under the same account could invoke the browser launcher.
 Custom browser selections are preserved; setup grants no policy to arbitrary browsers.
 
 Files, page reading, the temporary browser and document tools are included in
-setup. Chromium runtimes and the pinned document tools are separate downloads;
-no model weights or API account are included. `--media` also prepares optional
-radio/video dependencies. Your provider may charge for requests.
+setup. Page reading and the temporary browser share one Chromium download and run in separate sessions.
+Linux setup also includes Quick Terminal and Terminal Use. Turn on each one separately in
+**Shelf → Installed → Connections**. Quick Terminal uses Kejtu’s Python. Terminal Use
+uses system Node.js 22.12 or newer. The document tools download separately.
+No model weights or API account are included. Your provider may charge for requests.
 
 ## Install and start
 
@@ -63,8 +65,7 @@ python3 packaging/source/install.py
 python3 packaging/source/install.py --install
 ```
 
-Add `--media` for optional playback dependencies. Use `--jobs 2` to limit parallel
-build jobs. Rerunning the installer repairs missing dependencies without replacing
+Use `--jobs 2` to limit parallel build jobs. Rerunning the installer repairs missing dependencies without replacing
 your data or saved access choices. It refuses to build while this copy is running.
 
 Setup also adds **Kejtu** to your application menu, using the existing icon.
@@ -112,7 +113,6 @@ python3 packaging/source/install.py --install
 ./kejtu start
 ```
 
-If you installed media dependencies, keep `--media` on the install command.
 Use the same directory; do not copy another installation's private state into it.
 The installer can be rerun after an interrupted download or build. It does not
 perform an automatic source downgrade or retry uncertain document operations.
@@ -129,9 +129,34 @@ source checkouts using this desktop identity.
 API keys use the desktop keyring. ChatGPT sign-in tokens are stored in private,
 permission-protected files under `.state/runtime/chatgpt/`; those files are not
 keyring-encrypted. Treat a full `.state/` backup as sensitive.
-Back up the stopped checkout's entire `.state/` and your shared documents before
-removing the application; shared documents live in the folders you chose.
-Keyring credentials need their own system backup. Removing this checkout removes
+`./kejtu backup` leaves every connection key out of its copy of the connection
+settings, including one an earlier version saved in that file. The copy keeps the
+field names, and `receipt.json` lists what has to be entered again after a
+restore. A copy of the whole `.state/` folder still holds the live settings file.
+
+A backup also takes each installed package's own data, never its program files
+or caches. A package's data is left out only if you cleared **Include its data in backups**
+on that package in Shelf → Installed; `receipt.json` and the command's output name
+each package with its size either way. A backup is refused while a tool of a
+package is running.
+
+To put a backup into a checkout that has no archive yet:
+
+```sh
+./kejtu restore /full/path/to/.state/backups/<backup folder>
+./kejtu start
+```
+
+Restore never writes over an existing archive or settings, and it accepts only a
+backup made by the same archive format. It brings back the archive, the
+settings, the launch profile and each package's data. It prints what is still to
+do, and Packages shows the same list: packages whose program files have to be
+installed again, accounts to sign into again, keys to enter again, and package
+data that was left out. Connections stay off until you enable them. Account
+passwords, API keys and login tokens are not restored; sign in or enter keys
+yourself on the new installation. Restore never reads or copies the keyring.
+Keep the managed backup and your shared documents before removing the application;
+shared documents live in the folders you chose. Removing this checkout removes
 its local archive and backups, but leaves the desktop directories, shared
 documents, keyring entries and system dependencies in place. Keep the copied
 backups somewhere safe; desktop storage can contain unsaved private text too.
@@ -165,9 +190,7 @@ disable AppArmor. The installer recreates a missing profile when needed.
 - The Manjaro test machine's password vault stayed locked after reboot, so saving
   and retrieving API keys was not verified in that session. An earlier test did
   verify key access. See the password-vault note below if an API key cannot be saved.
-- Earlier radio control checks passed. Video metadata was retrieved on Manjaro,
-  but playback crashed in its virtual graphics stack; Ubuntu's video request
-  timed out. Actual video and audible output need suitable-hardware testing.
+
 - Model calls and enabled web tools send selected information to their services.
   Local storage does not make remote inference private. File access still needs
   your saved folder permissions; installation does not grant folders.
@@ -175,9 +198,9 @@ disable AppArmor. The installer recreates a missing profile when needed.
   and tool results will not fit. Kejtu does not silently truncate required material.
   Focused release checks pass; the broader development test suite still has
   unresolved failures. This is not a claim that the whole application is tested.
-- Account sign-in, paid APIs, GPU embeddings and audible media output require
-  separate acceptance on suitable hardware/accounts. No bundled media content,
-  guaranteed search results or automatic updater is provided.
+- Account sign-in, paid APIs and GPU embeddings require separate acceptance on
+  suitable hardware/accounts. No guaranteed search results or automatic updater
+  is provided.
 - This is a source installation, not a portable binary or a distribution package.
   Test and development-history files are intentionally absent from this release
   repository. `RELEASE.json` identifies the canonical source and exported files.

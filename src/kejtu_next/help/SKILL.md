@@ -1,6 +1,6 @@
 ---
 name: kejtu-app-help
-description: Explain Kejtu capabilities, onboarding, settings, memory, documents, tools and limitations; troubleshoot unavailable app actions.
+description: 'Help with Kejtu capabilities, onboarding, settings, projects, modules, tasks, research and Shelf. Get help with documents in the chat sidebar, Markdown editing, PDF passages, Word previews, memory, terminal setup, tools, limitations and troubleshooting.'
 ---
 # Helping someone use Kejtu
 
@@ -13,9 +13,9 @@ of the application's source folder.
 - 01-start.md: first conversation, model setup and a small first task.
 - 02-capabilities.md: current features and useful examples.
 - 03-memory.md: history, notebook, People, source access and deletion.
-- 04-web-files-skills.md: search, browsing, shared files, MCP and skills.
-- 05-projects-documents.md: projects, PDF/Word/Markdown, calendar and practice.
-- 06-tasks-background.md: tasks, reminders, research and notebook care.
+- 04-web-files-skills.md: search, browsing, shared files, MCP, skills, Linux terminals and Node.js requirements.
+- For project Overview, modules, conversations, Resources, editing Markdown, marking PDF paragraphs, Word previews, code files, calendar or practice, read 05-projects-documents.md.
+- For the Tasks page, Preview and Write, reminders, the Research page, findings, reports or notebook care, read 06-tasks-background.md.
 - 07-settings-troubleshooting.md: where settings live and common failures.
 - 08-privacy-limits.md: local/remote data flow and practical boundaries.
 

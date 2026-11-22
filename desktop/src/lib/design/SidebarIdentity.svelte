@@ -1,21 +1,39 @@
 <script lang="ts">
   import Wordmark from "./Wordmark.svelte";
+  import KejtuMark from "./KejtuMark.svelte";
+  import type { KejtuGesture } from "./kejtu-state";
+  import { companionGesture, spinOnDoubleClick } from "./companion";
+  import { chatAppearance } from "./theme";
   export let subtitle = "Your quiet space";
+  /** A reply is being worked on: Kejtu stays awake, and the quiet time
+   *  before it dozes counts again from when the work ends. */
+  export let working = false;
+
+  // The Kejtu that is always there: it says hello on the first Home visit of
+  // the day, dozes off while you are away and spins on a double click.
+  const AWAY = 5 * 60_000;
+  let mark: { play: (gesture: KejtuGesture) => Promise<void> } | undefined;
+  let handled = 0;
+  $: if (mark && $companionGesture && $companionGesture.at !== handled) {
+    handled = $companionGesture.at;
+    // A hello asked for before the sidebar was there still plays, but not
+    // one from long ago.
+    if (Date.now() - $companionGesture.at < 4000)
+      void mark.play($companionGesture.gesture);
+  }
+  $: spin = $chatAppearance.rotateKejtu
+    ? (gesture: KejtuGesture) => mark?.play(gesture)
+    : null;
 </script>
 
 <div class="sidebar-identity">
-  <svg class="companion-mark" viewBox="0 0 96 96" fill="none" aria-hidden="true"
-    ><path
-      d="M48 8C70 6 88 23 87 47C86 70 70 88 46 87C23 86 7 69 9 45C11 22 27 10 48 8Z"
-      stroke="currentColor"
-      stroke-width="2.5"
-    /><circle cx="34" cy="34" r="6" fill="currentColor" /><circle
-      cx="63"
-      cy="63"
-      r="3.5"
-      fill="currentColor"
-      opacity=".58"
-    /></svg
+  <span class="companion-mark" use:spinOnDoubleClick={spin}
+    ><KejtuMark
+      bind:this={mark}
+      size={33}
+      moves={$chatAppearance.rotateKejtu}
+      sleepAfter={$chatAppearance.rotateKejtu && !working ? AWAY : 0}
+    /></span
   >
   <div class="brand-copy">
     <Wordmark bottom={0} />
@@ -33,6 +51,7 @@
     padding: 4px 0 12px;
   }
   .companion-mark {
+    display: block;
     flex: none;
     width: 33px;
     height: 33px;

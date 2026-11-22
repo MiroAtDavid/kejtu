@@ -473,7 +473,7 @@ impl Backend {
             || data.get("process_instance_id").and_then(Value::as_str) != Some(process_id.as_str())
             || data.get("build_fingerprint").and_then(Value::as_str)
                 != Some(env!("R013_BUILD_SHA256"))
-            || data.get("store_schema_version").and_then(Value::as_u64) != Some(39)
+            || data.get("store_schema_version").and_then(Value::as_u64) != Some(44)
         {
             let _ = backend.child.kill();
             return Err("candidate identity incompatible".into());
@@ -719,7 +719,26 @@ impl Backend {
                 .and_then(Value::as_str)
                 .map(str::to_string),
             intent_sha256: if kind == "conversation.create" {
-                self.creation_intent.clone()
+                let project = arguments.get("project_id").filter(|value| !value.is_null());
+                let module = arguments.get("module_id").filter(|value| !value.is_null());
+                if project.is_some() || module.is_some() {
+                    // Match Python's creation_intent exactly: standalone modules
+                    // include a null project, while project-only identities keep
+                    // their original bytes (no added null module field).
+                    let mut scope = json!({
+                        "creation_intent_sha256": self.creation_intent,
+                        "project_id": project,
+                    });
+                    if let Some(module) = module {
+                        scope["module_id"] = module.clone();
+                    }
+                    sha256_hex(
+                        &serde_json::to_vec(&scope)
+                            .map_err(|_| "creation intent unavailable".to_string())?,
+                    )
+                } else {
+                    self.creation_intent.clone()
+                }
             } else if kind == "exchange.action" {
                 sha256_hex(&serde_json::to_vec(&json!({"conversation_id":arguments["conversation_id"],
                     "turn_id":arguments["turn_id"],"action":arguments["action"],"text":arguments["text"]}))

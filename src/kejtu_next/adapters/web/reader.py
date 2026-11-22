@@ -30,10 +30,12 @@ def browser_arguments(root):
         path = Path('/etc') / name
         if path.exists():
             args += ['--ro-bind', str(path.resolve()), str(path)]
-    for path in (Path(sys.prefix), root / '.state/playwright', Path(__file__).resolve().parent):
+    runtime = root / '.state/mcp-runtime'
+    modules = runtime / 'playwright/node_modules'
+    for path in (Path(sys.prefix), modules, runtime / 'browsers', Path(__file__).resolve().parent):
         args += ['--ro-bind', str(path), str(path)]
     return args + ['--remount-ro', '/', '--chdir', '/tmp', '--', sys.executable, '-E', '-s', '-B',
-                   str(Path(__file__).with_name('reader_backend.py'))]
+                   str(Path(__file__).with_name('reader_backend.py')), str(modules / 'playwright')]
 
 
 class WebReader:
@@ -48,7 +50,7 @@ class WebReader:
             return fetch(self.runtime_root, url, timeout, cancelled)
         root = self.runtime_root
         env = {k: v for k, v in os.environ.items() if k in ('PATH', 'LANG', 'LC_ALL', 'LD_LIBRARY_PATH')}
-        env['PLAYWRIGHT_BROWSERS_PATH'] = str(root / '.state/playwright')
+        env['PLAYWRIGHT_BROWSERS_PATH'] = str(root / '.state/mcp-runtime/browsers')
         env['PYTHONDONTWRITEBYTECODE'] = '1'
         # No inherited credentials, browser profile, desktop bus or model endpoint.
         process = subprocess.Popen(browser_arguments(root),

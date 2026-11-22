@@ -15,7 +15,7 @@ import time
 import uuid
 
 from ...core.records import Failure
-from ...core.tasks import validate
+from ...core.tasks import validate, URGENCIES
 from .history import encoded
 
 TASK_SCHEMA = '''
@@ -131,7 +131,7 @@ class TaskStore:
             rows = self._query('''SELECT DISTINCT t.id,t.revision,t.outcome,t.attention FROM personal_task_operations o
                 JOIN personal_tasks t ON t.id=o.task_id WHERE o.turn_id=? ORDER BY t.id LIMIT ?''',
                 (turn_id,self.store.execution.for_turn(turn_id).operations)).fetchall()
-            return [dict(row) for row in rows if self._eligible(row['id'])]
+            return [dict(row, source_dependencies=self._source_ids(row)) for row in rows if self._eligible(row['id'])]
 
     @contextmanager
     def transaction(self, ledger=None, *, write=False):
@@ -207,24 +207,51 @@ class TaskStore:
             raise Failure('task_conflict', 'Task changed. Read its current state; keep your draft and choose the intended change.')
         return row
 
-    def _eligible(self, task_id):
-        return self._query('''SELECT 1 FROM personal_task_sources s WHERE s.task_id=? AND NOT EXISTS(
-            SELECT 1 FROM recall_turns t JOIN artifacts a ON a.id=t.user_id
-            JOIN memory_grants g ON g.conversation_id=t.conversation_id AND g.enabled=1
-            WHERE t.user_id=s.user_id) LIMIT 1''', (task_id,)).fetchone() is None
+    @staticmethod
+    def _eligibility():
+        # Transitions have no quotation row, but their committed user turn still
+        # owns the displayed task state. Keep list/read/write gates identical.
+        return """NOT EXISTS(SELECT 1 FROM (
+            SELECT user_id FROM personal_task_sources WHERE task_id=t.id
+            UNION SELECT u.user_id FROM personal_task_operations o LEFT JOIN turns u ON u.id=o.turn_id
+            WHERE o.task_id=t.id AND o.status='committed' AND o.turn_id IS NOT NULL) s WHERE NOT EXISTS(
+            SELECT 1 FROM recall_turns u JOIN artifacts a ON a.id=u.user_id
+            JOIN memory_grants g ON g.conversation_id=u.conversation_id AND g.enabled=1
+            WHERE u.user_id=s.user_id))"""
 
-    def _description(self, row):
-        # The current revision owns its exact body. Older task revisions had no
-        # description; reading them supplies an empty body without rewriting history.
+    def _eligible(self, task_id):
+        return self._query('SELECT 1 FROM personal_tasks t WHERE t.id=? AND '+self._eligibility(),
+                           (task_id,)).fetchone() is not None
+
+    def _details(self, row):
+        # Reuse the revision-owned description/metadata, not a second task store.
+        # Missing legacy urgency reads as medium without rewriting old history.
         saved = self._query('SELECT record FROM personal_task_history WHERE task_id=? AND revision=?',
                             (row['id'],row['revision'])).fetchone()
-        return json.loads(saved['record']).get('description','') if saved else ''
+        value=json.loads(saved['record']) if saved else {}
+        urgency=value.get('urgency','medium')
+        if urgency not in URGENCIES:
+            raise Failure('store_integrity','The saved task urgency is invalid.')
+        return dict(description=value.get('description',''),urgency=urgency)
 
-    def _record(self, row):
+    def _source_ids(self, row):
+        # A delivered task revision depends on its exact recorded user sources,
+        # including earlier revisions retained in the current task body.
+        rows = self._query('''SELECT user_id FROM personal_task_sources WHERE task_id=? AND revision<=?
+            UNION SELECT t.user_id FROM personal_task_operations o JOIN turns t ON t.id=o.turn_id
+            WHERE o.task_id=? AND o.revision<=? AND o.status='committed' ORDER BY user_id LIMIT 513''',
+            (row['id'],row['revision'],row['id'],row['revision'])).fetchall()
+        if len(rows) > 512:
+            raise Failure('task_result_capacity', 'The task source identities cannot fit a complete bounded result.')
+        return [source[0] for source in rows]
+
+    def _record(self, row, *, sources=False):
         value = dict(row)
-        value['description'] = self._description(row)
+        value.update(self._details(row))
         value['placements'] = self.store.planner.task_placements(row['id'])
         value['read_ref'] = self._ref(row)
+        if sources and (dependencies := self._source_ids(row)):
+            value['source_dependencies'] = dependencies
         source = self._query('SELECT 1 FROM personal_task_sources WHERE task_id=? LIMIT 1', (row['id'],)).fetchone()
         value['source_status'] = 'manual' if source is None else 'available' if self._eligible(row['id']) else 'unavailable'
         value['note_status'] = 'none' if row['note_id'] is None else 'available' if self._query(
@@ -274,7 +301,7 @@ class TaskStore:
                 return result
             old = self._resolve(args['read_ref'], current=True) if args.get('read_ref') else None
             if old is not None:
-                old = dict(old, description=self._description(old))
+                old = dict(old, **self._details(old))
             placement_changed = False
             if 'placement' in args:
                 settings = self.store.planner.settings()['settings']
@@ -315,9 +342,9 @@ class TaskStore:
                     AND json_extract(m.body,'$.attribution.source_quote')=? LIMIT 1''',source).fetchone():
                     raise Failure('task_legacy_conflict', 'This action already has an open-thread note. Keep using that record; automatic conversion is unavailable.')
                 stamp = datetime.now(timezone.utc).isoformat()
-                row = dict(old) if old else dict(id=uuid.uuid4().hex, revision=0, title='', description='', due=None,
+                row = dict(old) if old else dict(id=uuid.uuid4().hex, revision=0, title='', description='', urgency='medium', due=None,
                     note_id=None, outcome='open', attention='active', created_at=stamp, updated_at=stamp)
-                fields = ('title','description','due','note_id') if action == 'save' else ('outcome','attention')
+                fields = ('title','description','due','note_id','urgency') if action == 'save' else ('outcome','attention')
                 for name in fields:
                     if name in args:
                         row[name] = args[name]
@@ -363,13 +390,13 @@ class TaskStore:
                 # Ordinary reads authorize edits from the complete current head.
                 # Historical bodies consume context only when explicitly asked
                 # for; retain the wire envelope without implying a history page.
-                return fit(dict(status='complete', task=self._record(row), history=[], next_offset=None))
+                return fit(dict(status='complete', task=self._record(row, sources=not manual), history=[], next_offset=None))
             if args.get('view') == 'sources':
                 entries = self._query('''SELECT s.user_id,s.quote,s.revision,t.id AS turn_id,t.conversation_id
                     FROM personal_task_sources s LEFT JOIN recall_turns t ON t.user_id=s.user_id
                     WHERE s.task_id=? ORDER BY s.revision,s.user_id,s.quote LIMIT ? OFFSET ?''',
                     (row['id'],limit+1,offset)).fetchall()
-                result = dict(status='complete',task=self._record(row),history=[],sources=[],next_offset=None)
+                result = dict(status='complete',task=self._record(row, sources=not manual),history=[],sources=[],next_offset=None)
                 fit(result)
                 for entry in entries[:limit]:
                     candidate = dict(result,sources=result['sources']+[dict(entry)],next_offset=offset+len(result['sources'])+1)
@@ -385,7 +412,7 @@ class TaskStore:
                 return fit(result)
             entries = self._query('SELECT record,action FROM personal_task_history WHERE task_id=? ORDER BY revision DESC LIMIT ? OFFSET ?',
                 (row['id'],limit+1,offset)).fetchall()
-            result = dict(status='complete',task=self._record(row),history=[],next_offset=None)
+            result = dict(status='complete',task=self._record(row, sources=not manual),history=[],next_offset=None)
             fit(result)
             for entry in entries[:limit]:
                 candidate = dict(result,history=result['history']+[dict(json.loads(entry['record']),action=entry['action'])],next_offset=offset+len(result['history'])+1)
@@ -414,22 +441,24 @@ class TaskStore:
             clauses.append("""EXISTS(SELECT 1 FROM planner_records l WHERE l.kind='task_link' AND l.cancelled=0
                 AND json_extract(l.body,'$.task_id')=t.id AND json_extract(l.body,'$.course_id')=?)""")
             params.append(args['section_id'])
+        urgency="coalesce((SELECT json_extract(h.record,'$.urgency') FROM personal_task_history h WHERE h.task_id=t.id AND h.revision=t.revision),'medium')"
+        if args.get('urgency','all')!='all':
+            clauses.append(urgency+'=?');params.append(args['urgency'])
         if args.get('query'):
             self.db.create_function('task_casefold',1,str.casefold,deterministic=True)
             clauses.append('instr(task_casefold(t.title),?)>0'); params.append(args['query'].casefold())
-        eligibility = '''NOT EXISTS(SELECT 1 FROM personal_task_sources s WHERE s.task_id=t.id AND NOT EXISTS(
-            SELECT 1 FROM recall_turns u JOIN artifacts a ON a.id=u.user_id JOIN memory_grants g ON g.conversation_id=u.conversation_id
-            WHERE u.user_id=s.user_id AND g.enabled=1))'''
+        eligibility = self._eligibility()
         if not manual: clauses.append(eligibility)
         where = ' AND '.join(clauses) or '1'
         total = self._query('SELECT count(*) FROM personal_tasks t WHERE '+where,params).fetchone()[0]
         opened = self._query("SELECT count(*) FROM personal_tasks t WHERE outcome='open' AND "+('1' if manual else eligibility)).fetchone()[0]
+        order=("CASE "+urgency+" WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END," if args.get('order')=='urgency' else '')
         rows = self._query('SELECT * FROM personal_tasks t WHERE '+where+
-            ' ORDER BY due IS NULL,due,created_at,id LIMIT ? OFFSET ?', (*params,limit,offset)).fetchall()
+            ' ORDER BY '+order+'due IS NULL,due,created_at,id LIMIT ? OFFSET ?', (*params,limit,offset)).fetchall()
         result = dict(status='complete',items=[],total=total,open_total=opened,next_offset=None)
         fit(result)
         for row in rows:
-            item = self._record(row)
+            item = self._record(row, sources=not manual)
             if args.get('day'):
                 item['day_group'] = 'quiet' if row['outcome']!='open' or row['attention']!='active' else 'undated' if row['due'] is None else 'overdue' if row['due']<args['day'] else 'due' if row['due']==args['day'] else 'future'
             candidate = dict(result,items=result['items']+[item],next_offset=offset+len(result['items'])+1)

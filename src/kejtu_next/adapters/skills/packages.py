@@ -61,7 +61,7 @@ def prepare(files,origin,dirname=None):
     return dict(manifest=manifest,revision=sha(encode(manifest).encode()),files=files)
 
 
-def local(source,check=lambda:None):
+def local(source,check=lambda:None,origin=None):
     folder=Path(source)
     if not folder.is_absolute() or folder.resolve()!=folder or not folder.is_dir() or folder.is_symlink():
         raise ValueError('Choose a real absolute skill folder without symbolic links.')
@@ -98,23 +98,44 @@ def local(source,check=lambda:None):
                 if len(body)>MAX_FILE or len(files)>MAX_FILES or total>MAX_PACKAGE:raise ValueError('Skill package exceeds its file/byte limit.')
         visit(root)
     finally:os.close(root)
-    return prepare(files,dict(kind='local',directory=str(folder)),folder.name)
+    # A package the app staged from a pinned source supplies that source as the
+    # origin; a staging directory is never recorded as provenance.
+    return prepare(files,origin or dict(kind='local',directory=str(folder)),folder.name)
 
 
-def load_source(kind,source,check,github=None):
+def load_source(kind,source,check,github=None,*,expected_commit=None,origin=None):
+    if origin is not None and (kind!='folder' or not isinstance(origin,dict) or not origin
+            or any(not isinstance(k,str) or not isinstance(v,str) for k,v in origin.items())):
+        raise ValueError('Only a staged folder import takes a supplied origin of text fields.')
     if kind=='text':return prepare({'SKILL.md':source.encode()},dict(kind='pasted'))
-    if kind=='folder':return local(source,check)
+    if kind=='folder':return local(source,check,origin)
     if kind=='github' and github:
-        files,dirname,origin=github(source,check=check,deadline=time.monotonic()+30)
+        files,dirname,origin=github(source,check=check,deadline=time.monotonic()+30,expected_commit=expected_commit)
         return prepare(files,origin,dirname)
     raise ValueError('Choose a skill folder, SKILL.md text, or a supported public GitHub folder.')
 
 
 class PackageImporter:
     """A disposable reader makes Stop/deadlines effective even on a stalled disk."""
-    async def load(self,kind,source,check):
-        import asyncio
+    async def load(self,kind,source,check,*,expected_commit=None,origin=None):
         import base64
+        result=await self._ask(dict(kind=kind,source=source,expected_commit=expected_commit,origin=origin),check)
+        package=result['package'];package['files']={p:base64.b64decode(b,validate=True) for p,b in package['files'].items()}
+        return package
+
+    async def describe(self,directory,check):
+        """What a package folder holds (bundles.read), from the same disposable reader."""
+        return (await self._ask(dict(kind='describe',source=directory),check))['description']
+
+    async def catalogue(self, identity, digest, check):
+        import base64
+        result = await self._ask(dict(kind='catalogue', identity=identity, digest=digest), check)
+        for package in result['packages'].values():
+            package['files'] = {p: base64.b64decode(b, validate=True) for p, b in package['files'].items()}
+        return result
+
+    async def _ask(self,request,check):
+        import asyncio
         import signal
         import sys
         process=None;read=None
@@ -125,15 +146,14 @@ class PackageImporter:
             process=await asyncio.create_subprocess_exec(sys.executable,'-B','-m','kejtu_next','--skill-import-worker',
                 stdin=asyncio.subprocess.PIPE,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,
                 env=env,start_new_session=True)
-            read=asyncio.create_task(process.communicate(json.dumps(dict(kind=kind,source=source)).encode()))
+            read=asyncio.create_task(process.communicate(json.dumps(request).encode()))
             while not read.done():
                 await asyncio.wait({read},timeout=.1);check()
             data,_=read.result();check()
             if len(data)>14*1024**2 or process.returncode!=0:raise ValueError('Skill reader did not return a complete bounded package.')
             result=json.loads(data)
             if not result['ok']:raise ValueError(result['error'])
-            package=result['package'];package['files']={p:base64.b64decode(b,validate=True) for p,b in package['files'].items()}
-            return package
+            return result
         finally:
             if process:
                 try:os.killpg(process.pid,signal.SIGKILL)

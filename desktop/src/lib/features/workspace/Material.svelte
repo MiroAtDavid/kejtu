@@ -1,74 +1,61 @@
 <script lang="ts">
-  import type { DocumentReference } from "./document-assist";
-  import { tick, onMount, onDestroy } from "svelte";
+  import { tick } from "svelte";
   import Icon from "$lib/design/Icon.svelte";
   import MaterialReader from "./MaterialReader.svelte";
   import MarkdownEditor from "./MarkdownEditor.svelte";
   import { prepareDocumentSource } from "./document-source";
-  import ChoicePicker from "$lib/design/ChoicePicker.svelte";
-  import WordEditor from "./WordEditor.svelte";
+  import WordReader from "./WordReader.svelte";
+  import CodeEditor from "./CodeEditor.svelte";
   import MaterialFiles from "./MaterialFiles.svelte";
   import { materialPortal } from "./material-portal";
-  import { workspaceRequest, type Source } from "./workspace";
-  import { projectBrief } from "./project-brief";
-  import {
-    showDocument,
-    closeDocument,
-    splitDocuments,
-    reorderDocuments,
-    placeDocument,
-    type DocumentLayout,
-    type OpenDocument,
-  } from "./document-tabs";
+  import type { Source } from "./workspace";
+  import { reorderDocuments, type OpenDocument } from "./document-tabs";
+  import type { DocumentDockBounds } from "./document-dock";
+  export let dockBounds: DocumentDockBounds | null = null;
+  export let onDocumentsChange: (count: number) => void = () => {};
   export let courseId: string;
   export let courseTitle = "";
-  export let projectPeriod = "";
-  export let startProjectBrief = false;
   export let fileSidebar: HTMLElement | null = null;
   export let folder: string | null = null;
   export let chooseSaveFolder: () => Promise<
     string | null | undefined
   > = async () => folder;
   export let onSource: (source: Source) => void = () => {};
-  export let onPractice: (source: Source) => void = () => {};
   export let onDiscuss: (text: string, source?: Source) => void = () => {};
   export let requestedSource: Source | null = null;
   export let active = true;
+  /** Show this module's tree in the sidebar while the reader stays inactive. */
+  export let showFiles = false;
+  export let onShowReader: () => boolean = () => true;
   export let busy = false;
-  export let onFileChosen: () => void = () => {};
-  export let onWideChange: (wide: boolean) => void = () => {};
-  let fullWidth = false;
-  let filesOpen = false;
   let documents: OpenDocument[] = [];
   // Reorder the tab strip alone. Moving an iframe's DOM node can reload it,
   // even when its keyed component survives, losing unsaved document work.
+  $: onDocumentsChange(documents.length);
+  $: dockStyle = dockBounds
+    ? `position:fixed;left:${dockBounds.left}px;top:${dockBounds.top}px;width:${dockBounds.width}px;height:${dockBounds.height}px;`
+    : undefined;
   let tabOrder: number[] = [];
   let draggedTab: number | null = null;
   let tabDrop: { id: number; after: boolean } | null = null;
-  let paneDrop: "left" | "right" | null = null;
   let serial = 0,
     changing = false;
-  let layout: DocumentLayout = { active: null, left: null, right: null };
-  let wide = false,
-    ratio = 50,
-    dragging = false;
+  let activeTab: number | null = null;
   let readers: Record<number, MaterialReader> = {};
   let editors: Record<
     number,
     {
       confirmDiscard: () => Promise<boolean>;
-      openDiscussion?: (reference?: DocumentReference) => Promise<void>;
     }
   > = {};
   let sources: Record<number, Source | null> = {};
   let lastPdf: number | null = null;
-  $: onWideChange(fullWidth);
-  $: if (active) onSource(sources[layout.active ?? -1] ?? null);
+  $: if (active) onSource(sources[activeTab ?? -1] ?? null);
   $: sourceDocument = documents.find(
     (doc) =>
       doc.id === lastPdf && doc.kind === "reader" && /\.pdf$/i.test(doc.file),
   );
-  $: selectedDocument = documents.find((doc) => doc.id === layout.active);
+  $: selectedDocument = documents.find((doc) => doc.id === activeTab);
   $: selected = selectedDocument?.lookupFile ?? selectedDocument?.file ?? "";
   function patch(id: number, values: Partial<OpenDocument>) {
     if (
@@ -95,15 +82,15 @@
     browser.refreshFiles();
   }
   function revealTab() {
-    if (!active || layout.active === null) return;
+    if (!active || activeTab === null) return;
     void tick().then(() =>
       document
-        .getElementById(`document-tab-${courseId}-${layout.active}`)
+        .getElementById(`document-tab-${courseId}-${activeTab}`)
         ?.scrollIntoView({ block: "nearest", inline: "nearest" }),
     );
   }
   function selectTab(id: number) {
-    layout = showDocument(layout, id);
+    activeTab = id;
     revealTab();
     if (
       documents.some(
@@ -118,100 +105,19 @@
     documents = [...documents, doc];
     tabOrder = [...tabOrder, doc.id];
     selectTab(doc.id);
-    onFileChosen();
-    filesOpen = false;
     return doc;
   }
-  let newKind = "";
-  let mounted = false,
-    starterAttempted = false,
-    disposed = false,
-    navigation = 0;
-  const briefKey = () => `kejtu-next:project-brief:${courseId}`;
-  onMount(() => {
-    mounted = true;
-  });
-  onDestroy(() => {
-    disposed = true;
-  });
-  $: if (mounted && active && startProjectBrief && !starterAttempted && !busy) {
-    starterAttempted = true;
-    void firstResourcesVisit();
-  }
-  async function firstResourcesVisit() {
-    try {
-      if (localStorage.getItem(briefKey())) return;
-    } catch {
-      /* The editor still works without browser storage. */
-    }
-    if (requestedSource || documents.length || changing) return;
-    const run = navigation;
-    const brief = projectBrief(courseTitle, folder, projectPeriod);
-    let existing = false;
-    if (folder) {
-      try {
-        let offset: number | null = 0;
-        const seen = new Set<number>();
-        while (offset !== null && !seen.has(offset)) {
-          seen.add(offset);
-          const page: {
-            items: { name: string; path: string; kind: string }[];
-            next_offset: number | null;
-          } = await workspaceRequest("materials.list", {
-            course_id: courseId,
-            path: "",
-            offset,
-            limit: 100,
-          });
-          if (
-            disposed ||
-            run !== navigation ||
-            !active ||
-            documents.length ||
-            requestedSource
-          )
-            return;
-          if (
-            page.items.some(
-              (item) => item.kind === "file" && item.path === brief.name,
-            )
-          ) {
-            existing = true;
-            break;
-          }
-          offset = page.next_offset;
-        }
-      } catch {
-        /* No file is written: a starter can be drafted before folder access is configured. */
-      }
-    }
-    if (
-      disposed ||
-      run !== navigation ||
-      !active ||
-      documents.length ||
-      requestedSource
-    )
-      return;
-    if (existing) await openEditor(brief.name, "md");
-    else {
-      addDocument({
-        file: "",
-        kind: "md",
-        label: brief.name,
-        initialContent: brief.text,
-      });
-    }
-    try {
-      localStorage.setItem(briefKey(), "opened");
-    } catch {
-      /* No persistence claim when browser storage is unavailable. */
-    }
-  }
-  let panes: HTMLDivElement;
   let browser: MaterialFiles;
-  $: fileTarget = active && !fullWidth ? fileSidebar : null;
-  $: divided = wide && layout.right !== null;
+  $: fileTarget = active || showFiles ? fileSidebar : null;
+  function chooseFile(path: string, code = false) {
+    if (changing || !onShowReader()) return;
+    if (code) openDocument(path, "code");
+    else select(path);
+    void tick().then(revealTab);
+  }
+  function newMarkdown() {
+    if (!changing && onShowReader()) openDocument("", "md");
+  }
   $: if (requestedSource) {
     const source = requestedSource;
     requestedSource = null;
@@ -232,20 +138,58 @@
   $: orderedDocuments = tabOrder
     .map((id) => documents.find((doc) => doc.id === id))
     .filter((doc): doc is OpenDocument => doc !== undefined);
-  function measure(node: HTMLElement) {
-    const update = () => {
-      wide = node.getBoundingClientRect().width >= 820;
-      revealTab();
+  // The tab strip scrolls without a visible bar: a vertical wheel moves it
+  // sideways, the chosen tab is revealed, and soft edges show hidden tabs.
+  let moreBefore = false,
+    moreAfter = false;
+  function tabScroller(node: HTMLElement, _tabs: unknown) {
+    let frame = 0;
+    const edges = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const end = node.scrollWidth - node.clientWidth;
+        moreBefore = node.scrollLeft > 1;
+        moreAfter = node.scrollLeft < end - 1;
+      });
+    };
+    const wheel = (event: WheelEvent) => {
+      if (event.ctrlKey || Math.abs(event.deltaX) >= Math.abs(event.deltaY))
+        return;
+      const end = node.scrollWidth - node.clientWidth;
+      const step =
+        event.deltaMode === 1
+          ? event.deltaY * 16
+          : event.deltaMode === 2
+            ? event.deltaY * node.clientWidth
+            : event.deltaY;
+      // At either end the wheel belongs to the page again.
+      if (
+        end <= 0 ||
+        (step < 0 && node.scrollLeft <= 0) ||
+        (step > 0 && node.scrollLeft >= end)
+      )
+        return;
+      event.preventDefault();
+      node.scrollLeft += step;
     };
     const observer =
-      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(edges);
     observer?.observe(node);
-    update();
-    return { destroy: () => observer?.disconnect() };
+    node.addEventListener("scroll", edges, { passive: true });
+    node.addEventListener("wheel", wheel, { passive: false });
+    edges();
+    return {
+      update: edges,
+      destroy() {
+        cancelAnimationFrame(frame);
+        observer?.disconnect();
+        node.removeEventListener("scroll", edges);
+        node.removeEventListener("wheel", wheel);
+      },
+    };
   }
-  async function openEditor(file = "", kind: "docx" | "md" = "docx") {
+  function openDocument(file: string, kind: "docx" | "md" | "code") {
     if (changing) return;
-    navigation++;
     const existing =
       file &&
       documents.find(
@@ -257,20 +201,10 @@
     }
     return addDocument({ file, kind });
   }
-  export async function openDiscussion(reference: DocumentReference) {
-    if (reference.course_id !== courseId || !reference.file)
-      throw new Error("This document is unavailable.");
-    const doc = await openEditor(reference.file, "md");
-    if (!doc) return;
-    await tick();
-    await editors[doc.id]?.openDiscussion?.(reference);
-  }
-  async function select(path: string, readOriginal = false) {
+  function select(path: string, readOriginal = false) {
     if (changing) return;
-    navigation++;
     if (!readOriginal && /\.(docx|md|markdown)$/i.test(path)) {
-      await openEditor(path, /\.docx$/i.test(path) ? "docx" : "md");
-      filesOpen = false;
+      openDocument(path, /\.docx$/i.test(path) ? "docx" : "md");
       return;
     }
     const existing = documents.find(
@@ -278,19 +212,21 @@
     );
     if (existing) selectTab(existing.id);
     else addDocument({ file: path, kind: "reader" });
-    onFileChosen();
-    filesOpen = false;
   }
   async function closeTab(doc: OpenDocument) {
     if (changing) return;
     changing = true;
-    navigation++;
     try {
-      const owner = doc.kind === "reader" ? readers[doc.id] : editors[doc.id];
-      if (!owner || !(await owner.confirmDiscard())) return;
-      layout = closeDocument(layout, doc.id, tabOrder);
+      if (
+        (doc.kind === "md" || doc.kind === "code") &&
+        !(await editors[doc.id]?.confirmDiscard())
+      )
+        return;
+      const index = tabOrder.indexOf(doc.id);
       documents = documents.filter((item) => item.id !== doc.id);
       tabOrder = tabOrder.filter((id) => id !== doc.id);
+      if (activeTab === doc.id)
+        activeTab = tabOrder[Math.min(index, tabOrder.length - 1)] ?? null;
       delete readers[doc.id];
       delete editors[doc.id];
       delete sources[doc.id];
@@ -300,26 +236,17 @@
             (item) => item.kind === "reader" && /\.pdf$/i.test(item.file),
           )?.id ?? null;
       await tick();
-      if (layout.active !== null)
+      if (activeTab !== null)
         document
-          .getElementById(`document-tab-${courseId}-${layout.active}`)
-          ?.focus();
-      else
-        document
-          .getElementById(`empty-reader-${courseId}`)
-          ?.querySelector<HTMLElement>(".reader-empty")
+          .getElementById(`document-tab-${courseId}-${activeTab}`)
           ?.focus();
     } finally {
       changing = false;
     }
   }
-  function toggleSplit() {
-    layout = splitDocuments(layout, tabOrder);
-  }
   function endTabDrag() {
     draggedTab = null;
     tabDrop = null;
-    paneDrop = null;
   }
   function startTabDrag(event: DragEvent, id: number) {
     if (changing || !event.dataTransfer) {
@@ -356,46 +283,6 @@
     );
     endTabDrag();
   }
-  function overPane(event: DragEvent, side: "left" | "right") {
-    if (draggedTab === null) return;
-    event.preventDefault();
-    if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
-    tabDrop = null;
-    paneDrop = side;
-  }
-  function dropInPane(event: DragEvent, side: "left" | "right") {
-    if (draggedTab === null) return;
-    event.preventDefault();
-    layout = placeDocument(layout, draggedTab, side, tabOrder);
-    selectTab(draggedTab);
-    endTabDrag();
-  }
-  function startDrag(e: PointerEvent) {
-    if (e.button !== 0) return;
-    dragging = true;
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-  }
-  function move(e: PointerEvent) {
-    if (!dragging) return;
-    const rect = panes.getBoundingClientRect();
-    ratio = Math.max(
-      30,
-      Math.min(70, (100 * (e.clientX - rect.left)) / rect.width),
-    );
-  }
-  function resizeKeys(e: KeyboardEvent) {
-    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
-    e.preventDefault();
-    ratio =
-      e.key === "Home"
-        ? 30
-        : e.key === "End"
-          ? 70
-          : Math.max(
-              30,
-              Math.min(70, ratio + (e.key === "ArrowRight" ? 2 : -2)),
-            );
-  }
   function tabKeys(e: KeyboardEvent, id: number) {
     if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
     e.preventDefault();
@@ -431,10 +318,11 @@
   }}
 />
 
-<div class="workspace" use:measure>
+<div class="workspace docked" style={dockStyle}>
   <div
     class="file-browser"
-    hidden={!active || (fullWidth && !filesOpen)}
+    class:in-sidebar={!!fileTarget}
+    hidden={!active && !showFiles}
     use:materialPortal={fileTarget}
   >
     <MaterialFiles
@@ -443,20 +331,24 @@
       {courseTitle}
       {selected}
       sidebar={!!fileTarget}
-      onSelect={select}
+      disabled={busy || changing}
+      onSelect={chooseFile}
+      onNewMarkdown={newMarkdown}
     />
   </div>
   <div class="document-strip">
-    {#if fullWidth}<button
-        class="icon"
-        aria-expanded={filesOpen}
-        on:click={() => (filesOpen = !filesOpen)}>Files</button
-      >{/if}
-    <div class="document-tabs" role="tablist" aria-label="Open documents">
+    <div
+      class="document-tabs"
+      class:more-before={moreBefore}
+      class:more-after={moreAfter}
+      role="tablist"
+      aria-label="Open documents"
+      use:tabScroller={orderedDocuments}
+    >
       {#each orderedDocuments as doc (doc.id)}
         <div
           class="editor-tab"
-          class:chosen={layout.active === doc.id}
+          class:chosen={activeTab === doc.id}
           class:tab-dragging={draggedTab === doc.id}
           class:drop-before={tabDrop?.id === doc.id && !tabDrop.after}
           class:drop-after={tabDrop?.id === doc.id && tabDrop.after}
@@ -464,10 +356,10 @@
           <button
             id={`document-tab-${courseId}-${doc.id}`}
             role="tab"
-            aria-selected={layout.active === doc.id}
+            aria-selected={activeTab === doc.id}
             aria-controls={`document-pane-${courseId}-${doc.id}`}
-            tabindex={layout.active === doc.id ? 0 : -1}
-            title={`${doc.label || doc.file || `Untitled.${doc.kind}`} · Drag to reorder or move to a pane. Alt+Shift+Left/Right reorders.`}
+            tabindex={activeTab === doc.id ? 0 : -1}
+            title={`${doc.label || doc.file || `Untitled.${doc.kind}`} · Drag to reorder. Alt+Shift+Left/Right reorders.`}
             draggable={!changing}
             on:dragstart={(event) => startTabDrag(event, doc.id)}
             on:dragover={(event) => overTab(event, doc.id)}
@@ -490,9 +382,9 @@
           <button
             class="close"
             title={`Close ${doc.label || doc.file || "document"}`}
-            aria-label={doc.kind === "reader"
-              ? "Close document"
-              : "Close editable document"}
+            aria-label={doc.kind === "md" || doc.kind === "code"
+              ? "Close editable document"
+              : "Close document"}
             disabled={changing}
             on:click={() => closeTab(doc)}
             ><Icon name="close" size={12} /></button
@@ -500,91 +392,10 @@
         </div>
       {/each}
     </div>
-    <div class="new-document">
-      <ChoicePicker
-        id={`new-document-${courseId}`}
-        label="New document"
-        placeholder="+ New"
-        compact
-        options={[
-          {
-            value: "md",
-            label: "Markdown",
-            detail: "Write and preview Markdown",
-          },
-          {
-            value: "docx",
-            label: "Word document",
-            detail: "Edit with WordCraft",
-          },
-        ]}
-        value={newKind}
-        disabled={changing}
-        onChange={async (kind) => {
-          newKind = kind;
-          await tick();
-          newKind = "";
-          void openEditor("", kind as "docx" | "md");
-        }}
-      />
-    </div>
-    <div class="view-controls">
-      {#if documents.length > 1}<button
-          class="icon"
-          aria-label="Show documents side by side"
-          aria-pressed={divided}
-          title={wide
-            ? "Show documents side by side"
-            : "Use Wide view for side by side"}
-          disabled={!wide}
-          on:click={toggleSplit}><Icon name="sidebar" size={15} /></button
-        >{/if}
-      <button
-        class="icon"
-        aria-pressed={fullWidth}
-        on:click={() => (fullWidth = !fullWidth)}
-        >{fullWidth ? "Exit wide view" : "Wide view"}</button
-      >
-    </div>
   </div>
-  {#if divided}<div class="split-choice">
-      <button
-        class="icon"
-        on:click={() => {
-          layout = { ...layout, left: layout.right, right: layout.left };
-        }}>Swap sides</button
-      >
-      <ChoicePicker
-        id={`beside-document-${courseId}`}
-        label="Right document"
-        compact
-        value={String(layout.right)}
-        options={orderedDocuments
-          .filter((doc) => doc.id !== layout.left)
-          .map((doc) => ({
-            value: String(doc.id),
-            label:
-              doc.label || doc.file.split("/").pop() || `Untitled.${doc.kind}`,
-          }))}
-        onChange={(id) =>
-          (layout = { ...layout, right: Number(id), active: layout.left })}
-      />
-    </div>{/if}
-  <div
-    bind:this={panes}
-    class="panes"
-    class:divided
-    class:dragging
-    class:tab-drag-active={draggedTab !== null}
-    style:--split={`${ratio}%`}
-  >
-    {#if !documents.length}<div id={`empty-reader-${courseId}`}>
-        <MaterialReader {courseId} {folder} {active} />
-      </div>{/if}
+  <div class="panes" class:tab-drag-active={draggedTab !== null}>
     {#each documents as doc (doc.id)}
-      {@const visible = divided
-        ? doc.id === layout.left || doc.id === layout.right
-        : doc.id === layout.active}
+      {@const visible = doc.id === activeTab}
       <div
         id={`document-pane-${courseId}-${doc.id}`}
         class="document-pane"
@@ -592,22 +403,10 @@
         tabindex="0"
         aria-labelledby={`document-tab-${courseId}-${doc.id}`}
         hidden={!visible}
-        style:grid-column={divided
-          ? doc.id === layout.right
-            ? "3"
-            : "1"
-          : undefined}
-        on:focusin={() => {
-          selectTab(doc.id);
-        }}
-        on:pointerdown={() => {
-          selectTab(doc.id);
-        }}
       >
         {#if doc.kind === "reader"}
           <MaterialReader
             bind:this={readers[doc.id]}
-            {chooseSaveFolder}
             {courseId}
             {folder}
             tabId={String(doc.id)}
@@ -615,12 +414,20 @@
             requestedSource={doc.source ?? null}
             {busy}
             onSource={(source) => (sources = { ...sources, [doc.id]: source })}
-            {onPractice}
             {onDiscuss}
             onOriginal={(path) => void select(path, true)}
-            onChange={(dirty) => patch(doc.id, { dirty })}
-            onFocus={() => selectTab(doc.id)}
             active={active && visible}
+          />
+        {:else if doc.kind === "code"}
+          <CodeEditor
+            bind:this={editors[doc.id]}
+            {courseId}
+            file={doc.file}
+            active={active && visible}
+            {busy}
+            {onDiscuss}
+            onChange={(dirty) => patch(doc.id, { dirty })}
+            onOriginal={() => void select(doc.file, true)}
           />
         {:else if doc.kind === "md"}
           <MarkdownEditor
@@ -628,8 +435,6 @@
             {chooseSaveFolder}
             {courseId}
             file={doc.file}
-            initialContent={doc.initialContent ?? ""}
-            initialName={doc.label ?? ""}
             courseFolder={folder}
             sourceName={sourceDocument?.file.split("/").pop() ?? ""}
             prepareSource={(signal) =>
@@ -643,79 +448,49 @@
                 signal,
               )}
             active={active && visible}
-            focused={layout.active === doc.id}
+            focused={activeTab === doc.id}
             onChange={(dirty) => patch(doc.id, { dirty })}
             onReadOriginal={(file) => void select(file, true)}
             onSaved={(path) => savedDocument(doc, path)}
           />
         {:else}
-          <WordEditor
-            bind:this={editors[doc.id]}
-            {chooseSaveFolder}
+          <WordReader
             {courseId}
             file={doc.file}
+            {busy}
+            {onDiscuss}
             active={active && visible}
             onFocus={() => selectTab(doc.id)}
-            onChange={(dirty) => patch(doc.id, { dirty })}
-            onSaved={(path, format) => {
-              if (format === "docx") savedDocument(doc, path);
-              else browser.refreshFiles();
-            }}
           />
         {/if}
       </div>
     {/each}
-    {#if divided}
-      <!-- Keyboard-operable splitter; pointer capture keeps dragging on its narrow rail. -->
-      <!-- svelte-ignore a11y_no_noninteractive_tabindex a11y_no_noninteractive_element_interactions -->
-      <div
-        class="divider"
-        role="separator"
-        aria-label="Resize document panes"
-        aria-orientation="vertical"
-        aria-valuemin="30"
-        aria-valuemax="70"
-        aria-valuenow={Math.round(ratio)}
-        tabindex="0"
-        on:pointerdown={startDrag}
-        on:pointermove={move}
-        on:pointerup={() => (dragging = false)}
-        on:lostpointercapture={() => (dragging = false)}
-        on:keydown={resizeKeys}
-      ></div>
-    {/if}
-    {#if draggedTab !== null && wide && documents.length > 1}
-      <div
-        class="pane-drop-zones"
-        style:--drop-split={divided ? `${ratio}%` : "50%"}
-      >
-        {#each ["left", "right"] as side}
-          <button
-            class="pane-drop-zone"
-            class:drop-ready={paneDrop === side}
-            tabindex="-1"
-            aria-label={`Drop document on ${side}`}
-            on:dragover={(event) => overPane(event, side as "left" | "right")}
-            on:dragleave={() => (paneDrop = null)}
-            on:drop={(event) => dropInPane(event, side as "left" | "right")}
-            ><span>Move to {side}</span></button
-          >
-        {/each}
-      </div>
-    {/if}
   </div>
 </div>
 
 <style>
   .workspace {
     min-width: 0;
+    /* The reader owns scrolling; its viewport is fitted to these dock bounds. */
+    overflow: clip;
+    overscroll-behavior: contain;
+    /* Composer pickers remain above the adjacent document. */
+    z-index: 5;
+    background: var(--ke-surface);
+  }
+  .file-browser.in-sidebar {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
   }
   .document-strip {
     display: flex;
     align-items: center;
     gap: 4px;
     min-height: 34px;
-    margin: 0 0 8px;
+    margin: 0 0 2px;
+    padding-right: 34px;
     border-bottom: 1px solid var(--ke-border);
   }
   .document-tabs {
@@ -723,11 +498,52 @@
     align-items: stretch;
     gap: 4px;
     overflow-x: auto;
-    scrollbar-width: thin;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    /* No bar under the tabs on any engine; revealed tabs clear the soft edge. */
+    scrollbar-width: none;
+    scroll-padding-inline: 24px;
     min-width: 0;
+    --tab-fade: 24px;
   }
-  .document-tabs button,
-  .icon {
+  .document-tabs::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  .document-tabs.more-before {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--tab-fade)
+    );
+    mask-image: linear-gradient(to right, transparent, #000 var(--tab-fade));
+  }
+  .document-tabs.more-after {
+    -webkit-mask-image: linear-gradient(
+      to left,
+      transparent,
+      #000 var(--tab-fade)
+    );
+    mask-image: linear-gradient(to left, transparent, #000 var(--tab-fade));
+  }
+  .document-tabs.more-before.more-after {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--tab-fade),
+      #000 calc(100% - var(--tab-fade)),
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 var(--tab-fade),
+      #000 calc(100% - var(--tab-fade)),
+      transparent
+    );
+  }
+  .document-tabs button {
     display: flex;
     align-items: center;
     gap: 7px;
@@ -751,8 +567,7 @@
     background: var(--ke-surface-inset);
     color: var(--ke-text-primary);
   }
-  .document-tabs button:hover,
-  .icon:hover {
+  .document-tabs button:hover {
     background: var(--ke-surface-inset);
   }
   .editor-tab {
@@ -789,34 +604,6 @@
     min-height: 24px;
     margin-right: 4px;
   }
-  .icon {
-    padding: 7px;
-    flex: none;
-    border-radius: var(--ke-radius-sm);
-  }
-  .new-document {
-    flex: none;
-    width: 100px;
-  }
-  .new-document :global(.choice-options) {
-    width: 220px;
-  }
-  .view-controls {
-    display: flex;
-    margin-left: auto;
-    flex: none;
-  }
-  .split-choice {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 8px;
-  }
-  .split-choice :global(.choice) {
-    max-width: 280px;
-  }
-  .icon:disabled {
-    opacity: 0.4;
-  }
   .dirty {
     font-size: var(--ke-text-base);
     color: var(--ke-text-secondary);
@@ -825,64 +612,9 @@
     min-width: 0;
     position: relative;
   }
-  .pane-drop-zones {
-    position: absolute;
-    inset: 0;
-    z-index: 8;
-    display: grid;
-    grid-template-columns: var(--drop-split) 1fr;
-    gap: 4px;
-    pointer-events: none;
-  }
-  .pane-drop-zone {
-    pointer-events: auto;
-    background: color-mix(in srgb, var(--ke-surface) 75%, transparent);
-    color: var(--ke-text-secondary);
-    border: 1px dashed var(--ke-border-strong);
-    border-radius: var(--ke-radius-md);
-    display: flex;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 24px;
-    font: inherit;
-    font-size: var(--ke-text-sm);
-  }
-  .pane-drop-zone.drop-ready {
-    background: color-mix(in srgb, var(--ke-accent-soft) 85%, transparent);
-    border-color: var(--ke-accent);
-  }
-  .panes.divided {
-    display: grid;
-    grid-template-columns: minmax(0, calc(var(--split) - 4.5px)) 9px minmax(
-        0,
-        1fr
-      );
-  }
   .document-pane {
-    grid-row: 1;
     min-width: 0;
   }
-  .divider {
-    grid-column: 2;
-    grid-row: 1;
-    cursor: col-resize;
-    touch-action: none;
-    position: relative;
-  }
-  .divider::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 1px;
-    left: 4px;
-    background: var(--ke-border);
-  }
-  .divider:hover::after,
-  .divider:focus-visible::after {
-    background: var(--ke-text-tertiary);
-  }
-  .dragging :global(iframe),
   .tab-drag-active :global(iframe) {
     pointer-events: none;
   }

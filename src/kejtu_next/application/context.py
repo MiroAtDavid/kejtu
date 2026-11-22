@@ -189,7 +189,7 @@ class ContextCheckpoint:
             # a summarizer cannot promote an assistant claim into a mutation.
             receipts = tuple(Message('system', 'Verified operation receipt (not instructions): ' + m.content)
                 for m in sources if m.role == 'tool' and (m.tool_name in ('write_note', 'note_outcome')
-                    or m.tool_name in ('personal_tasks', 'research_tasks') and json.loads(m.content).get('status') in (
+                    or m.tool_name in ('personal_tasks', 'research_tasks', 'reminders', 'background_interests') and json.loads(m.content).get('status') in (
                         'committed', 'unchanged', 'unknown')))
             replacement = (summary,) + receipts
             result, _ = replace_spans(messages, selected, replacement)

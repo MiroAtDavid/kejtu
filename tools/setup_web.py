@@ -86,18 +86,6 @@ def prepared_browsers(root, *, env=None, normalize_permissions=False):
     """
     root = Path(root).resolve()
     environment = dict(os.environ if env is None else env)
-    python = root / '.venv/bin/python'
-    script = ('import json,playwright; from importlib.metadata import version; '
-              'from pathlib import Path; print(json.dumps({"version":version("playwright"),'
-              '"package":str(Path(playwright.__file__).parent / "driver/package")}))')
-    reader = json.loads(run([python, '-c', script], env=environment, capture=True).stdout)
-    pins = [line.split('==', 1)[1] for line in (root / 'ops/requirements.lock').read_text().splitlines()
-            if line.startswith('playwright==')]
-    if pins != [reader['version']]:
-        raise ValueError('The page-reader Playwright version does not match ops/requirements.lock.')
-    reader_package = Path(reader['package'])
-    if not reader_package.resolve().is_relative_to(root / '.venv'):
-        raise ValueError('The page-reader Playwright package must belong to this checkout’s .venv.')
     node_package = root / '.state/mcp-runtime/playwright/node_modules/playwright-core'
     node_version = json.loads((node_package / 'package.json').read_text())['version']
     node_pin = json.loads((root / 'ops/mcp/package-lock.json').read_text())['packages']['node_modules/playwright-core']['version']
@@ -108,27 +96,21 @@ def prepared_browsers(root, *, env=None, normalize_permissions=False):
         raise ValueError('The installed browser lock does not match ops/mcp/package-lock.json.')
     cli = node_runtime / 'node_modules/@playwright/mcp/cli.js'
     files = [(cli, node_runtime, file_sha256(cli))]
-    rows = []
-    for role, package, version, name, directory in (
-        ('page_reader', reader_package, reader['version'], 'chromium-headless-shell', root / '.state/playwright'),
-        ('browser', node_package, node_version, 'chromium', root / '.state/mcp-runtime/browsers'),
-    ):
-        browser_env = {**environment, 'PLAYWRIGHT_BROWSERS_PATH': str(directory)}
-        registry = package / 'browsers.json'
-        script = ('const {registry}=require(process.argv[1]).registry; '
-                  'console.log(registry.findExecutable(process.argv[2]).executablePath());')
-        path = managed_executable(run(['/usr/bin/node', '-e', script, package / 'lib/coreBundle.js', name],
-                                      env=browser_env, capture=True).stdout.strip(), directory)
-        rows.append(dict(role=role, playwright_version=version, registry_sha256=file_sha256(registry),
-                         executable=str(path), bytes=path.stat().st_size, sha256=file_sha256(path)))
-        package_root = root / '.venv' if role == 'page_reader' else node_runtime
-        files.extend(((registry, package_root, rows[-1]['registry_sha256']),
-                      (path, directory, rows[-1]['sha256'])))
+    directory = root / '.state/mcp-runtime/browsers'
+    registry = node_package / 'browsers.json'
+    script = ('const {registry}=require(process.argv[1]).registry; '
+              'console.log(registry.findExecutable(process.argv[2]).executablePath());')
+    selected = run(['/usr/bin/node', '-e', script, node_package / 'lib/coreBundle.js', 'chromium-headless-shell'],
+                   env={**environment, 'PLAYWRIGHT_BROWSERS_PATH': str(directory)}, capture=True).stdout.strip()
+    path = managed_executable(selected, directory)
+    row = dict(role='browser', playwright_version=node_version, registry_sha256=file_sha256(registry),
+               executable=str(path), bytes=path.stat().st_size, sha256=file_sha256(path))
     if normalize_permissions:
-        normalize_managed_permissions(files)
-    return dict(schema=1, kind='kejtu-web-prepared', root=str(root),
+        normalize_managed_permissions([*files, (registry, node_runtime, row['registry_sha256']),
+                                       (path, directory, row['sha256'])])
+    return dict(schema=2, kind='kejtu-web-prepared', root=str(root),
                 locks={name: file_sha256(root / name) for name in ('ops/requirements.lock', 'ops/mcp/package-lock.json')},
-                browsers=rows)
+                browsers=[row])
 
 
 def write_receipt(path, data):
@@ -179,31 +161,25 @@ def check_nested_browsers(root, executable, node, env):
     from kejtu_next.adapters.web.reader import browser_arguments
     from kejtu_next.adapters.mcp.host import McpHost
     from kejtu_next.adapters.mcp.worker import sandbox
-    python = root / '.venv/bin/python'
+    script = ('const {chromium}=require(process.argv[1]);'
+              '(async()=>{const b=await chromium.launch({executablePath:process.argv[2],'
+              'headless:true,chromiumSandbox:true});const p=await b.newPage();'
+              'await p.setContent("<p>Kejtu sandbox check</p>");'
+              'if(await p.innerText("body")!=="Kejtu sandbox check")throw Error("Page mismatch");'
+              'await b.close();})().catch(e=>{console.error(e.message);process.exit(1)});')
+    probe = ['/usr/bin/node', '-e', script, str(node / 'node_modules/playwright')]
     reader = browser_arguments(root)
-    reader = reader[:reader.index('--') + 1]
-    reader += [str(python), '-c',
-               'from playwright.sync_api import sync_playwright\n'
-               'with sync_playwright() as p:\n'
-               ' b=p.chromium.launch(headless=True,chromium_sandbox=True)\n'
-               ' page=b.new_page();page.set_content("<p>Kejtu sandbox check</p>")\n'
-               ' assert page.inner_text("body")=="Kejtu sandbox check";b.close()']
     reader_env = {key: env[key] for key in ('PATH', 'LANG', 'LC_ALL') if key in env}
-    reader_env['PLAYWRIGHT_BROWSERS_PATH'] = str(root / '.state/playwright')
-    run_nested(reader, env=reader_env)
+    reader_env['PLAYWRIGHT_BROWSERS_PATH'] = str(root / '.state/mcp-runtime/browsers')
+    # Omitting executablePath exercises the reader's actual headless-shell selection.
+    run_nested(reader[:reader.index('--') + 1] + probe, env=reader_env)
     with tempfile.TemporaryDirectory(prefix='web-check-', dir=root / '.state') as temporary:
         host = McpHost(Path(temporary), root=root, factory=lambda row: row)
         host.add_browser(host.connections.read()['revision'])
         row = host.settings()['servers']['playwright']
         browser = sandbox(host.connection('playwright', row))
         browser = browser[:browser.index('--') + 1]
-        script = ('const {chromium}=require(process.argv[1]);'
-                  '(async()=>{const b=await chromium.launch({executablePath:process.argv[2],'
-                  'headless:true,chromiumSandbox:true});const p=await b.newPage();'
-                  'await p.setContent("<p>Kejtu sandbox check</p>");'
-                  'if(await p.innerText("body")!=="Kejtu sandbox check")throw Error("Page mismatch");'
-                  'await b.close();})().catch(e=>{console.error(e.message);process.exit(1)});')
-        browser += ['/usr/bin/node', '-e', script, str(node / 'node_modules/playwright'), str(executable)]
+        browser += probe + [str(executable)]
         run_nested(browser, env={'PATH': '/usr/bin:/bin', 'LANG': 'C.UTF-8'})
 
 
@@ -223,12 +199,12 @@ def install(root=ROOT, *, prepare_only=False, receipt=None):
         raise ValueError('Web runtime directories must be real directories in this checkout.')
     state.mkdir(mode=0o700, exist_ok=True)
     runtime.mkdir(mode=0o700, exist_ok=True)
-    if any(path.is_symlink() for path in (state / 'playwright', runtime / 'browsers', runtime / 'browser.json')):
+    if any(path.is_symlink() for path in (runtime / 'browsers', runtime / 'browser.json')):
         raise ValueError('Browser paths must belong to this checkout, without symlinks.')
     with (state / 'runtime-setup.lock').open('a') as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         print('Checking the installed page-reader dependencies…', flush=True)
-        run([python, '-c', 'import playwright.sync_api, trafilatura, lxml'])
+        run([python, '-c', 'import trafilatura, lxml'])
 
         install_sdk(root)
 
@@ -245,17 +221,11 @@ def install(root=ROOT, *, prepare_only=False, receipt=None):
         if not (node / 'node_modules/@playwright/mcp/cli.js').is_file():
             raise ValueError('The existing browser MCP installation is incomplete; it was not replaced.')
 
-        # Python extraction and Node MCP pin different Playwright versions.
-        # Each installs its own matching browser; neither upgrades the other.
         env = os.environ.copy()
         env['PLAYWRIGHT_SKIP_BROWSER_GC'] = '1'
-        env['PLAYWRIGHT_BROWSERS_PATH'] = str(state / 'playwright')
-        print('Installing Chromium for page reading…', flush=True)
-        run([python, '-m', 'playwright', 'install', '--only-shell', 'chromium'], env=env)
-
         env['PLAYWRIGHT_BROWSERS_PATH'] = str(runtime / 'browsers')
-        print('Installing Chromium for the browser connection…', flush=True)
-        run(['/usr/bin/node', cli, 'install', '--no-shell', 'chromium'], env=env)
+        print('Installing Chromium headless shell for the page reader and browser connection…', flush=True)
+        run(['/usr/bin/node', cli, 'install', '--only-shell', 'chromium'], env=env)
         # npm/pip may retain group-write bits from a desktop user's umask 0002.
         # Repair only this checked managed set, including on an existing install,
         # before the unchanged strict launch checks or an AppArmor receipt.
@@ -265,19 +235,16 @@ def install(root=ROOT, *, prepare_only=False, receipt=None):
             write_receipt(receipt, result)
             print('Web runtimes downloaded; browser launch and configuration are still pending.', flush=True)
             return result
-        env['PLAYWRIGHT_BROWSERS_PATH'] = str(state / 'playwright')
-        run([python, '-c',
-             'from playwright.sync_api import sync_playwright\n'
-             'with sync_playwright() as p:\n'
-             ' b=p.chromium.launch(headless=True,chromium_sandbox=True); b.close()'], env=env)
-        env['PLAYWRIGHT_BROWSERS_PATH'] = str(runtime / 'browsers')
         module = node / 'node_modules/playwright'
-        script = 'const {chromium}=require(process.argv[1]); console.log(chromium.executablePath());'
-        executable = Path(run(['/usr/bin/node', '-e', script, module], env=env, capture=True).stdout.strip())
+        executable = Path(prepared['browsers'][0]['executable'])
         config = runtime / 'browser.json'
-        if config.exists():
-            # An explicitly selected existing executable remains the authority.
-            executable = Path(json.loads(config.read_text())['executable'])
+        previous = json.loads(config.read_text()) if config.exists() else None
+        if previous is not None:
+            # Upgrade the old managed default while preserving explicit custom paths.
+            script = 'const {chromium}=require(process.argv[1]); console.log(chromium.executablePath());'
+            old_default = run(['/usr/bin/node', '-e', script, module], env=env, capture=True).stdout.strip()
+            if previous['executable'] != old_default:
+                executable = Path(previous['executable'])
         if not executable.is_absolute() or not executable.is_file() or not os.access(executable, os.X_OK):
             raise ValueError('The selected Chromium executable is unavailable. No browser setting was changed.')
         script = ('const {chromium}=require(process.argv[1]); '
@@ -285,13 +252,19 @@ def install(root=ROOT, *, prepare_only=False, receipt=None):
                   'headless:true,chromiumSandbox:true}); await b.close();})()'
                   '.catch(e=>{console.error(e.message);process.exit(1)});')
         run(['/usr/bin/node', '-e', script, module, executable], env=env)
-        if not config.exists():
-            with config.open('x') as target:
-                json.dump({'executable': str(executable)}, target)
-                target.write('\n')
-            config.chmod(0o600)
-        print('Checking both Chromium engines inside their Linux tool sandboxes…', flush=True)
-        check_nested_browsers(root, executable, node, env)
+        updated = dict(previous or {}, executable=str(executable))
+        if updated != previous:
+            write_receipt(config, updated)
+        try:
+            print('Checking both tools inside their Linux browser sandboxes…', flush=True)
+            check_nested_browsers(root, executable, node, env)
+        except BaseException:
+            if updated != previous:
+                if previous is None:
+                    config.unlink()
+                else:
+                    write_receipt(config, previous)
+            raise
         result = dict(page_reader=True, mcp=True, browser=str(executable))
         print('Web runtimes are ready. First launch enables Tavily and the browser connection.', flush=True)
         return result

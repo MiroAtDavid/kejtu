@@ -1,8 +1,9 @@
-//! Native folder selection returns a path only; the Files owner grants access on Save.
+//! Operator folder selection/creation; the Files owner remains the access authority.
 #[tauri::command]
 pub async fn choose_folder(
     app: tauri::AppHandle,
     initial: Option<String>,
+    create: Option<bool>,
 ) -> Result<Option<String>, String> {
     if initial
         .as_ref()
@@ -36,7 +37,12 @@ pub async fn choose_folder(
             let parent = handle
                 .get_webview_window("main")
                 .and_then(|w| w.gtk_window().ok());
-            open_dialog(parent.as_ref().map(|p| p.upcast_ref()), initial, sender);
+            open_dialog(
+                parent.as_ref().map(|p| p.upcast_ref()),
+                initial,
+                create.unwrap_or(false),
+                sender,
+            );
         })
         .map_err(|_| "The folder chooser could not open.".to_string())?;
         receiver
@@ -45,7 +51,7 @@ pub async fn choose_folder(
     }
     #[cfg(not(target_os = "linux"))]
     {
-        let _ = (app, initial);
+        let _ = (app, initial, create);
         Err("Folder selection is currently supported on Linux. Enter a path instead.".into())
     }
 }
@@ -54,15 +60,28 @@ pub async fn choose_folder(
 fn open_dialog(
     parent: Option<&gtk::Window>,
     initial: Option<String>,
+    create: bool,
     sender: tokio::sync::oneshot::Sender<Result<Option<String>, String>>,
 ) -> gtk::glib::WeakRef<gtk::FileChooserNative> {
     use gtk::prelude::*;
     use std::cell::RefCell;
     let dialog = gtk::FileChooserNative::new(
-        Some("Choose a folder"),
+        Some(if create {
+            "Create a folder"
+        } else {
+            "Choose a folder"
+        }),
         parent,
-        gtk::FileChooserAction::SelectFolder,
-        Some("Choose folder"),
+        if create {
+            gtk::FileChooserAction::CreateFolder
+        } else {
+            gtk::FileChooserAction::SelectFolder
+        },
+        Some(if create {
+            "Create folder"
+        } else {
+            "Choose folder"
+        }),
         Some("Cancel"),
     );
     dialog.set_modal(true);
@@ -82,11 +101,7 @@ fn open_dialog(
         let result = if response == gtk::ResponseType::Accept {
             dialog
                 .filename()
-                .map(|path| {
-                    path.into_os_string()
-                        .into_string()
-                        .map_err(|_| "Choose a folder with a UTF-8 name.".to_string())
-                })
+                .map(|path| selected_folder(path, create))
                 .transpose()
         } else {
             Ok(None)
@@ -99,6 +114,34 @@ fn open_dialog(
     });
     dialog.show();
     dialog.downgrade()
+}
+
+// Native choosers differ in whether CreateFolder creates before returning.
+// Complete only the explicitly accepted leaf, never parents or an existing file.
+#[cfg(target_os = "linux")]
+fn selected_folder(path: std::path::PathBuf, create: bool) -> Result<String, String> {
+    use std::os::unix::fs::DirBuilderExt;
+    path.to_str().ok_or("Choose a folder with a UTF-8 name.")?;
+    if !path.is_absolute() {
+        return Err("Choose a complete folder path.".into());
+    }
+    if create && !path.is_dir() {
+        std::fs::DirBuilder::new()
+            .mode(0o700)
+            .create(&path)
+            .map_err(|_| {
+                "The folder could not be created here. Choose a writable location.".to_string()
+            })?;
+    }
+    if !path.is_dir() {
+        return Err("This folder is unavailable. Choose an existing folder.".into());
+    }
+    // Files saves canonical targets; use the same identity for existing-grant checks.
+    path.canonicalize()
+        .map_err(|_| "This folder is unavailable.".to_string())?
+        .into_os_string()
+        .into_string()
+        .map_err(|_| "Choose a folder with a UTF-8 name.".to_string())
 }
 
 

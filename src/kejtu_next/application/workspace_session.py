@@ -14,14 +14,13 @@ from .workspace import FIELDS, decode
 def enabled(controls):
     if controls is None:return False
     settings=controls.store.settings()['settings']
-    return settings['model_read'] and any(settings[k] for k in ('university_enabled','radio_enabled','video_enabled'))
+    return settings['model_read'] and settings['university_enabled']
 
 
 class WorkspaceSession:
-    def __init__(self,controls,conversation_id,turn_id,ledger,*,tasks=None,skills=None):
+    def __init__(self,controls,conversation_id,turn_id,ledger,*,tasks=None):
         self.controls,self.store,self.cid,self.tid,self.ledger=controls,controls.store,conversation_id,turn_id,ledger
         self.tasks=tasks
-        self.skills=skills
         self.revision=self.store.epoch()
         self.files_revision=self._files_epoch()
         self.reads=set()
@@ -49,6 +48,17 @@ class WorkspaceSession:
             # turn. Material operations still consult their own Files authority;
             # no saved configuration is treated as empty or rewritten here.
             return 'mcp_unavailable'
+
+    def project_context(self):
+        self.check()
+        if not self.store.settings()['settings']['university_enabled']:return None
+        link=self.store.conversation_project(self.cid)
+        if not link['available'] and not link['module_available']:return None
+        context=dict(project_id=link['project_id'],title=link['title'])
+        if link['module_available']:
+            context.update(module_id=link['module_id'],module_title=link['module_title'])
+        label='Current conversation project/module' if link['module_available'] else 'Current conversation project'
+        return (label+' (quoted metadata): '+json.dumps(context,ensure_ascii=False))
 
     def clear_reads(self):
         self.reads.clear();self.sources.clear()
@@ -79,11 +89,7 @@ class WorkspaceSession:
 
     def preflight(self,name,args):
         self.check()
-        if name=='media':
-            if self.controls.media is None:raise Failure('media_unavailable','Media controls are unavailable.')
-            effect=self.controls.media.preflight(args['command'])
-            if effect:self._quote(args['source_quote'])
-            return
+        if name!='university':raise Failure('workspace_arguments','Unsupported workspace tool.')
         settings=self.store.settings()['settings']
         if not settings['university_enabled']:raise Failure('university_disabled','Enable University in the local workspace settings.')
         action=args['action']
@@ -107,16 +113,6 @@ class WorkspaceSession:
             if data.get('task_id'):self._task(data['task_id'])
             if kind=='practice' and any(source.get('artifact_id') not in self.sources for source in data.get('sources',[])):
                 raise Failure('material_read_required','Read the exact practice sources in this turn before saving an attempt.')
-        # Tool intent supplies a precise workflow boundary without guessing from
-        # keywords. Refuse before effects until the model has the full procedure.
-        if self.skills:
-            procedure=None
-            if action=='calendar.suggest' or action=='record.save' and payload['kind']=='event' and payload['data'].get('kind')=='study':
-                procedure='kejtu-study-planning'
-            elif action=='record.save' and payload['kind'] in ('semester','course'):
-                procedure='kejtu-semester-organization'
-            elif action=='record.save' and payload['kind']=='practice':procedure='kejtu-study-support'
-            if procedure:self.skills.required(procedure)
 
     def observe(self,name,args,result):
         if name!='university' or result.get('status') in ('rejected','not_delivered','not_executed'):return
@@ -133,10 +129,12 @@ class WorkspaceSession:
     def describe(self):
         return dict(actions={key:dict(required=sorted(required),optional=sorted(optional))
                     for key,(required,optional) in FIELDS.items() if key in READS|{'record.save','operation.lookup'}},
+            section_discovery='Use record.page with kind=course and project_id to list only that project’s modules and resource folders, then materials.list/read for an exact module. Files access still applies.',
+            conversation_discovery='conversation.page returns linked conversation identities without message content. Add module_id to project_id for a module’s conversations; project_id=null is only for a standalone module. Omit module_id for the whole project. When search_memory supports conversation_id, use that filter to search relevant originals under existing recall permissions and exclusions.',
             records={name:[field.name for field in fields(record)] for name,record in
                      [('semester',Semester),('course',Course),('event',Event)]},
-            record_labels=dict(semester='project',course='section/module'),
-            optional_grouping='course is a section/module, optionally under a semester (project). Project starts_on and ends_on may be null. Repeating events need a last date when the project has none.',
+            record_labels=dict(semester='project',course='module'),
+            optional_grouping='course is a module, optionally under a semester (project). Project starts_on and ends_on may be null. Repeating events need a last date when the project has none.',
             examples=dict(semester=asdict(Semester('Winter','2026-10-01','2027-01-31','Europe/Vienna')),
                 course=asdict(Course('Statistics','0'*32)),
                 event=asdict(Event('Study','2026-10-20T10:00:00+02:00','2026-10-20T10:45:00+02:00','Europe/Vienna',kind='study'))),
@@ -144,7 +142,7 @@ class WorkspaceSession:
             practice_fields=['course_id','topic','question','answer','feedback','confidence','basis','sources'],
             practice_basis=['user_report','exercise_attempt','model_feedback'],
             task_link_fields=['course_id','task_id','estimate_minutes','material'],
-            task_link_project='For a task linked directly to a project, use course_id=null and add semester_id with that project identity. For a section, use course_id and omit semester_id.',
+            task_link_project='For a task linked directly to a project, use course_id=null and add semester_id with that project identity. For a module, use course_id and omit semester_id.',
             event_types=list(KINDS),event_repeat=['none','daily','weekly'],
             meeting_types=['lecture','tutorial','seminar','lab'],
             fortnightly=dict(repeat='weekly',interval=2),
@@ -159,21 +157,6 @@ class WorkspaceSession:
             return result
         try:
             self.preflight(name,args)
-            if name=='media':
-                # Reserve a complete bounded receipt before any player effect.
-                fit(dict(domain='workspace',status='observed',detail='x'*2048))
-                result=await self.controls.media.command(args['command'],intent_key='media:'+self.tid+':'+hashlib.sha256(args['command'].encode()).hexdigest())
-                result=dict(domain='workspace',**result)
-                if budget.fits(result):return result
-                # Metadata is optional presentation. Keep the complete effect
-                # outcome and actual readiness after execution, never mislabel a
-                # committed player command as rejected because its title is long.
-                data=result.get('data',{})
-                compact=dict(domain='workspace',status=result['status'],player=result.get('player'),
-                    data={k:v for k,v in data.items() if k in ('state','audio_output_ready','video_output_ready','volume','position_seconds')},
-                    reason=result.get('reason'),replayed=result.get('replayed',False),
-                    notice='Optional metadata omitted for context fit; status can be observed separately.')
-                return fit(compact)
             action=args['action']
             if action=='describe':return fit(dict(domain='workspace',**self.describe()))
             payload=decode(action,args['payload_json'])
@@ -183,13 +166,15 @@ class WorkspaceSession:
                 payload['mutation_key']='workspace:'+self.tid+':'+hashlib.sha256(json.dumps(payload,sort_keys=True,ensure_ascii=False).encode()).hexdigest()
             if action in ('materials.read','materials.snapshot'):
                 payload['maximum']=min(payload.get('maximum',16384),max(1,maximum-2048))
-            result=await self.controls.execute(action,payload,origin=origin,fit=fit)
+            if action=='conversation.page':
+                result=self.store.project_conversations(payload['project_id'],module_id=payload.get('module_id'),offset=payload.get('offset',0),limit=payload.get('limit',25),titles=False)
+            else:result=await self.controls.execute(action,payload,origin=origin,fit=fit)
             self.revision=self.store.epoch()
             if action=='snapshot':
                 # University authority does not expose bookmark URLs, pinned-note
                 # identities or selected external calendars from the local layout.
                 result=dict(result,settings={k:v for k,v in result['settings'].items()
-                    if k in ('university_enabled','model_write','radio_enabled','video_enabled','availability')})
+                    if k in ('university_enabled','model_write','availability')})
                 result.pop('layout_revision',None)
                 # This is a settings revision, not a workspace-wide change
                 # counter. Missing record collections are not empty collections.

@@ -1,4 +1,8 @@
 <script lang="ts">
+  import {
+    editSummary,
+    replySummary,
+  } from "$lib/features/workspace/document-assist";
   export let text = "";
   export let complete = true;
   export let onInspect: (() => void) | undefined = undefined;
@@ -17,6 +21,10 @@
   export let disabled = false;
   export let recallExcluded = false;
   export let partialRecallExcluded = false;
+  // Copy/save the same words the conversation displays. The exact structured
+  // request and response remain in the archive and editor validation pipeline.
+  $: question = editSummary(text)?.instruction ?? text;
+  $: answer = replySummary(answerText)?.explanation ?? answerText;
   let editing = false;
   let memoryText = "";
   let saving = false;
@@ -66,7 +74,7 @@
       close(true);
     }
   }
-  async function copy(value = text) {
+  async function copy(value = question) {
     try {
       await navigator.clipboard.writeText(value);
       message = "Copied";
@@ -117,7 +125,7 @@
         {complete ? "Copy question" : "Copy visible question"}
       </button>
       {#if answerText}
-        <button type="button" on:click={() => copy(answerText)}
+        <button type="button" on:click={() => copy(answer)}
           >{answerComplete ? "Copy answer" : "Copy visible answer"}</button
         >
       {/if}
@@ -168,8 +176,8 @@
           on:click={() => {
             close();
             memoryText =
-              complete && new TextEncoder().encode(text).length <= 8192
-                ? text
+              complete && new TextEncoder().encode(question).length <= 8192
+                ? question
                 : "";
             editing = true;
           }}>Save a memory…</button

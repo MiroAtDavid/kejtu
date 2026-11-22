@@ -7,7 +7,6 @@ the caller's unconfined restrictions. Only fixed browser owners select that role
 from __future__ import annotations
 
 import hashlib
-import importlib.metadata
 import json
 import os
 from pathlib import Path
@@ -134,6 +133,36 @@ def command(root=ROOT, *, browser=False):
     return [runtime['executables']['browser' if browser else 'tools']]
 
 
+def staging(directory, *, root=ROOT):
+    """The mount profile for a package's dependency step: one writable folder, the read-only system, network.
+
+    Nothing of the user or of Kejtu is mounted: no home, no application folder, no
+    saved state, no other package. It is not the profile a connection runs in, and
+    it is used only while a package is being installed. The caller appends the one
+    command to run.
+    """
+    directory = Path(directory)
+    if (not directory.is_absolute() or directory.is_symlink() or not directory.is_dir()
+            or str(directory.resolve()) != str(directory)):
+        raise ValueError('The staging folder must be a real directory.')
+    args = command(root) + [
+        '--unshare-user', '--unshare-pid', '--unshare-ipc', '--unshare-uts', '--die-with-parent',
+        '--new-session', '--cap-drop', 'ALL', '--ro-bind', '/usr', '/usr', '--proc', '/proc', '--dev', '/dev',
+        '--tmpfs', '/tmp', '--dir', '/etc', '--clearenv', '--setenv', 'HOME', '/tmp',
+        '--setenv', 'PATH', '/usr/bin:/bin', '--setenv', 'LANG', 'C.UTF-8']
+    for name in ('lib', 'lib64', 'bin', 'sbin'):
+        path = Path('/') / name
+        if path.is_symlink():
+            args += ['--symlink', os.readlink(path), str(path)]
+        elif path.exists():
+            args += ['--ro-bind', str(path), str(path)]
+    for name in ('resolv.conf', 'nsswitch.conf', 'hosts', 'ssl', 'ld.so.cache', 'os-release'):
+        path = Path('/etc') / name
+        if path.exists():
+            args += ['--ro-bind', str(path.resolve()), str(path)]
+    return args + ['--bind', str(directory), '/install', '--remount-ro', '/', '--chdir', '/install']
+
+
 def approved_browsers(root):
     root = Path(root).resolve()
     marker = root / '.state/source-install/apparmor.json'
@@ -141,8 +170,8 @@ def approved_browsers(root):
     prepared = json.loads(marker.read_text())['prepared']
     lock_names = ('ops/requirements.lock', 'ops/mcp/package-lock.json')
     if (prepared.get('root') != str(root) or prepared.get('kind') != 'kejtu-web-prepared'
-            or prepared.get('schema') != 1 or set(prepared.get('locks', {})) != set(lock_names)
-            or [r.get('role') for r in prepared.get('browsers', [])] != ['page_reader', 'browser']):
+            or prepared.get('schema') != 2 or set(prepared.get('locks', {})) != set(lock_names)
+            or [r.get('role') for r in prepared.get('browsers', [])] != ['browser']):
         raise ValueError('The managed browser preparation is incomplete or belongs to another installation.')
     for relative, value in prepared['locks'].items():
         if sha256(root / relative) != value:
@@ -150,28 +179,21 @@ def approved_browsers(root):
     node = root / '.state/mcp-runtime/playwright'
     if (node / 'package-lock.json').read_bytes() != (root / 'ops/mcp/package-lock.json').read_bytes():
         raise ValueError('The browser runtime no longer matches its dependency lock.')
-    try:
-        reader_package = Path(importlib.metadata.distribution('playwright').locate_file('playwright/driver/package')).resolve()
-    except importlib.metadata.PackageNotFoundError:
-        raise ValueError('The page-reader dependency is missing. Rerun the source installer.') from None
-    if not reader_package.is_relative_to(root / '.venv'):
-        raise ValueError('The page-reader runtime belongs to another installation.')
     real_file(node / 'node_modules/@playwright/mcp/cli.js')
-    for selected, directory, package in zip(prepared['browsers'],
-            (root / '.state/playwright', root / '.state/mcp-runtime/browsers'),
-            (reader_package, node / 'node_modules/playwright-core')):
-        browser = Path(selected['executable'])
-        real_file(browser, executable=True)
-        registry = package / 'browsers.json'
-        real_file(registry)
-        if (not browser.is_relative_to(directory) or sha256(browser) != selected['sha256']
-                or browser.stat().st_size != selected['bytes']
-                or sha256(registry) != selected['registry_sha256']):
-            raise ValueError('The browser or registry differs from its approved managed executable.')
+    selected = prepared['browsers'][0]
+    browser = Path(selected['executable'])
+    directory = root / '.state/mcp-runtime/browsers'
+    registry = node / 'node_modules/playwright-core/browsers.json'
+    real_file(registry)
+    real_file(browser, executable=True)
+    if (not browser.is_relative_to(directory) or '..' in browser.parts
+            or sha256(browser) != selected['sha256'] or browser.stat().st_size != selected['bytes']
+            or sha256(registry) != selected['registry_sha256']):
+        raise ValueError('The browser or registry differs from its approved managed executable.')
     return prepared['browsers']
 
 
-def browser_identity(root, row):
+def browser_identity(root, row, *, allow_previous=False):
     """Recognize execution content, never connection names or imported flags.
 
     A saved connection is mutable. Both the host and worker recheck its exact
@@ -187,19 +209,26 @@ def browser_identity(root, row):
     if config.is_symlink():
         raise ValueError('The browser configuration is redirected.')
     browser = Path(json.loads(config.read_text())['executable'])
-    expected = dict(transport='stdio', command=str(Path(sys._base_executable).resolve()),
-                    args=['-B', '-m', module, '--runtime', str(runtime), '--browser', str(browser)],
+    def fields(executable):
+        return dict(transport='stdio', command=str(Path(sys._base_executable).resolve()),
+                    args=['-B', '-m', module, '--runtime', str(runtime), '--browser', str(executable)],
                     env={'PYTHONPATH': str(root / 'src')},
-                    read_paths=[str(root / 'src'), str(runtime), str(browser.parents[1])],
+                    read_paths=[str(root / 'src'), str(runtime), str(executable.parents[1])],
                     write_paths=[], network=True, requires_web=True)
-    if any(row.get(key) != value for key, value in expected.items()) or row.get('shared_root'):
+
+    expected = fields(browser)
+    allowed = [expected]
+    directory = root / '.state/mcp-runtime/browsers'
+    # Only the former shipped Linux default is interchangeable. A saved custom
+    # command, mount, environment or browser has to pass the original exact check.
+    replacement = directory / 'chromium_headless_shell-1243/chrome-headless-shell-linux64/chrome-headless-shell'
+    if allow_previous and browser == replacement:
+        allowed.append(fields(directory / 'chromium-1243/chrome-linux64/chrome'))
+    if row.get('shared_root') or not any(all(row.get(k) == v for k, v in form.items()) for form in allowed):
         raise ValueError('The included browser command or access changed. Restore its included connection before using it.')
-    # A compatible unrestricted system can still run an explicitly chosen browser
-    # under its existing namespace contract. Ubuntu's extra policy covers only the
-    # two managed engines from the preparation receipt.
-    identity = dict(command=expected['command'], args=expected['args'])
+    identity = dict(command=expected['command'], args=expected['args'], read_paths=expected['read_paths'])
     if restricted():
-        selected = approved_browsers(root)[1]
+        selected = approved_browsers(root)[0]
         if str(browser) != selected['executable']:
             raise ValueError('The browser differs from its approved managed executable.')
         identity['browser_sha256'] = selected['sha256']

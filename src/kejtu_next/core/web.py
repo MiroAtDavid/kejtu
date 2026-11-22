@@ -64,12 +64,12 @@ not a new check of the live page. If a page is blocked by a cookie wall, 401, pa
 or other access challenge, report it and stop; do not loop. Partial extraction is
 not proof that the missing information does not exist.
 
-Interactive pages: Playwright MCP interaction tools are NOT available in this
-replacement. Do not invent browser calls or claim to have clicked or typed. If an
-answer requires interaction that web_read cannot provide, explain the gap. A
-navigation success or snapshot file link alone would not establish page content;
-only actual returned text supports a page claim. Use available app tools, never
-terminal network commands, another endpoint or a browser launch to bypass access.
+Interactive pages: web_read cannot click or fill forms. When MCP tools are
+supplied, discover permitted browser tools with mcp_tools and use mcp_call with
+their exact schemas. Explain the gap if none supports the interaction. Never
+invent calls or claim unverified actions. Navigation or snapshot links alone do
+not establish page content; obtain actual returned text. Use available app tools,
+never terminal network commands, another endpoint or a browser launch to bypass access.
 
 Cite what you actually got. Link actual source URLs, never reconstructed ones.
 Put citations beside the supported claims; remove an unread snippet citation or

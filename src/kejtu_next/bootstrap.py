@@ -37,6 +37,13 @@ def initialize_desktop_web(store, host):
         host.add_browser(host.connections.read()['revision'])
 
 
+def initialize_desktop_terminals(host):
+    from .adapters.mcp.terminals import DIRECTORY, NAMES
+    if sys.platform == 'linux' and (host.root / '.state/mcp-runtime' / DIRECTORY).is_dir():
+        for name in NAMES:
+            host.setup(name, host.connections.read()['revision'])
+
+
 def initialize_desktop_workspace(store):
     """Fresh desktop choices; never replace an existing saved workspace policy."""
     from .application.clock import ClockContext
@@ -71,7 +78,17 @@ def initialize_desktop_reflection(store, profile, *, notes_write):
         Schedule(start.isoformat(), zone, repeat='daily'), profile,
         permissions=JobPermissions(read_memory=True, write_notes=notes_write),
         enabled=True)
-    return store.jobs.save(definition, mutation_key=uuid4().hex, now=now.isoformat())
+    receipt = store.jobs.save(definition, mutation_key=uuid4().hex, now=now.isoformat())
+    care = JobDefinition('notebook_care', 'Keep notebook tidy', None,
+        Schedule(start.isoformat(), zone, repeat='daily'), profile,
+        permissions=JobPermissions(read_memory=True, write_notes=notes_write),
+        enabled=True)
+    store.jobs.save(care, mutation_key=uuid4().hex, now=now.isoformat())
+    review = JobDefinition('reminder_review','Review leftover reminders',None,
+        Schedule(start.isoformat(),zone,repeat='daily'),profile,
+        permissions=JobPermissions(read_memory=True),enabled=True)
+    store.jobs.save(review,mutation_key=uuid4().hex,now=now.isoformat())
+    return receipt
 
 
 def native_profile(path: Path, expected_sha256: str | None = None):
@@ -129,11 +146,11 @@ def wire_chatgpt(session, saved):
 def workspace_controls(app):
     """Composition root: application owners receive current concrete adapters."""
     from .adapters.mcp.course_material import CourseMaterials
-    from .adapters.web.media.runtime import MediaRuntime
-    from .application.media import MediaControls
+    from .adapters.web.media.runtime import CalendarRuntime
+    from .application.media import CalendarControls
     from .application.workspace import WorkspaceControls
     return WorkspaceControls(app,materials=CourseMaterials(app.store,getattr(app.mcp_host,'files',None)),
-        media=MediaControls(app,MediaRuntime(app.store)))
+        media=CalendarControls(app,CalendarRuntime()))
 
 
 def native_main(argv=None) -> int:
@@ -202,6 +219,8 @@ def native_main(argv=None) -> int:
             model, provider_mode = DevelopmentModel(), 'development_fake'
         store = SqliteStore(args.state_dir, create=args.initialize,
                             expected_state_id=args.expected_state_id)
+        from .adapters.skills.included import install_included
+        install_included(store)
         saved_models = None
         if args.profile is not None:
             store.recall.embedding = LocalEmbedding()
@@ -211,11 +230,18 @@ def native_main(argv=None) -> int:
         from .adapters.mcp.host import McpHost
         from .adapters.skills.packages import PackageImporter
         from .adapters.web.providers import WebBackends
-        mcp_host = McpHost(args.state_dir)
+        from .adapters.mcp.secrets import ConnectionSecrets, MAX_VALUE_BYTES, credential_value
+        from .adapters.models.credentials import SecretItem
+        # Connection keys use the same desktop keyring owner as provider keys, one
+        # item per saved value, with the connection's own value rule.
+        mcp_host = McpHost(args.state_dir, secrets=ConnectionSecrets(
+            lambda identity, label: DesktopKeyring(spec=SecretItem('mcp-connection', identity, label),
+                                                   validate=credential_value, encoding='utf-8', limit=MAX_VALUE_BYTES)))
         if args.initialize and args.profile is not None:
             from .adapters.skills.starter import install_starter
             install_starter(store)
             initialize_desktop_web(store, mcp_host)
+            initialize_desktop_terminals(mcp_host)
             initialize_desktop_workspace(store)
             store.onboarding.offer()
             initialize_desktop_reflection(store, profile, notes_write=args.notes_write)
@@ -345,6 +371,174 @@ def main(argv=None) -> int:
             store.close()
 
 
+def package_tree_request(args):
+    """One request of the disposable package-tree process; data only, nothing is executed.
+
+    ``materialize`` downloads a pinned archive, unpacks it beside its destination,
+    checks the unpacked tree against its pinned hash and publishes it with one
+    rename; an existing tree is never replaced. ``verify`` hashes what is there.
+    """
+    import shutil
+    import tarfile
+    from .adapters import artifacts
+    from .adapters.mcp.trees import artifact, clear_leftovers, missing_programs, tree_path
+    root, commands = Path(args['root']), args.get('commands', [])
+    if args['action'] == 'verify':
+        path = tree_path(root, args['key'])
+        if any(item.is_symlink() for item in (path, path.parent, root)):
+            return dict(ok=True, state='different')
+        if not path.exists():
+            return dict(ok=True, state='absent')
+        try:
+            same = path.is_dir() and artifacts.tree_hash(path) == args['key'].partition('/')[0]
+        except artifacts.ArtifactError:
+            same = False
+        if not same:
+            return dict(ok=True, state='different')
+        return dict(ok=True, state='incomplete' if missing_programs(path, commands) else 'ok')
+    pin = artifact(args['artifact'])
+    try:
+        parent = artifacts.real_directory(root / pin['tree_sha256'])
+        cache = artifacts.real_directory(root / '.downloads')
+        # Leftovers of a run that was ended: only one tree is worked on at a time.
+        # Only real folders of this layout are entered; a link is never followed.
+        clear_leftovers(root)
+        for stale in cache.glob('.download-*'):
+            if stale.is_symlink() or stale.is_file():
+                stale.unlink(missing_ok=True)
+        destination = parent / pin['directory']
+        if destination.is_symlink() or destination.exists():
+            if destination.is_symlink() or not destination.is_dir() or artifacts.tree_hash(destination) != pin['tree_sha256']:
+                return dict(ok=False, code='shelf_tree_differs',
+                            error='A different folder already occupies this package tree; it was left untouched.')
+            absent = missing_programs(destination, commands)
+            if absent:
+                # The pinned tree is in place; it simply does not hold what this package declares.
+                return dict(ok=False, code='shelf_program_missing',
+                            error=f'The package tree does not contain the declared program {absent[0]}; nothing was changed.')
+            return dict(ok=True, state='present')
+    except artifacts.ArtifactError as error:
+        return dict(ok=False, code='shelf_tree', error=str(error))
+    item = dict(pin, id=pin['directory'], archive=pin['sha256'] + '.tar.gz')
+    try:
+        archive = artifacts.download(cache, item, user_agent='Kejtu-shelf')
+    except artifacts.ArtifactError as error:
+        return dict(ok=False, code='shelf_download', error=str(error))
+    except OSError:
+        return dict(ok=False, code='shelf_download', error='The package archive could not be downloaded; nothing was installed.')
+
+    def prepare(temporary):
+        extracted = artifacts.extract_archive(archive, temporary, item)
+        if pin.get('dependencies') == 'npm':
+            # The one step that runs a program: npm, in its own sandbox profile. The
+            # pinned tree is the result, so it is hashed after this step.
+            npm_dependencies(extracted, args.get('registry'))
+        elif pin.get('dependencies') == 'wheels':
+            # Python wheels are downloaded at their pinned size and hash and copied in
+            # as plain files. Nothing is built or run, so this step needs no sandbox.
+            used = sum(path.stat().st_size for path in extracted.rglob('*') if path.is_file() and not path.is_symlink())
+            wheel_dependencies(extracted, cache, pin['unpacked_bytes'] - used)
+        if pin.get('dependencies'):
+            size = sum(path.stat().st_size for path in extracted.rglob('*') if path.is_file() and not path.is_symlink())
+            if size > pin['unpacked_bytes']:
+                raise artifacts.ArtifactError('The installed package is larger than its pin allows; nothing was installed.')
+        if artifacts.tree_hash(extracted) != pin['tree_sha256']:
+            raise artifacts.ArtifactError('The unpacked package does not match its pinned contents; nothing was installed.')
+        absent = missing_programs(extracted, commands)
+        if absent:
+            raise artifacts.ArtifactError(f'The package does not contain its declared program {absent[0]}; nothing was installed.')
+        return extracted
+    try:
+        artifacts.publish(destination, prepare)
+    except Failure as error:  # the dependency step refused, saying why; nothing was published
+        return dict(ok=False, code=error.code, error=error.detail[:500])
+    except (artifacts.ArtifactError, tarfile.TarError, EOFError) as error:
+        message = str(error) if isinstance(error, artifacts.ArtifactError) else 'The package archive could not be unpacked; nothing was installed.'
+        return dict(ok=False, code='shelf_tree', error=message)
+    archive.unlink(missing_ok=True)  # verified and published; it can be downloaded again
+    return dict(ok=True, state='published')
+
+
+def npm_dependencies(tree, registry=None):
+    """Install a package's npm dependencies from its lock file, inside the staging sandbox.
+
+    npm runs with the read-only system, network, and this one folder; nothing of the
+    user or of Kejtu is mounted. No package script runs (``--ignore-scripts``) and no
+    command link is made (``--no-bin-links``), so the result holds only regular files
+    and can be hashed strictly. ``registry`` is for tests; the public registry is used
+    otherwise, and the lock's integrity values are what npm verifies either way.
+    """
+    import subprocess
+    from .adapters.linux_sandbox import staging
+    from .adapters.mcp.trees import NODE, NPM, REGISTRY, npm_lock
+    npm_lock(tree)
+    if not (Path(NPM).is_file() and Path(NODE).is_file()):
+        raise Failure('shelf_dependency', 'This package needs Node.js and npm installed on this computer; nothing was installed.')
+    try:
+        command = staging(tree) + [
+            '--setenv', 'npm_config_cache', '/tmp/npm-cache', '--setenv', 'npm_config_update_notifier', 'false',
+            # One quick retry for a dropped connection; a download that does not match its lock is not worth waiting on.
+            '--setenv', 'npm_config_fetch_retries', '1', '--setenv', 'npm_config_fetch_retry_mintimeout', '1000',
+            '--setenv', 'npm_config_fetch_retry_maxtimeout', '5000',
+            '--setenv', 'npm_config_registry', registry or REGISTRY, '--',
+            NPM, 'ci', '--omit=dev', '--ignore-scripts', '--no-bin-links', '--no-audit', '--no-fund']
+        result = subprocess.run(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=200)
+    except subprocess.TimeoutExpired:
+        raise Failure('shelf_dependency', 'Installing the package’s dependencies took too long and was stopped; nothing was installed.') from None
+    except (OSError, ValueError, KeyError, StopIteration):
+        raise Failure('shelf_dependency', 'The Linux tool sandbox is incomplete or changed; the package’s dependencies were not installed.') from None
+    if result.returncode != 0:
+        raise Failure('shelf_dependency', 'npm could not install the package’s dependencies exactly as locked; nothing was installed.')
+    # npm's own copy of the lock inside node_modules varies with the npm version and is not part of the package.
+    hidden = Path(tree) / 'node_modules/.package-lock.json'
+    if hidden.is_file() and not hidden.is_symlink():
+        hidden.unlink()
+
+
+def wheel_dependencies(tree, cache, allowance):
+    """Add a package's pinned Python wheels to its tree, as data.
+
+    Every wheel is fetched through the shared pinned-download primitive (exact size
+    and sha256, HTTPS only) and unpacked into ``site-packages`` as plain files. pip
+    is not used: nothing is built, no command script is generated and nothing is
+    imported or run. The downloaded wheels are discarded once unpacked.
+    """
+    from .adapters import artifacts
+    from .adapters.mcp.trees import WHEEL_FOLDER, wheel_lock
+    items = wheel_lock(tree)
+    target = Path(tree) / WHEEL_FOLDER
+    target.mkdir()
+    remaining = allowance
+    for item in items:
+        try:
+            wheel = artifacts.download(cache, item, user_agent='Kejtu-shelf')
+        except artifacts.ArtifactError as error:
+            raise Failure('shelf_dependency', 'A Python package could not be downloaded exactly as pinned; nothing was installed.') from error
+        except OSError:
+            raise Failure('shelf_dependency', 'A Python package could not be downloaded; nothing was installed.') from None
+        try:
+            remaining -= artifacts.extract_wheel(wheel, target, remaining)
+        except artifacts.ArtifactError as error:
+            raise Failure('shelf_dependency', str(error) + ' Nothing was installed.') from None
+        finally:
+            wheel.unlink(missing_ok=True)
+
+
+def package_tree_main():
+    """Private one-request composition for package trees; opens no archive and runs nothing it handles."""
+    try:
+        raw = sys.stdin.buffer.read(65537)
+        if len(raw) > 65536:
+            raise ValueError('Package tree request exceeds its allowance.')
+        result = package_tree_request(json.loads(raw))
+    except Failure as error:
+        result = dict(ok=False, code='shelf_tree', error=error.detail[:500])
+    except Exception:
+        result = dict(ok=False)  # unknown: the caller inspects the tree
+    sys.stdout.write(json.dumps(result, ensure_ascii=False, allow_nan=False))
+    return 0
+
+
 def skill_import_main():
     """Private one-request package-reader composition; opens no archive."""
     import base64
@@ -354,12 +548,25 @@ def skill_import_main():
     try:
         raw=sys.stdin.buffer.read(65537)
         if len(raw)>65536:raise ValueError('Skill import request exceeds its allowance.')
-        args=json.loads(raw);deadline=time.monotonic()+32
+        args=json.loads(raw);deadline=time.monotonic()+(155 if args.get('kind')=='catalogue' else 32)
         def check():
             if time.monotonic()>deadline:raise ValueError('Skill import reached its time limit.')
-        package=load_source(args['kind'],args['source'],check,download)
-        package['files']={p:base64.b64encode(b).decode('ascii') for p,b in package['files'].items()}
-        result=dict(ok=True,package=package)
+        if args['kind']=='catalogue':
+            from .adapters.skills.catalogue import selected, download as download_package
+            from .adapters.web.skill_github import fetch
+            result = download_package(selected(args['identity'], args['digest']), check, get=fetch)
+            for package in result['packages'].values():
+                package['files'] = {p: base64.b64encode(b).decode('ascii') for p, b in package['files'].items()}
+            result['ok'] = True
+        elif args['kind']=='describe':
+            # What a package folder holds, read as data; nothing is loaded from it.
+            from .adapters.skills.bundles import read
+            result=dict(ok=True,description=read(args['source'],check))
+        else:
+            package=load_source(args['kind'],args['source'],check,download,
+                                expected_commit=args.get('expected_commit'),origin=args.get('origin'))
+            package['files']={p:base64.b64encode(b).decode('ascii') for p,b in package['files'].items()}
+            result=dict(ok=True,package=package)
     except Exception as error:
         result=dict(ok=False,error=str(error)[:500])
     sys.stdout.write(json.dumps(result,ensure_ascii=False,allow_nan=False))

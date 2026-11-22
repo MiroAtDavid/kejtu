@@ -1,15 +1,14 @@
 <script lang="ts">
-  import { onMount, tick, getContext, mount, unmount } from "svelte";
+  import { documentViewportHeight } from "./document-dock";
+  import { onMount, tick, getContext } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { identity } from "$lib/api/client";
   import Icon from "$lib/design/Icon.svelte";
   import DocumentPreview from "./DocumentPreview.svelte";
-  import DocumentDiscussion from "./DocumentDiscussion.svelte";
   import type {
     DocumentDiscussionState,
     DocumentDiscussionActions,
   } from "./document-discussion";
-  import DocumentPopover from "./DocumentPopover.svelte";
   import DocumentActivity from "./DocumentActivity.svelte";
   import { workProgress } from "./document-work-progress";
   import { phaseLabel, type Stream } from "$lib/features/chat/stream";
@@ -23,7 +22,7 @@
   let usePdf = true;
   let preparingSource = false;
   import ReaderNotice from "./ReaderNotice.svelte";
-  import { readCourseDocument } from "./craft-document";
+  import { readCourseDocument } from "./document-bytes";
   import { documentDirectory } from "./document-save";
   import { registerReader, refreshReaderDrafts } from "./reader-drafts";
   import {
@@ -37,6 +36,7 @@
     workRequest,
     editPrompt,
     readDocumentReply,
+    proposalText,
     type DocumentReply,
     type DocumentReference,
     type DocumentAssistant,
@@ -63,6 +63,12 @@
   $: documentExchanges = $history.entries.filter((entry) =>
     belongsToDocument(entry, documentReference),
   );
+  const discussion = assistant?.discussion ?? readable(null);
+  $: panelOpen = $discussion?.reference.session_id === sessionId;
+  // A hidden/closed editor cannot remain the target of the main composer.
+  // Its unsent instruction stays with this mounted editor for reopening.
+  $: if (!active && panelOpen && !asking)
+    assistant?.releaseDiscussion?.(sessionId);
   const available = assistant?.available ?? readable(false);
   const pending = assistant?.pending ?? readable(false);
   const progress = assistant?.progress ?? readable<Stream | null>(null);
@@ -185,19 +191,11 @@
   let controller: AbortController | null = null;
   let proposal: DocumentReply | null = null;
   let appliedState: { requestId: string; text: string } | null = null;
-  let panelOpen = false;
-  let panelX = 200,
-    panelY = 200;
   let zoom = 100;
   let focusHint = "";
   let menu: { x: number; y: number; label: string } | null = null;
   let menuElement: HTMLDivElement;
-  function closePanel() {
-    panelOpen = false;
-    if (mode !== "preview") view?.focus();
-    else surface?.querySelector<HTMLElement>(".preview")?.focus();
-  }
-  async function openPanel(x?: number, y?: number) {
+  async function openPanel() {
     if (!view || !ready) return;
     // Keyboard selections have no mouseup event. Capture their optional hint
     // before the panel takes focus; failed source mapping never gates editing.
@@ -209,14 +207,27 @@
       visualHint()
     )
       rememberHint();
-    const bounds = surface.getBoundingClientRect();
-    panelX = x ?? Math.max(bounds.left + 12, bounds.right - 580);
-    panelY = y ?? bounds.top + 64;
     menu = null;
-    panelOpen = true;
+    try {
+      await assistant?.discuss?.({
+        reference: documentReference,
+        model: discussionModel,
+        actions: discussionActions,
+      });
+    } catch (e) {
+      assistError = e instanceof Error ? e.message : String(e);
+    }
   }
+  // The "···" document options close on a click anywhere outside them, like
+  // the selection menu (and on Escape, in documentKeys).
+  let optionsMenu: HTMLDetailsElement | undefined;
   function dismissMenu(e: PointerEvent) {
     if (menu && !menuElement?.contains(e.target as Node)) menu = null;
+    if (
+      optionsMenu?.open &&
+      !(e.target instanceof Node && optionsMenu.contains(e.target))
+    )
+      optionsMenu.open = false;
   }
   function visualHint() {
     const selected = window.getSelection();
@@ -261,6 +272,9 @@
     try {
       let range: { from: number; to: number };
       let label = "";
+      // The text the menu's card shows in the chat box and the request
+      // carries as focus_hint: the marked blocks, or the selected source.
+      let marked = "";
       if (origin === "source") {
         range = view.selection();
         if (range.from === range.to) {
@@ -316,10 +330,15 @@
             ? "Selected blocks"
             : (block.dataset.documentLabel ?? "block");
         label = label[0].toUpperCase() + label.slice(1);
+        marked = blocks
+          .map((item) => item.textContent?.trim() ?? "")
+          .filter(Boolean)
+          .join("\n\n");
       }
+      if (origin === "source") marked = text.slice(range.from, range.to);
       e.preventDefault();
-      focusHint = "";
       target = view.markTarget(range);
+      focusHint = marked;
       menu = {
         x: e.clientX || surface.getBoundingClientRect().left + 60,
         y: e.clientY + 10 || surface.getBoundingClientRect().top + 50,
@@ -348,7 +367,7 @@
       menu = null;
       if (context) {
         e.preventDefault();
-        void openPanel(e.clientX, e.clientY + 20);
+        void openPanel();
       }
     }
   }
@@ -356,7 +375,7 @@
   function insertAfter() {
     if (!target || !view || !menu) return;
     target = view.markTarget({ from: target.to, to: target.to });
-    void openPanel(menu.x, menu.y + 30);
+    void openPanel();
   }
   function wholeDocument() {
     if (!view || asking) return;
@@ -366,6 +385,14 @@
   }
 
   function documentKeys(e: KeyboardEvent) {
+    if (e.key === "Escape" && optionsMenu?.open) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (optionsMenu.contains(document.activeElement))
+        optionsMenu.querySelector("summary")?.focus({ preventScroll: true });
+      optionsMenu.open = false;
+      return;
+    }
     if (!active || !focused) return;
     if (e.key === "Escape") menu = null;
     if (
@@ -416,9 +443,6 @@
       assistError = e instanceof Error ? e.message : String(e);
     }
   }
-  onMount(() =>
-    assistant?.register?.(documentReference, () => openDiscussion()),
-  );
   async function ask() {
     if (asking || !$available || !assistant || !view || !instruction.trim())
       return;
@@ -457,7 +481,18 @@
         source,
       );
       liveRequestId = request.request_id;
-      const response = await assistant.ask(editPrompt(request), signal);
+      const response = await assistant.ask(editPrompt(request), signal, () => {
+        // Keep uncertain submissions and newer typing. The saved exchange owns
+        // accepted text even when the answer later fails or is stopped.
+        if (!disposed && instruction === submitted) instruction = "";
+        // As with a marked PDF passage, sending unmarks: the sent question
+        // keeps its card, the chat box and the document are clear again.
+        if (!disposed) {
+          view?.clearTarget();
+          target = null;
+          focusHint = "";
+        }
+      });
       if (disposed || signal.aborted) return;
       clearTimeout(progressTimer);
       progressTimer = undefined;
@@ -475,7 +510,6 @@
         // Conversation has no replacement field and must never touch the editor,
         // target, dirty state or Undo history (even after concurrent typing).
         assistant.outcome?.(request.request_id, "replied");
-        if (instruction === submitted) instruction = "";
       } else {
         const beforeEdit = text;
         let applied = false;
@@ -502,7 +536,6 @@
             request.request_id,
             changed ? "applied" : "unchanged",
           );
-          if (instruction === submitted) instruction = "";
         }
       }
       exchanges = [
@@ -556,8 +589,6 @@
     string | null | undefined
   > = async () => courseFolder;
   export let file = "";
-  export let initialContent = "";
-  export let initialName = "";
   export let courseFolder: string | null = null;
   let discussionFile = file;
   export let active = true;
@@ -570,18 +601,20 @@
   let richTools: HTMLDivElement;
   let surface: HTMLDivElement;
   let view: MarkdownView | undefined;
-  let text = file ? "" : initialContent,
+  let text = "",
     saved = "",
     preview = "";
   let ready = false,
     saving = false,
     disposed = false,
     dirty = false;
-  let mode: "edit" | "write" | "preview" | "both" | "diff" = "edit";
+  let mode: "edit" | "write" | "preview" | "both" | "diff" = file
+    ? "preview"
+    : "edit";
   let height = 600,
     error = "",
     notice = "";
-  let name = file.split("/").pop() || initialName || "Untitled.md";
+  let name = file.split("/").pop() || "Untitled.md";
   let documentPath: string | null = null;
   let timer: ReturnType<typeof setTimeout>;
   let paint = 0;
@@ -626,14 +659,23 @@
     if (!active) return;
     paint = requestAnimationFrame(() => {
       if (disposed || !surface?.getClientRects().length) return;
-      height = Math.max(
-        260,
-        innerHeight - surface.getBoundingClientRect().top - 12,
-      );
+      height = documentViewportHeight(surface);
       view?.measure();
     });
   }
+  // Preview and Compare are views you step into: pressing the lit button again
+  // steps back to the view you came from (Write unless it was the source).
+  let returnMode: "edit" | "write" | "both" = "edit";
+  function toggleView(value: "preview" | "diff") {
+    void changeMode(mode === value ? returnMode : value);
+  }
   async function changeMode(value: typeof mode) {
+    if (
+      (value === "preview" || value === "diff") &&
+      mode !== "preview" &&
+      mode !== "diff"
+    )
+      returnMode = mode;
     mode = value;
     view?.setMode?.(value);
     preview = text;
@@ -723,7 +765,6 @@
             ignoreBOM: true,
           }).decode(original.bytes);
         }
-        // A supplied starter is an unsaved document, not an acknowledged file.
         saved = file ? text : "";
         preview = text;
         const mounted = await mountMarkdown(
@@ -756,9 +797,7 @@
         view.setMode?.(mode);
         ready = true;
         resize();
-        // Show a prefilled brief from its beginning; rich-editor focus can scroll
-        // to its last inserted paragraph before the reader has seen the context.
-        if (active && !file && !initialContent) view.focus();
+        if (active && !file) view.focus();
         if (discussionRequested) await openDiscussion();
       } catch (e) {
         if (!disposed) error = e instanceof Error ? e.message : String(e);
@@ -766,6 +805,7 @@
     })();
     return () => {
       disposed = true;
+      assistant?.releaseDiscussion?.(sessionId);
       clearTimeout(progressTimer);
       controller?.abort();
       clearTimeout(timer);
@@ -816,6 +856,10 @@
         ? "Selected passage"
         : "This document",
     hasFocus: !!(target || focusHint),
+    marked: target?.valid
+      ? focusHint || (target.from === target.to ? "" : target.selected)
+      : focusHint,
+    insertion: !!target?.valid && target.from === target.to,
     asking,
     sourceName,
     usePdf,
@@ -856,15 +900,6 @@
             : replyState($progress?.phase)
       : null,
   });
-  function renderDetachedDiscussion(target: HTMLElement) {
-    const instance = mount(DocumentDiscussion, {
-      target,
-      props: { model: discussionModel, actions: discussionActions },
-    });
-    return () => {
-      void unmount(instance);
-    };
-  }
 </script>
 
 <svelte:window
@@ -874,10 +909,6 @@
   on:keydown|capture={documentKeys}
 />
 <div class="markdown-editor">
-  {#if initialContent && !file && !saved}<p class="starter-note">
-      Section brief starter · Add your context, develop it with Ask Kejtu, then
-      save a Markdown copy.
-    </p>{/if}
   <div class="document-toolbar" aria-label="Markdown document controls">
     <button
       class="icon"
@@ -891,7 +922,10 @@
       aria-label="Undo Markdown edit"
       title="Undo"
       disabled={!ready || liveDocument !== null}
-      on:click={() => view?.undo()}><Icon name="undo" size={16} /></button
+      on:click={() =>
+        appliedState && text === appliedState.text
+          ? discussionActions.undo()
+          : view?.undo()}><Icon name="undo" size={16} /></button
     >
     <button
       class="icon"
@@ -900,6 +934,117 @@
       disabled={!ready || liveDocument !== null}
       on:click={() => view?.redo()}><Icon name="redo" size={16} /></button
     >
+    <div class="mode-rail" role="group" aria-label="Markdown view">
+      <button
+        aria-label="Write"
+        title="Write in the formatted document"
+        aria-pressed={mode === "edit"}
+        on:click={() => changeMode("edit")}
+        ><Icon name="text" size={17} /></button
+      >
+      <button
+        aria-label="Preview"
+        title="Preview document"
+        aria-pressed={mode === "preview"}
+        on:click={() => toggleView("preview")}
+        ><Icon name="file" size={17} /></button
+      >
+      <button
+        aria-label="Compare"
+        title="Compare with the opened document"
+        aria-pressed={mode === "diff"}
+        on:click={() => toggleView("diff")}
+        ><Icon name="compare" size={17} /></button
+      >
+    </div>
+    {#if assistant}<button
+        class:working={asking}
+        aria-label="Discuss document in chat"
+        title={asking
+          ? "Kejtu is working…"
+          : panelOpen
+            ? "Return to ordinary chat"
+            : "Discuss in chat · Ctrl/⌘ Shift K"}
+        aria-pressed={panelOpen}
+        disabled={!ready}
+        on:click={() =>
+          panelOpen && !asking
+            ? assistant?.releaseDiscussion?.(sessionId)
+            : openPanel()}
+        ><Icon
+          name="comment"
+          size={17}
+        />{#if asking || instruction.trim() || proposal}<span class="dot"
+          ></span>{/if}</button
+      >{/if}
+    <details class="document-options" bind:this={optionsMenu}>
+      <summary aria-label="Document options" title="Document options"
+        >···</summary
+      >
+      <div class="options-menu">
+        <button
+          aria-label="Source"
+          aria-pressed={mode === "write"}
+          on:click={() => changeMode("write")}>Edit Markdown source</button
+        >
+        <button
+          aria-label="Both"
+          aria-pressed={mode === "both"}
+          on:click={() => changeMode("both")}>Source and preview</button
+        >
+        {#if discussionFile}<button
+            aria-label="Read original Markdown"
+            on:click={() => onReadOriginal(discussionFile)}
+            >Read original Markdown</button
+          >{/if}
+        <details hidden={mode !== "edit"}>
+          <summary>Formatting</summary>
+          <div class="rich-tools" bind:this={richTools}></div>
+        </details>
+        <div class="zoom-controls" role="group" aria-label="Document zoom">
+          <button
+            class="zoom-value"
+            title="Reset zoom"
+            aria-label="Reset document zoom"
+            on:click={() => (zoom = 100)}>{zoom}%</button
+          >
+          <button
+            aria-label="Zoom in"
+            title="Zoom in"
+            disabled={zoom >= 150}
+            on:click={() => (zoom = Math.min(150, zoom + 10))}
+            ><Icon name="zoom-in" size={17} /></button
+          >
+          <button
+            aria-label="Zoom out"
+            title="Zoom out"
+            disabled={zoom <= 80}
+            on:click={() => (zoom = Math.max(80, zoom - 10))}
+            ><Icon name="zoom-out" size={17} /></button
+          >
+        </div>
+        {#if assistant}
+          {#if target || focusHint}<button
+              disabled={asking}
+              on:click={wholeDocument}>Use whole document</button
+            >{/if}
+          {#if sourceName}<label class="reference-source"
+              ><input
+                type="checkbox"
+                bind:checked={usePdf}
+                disabled={asking}
+              />Use {sourceName}</label
+            >{/if}
+          {#if proposal}<details class="unapplied-change">
+              <summary>Unapplied change</summary>
+              <pre>{proposalText(proposal)}</pre>
+              <button on:click={discussionActions.dismissProposal}
+                >Dismiss proposal</button
+              >
+            </details>{/if}
+        {/if}
+      </div>
+    </details>
     <span class="state" role="status"
       >{saving
         ? "Saving…"
@@ -911,16 +1056,16 @@
               ? "Unsaved changes"
               : "Markdown"}</span
     >
-    {#if discussionFile}<button
-        title="Read the saved original and use Explain or Practise"
-        aria-label="Read original Markdown"
-        on:click={() => onReadOriginal(discussionFile)}>Read original</button
-      >{/if}
   </div>
   {#if error}<ReaderNotice
       error
       label="Dismiss Markdown error"
       onDismiss={() => (error = "")}>{error}</ReaderNotice
+    >{/if}
+  {#if assistError && !panelOpen}<ReaderNotice
+      error
+      label="Dismiss editing message"
+      onDismiss={() => (assistError = "")}>{assistError}</ReaderNotice
     >{/if}
   {#if notice}<ReaderNotice
       label="Dismiss Markdown message"
@@ -933,43 +1078,6 @@
     style:--document-zoom={zoom / 100}
     style:--document-height={`${height}px`}
   >
-    <div class="mode-rail" role="group" aria-label="Markdown view">
-      <button
-        aria-label="Write"
-        title="Write in the formatted document"
-        aria-pressed={mode === "edit"}
-        on:click={() => changeMode("edit")}
-        ><Icon name="text" size={17} /></button
-      >
-      <button
-        aria-label="Source"
-        title="Edit Markdown source"
-        aria-pressed={mode === "write"}
-        on:click={() => changeMode("write")}
-        ><Icon name="code" size={17} /></button
-      >
-      <button
-        aria-label="Preview"
-        title="Preview document"
-        aria-pressed={mode === "preview"}
-        on:click={() => changeMode("preview")}
-        ><Icon name="file" size={17} /></button
-      >
-      <button
-        aria-label="Both"
-        title="Source and preview side by side"
-        aria-pressed={mode === "both"}
-        on:click={() => changeMode("both")}
-        ><Icon name="sidebar" size={17} /></button
-      >
-      <button
-        aria-label="Compare"
-        title="Compare with the opened document"
-        aria-pressed={mode === "diff"}
-        on:click={() => changeMode("diff")}
-        ><Icon name="compare" size={17} /></button
-      >
-    </div>
     <div class="surface" class:both={mode === "both"} use:documentScrollbars>
       <!-- Selection and context menus enhance the ordinary keyboard editor. -->
       <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -1028,44 +1136,6 @@
         />
       {/if}
     </div>
-    <div class="document-rail">
-      {#if assistant}<button
-          class:working={asking}
-          aria-label="Ask Kejtu"
-          title={asking ? "Kejtu is working…" : "Ask Kejtu · Ctrl/⌘ Shift K"}
-          aria-pressed={panelOpen}
-          disabled={!ready}
-          on:click={() => (panelOpen ? closePanel() : openPanel())}
-          ><Icon
-            name="comment"
-            size={17}
-          />{#if asking || instruction.trim() || proposal}<span class="dot"
-            ></span>{/if}</button
-        >{/if}
-      <div class="rich-tools" bind:this={richTools}></div>
-      <div class="zoom-controls" role="group" aria-label="Document zoom">
-        <button
-          class="zoom-value"
-          title="Reset zoom"
-          aria-label="Reset document zoom"
-          on:click={() => (zoom = 100)}>{zoom}%</button
-        >
-        <button
-          aria-label="Zoom in"
-          title="Zoom in"
-          disabled={zoom >= 150}
-          on:click={() => (zoom = Math.min(150, zoom + 10))}
-          ><Icon name="zoom-in" size={17} /></button
-        >
-        <button
-          aria-label="Zoom out"
-          title="Zoom out"
-          disabled={zoom <= 80}
-          on:click={() => (zoom = Math.max(80, zoom - 10))}
-          ><Icon name="zoom-out" size={17} /></button
-        >
-      </div>
-    </div>
   </div>
   {#if active && menu}
     <div
@@ -1076,13 +1146,15 @@
       role="group"
       aria-label="Document selection actions"
     >
-      <button on:click={() => menu && openPanel(menu.x, menu.y + 30)}
-        >{menu.label
-          ? `Edit ${menu.label.toLowerCase()}…`
-          : "Ask Kejtu…"}</button
-      >
+      <!-- Each choice puts the marked passage (or the place after it) into the
+           chat box as a card; Kejtu reads from the words whether to answer or
+           edit, so Conversation and Edit send the same mark. -->
+      <button on:click={() => menu && openPanel()}>Conversation</button>
+      {#if menu.label}<button on:click={() => menu && openPanel()}
+          >Edit {menu.label.toLowerCase()}</button
+        >{/if}
       {#if target && target.from !== target.to}<button on:click={insertAfter}
-          >Insert after…</button
+          >Insert after</button
         >{/if}
       <button
         aria-label="Close selection menu"
@@ -1091,25 +1163,9 @@
       >
     </div>
   {/if}
-  {#if assistant && active && panelOpen}
-    <DocumentPopover
-      bind:x={panelX}
-      bind:y={panelY}
-      onClose={closePanel}
-      renderDetached={renderDetachedDiscussion}
-    >
-      <DocumentDiscussion model={discussionModel} actions={discussionActions} />
-    </DocumentPopover>
-  {/if}
 </div>
 
 <style>
-  .starter-note {
-    margin: 8px 12px;
-    font-size: var(--ke-text-xs);
-    line-height: 1.5;
-    color: var(--ke-text-secondary);
-  }
   .markdown-editor {
     min-width: 0;
   }
@@ -1117,72 +1173,86 @@
     position: relative;
     container-type: inline-size;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) var(--document-rail-width);
+    grid-template-columns: minmax(0, 1fr);
     min-height: 260px;
     background: var(--ke-surface);
   }
-  .mode-rail {
-    position: absolute;
-    z-index: 2;
-    left: var(--document-tool-inset);
-    top: var(--document-tool-inset);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-    padding: 6px;
-    border: 1px solid var(--ke-border);
-    border-radius: var(--ke-radius-lg);
-    background: var(--ke-surface-raised);
-    box-shadow: 0 4px 16px rgb(0 0 0 / 0.11);
-  }
-  :global(.workspace) .mode-rail button,
-  :global(.workspace) .document-rail button {
+  :global(.workspace) .document-toolbar {
+    flex-wrap: wrap;
+    height: auto;
     position: relative;
+    gap: 2px;
+    margin-bottom: 2px;
+  }
+  .mode-rail {
+    margin-left: 6px;
+  }
+  .document-options {
+    position: relative;
+    flex: none;
+  }
+  .document-options > summary {
     display: grid;
     place-items: center;
-    flex: none;
-    width: 32px;
+    width: 28px;
     height: 32px;
-    padding: 0;
-    border: 1px solid transparent;
-    border-radius: var(--ke-radius-sm);
-    background: transparent;
-    color: var(--ke-text-secondary);
+    list-style: none;
     cursor: pointer;
+    color: var(--ke-text-secondary);
   }
-  :global(.workspace) .mode-rail button:hover,
-  :global(.workspace) .document-rail button:hover {
-    background: var(--ke-surface-inset);
+  .document-options > summary::-webkit-details-marker {
+    display: none;
   }
-  :global(.workspace) .mode-rail button[aria-pressed="true"],
-  :global(.workspace) .document-rail button[aria-pressed="true"] {
-    background: var(--ke-surface-inset);
-    border-color: var(--ke-border-strong);
-    color: var(--ke-text-primary);
+  .document-options > summary:focus-visible {
+    outline: 2px solid var(--ke-focus-ring);
   }
-  :global(.workspace) .mode-rail button:focus-visible,
-  :global(.workspace) .document-rail button:focus-visible,
+  .document-options .options-menu {
+    position: absolute;
+    z-index: 6;
+    right: 0;
+    top: 100%;
+    display: flex;
+    flex-direction: column;
+    min-width: 120px;
+    width: max-content;
+    max-width: min(280px, 70vw);
+    gap: 4px;
+    padding: 6px;
+    border: 1px solid var(--ke-border);
+    border-radius: var(--ke-radius-sm);
+    background: var(--ke-surface);
+  }
+  .zoom-controls {
+    display: flex;
+    gap: 2px;
+  }
+  .reference-source {
+    display: flex;
+    gap: 6px;
+    padding: 6px;
+    align-items: start;
+    font-size: var(--ke-text-xs);
+    overflow-wrap: anywhere;
+  }
+  .unapplied-change {
+    padding: 6px;
+    font-size: var(--ke-text-xs);
+  }
+  .unapplied-change pre {
+    max-height: 180px;
+    overflow: auto;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  .document-toolbar .state {
+    flex: 1;
+    margin-left: 4px;
+  }
   .selection-menu button:focus-visible {
     outline: 2px solid var(--ke-focus-ring);
     outline-offset: -1px;
   }
-  .document-rail {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 8px 6px;
-    border-left: 1px solid var(--ke-border);
-  }
-  :global(.workspace) .document-rail > button {
-    width: 32px;
-    height: 32px;
-  }
-  :global(.workspace) .document-rail button:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
-  .document-rail .dot {
+  .document-toolbar .dot {
     position: absolute;
     top: 4px;
     right: 3px;
@@ -1191,13 +1261,7 @@
     border-radius: 50%;
     background: var(--ke-marker-blue);
   }
-  .zoom-controls {
-    margin-top: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-  .document-rail .zoom-value {
+  .zoom-value {
     font: 10px var(--ke-font-ui);
   }
   .surface {
@@ -1220,7 +1284,7 @@
   }
   .preview {
     overflow: auto;
-    padding: var(--document-page-top) var(--document-page-side);
+    padding: 0;
     min-width: 0;
     font-size: calc(14px * var(--document-zoom));
     line-height: 1.7;
@@ -1237,6 +1301,7 @@
     overflow-y: auto;
     overflow-x: hidden;
     width: 44px;
+    max-height: min(40vh, 240px);
     scrollbar-width: none;
   }
   .document-page {
@@ -1244,13 +1309,11 @@
     width: 100%;
     min-height: 100%;
     margin: 0 auto;
-    padding: clamp(24px, 4vw, 56px);
-    background: var(--ke-surface-raised);
-    border: 1px solid color-mix(in srgb, var(--ke-border) 60%, transparent);
-    box-shadow: var(--document-paper-shadow);
+    padding: 18px 20px;
+    background: transparent;
   }
   .both .document-page {
-    padding: 24px;
+    padding: 18px 16px;
   }
   .selection-menu {
     display: flex;

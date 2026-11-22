@@ -6,11 +6,14 @@ from ..core.planner import suggestions, study_preferences
 from ..core.records import Failure
 
 FIELDS={
+    'conversation.project':({'conversation_id'},set()),
+    'conversation.assign':({'conversation_id','project_id','expected_revision','mutation_key'},{'module_id'}),
+    'conversation.page':({'project_id'},{'module_id','offset','limit'}),
     'snapshot':(set(),set()),
     'settings.read':(set(),set()),
     'settings.save':({'settings','expected_revision','expected_layout_revision','mutation_key'},set()),
     'layout.save':({'widgets','expected_revision','mutation_key'},set()),
-    'record.page':({'kind'},{'offset','limit','include_cancelled'}),
+    'record.page':({'kind'},{'offset','limit','include_cancelled','project_id'}),
     'record.read':({'kind','id'},set()),
     'record.save':({'kind','data','mutation_key'},{'id','expected_revision','cancelled','allow_conflicts'}),
     'operation.lookup':({'mutation_key'},set()),
@@ -18,16 +21,16 @@ FIELDS={
     'calendar.preview':({'kind','data'},{'id'}),
     'calendar.suggest':({'first','last','minutes'},{'count','availability'}),
     'materials.document':({'course_id','path'},{'offset','sha256'}),
+    'materials.save_code':({'course_id','path','opened_path','sha256','draft_sha256','upload_id','offset','total','chunk_b64'},set()),
     'materials.list':({'course_id'},{'path','offset','limit'}),
     'materials.read':({'course_id','path'},{'page','offset','maximum','view'}),
     'materials.snapshot':({'course_id','artifact_id'},{'offset','maximum'}),
     'widget.read':({'id'},{'offset','refresh','conversation_id'}),
-    'media.command':({'command'},{'intent_key'}),
     'calendars.list':(set(),set()),
     'widget.sources':({'id','conversation_id'},{'offset'}),
     'widget.source':({'id','conversation_id','read_ref'},{'offset','maximum'}),
 }
-WRITES={'settings.save','record.save'}
+WRITES={'settings.save','record.save','conversation.assign'}
 
 
 def decode(action,raw):
@@ -45,6 +48,10 @@ def decode(action,raw):
         from ..core.planner import identity
         for field in ('id','course_id','artifact_id','conversation_id'):
             if field in value:identity(value[field])
+        for field in ('project_id','module_id'):
+            if field in value and value[field] is not None:identity(value[field])
+        if action=='conversation.page' and value['project_id'] is None and value.get('module_id') is None:
+            raise ValueError('Choose a project or module.')
         for field in ('offset','deadline_offset','limit','maximum','page','expected_revision','expected_layout_revision'):
             if field in value and (type(value[field]) is not int or not 0<=value[field]<2**63):
                 raise ValueError('Workspace positions, revisions and sizes must be bounded nonnegative integers.')
@@ -52,7 +59,7 @@ def decode(action,raw):
             if field in value and type(value[field]) is not bool:raise ValueError('Workspace switches must be explicit booleans.')
         for field in ('data','settings','availability'):
             if field in value and not isinstance(value[field],dict):raise ValueError('Use a structured '+field+' object.')
-        for field in ('first','last','path','command','mutation_key','intent_key','timezone','read_ref','kind'):
+        for field in ('first','last','path','opened_path','mutation_key','timezone','read_ref','kind'):
             if field in value and (not isinstance(value[field],str) or '\x00' in value[field] or len(value[field].encode())>4096):
                 raise ValueError('Use bounded text fields without NUL.')
         return value
@@ -69,8 +76,7 @@ class WorkspaceControls:
 
     async def dispatch(self,action,raw):
         args=decode(action,raw)
-        effect=action=='media.command' and self.media.preflight(args['command'])
-        if action in WRITES or effect:
+        if action in WRITES:
             if self.app.tasks or self.app.store.active_turn_id() is not None:
                 raise Failure('native_busy','Finish the current reply before changing workspace data.')
             await self.app.background.foreground()
@@ -87,6 +93,10 @@ class WorkspaceControls:
 
     async def execute(self,action,args,*,origin=None,fit=None):
         store=self.store
+        if action=='conversation.project':return store.conversation_project(args['conversation_id'])
+        if action=='conversation.assign':
+            return store.assign_conversation(args['conversation_id'],args['project_id'],args['expected_revision'],args['mutation_key'],module_id=args.get('module_id'))
+        if action=='conversation.page':return store.project_conversations(args['project_id'],module_id=args.get('module_id'),offset=args.get('offset',0),limit=args.get('limit',25))
         if action=='snapshot':
             return dict(**store.settings(),semesters=store._all('semester'),courses=store._all('course'))
         if action=='settings.read':return store.settings()
@@ -98,7 +108,6 @@ class WorkspaceControls:
                 warnings=await self.media.permissions_changed(previous,args['settings'])
                 if warnings:receipt=dict(receipt,warnings=warnings)
             return receipt
-        if action=='media.command':return await self.media.command(args['command'],intent_key=args.get('intent_key'))
         if action=='calendars.list':return await self.media.calendars()
         if action in ('widget.sources','widget.source'):
             pinned=await self.widget(dict(id=args['id'],conversation_id=args['conversation_id']))
@@ -118,7 +127,7 @@ class WorkspaceControls:
         if action=='operation.lookup':return store.lookup(args['mutation_key'])
         if action=='record.page':
             return store.page(args['kind'],offset=args.get('offset',0),limit=args.get('limit',50),
-                              include_cancelled=args.get('include_cancelled',False))
+                              include_cancelled=args.get('include_cancelled',False),project_id=args.get('project_id'))
         if action=='record.read':return store.read(args['kind'],args['id'])
         if action=='record.save':
             if args['kind']=='course' and args['data'].get('folder'):
@@ -155,7 +164,7 @@ class WorkspaceControls:
             return dict(occurrences=store.calendar(args['first'],args['last']),deadlines=deadlines,
                         deadline_next_offset=offset+100 if len(rows)>100 else None,
                         calendar_scope='Kejtu timetable only; external calendars shown in widgets are not included.',
-                        reminder_notice='Reminder scheduling runs while Kejtu is open and coalesces missed occurrences on return. Timed alert presentation is not connected yet; saving a reminder does not promise a notification.')
+                        reminder_notice='Reminder scheduling runs while Kejtu is open and coalesces missed occurrences on return. Home reminder presentation is muted; due reminders may be mentioned naturally during conversation; there is no operating-system alarm.')
         if action=='calendar.suggest':
             saved=store.settings()['settings']['availability']
             # Retired weekly-window settings must not silently constrain a plan
@@ -172,6 +181,8 @@ class WorkspaceControls:
                                 '. These are tentative suggestions; check that the times suit you. Describe different hours in chat.') if provisional else None)
         if action=='materials.document':
             return self.materials.document(args['course_id'],args['path'],offset=args.get('offset',0),sha256=args.get('sha256'))
+        if action=='materials.save_code':
+            return self.materials.code_saves.receive(self.materials, **args)
         if action=='materials.list':
             return self.materials.listing(args['course_id'],args.get('path',''),offset=args.get('offset',0),limit=args.get('limit',50))
         if action=='materials.read':
@@ -211,10 +222,6 @@ class WorkspaceControls:
             except Failure as error:
                 return dict(status='unavailable',kind=kind,data=None,reason=error.detail)
             return dict(status='ready',kind=kind,data=dict(body,view_token=token))
-        if kind=='radio':
-            if not settings['radio_enabled']:return dict(status='disabled',kind=kind,data=None)
-            if self.media is None:return dict(status='unavailable',kind=kind,data=None)
-            return dict(status='ready',kind=kind,data=await self.media.command('radio status'))
         if kind=='calendar':
             if not settings['calendar_enabled']:return dict(status='disabled',kind=kind,data=None)
             if self.media is None:return dict(status='unavailable',kind=kind,data=None)

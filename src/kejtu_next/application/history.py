@@ -107,8 +107,14 @@ class HistoryTurn(OperationLoop):
         try:
             # Bound source materialization independently of any token estimate.
             if sum(self._cost(u) for u in selected.values()) > 4 * ledger.profile.context_limit:
+                selected = {ident:self._compact(unit) for ident,unit in selected.items()}
+            if sum(self._cost(u) for u in selected.values()) > 4 * ledger.profile.context_limit:
                 raise Failure('context_limit', 'Protected history exceeds the bounded request; originals remain readable.')
             messages = compose()
+            if ledger.remaining_input(messages) < 0 and not ledger.can_probe(messages):
+                selected = {ident:self._compact(unit) for ident,unit in selected.items()}
+                loaded.clear()
+                messages = compose()
             if ledger.remaining_input(messages) < 0 and not ledger.can_probe(messages):
                 raise Failure('context_limit', 'Protected instructions/current input/recent history do not fit.')
             for ordinal in range(snapshot.total, 0, -1):
@@ -134,6 +140,8 @@ class HistoryTurn(OperationLoop):
                 break
             messages = compose(prune=True)
             self.initial_length = len(messages)
+            record['source_dependencies'] = sorted({source for u in selected.values()
+                for source in (*u.delivery_dependencies, *(u.action_dependencies if not u.action_ids_omitted else ()))})
             record.update(status='admitted', admitted_ids=[u.turn_id for u in sorted(selected.values(), key=lambda u:u.ordinal)],
                 protected_ids=sorted(protected), omitted_count=snapshot.total-len(selected),
                 input_estimate=ledger.request_cost(messages), notice_estimate=message_cost(messages[len(prefix)]))
@@ -184,7 +192,9 @@ class HistoryTurn(OperationLoop):
                     json.dumps(value, ensure_ascii=True, separators=(',', ':')))
             counts = {key: len(value) if isinstance(value, list) else value for key, value in actions.items()}
             compact = record(dict(counts, ids='not_loaded')) if counts != actions else None
-            unit = replace(unit, actions=record(actions), actions_without_ids=compact)
+            dependencies = tuple(source for items in actions.values() if isinstance(items, list)
+                for item in items if isinstance(item, dict) for source in item.get('source_dependencies', []))
+            unit = replace(unit, actions=record(actions), actions_without_ids=compact, action_dependencies=dependencies)
         return unit
 
     @staticmethod
@@ -203,8 +213,11 @@ class HistoryTurn(OperationLoop):
     def _compact(unit):
         # Typed counts from the SAME verified outcomes, not a generated summary
         # or a shortened original. Explicitly disclose unloaded identities.
-        return replace(unit, actions=unit.actions_without_ids, actions_without_ids=None,
-            action_ids_omitted=True) if unit.actions_without_ids else unit
+        if unit.actions_without_ids:
+            unit = replace(unit, actions=unit.actions_without_ids, actions_without_ids=None, action_ids_omitted=True)
+        if unit.deliveries_without_bodies:
+            unit = replace(unit, deliveries=unit.deliveries_without_bodies, deliveries_without_bodies=(), delivery_dependencies=())
+        return unit
 
     def recall_allowance(self, prefix, latest, include_turns):
         """Optional recall cannot displace protected original exchanges."""
@@ -270,6 +283,8 @@ class HistoryTurn(OperationLoop):
             messages = prefix + (notice,) + history + latest
             if ledger.remaining_input(messages) < ledger.working_room:
                 raise Failure('context_limit', 'Exact admitted history does not leave its working reserve.')
+            record['source_dependencies'] = sorted({source for u in selected.values()
+                for source in (*u.delivery_dependencies, *(u.action_dependencies if not u.action_ids_omitted else ()))})
             record.update(status='admitted', admitted_ids=[u.turn_id for u in ordered],
                 protected_ids=sorted(protected), omitted_count=snapshot.total - len(ordered),
                 recent_suffix_start=suffix_start,

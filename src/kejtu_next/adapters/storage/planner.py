@@ -20,12 +20,13 @@ CREATE TABLE planner_layout(singleton INTEGER PRIMARY KEY CHECK(singleton=1),rev
 CREATE TABLE planner_material(artifact_id TEXT PRIMARY KEY REFERENCES artifacts(id),course_id TEXT NOT NULL REFERENCES planner_records(id),
  path TEXT NOT NULL,source_sha256 TEXT NOT NULL,page INTEGER NOT NULL,representation TEXT NOT NULL,
  UNIQUE(course_id,path,source_sha256,page,representation));
+-- Historical observed metadata is retained inert for archive compatibility.
 CREATE TABLE media_tracks(id INTEGER PRIMARY KEY,session_id TEXT NOT NULL,station TEXT NOT NULL,
  title TEXT NOT NULL,observed_at TEXT NOT NULL);
 CREATE INDEX media_track_session ON media_tracks(session_id,id);
 '''
 KINDS = ('semester','course','event','exception','practice','task_link')
-WIDGETS = ('radio','note','calendar','bookmarks','university','tasks')
+WIDGETS = ('note','calendar','bookmarks','university','tasks')
 MAX_RECORDS = 10000
 
 
@@ -35,14 +36,28 @@ def encoded(value):
 
 def defaults():
     return dict(university_enabled=False,model_read=False,model_write=False,widgets=[],
-                radio_enabled=False,video_enabled=False,calendar_enabled=False,calendars=[],
+                calendar_enabled=False,calendars=[],
                 availability=dict(timezone='UTC',windows=[],buffer_minutes=15))
+
+
+def normalize_widgets(widgets):
+    """Retire saved playback cards without touching the stored historical layout."""
+    if not isinstance(widgets,list):return widgets
+    return [w for w in widgets if not isinstance(w,dict) or w.get('kind') not in ('radio','video')]
+
+
+def normalize_settings(value):
+    """Read older archives/clients through the existing settings owner, no migration."""
+    if not isinstance(value,dict):return value
+    result={k:v for k,v in value.items() if k not in ('radio_enabled','video_enabled')}
+    if 'widgets' in result:result['widgets']=normalize_widgets(result['widgets'])
+    return result
 
 
 def validate_settings(value):
     if not isinstance(value,dict) or set(value) != set(defaults()):
         raise ValueError('Use complete workspace settings.')
-    for key in ('university_enabled','model_read','model_write','radio_enabled','video_enabled','calendar_enabled'):
+    for key in ('university_enabled','model_read','model_write','calendar_enabled'):
         if type(value[key]) is not bool:
             raise ValueError('Workspace permissions must be explicit booleans.')
     if value['model_write'] and not value['model_read']:
@@ -100,13 +115,13 @@ class PlannerStore:
     def settings(self):
         row=self.db.execute('SELECT revision,body FROM planner_settings WHERE singleton=1').fetchone()
         layout=self.layout()
-        value=json.loads(row['body']) if row else defaults()
+        value=normalize_settings(json.loads(row['body'])) if row else defaults()
         return dict(revision=row['revision'] if row else 0,layout_revision=layout['revision'],
                     settings=dict(value,widgets=layout['widgets']))
 
     def layout(self):
         row=self.db.execute('SELECT revision,widgets FROM planner_layout WHERE singleton=1').fetchone()
-        return dict(revision=row['revision'],widgets=json.loads(row['widgets'])) if row else dict(revision=0,widgets=[])
+        return dict(revision=row['revision'],widgets=normalize_widgets(json.loads(row['widgets']))) if row else dict(revision=0,widgets=[])
 
     def lookup(self,key):
         text(key,'Operation identity',256)
@@ -143,18 +158,127 @@ class PlannerStore:
         self.db.execute('INSERT INTO planner_operations VALUES(?,?,?)',(key,intent,encoded(result)))
         return result
 
+    def conversation_project(self,conversation_id):
+        identity(conversation_id)
+        if not self.db.execute('SELECT 1 FROM conversations WHERE id=?',(conversation_id,)).fetchone():
+            raise Failure('planner_missing','This conversation is unavailable.')
+        row=self.db.execute("SELECT revision,body FROM planner_records WHERE kind='conversation_link' AND id=?",
+                            (conversation_id,)).fetchone()
+        link=json.loads(row['body']) if row else dict(project_id=None)
+        project_id,module_id=link['project_id'],link.get('module_id')
+        project=self.db.execute("SELECT body,cancelled FROM planner_records WHERE kind='semester' AND id=?",
+                                (project_id,)).fetchone() if project_id else None
+        available=bool(project and not project['cancelled'])
+        module=self.db.execute("SELECT body,cancelled FROM planner_records WHERE kind='course' AND id=?",
+                               (module_id,)).fetchone() if module_id else None
+        module_data=json.loads(module['body']) if module else None
+        # Moving/cancelling a module must not silently move its conversations or
+        # supply a mismatched module as current context. Retain IDs for detachment.
+        module_available=bool(module and not module['cancelled'] and
+                              module_data['semester_id']==project_id and
+                              (project_id is None or available))
+        return dict(conversation_id=conversation_id,project_id=project_id,revision=row['revision'] if row else 0,
+                    available=available,title=json.loads(project['body'])['title'] if available else None,
+                    module_id=module_id,module_available=module_available,
+                    module_title=module_data['title'] if module_available else None)
+
+    def memory_context(self,conversation_id,ledger=None):
+        """Optional recall preference, never a folder/network or memory grant."""
+        if ledger is not None:
+            # Up to seven indexed owner reads; charge their partial SQL quanta.
+            ledger.spend_sql(700)
+        settings=self.settings()['settings']
+        if not settings['model_read'] or not settings['university_enabled']:
+            return {}
+        link=self.conversation_project(conversation_id)
+        return {name:link[name] for name,available in
+                (('project_id','available'),('module_id','module_available')) if link[available]}
+
+    def _conversation_scope(self,project_id,module_id):
+        if project_id is not None:
+            identity(project_id)
+            self._live('semester',project_id)
+        if module_id is not None:
+            identity(module_id)
+            module=self._live('course',module_id)
+            if module['data']['semester_id']!=project_id:
+                raise Failure('planner_module_project','Choose a module belonging to the selected project.')
+
+    def _assign_conversation(self,conversation_id,project_id,revision,*,module_id=None):
+        """Called inside the existing creation or planner mutation transaction.
+
+        Links use the versioned project records, not conversation configuration.
+        Detachment retains a revision so stale windows cannot overwrite it.
+        This kind is deliberately absent from generic/model record.save.
+        """
+        identity(conversation_id)
+        self._conversation_scope(project_id,module_id)
+        if type(revision) is not int or revision<0:
+            raise Failure('planner_arguments','Supply the current conversation attachment revision.')
+        collision=self.db.execute('SELECT kind FROM planner_records WHERE id=?',(conversation_id,)).fetchone()
+        if collision and collision['kind']!='conversation_link':
+            raise Failure('planner_conflict','This identity already belongs to another project record.')
+        current=self.conversation_project(conversation_id)
+        if current['revision']!=revision:
+            raise Failure('planner_conflict','This conversation attachment changed; reload its current project and module.')
+        if current['project_id']==project_id and current['module_id']==module_id:return current
+        if not revision and self.db.execute('SELECT count(*) FROM planner_records').fetchone()[0]>=MAX_RECORDS:
+            raise Failure('planner_capacity','Project records have reached their supported capacity.')
+        now=utc(datetime.now(timezone.utc))
+        changed=self.db.execute("INSERT INTO planner_records VALUES('conversation_link',?,?,?,0,?,?) "
+            'ON CONFLICT(id) DO UPDATE SET revision=excluded.revision,body=excluded.body,updated_at=excluded.updated_at '
+            "WHERE planner_records.kind='conversation_link' AND planner_records.revision=?",
+            (conversation_id,revision+1,encoded(dict(project_id=project_id,module_id=module_id)),now,now,revision))
+        if not changed.rowcount:raise Failure('planner_conflict','The conversation attachment changed while saving.')
+        return self.conversation_project(conversation_id)
+
+    def assign_conversation(self,conversation_id,project_id,revision,key,*,module_id=None):
+        # Preserve old project-only intent identities and their durable receipts.
+        scope=['conversation.assign',conversation_id,project_id,revision]
+        if module_id is not None:scope.append(module_id)
+        intent=hashlib.sha256(encoded(scope).encode()).hexdigest()
+        with self.db:
+            prior=self._prior(key,intent)
+            if prior:return prior
+            result=self._assign_conversation(conversation_id,project_id,revision,module_id=module_id)
+            return self._receipt(key,intent,dict(status='saved',**result,replayed=False))
+
+    def project_conversations(self,project_id,*,module_id=None,offset=0,limit=25,titles=True):
+        if project_id is None and module_id is None:
+            raise Failure('planner_page','Choose a project or module for conversation discovery.')
+        self._conversation_scope(project_id,module_id)
+        if type(offset) is not int or not 0<=offset<=MAX_RECORDS or type(limit) is not int or not 1<=limit<=100:
+            raise Failure('planner_page','Use a bounded page of project conversations.')
+        where="p.kind='conversation_link' AND json_extract(p.body,'$.project_id') IS ?"
+        parameters=[project_id]
+        if module_id is not None:
+            where+=" AND json_extract(p.body,'$.module_id')=?"
+            parameters.append(module_id)
+        rows=self.db.execute("SELECT c.id,c.created_at FROM planner_records p JOIN conversations c ON c.id=p.id "
+            'WHERE '+where+' ORDER BY c.created_at DESC,c.id DESC LIMIT ? OFFSET ?',
+            (*parameters,limit+1,offset)).fetchall()
+        items=[dict(conversation_id=row['id'],created_at=row['created_at']) for row in rows[:limit]]
+        # Model discovery receives identities only. Conversation titles can be
+        # derived from excluded exchanges; original text must use memory grants
+        # and the existing exact-source dependency machinery, never this list.
+        if titles:
+            for item in items:item['title']=self.store.titles.read(item['conversation_id'])['title']
+        return dict(items=items,next_offset=offset+limit if len(rows)>limit else None)
+
     def save_settings(self,value,revision,key,*,layout_revision=None):
+        original=value
+        value=normalize_settings(value)
         try:
             validate_settings(value)
             if type(revision) is not int or revision<0:
                 raise ValueError('Supply the current settings revision.')
-            if len(encoded(value).encode())>32768:
+            if len(encoded(original).encode())>32768:
                 raise ValueError('Workspace settings exceed the supported size.')
         except (ValueError,TypeError,KeyError) as error:
             raise Failure('planner_settings',str(error)) from None
         layout_revision=self.layout()['revision'] if layout_revision is None else layout_revision
         if type(layout_revision) is not int or layout_revision<0:raise Failure('planner_settings','Supply the current layout revision.')
-        intent=hashlib.sha256(encoded(['settings',value,revision,layout_revision]).encode()).hexdigest()
+        intent=hashlib.sha256(encoded(['settings',original,revision,layout_revision]).encode()).hexdigest()
         with self.db:
             prior=self._prior(key,intent)
             if prior:return prior
@@ -173,12 +297,14 @@ class PlannerStore:
 
     def save_layout(self,widgets,revision,key):
         """Presentation never changes a permission epoch or a course record."""
+        original=widgets
+        widgets=normalize_widgets(widgets)
         try:
             validate_settings(dict(defaults(),widgets=widgets))
-            if len(encoded(widgets).encode())>32768:raise ValueError('The widget arrangement exceeds the supported size.')
+            if len(encoded(original).encode())>32768:raise ValueError('The widget arrangement exceeds the supported size.')
             if type(revision) is not int or revision<0:raise ValueError('Supply the current layout revision.')
         except (ValueError,TypeError,KeyError) as error:raise Failure('planner_layout',str(error)) from None
-        intent=hashlib.sha256(encoded(['layout',widgets,revision]).encode()).hexdigest()
+        intent=hashlib.sha256(encoded(['layout',original,revision]).encode()).hexdigest()
         with self.db:
             prior=self._prior(key,intent)
             if prior:return prior
@@ -198,11 +324,14 @@ class PlannerStore:
         return dict(id=row['id'],kind=row['kind'],revision=row['revision'],cancelled=bool(row['cancelled']),
                     created_at=row['created_at'],updated_at=row['updated_at'],data=json.loads(row['body']))
 
-    def page(self,kind,*,offset=0,limit=50,include_cancelled=False):
+    def page(self,kind,*,offset=0,limit=50,include_cancelled=False,project_id=None):
         if kind not in KINDS or type(offset) is not int or not 0<=offset<=MAX_RECORDS or type(limit) is not int or not 1<=limit<=100:
             raise Failure('planner_page','Use a supported record kind and bounded page.')
-        rows=self.db.execute('SELECT id FROM planner_records WHERE kind=? AND (? OR cancelled=0) ORDER BY created_at,id LIMIT ? OFFSET ?',
-                             (kind,int(include_cancelled),limit+1,offset)).fetchall()
+        if project_id is not None:
+            if kind!='course':raise Failure('planner_page','Project filtering applies to modules (course records).')
+            self._live('semester',project_id)
+        rows=self.db.execute("SELECT id FROM planner_records WHERE kind=? AND (? OR cancelled=0) AND (? IS NULL OR json_extract(body,'$.semester_id')=?) ORDER BY created_at,id LIMIT ? OFFSET ?",
+                             (kind,int(include_cancelled),project_id,project_id,limit+1,offset)).fetchall()
         return dict(items=[self.read(kind,row['id']) for row in rows[:limit]],next_offset=offset+limit if len(rows)>limit else None)
 
     def _all(self,kind):
@@ -249,7 +378,7 @@ class PlannerStore:
         if section:
             course=self._live('course',section)
             if course['data']['semester_id']!=project:
-                raise Failure('task_placement','Choose a section belonging to the selected project.')
+                raise Failure('task_placement','Choose a module belonging to the selected project.')
         if not project and not section:return bool(current)
         return len(current)!=1 or any(current[0][k]!=placement[k] for k in ('project_id','section_id'))
 
@@ -319,11 +448,11 @@ class PlannerStore:
             return dict(value,occurrence_at=utc(original))
         if kind=='task_link':
             if set(value) - {'semester_id'} != {'course_id','task_id','estimate_minutes','material'}:
-                raise ValueError('A task link needs a project or section, task, estimate and material references.')
+                raise ValueError('A task link needs a project or module, task, estimate and material references.')
             if value['course_id'] is not None:
                 self._live('course',identity(value['course_id']))
                 if value.get('semester_id') is not None:
-                    raise ValueError('Link either to a section or directly to a project.')
+                    raise ValueError('Link either to a module or directly to a project.')
             else:
                 self._live('semester',identity(value.get('semester_id')))
             self._task(identity(value['task_id']))

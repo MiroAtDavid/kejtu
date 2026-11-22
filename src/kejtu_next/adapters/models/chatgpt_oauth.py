@@ -3,7 +3,6 @@
 Only fixed OpenAI origins receive credentials. Identity is verified before any
 account is activated. This module never logs response bodies or token values.
 """
-import asyncio
 import base64
 import hashlib
 import hmac
@@ -14,6 +13,7 @@ from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, ProxyHandler, build_opener
 
 from ...core.records import Failure
+from ..authorization import joined_io
 from ._transport import NoRedirect
 
 ISSUER = 'https://auth.openai.com'
@@ -38,16 +38,6 @@ class OAuthError(Failure):
         self.oauth_code = code if code in TERMINAL_REFRESH | {'invalid_client', 'access_denied'} else 'oauth_error'
         self.status = status
         super().__init__('chatgpt_auth', f'ChatGPT sign-in could not complete (HTTP {status}, {self.oauth_code}).')
-
-
-async def joined_io(function, *args):
-    """Join bounded credential IO even on cancellation; no late token writes."""
-    task = asyncio.create_task(asyncio.to_thread(function, *args))
-    try:
-        return await asyncio.shield(task)
-    except asyncio.CancelledError:
-        await asyncio.gather(task, return_exceptions=True)
-        raise
 
 
 class OAuthHTTP:

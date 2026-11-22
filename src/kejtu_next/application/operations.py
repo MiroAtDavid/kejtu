@@ -5,6 +5,7 @@ second note writer, allocator, semantic router or retry policy lives here.
 """
 import asyncio
 import json
+from datetime import datetime, timezone
 from ..core.records import Failure, Message
 from ..core.providers import provider
 from ..core.context import RequestAccounting
@@ -16,6 +17,7 @@ from ..core.note_fields import PURPOSES, BASES, THREAD_STATES
 from ..core.tasks import arguments as task_arguments
 from ..core.research import arguments as research_arguments
 from ..core.reminder_tools import arguments as reminder_arguments
+from ..core.interests import tool_arguments as interest_arguments
 from ..core.people import arguments as people_arguments, FIELDS as PEOPLE_FIELDS, WRITES as PEOPLE_WRITES
 
 from ..core.web import arguments as web_arguments
@@ -60,7 +62,9 @@ class OperationLoop:
     async def continue_with(self, request, reply, call_model):
         ledger = self.ledger
         clock = asyncio.get_running_loop().time
+        interest_reads = set()
         while reply.tool_calls or reply.finish_reason == 'tool_calls':
+            interest_results = []
             if not request.allow_tool_calls:
                 raise Failure('tool_limit', 'The final phase requested another operation; nothing ran.')
             if not reply.tool_calls or reply.finish_reason != 'tool_calls':
@@ -118,6 +122,12 @@ class OperationLoop:
                             'recovery': 'search_history requires query (at most 256 UTF-8 bytes) and cursor (empty string for first page). '
                                 'read_history requires the returned 32-hex artifact_id, integer offset >= 0 and max_bytes >= 1. '
                                 'No extra fields. No call in this batch ran.'}
+                        args = None
+                elif self.history_tools and self.memory and self.web and not (ledger.notebook_only or ledger.web_only) and call.name == 'background_interests':
+                    try:
+                        args = interest_arguments(call)
+                    except Failure as error:
+                        preflight_errors[position-1] = dict(status='not_executed',reason=error.code,recovery=error.detail)
                         args = None
                 elif self.people and call.name == 'people':
                     try:
@@ -236,7 +246,7 @@ class OperationLoop:
                         'personal_tasks': {'list','read'},
                         'research_tasks': {'list','read','findings','runs','result'},
                         'people': PEOPLE_READS,
-                        'reminders': {'list','read','pending','outcome'},
+                        'reminders': {'list','read','pending','attention','outcome'},
                     }
                     if call.name in allowed_actions and args.get('action') not in allowed_actions[call.name]:
                         preflight_errors[position-1] = dict(status='not_executed', reason='background_read_only',
@@ -369,8 +379,9 @@ class OperationLoop:
                 task = call.name == 'personal_tasks'
                 research = call.name == 'research_tasks'
                 reminder = call.name == 'reminders'
+                interest = call.name == 'background_interests'
                 people = call.name == 'people'
-                note = call.name in ('write_note', 'note_outcome') or task or reminder or people or research or workspace_tool
+                note = call.name in ('write_note', 'note_outcome') or task or reminder or interest or people or research or workspace_tool
                 if preflight_errors or remeasure or end_work_reason:
                     budget, allowance = None, 0  # Whole feedback fitted or capability-gated; no result body to read.
                 else:
@@ -416,6 +427,9 @@ class OperationLoop:
                                 result = self.research.operation(args, allowance, budget)
                             elif task:
                                 result = self.tasks.operation(args, allowance, budget)
+                            elif interest:
+                                result = self.store.interests.model_operation(args, self.memory.snapshot, self.origin_id,
+                                    ledger, budget, interest_reads, datetime.now(timezone.utc).isoformat())
                             elif reminder:
                                 result = self.reminders.operation(args, allowance, budget)
                             elif note:
@@ -491,6 +505,8 @@ class OperationLoop:
                     people_reads.append((args, result))
                 if reminder and not (preflight_errors or remeasure):
                     reminder_reads.append((args, result))
+                if interest and not (preflight_errors or remeasure):
+                    interest_results.append((args, result))
                 if task and not (preflight_errors or remeasure):
                     task_reads.append((args, result))
                 if research and not (preflight_errors or remeasure):
@@ -564,6 +580,9 @@ class OperationLoop:
                 self.people.observe(args, result)
             for args, result in reminder_reads:
                 self.reminders.observe(args, result)
+            for args, result in interest_results:
+                if args['action'] == 'list' and result.get('status') == 'complete':
+                    interest_reads.update((row['id'],row['revision']) for row in result['items'])
             reply = await call_model(self.origin_id, ledger, request)
             if (checkpointed or finalizing) and ledger.remaining_input(request.messages) < 0:
                 # A provider-first send is permission to measure, not evidence

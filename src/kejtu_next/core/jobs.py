@@ -8,10 +8,11 @@ from .records import Profile
 from .execution import DEFAULT_BACKGROUND_SECONDS, MAX_FOREGROUND_OPERATIONS, PROCEDURE_LIMIT_BOUNDS
 from .schedules import Schedule
 from .research import ResearchSpec
+from .interests import KIND as INTEREST_KIND
 
 REVIEW_KINDS = ('idle_review', 'notebook_maintenance', 'notebook_care')
-KINDS = ('check_in', *REVIEW_KINDS, 'reminder_delivery', 'research')
-QUIET_KINDS = (*REVIEW_KINDS, 'research')
+KINDS = ('check_in', *REVIEW_KINDS, 'reminder_delivery', 'research', INTEREST_KIND, 'reminder_review')
+QUIET_KINDS = (*REVIEW_KINDS, 'research', INTEREST_KIND, 'reminder_review')
 RUN_TERMINAL = ('completed', 'deferred', 'failed', 'cancelled', 'interrupted', 'skipped')
 
 
@@ -49,6 +50,10 @@ def default_job_limits(kind):
     """New-job presets only; saved definitions always supply every field."""
     if kind not in KINDS:
         raise ValueError('Choose an installed background procedure.')
+    if kind == 'reminder_review':
+        return JobLimits(calls=17,operations=16,seconds=120,source_items=12,runs_per_day=1,cooldown_seconds=3600)
+    if kind == INTEREST_KIND:
+        return JobLimits(calls=2, operations=3, seconds=120, source_items=12, runs_per_day=1, cooldown_seconds=3600)
     if kind in QUIET_KINDS:
         # Care returns structured results per group. Reflection and maintenance
         # reserve one additional model response for their final private report.
@@ -83,6 +88,12 @@ class JobDefinition:
             raise ValueError('Only research jobs have an explicit research assignment.')
         if self.kind == 'research' and (self.limits.operations == 0 or self.permissions.write_notes):
             raise ValueError('Research requires web operations and cannot write notebook notes.')
+        if self.kind == INTEREST_KIND and (self.conversation_id is not None or self.limits.calls != 2
+                or self.limits.operations != 3 or self.limits.seconds > 120 or self.limits.runs_per_day > 3
+                or self.limits.cooldown_seconds < 3600):
+            raise ValueError('Interest following uses one independent, bounded allowance: two model requests and three web operations per check, at most three checks per day.')
+        if self.kind == 'reminder_review' and (self.conversation_id is not None or self.limits.operations == 0):
+            raise ValueError('Reminder review requires independent scope and tool operations.')
         if self.kind == 'notebook_care' and (self.conversation_id is not None or self.limits.operations == 0):
             raise ValueError('Notebook care requires independent notebook scope and at least one group operation.')
         if (not isinstance(self.title, str) or not self.title.strip()
@@ -90,8 +101,8 @@ class JobDefinition:
             raise ValueError('Job title must be nonempty bounded text.')
         # A null focus is an independent notebook review, never an implicit chat.
         if self.conversation_id is None:
-            if self.kind not in REVIEW_KINDS:
-                raise ValueError('Only notebook reviews may omit a source conversation.')
+            if self.kind not in (*REVIEW_KINDS, INTEREST_KIND, 'reminder_review'):
+                raise ValueError('Only independent notebook procedures may omit a source conversation.')
         elif not isinstance(self.conversation_id, str) or re.fullmatch('[0-9a-f]{32}', self.conversation_id) is None:
             raise ValueError('Use the exact source-conversation identity.')
         if (type(self.schedule) is not Schedule or type(self.profile) is not Profile

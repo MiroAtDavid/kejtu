@@ -1,8 +1,34 @@
 <script lang="ts">
   import type { Workspace } from "./workspace";
+  import type { UpdateStatus } from "$lib/api/wire.generated";
   import Icon from "$lib/design/Icon.svelte";
   export let workspace: Workspace;
   export let floating = false;
+  /** Installed Linux only: a package update of Kejtu itself. */
+  export let update: UpdateStatus | null = null;
+  export let relaunching = false;
+  export let relaunchError = "";
+  export let onRelaunch: () => void = () => {};
+  /** Relaunch was asked while documents have unsaved edits. */
+  export let savePrompt = false;
+  export let onKeepWorking: () => void = () => {};
+  export let onRelaunchAnyway: () => void = () => {};
+  const UPDATE_TEXT: Record<UpdateStatus["phase"], string> = {
+    normal: "",
+    holding:
+      "An update of Kejtu is being installed. The current work can finish; new work waits.",
+    stopping:
+      "An update of Kejtu is being installed. Work that did not finish in time is stopped, as Stop does.",
+    held: "Kejtu is being updated.",
+    updated: "Kejtu was updated.",
+    failed:
+      "Kejtu could not pause in time, so the update was stopped. New work starts again when it has ended.",
+  };
+  $: updateText = !update
+    ? ""
+    : update.phase === "holding" && update.detail === "files_changed"
+      ? "Kejtu's files were replaced while it was open. The current work can finish; new work waits."
+      : UPDATE_TEXT[update.phase];
   let dismissedError = "";
   let minimizedKey = "";
   let recoveryKey = "";
@@ -17,6 +43,34 @@
 </script>
 
 <div class="notifications" class:floating>
+  {#if update && update.phase !== "normal"}
+    <div class="notification" role="status">
+      <p>{updateText}</p>
+      {#if update.relaunch && savePrompt}
+        <p class="detail">
+          Some documents have unsaved edits. Save them first with Save in each
+          document; saving still works during the update.
+        </p>
+        <div class="actions">
+          <button type="button" on:click={onKeepWorking}
+            >Not now</button
+          >
+          <button
+            type="button"
+            disabled={relaunching}
+            on:click={onRelaunchAnyway}>Relaunch anyway…</button
+          >
+        </div>
+      {:else if update.relaunch}
+        <div class="actions">
+          <button type="button" disabled={relaunching} on:click={onRelaunch}
+            >Relaunch to update</button
+          >
+        </div>
+      {/if}
+      {#if relaunchError}<p class="detail" role="alert">{relaunchError}</p>{/if}
+    </div>
+  {/if}
   {#if $workspace.error && !pending && $workspace.error !== dismissedError}
     <div class="notification" role="alert">
       <header>

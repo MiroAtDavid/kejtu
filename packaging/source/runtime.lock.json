@@ -11,7 +11,7 @@
       "bytes": 19463556,
       "sha256": "61163b62d9faf814b864e1b255d15dc310a71a72ca03d8791fa8024420162745",
       "unpacked_bytes": 47496489,
-      "tree_sha256": "5465967d2556e06761ab73418bbf9964974d1c0b100dfd3b7ef435a757ac121c",
+      "tree_sha256": "d1b44e5d8144bcc7828fce8f6bd794989e7a4fd4c8cffd8bdae23d91bd90bc12",
       "executable": "bin/gridcraft-cli",
       "notices": [
         "share/doc/gridcraft/LICENSE-APACHE",
@@ -19,7 +19,8 @@
         "share/doc/gridcraft/OFL-biz-ud-mincho.txt",
         "share/doc/gridcraft/OFL-biz-ud-pgothic.txt",
         "share/doc/gridcraft/OFL-shippori-mincho.txt"
-      ]
+      ],
+      "upstream_tree_sha256": "5465967d2556e06761ab73418bbf9964974d1c0b100dfd3b7ef435a757ac121c"
     },
     {
       "id": "pdfcraft",
@@ -30,7 +31,7 @@
       "bytes": 84607597,
       "sha256": "bc7d651511273720f6a5ccbe0dd5b2c4ddccb6c576a0aff619f39d2c5667a315",
       "unpacked_bytes": 165487215,
-      "tree_sha256": "bc1743c27e5f5c22471280c62fb7fdc5e1b99525f7c2c3ce6796f725b54185fe",
+      "tree_sha256": "1eb35a9ac954e207ba94718face4614071a691c4205676f64982da6bca7db25f",
       "executable": "bin/pdfcraft-cli",
       "notices": [
         "share/doc/pdfcraft/LICENSE-APACHE",
@@ -42,7 +43,8 @@
         "share/doc/pdfcraft/OFL-noto-sans-cjk-sc.txt",
         "share/doc/pdfcraft/OFL-noto-sans-thai.txt",
         "share/doc/pdfcraft/OFL-shippori-mincho.txt"
-      ]
+      ],
+      "upstream_tree_sha256": "bc1743c27e5f5c22471280c62fb7fdc5e1b99525f7c2c3ce6796f725b54185fe"
     },
     {
       "id": "wordcraft",
@@ -53,7 +55,7 @@
       "bytes": 96839306,
       "sha256": "79bd54c81276f6ea551222432adec15e0eaab4cb5881decee38eafd7a5ca38f9",
       "unpacked_bytes": 177715203,
-      "tree_sha256": "a91bcd4aeb86a5a4e8c159320c54485ae537c6a2423d4e2391e2b159c4727f35",
+      "tree_sha256": "3469ff0b69bc8dd751924aa668516e78d9ae57d8be7bb38b4cb2e914f5a262c7",
       "executable": "bin/wordcraft-cli",
       "notices": [
         "share/doc/wordcraft/LICENSE-APACHE",
@@ -63,7 +65,8 @@
         "share/doc/wordcraft/OFL-noto-sans-arabic.txt",
         "share/doc/wordcraft/OFL-noto-sans-cjk-sc.txt",
         "share/doc/wordcraft/OFL-shippori-mincho.txt"
-      ]
+      ],
+      "upstream_tree_sha256": "a91bcd4aeb86a5a4e8c159320c54485ae537c6a2423d4e2391e2b159c4727f35"
     }
   ],
   "bubblewrap": {

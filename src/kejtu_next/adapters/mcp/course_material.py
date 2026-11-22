@@ -4,6 +4,7 @@ import base64
 from contextlib import contextmanager
 import hashlib
 import io
+import math
 import zipfile
 import json
 import os
@@ -12,16 +13,57 @@ import re
 from pathlib import Path
 import shutil
 import stat
+import tempfile
 
 from ...core.records import Failure
 from ...core.reference import exact_page
 from ...core.vision import inspect_image
 from .files import grants
+from .code_files import CODE_SUFFIXES, MAX_TEXT_BYTES, CodeSaves, validate_text
 
 MAX_FILE_BYTES=32*1024*1024
-MAX_TEXT_BYTES=2*1024*1024
-TEXT_SUFFIXES={'.txt','.md','.markdown','.csv','.tsv','.tex','.rst','.json','.yaml','.yml','.py','.r','.html','.css','.js','.ts'}
+TEXT_SUFFIXES=CODE_SUFFIXES | {'.md','.markdown','.csv','.tsv','.tex','.rst'}
 
+
+MAX_LAYOUT_BYTES=8*1024*1024
+_XML_CONTROL=re.compile(rb'[\x00-\x08\x0b\x0c\x0e-\x1f]')
+
+def pdf_layout(content,rotation=0):
+    """Paragraph boxes of one page from Poppler's -bbox-layout XHTML.
+
+    Boxes are PDF points from the top-left corner of the page as displayed.
+    Poppler already places words after the page's /Rotate but reports the
+    unrotated page size, so a quarter turn swaps width and height. Each block's
+    text is its words in Poppler's reading order, joined by spaces on one line.
+    """
+    if rotation not in (0,90,180,270):
+        raise Failure('material_projection','Paragraph positions could not be read for this page.')
+    from xml.etree import ElementTree
+    def unreadable():
+        return Failure('material_projection','Paragraph positions could not be read for this page.')
+    def local(node):
+        return node.tag.rsplit('}',1)[-1]
+    def number(node,key):
+        try:value=float(node.get(key))
+        except (TypeError,ValueError):raise unreadable() from None
+        if not math.isfinite(value):raise unreadable()
+        return value
+    try:root=ElementTree.fromstring(_XML_CONTROL.sub(b'',content))
+    except ElementTree.ParseError:raise unreadable() from None
+    pages=[node for node in root.iter() if local(node)=='page']
+    if len(pages)!=1:raise unreadable()
+    width,height=number(pages[0],'width'),number(pages[0],'height')
+    if width<=0 or height<=0:raise unreadable()
+    blocks=[]
+    for block in pages[0].iter():
+        if local(block)!='block':continue
+        text=' '.join(' '.join(word.text or '' for word in block.iter() if local(word)=='word').split())
+        if not text:continue
+        x0,y0,x1,y1=(number(block,key) for key in ('xMin','yMin','xMax','yMax'))
+        if x1<x0 or y1<y0:raise unreadable()
+        blocks.append(dict(box=[round(x0,2),round(y0,2),round(x1,2),round(y1,2)],text=text))
+    if rotation in (90,270):width,height=height,width
+    return dict(page_width=round(width,2),page_height=round(height,2),blocks=blocks)
 
 def image_record(mime,raw):
     try:return inspect_image(mime,base64.b64encode(raw).decode())
@@ -31,6 +73,26 @@ def image_record(mime,raw):
 class CourseMaterials:
     def __init__(self,store,files):
         self.store,self.files=store,files
+        self.code_saves = CodeSaves()
+
+    def code_writable(self, target):
+        _, config = self._settings()
+        matching = (g for g in grants(config) if Path(g['path']) in target.parents)
+        grant = max(matching, key=lambda g:len(Path(g['path']).parts), default=None)
+        if not grant or grant['access'] != 'write':
+            return False
+        try:
+            self.files.validate_connection_paths([], [str(target)])
+            info = target.stat(follow_symlinks=False)
+            if (not stat.S_ISREG(info.st_mode) or info.st_nlink != 1
+                    or info.st_mode & (stat.S_ISUID | stat.S_ISGID)):
+                return False
+            if os.name != 'nt' and (info.st_uid != os.geteuid()
+                    or (hasattr(os, 'listxattr') and 'security.capability' in os.listxattr(target, follow_symlinks=False))):
+                return False
+            return os.access(target, os.W_OK) and os.access(target.parent, os.W_OK)
+        except (Failure, OSError):
+            return False
 
     def _settings(self):
         if self.files is None:
@@ -136,15 +198,9 @@ class CourseMaterials:
             from ..storage.files import open_regular
             try:
                 if directory:
-                    # Windows scandir accepts a path, not a Unix directory fd.
-                    # Resolve/check each component; this is application policy,
-                    # not a process sandbox against concurrent local mutation.
-                    for part in (*reversed(target.parents), target):
-                        info = part.lstat()
-                        if info.st_file_attributes & stat.FILE_ATTRIBUTE_REPARSE_POINT:
-                            raise OSError('Linked directory is not shared.')
-                    if not stat.S_ISDIR(info.st_mode): raise OSError('Expected directory.')
-                    yield target, info
+                    from ..storage.files import held_windows_directory
+                    with held_windows_directory(target):
+                        yield target, target.stat(follow_symlinks=False)
                 else:
                     with open_regular(target) as source:
                         info=os.fstat(source.fileno())
@@ -188,8 +244,11 @@ class CourseMaterials:
                     try:kind='folder' if item.is_dir(follow_symlinks=False) else 'file' if item.is_file(follow_symlinks=False) else None
                     except OSError:continue
                     if kind:
-                        entries.append(dict(name=item.name,path=str((target/item.name).relative_to(root)),kind=kind,
-                                            bytes=item.stat(follow_symlinks=False).st_size if kind=='file' else 0))
+                        entry=dict(name=item.name,path=str((target/item.name).relative_to(root)),kind=kind,
+                                   bytes=item.stat(follow_symlinks=False).st_size if kind=='file' else 0)
+                        if kind == 'file' and Path(item.name).suffix.lower() in CODE_SUFFIXES:
+                            entry['editor'] = 'code'
+                        entries.append(entry)
         entries.sort(key=lambda r:(r['kind']!='folder',r['name'].casefold(),r['name']))
         if self._settings()[0]!=revision:self.path(course_id,relative)
         return dict(course_id=course_id,path=relative,items=entries[offset:offset+limit],
@@ -224,9 +283,14 @@ class CourseMaterials:
         if offset and sha256 is None:
             raise Failure('material_identity','Continue with the same opened document identity.')
         revision,root,target=self.path(course_id,relative)
-        if target.suffix.lower() not in ('.pdf','.docx','.md','.markdown'):
-            raise Failure('material_format','The document workspace opens PDF, DOCX and Markdown files.')
-        raw,_=self._read(root,target)
+        code = target.suffix.lower() in CODE_SUFFIXES
+        if not code and target.suffix.lower() not in ('.pdf','.docx','.md','.markdown'):
+            raise Failure('material_format','Choose a supported document or code file.')
+        raw,info=self._read(root,target)
+        if code:
+            if info.st_nlink != 1:
+                raise Failure('material_path', 'Open an independent copy of this linked file.')
+            validate_text(raw)
         if target.suffix.lower()=='.pdf' and not raw.startswith(b'%PDF-'):
             raise Failure('material_format','The selected file is not a PDF.')
         if target.suffix.lower()=='.docx':
@@ -254,8 +318,11 @@ class CourseMaterials:
         if self._settings()[0]!=revision:
             raise Failure('files_changed','File permissions changed during reading.')
         end=min(len(raw),offset+1024*1024)
-        return dict(path=str(target),sha256=digest,total_bytes=len(raw),offset=offset,
-                    next_offset=end if end<len(raw) else None,data=base64.b64encode(raw[offset:end]).decode())
+        result = dict(path=str(target),sha256=digest,total_bytes=len(raw),offset=offset,
+                      next_offset=end if end<len(raw) else None,data=base64.b64encode(raw[offset:end]).decode())
+        if code:
+            result['writable'] = self.code_writable(target)
+        return result
 
     async def _process(self,program,args,source,maximum):
         if sys.platform == 'win32':
@@ -263,6 +330,10 @@ class CourseMaterials:
         executable=shutil.which(program,path='/usr/bin:/bin')
         if not executable:
             raise Failure('material_runtime',f'{program} is unavailable; repair the document-reader installation.')
+        return await self._run_reader(executable, args, source, maximum)
+
+    @staticmethod
+    async def _run_reader(executable, args, source, maximum):
         child=await asyncio.create_subprocess_exec(executable,*args,stdin=asyncio.subprocess.PIPE,
             stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL,
             env=dict(os.environ,LC_ALL='C'))
@@ -291,9 +362,44 @@ class CourseMaterials:
             await child.wait()
             writer.cancel();await asyncio.gather(writer,return_exceptions=True)
 
+    async def _windows_pdf(self, raw, page, view):
+        # Poppler is a Linux dependency. The Windows package already includes
+        # this fixed CLI. It only receives the authorized bytes in a temporary
+        # file; the original path is never passed back to an external program.
+        if view == 'layout':
+            raise Failure('material_unavailable', 'Paragraph positions are not available in the Windows build yet.')
+        from .windows_connections import PROGRAMS, installed
+        try:
+            executable = installed(self.files.host.root, 'package-runtime/craft/' + PROGRAMS['pdfcraft'])
+        except ValueError as error:
+            raise Failure('material_runtime', str(error)) from None
+        with tempfile.TemporaryDirectory(prefix='kejtu-pdf-') as temporary:
+            original = Path(temporary) / 'document.pdf'
+            original.write_bytes(raw)
+            info = await self._run_reader(executable, ['info', original], b'', MAX_TEXT_BYTES)
+            try:
+                pages = json.loads(info)['pages']
+                if type(pages) is not int or not 1 <= pages <= 100000:
+                    raise ValueError
+            except (TypeError, KeyError, ValueError):
+                raise Failure('material_projection', 'The PDF page count could not be determined.') from None
+            if page > pages:
+                raise Failure('material_projection', 'This page is outside the PDF.')
+            if view == 'text':
+                text = await self._run_reader(executable, ['text', original, '--page', str(page)], b'', MAX_TEXT_BYTES)
+                return pages, text
+            rendered = Path(temporary) / 'page.jpg'
+            await self._run_reader(executable, ['render', original, '--page', str(page), '--dpi', '96',
+                                               '--out', rendered], b'', 65536)
+            with rendered.open('rb') as image:
+                data = image.read(1400001)
+            if len(data) > 1400000:
+                raise Failure('material_size', 'This PDF page is too large to display. Choose exact text.')
+            return pages, data
+
     async def read(self,course_id,relative,*,page=1,offset=0,maximum=16384,view='text'):
-        if type(page) is not int or not 1<=page<=100000 or view not in ('text','image'):
-            raise Failure('material_page','Choose a page number and text or image view.')
+        if type(page) is not int or not 1<=page<=100000 or view not in ('text','image','layout'):
+            raise Failure('material_page','Choose a page number and text, image or layout view.')
         if type(offset) is not int or offset<0 or type(maximum) is not int or not 1<=maximum<=32768:
             raise Failure('material_page','Choose a valid byte offset and page size of at most 32 KB.')
         revision,root,target=self.path(course_id,relative)
@@ -306,21 +412,39 @@ class CourseMaterials:
                 raise Failure('material_projection','The selected file is not a PDF.')
             # Count and projection use the same already-authorized bytes. The reader
             # can stop at the final page without probing invalid pages or guessing.
-            info=await self._process('pdfinfo',['-'],raw,65536)
-            count=re.search(rb'^Pages:\s+(\d+)\s*$',info,re.MULTILINE)
-            if count is None or not 1<=int(count[1])<=100000:
-                raise Failure('material_projection','The PDF page count could not be determined.')
-            metadata['page_count']=int(count[1])
-            if page>metadata['page_count']:
-                raise Failure('material_projection','This PDF page could not be read. Check its page number or protection.')
-            if view=='text':
-                content=await self._process('pdftotext',['-f',str(page),'-l',str(page),'-layout','-enc','UTF-8','-','-'],raw,MAX_TEXT_BYTES)
-                body=content.decode('utf-8')
-                representation='pdf_text'
+            if sys.platform == 'win32':
+                pages, content = await self._windows_pdf(raw, page, view)
             else:
-                content=await self._process('pdftoppm',['-f',str(page),'-l',str(page),'-singlefile','-scale-to','1600','-jpeg','-'],raw,1400000)
-                body=json.dumps(image_record('image/jpeg',content),separators=(',',':'))
-                representation='pdf_image'
+                info=await self._process('pdfinfo',['-'],raw,65536)
+                count=re.search(rb'^Pages:\s+(\d+)\s*$',info,re.MULTILINE)
+                if count is None or not 1<=int(count[1])<=100000:
+                    raise Failure('material_projection','The PDF page count could not be determined.')
+                pages=int(count[1])
+                if page>pages:
+                    raise Failure('material_projection','This PDF page could not be read. Check its page number or protection.')
+                if view=='text':
+                    content=await self._process('pdftotext',['-f',str(page),'-l',str(page),'-layout','-enc','UTF-8','-','-'],raw,MAX_TEXT_BYTES)
+                elif view=='layout':
+                    # Same Poppler page box as pdftoppm (media box). The page
+                    # size Poppler reports for the boxes ignores /Rotate.
+                    detail=await self._process('pdfinfo',['-f',str(page),'-l',str(page),'-'],raw,65536)
+                    turn=re.search(rb'^Page\s+%d rot:\s+(\d+)\s*$' % page,detail,re.MULTILINE)
+                    if turn is None or int(turn[1])%90:
+                        raise Failure('material_projection','Paragraph positions could not be read for this page.')
+                    rotation=int(turn[1])%360
+                    content=await self._process('pdftotext',['-f',str(page),'-l',str(page),'-bbox-layout','-enc','UTF-8','-','-'],raw,MAX_LAYOUT_BYTES)
+                else:
+                    content=await self._process('pdftoppm',['-f',str(page),'-l',str(page),'-singlefile','-scale-to','1600','-jpeg','-'],raw,1400000)
+            metadata['page_count'] = pages
+            if view == 'text':
+                body = content.decode('utf-8')
+                representation = 'pdf_text'
+            elif view == 'layout':
+                body = json.dumps(pdf_layout(content, rotation), ensure_ascii=False, separators=(',', ':'))
+                representation = 'pdf_layout'
+            else:
+                body = json.dumps(image_record('image/jpeg', content), separators=(',', ':'))
+                representation = 'pdf_image'
         elif suffix in ('.png','.jpg','.jpeg'):
             if view!='image':
                 raise Failure('material_image','This original is an image. Choose image view; no OCR text is implied.')

@@ -167,7 +167,7 @@ export function measureActivity(
     "img,svg,canvas,video,button,input,textarea,select",
   ))
     occupied.push(object.getBoundingClientRect());
-  for (const rail of surface.querySelectorAll(".mode-rail,.document-rail"))
+  for (const rail of surface.querySelectorAll(".mode-rail"))
     occupied.push(rail.getBoundingClientRect());
   const point = activityPoint(
     target,

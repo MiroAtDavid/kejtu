@@ -1,10 +1,10 @@
-"""Explicit human reminders, independent of notes, commitments and executable jobs."""
+"""User reminders and conversation-only follow-ups with exact source support."""
 from dataclasses import asdict, dataclass
 import hashlib
 import json
 import re
 
-from .schedules import Schedule
+from .schedules import Schedule, instant
 
 
 def identity(value):
@@ -41,6 +41,10 @@ class ReminderDefinition:
     support: tuple[ReminderSupport, ...] = ()
     note_id: str | None = None
     task_id: str | None = None
+    event_at: str | None = None
+    timing: str = 'explicit'
+    task_revision: int | None = None
+    origin: str = 'requested'
 
     def __post_init__(self):
         for name, maximum in (('title', 500), ('text', 4096)):
@@ -57,17 +61,38 @@ class ReminderDefinition:
             raise ValueError('Use at most eight distinct validated supporting user quotations.')
         if any(value is not None and not identity(value) for value in (self.note_id, self.task_id)):
             raise ValueError('Optional note/task links need exact identities, not executable text.')
+        if self.timing not in ('explicit', 'flexible'):
+            raise ValueError('Reminder timing is explicit or flexible.')
+        if self.origin not in ('requested', 'companion'):
+            raise ValueError('Use requested reminders or companion follow-ups.')
+        if self.origin == 'companion' and (self.note_id or self.task_id or self.schedule.repeat != 'none'):
+            raise ValueError('A companion follow-up has no task/note link and uses a one-time schedule.')
+        if self.event_at is not None:
+            instant(self.event_at)
+        if self.task_revision is not None and (self.task_id is None or type(self.task_revision) is not int or not 1 <= self.task_revision < 2**53):
+            raise ValueError('A linked task revision needs an exact task and positive revision.')
         if len(encoded(self.record()).encode()) > 12000:
             raise ValueError('The complete reminder definition exceeds its control-record bound.')
 
     def record(self):
         value = asdict(self)
         value['support'] = list(value['support'])
+        # Old immutable definitions retain their exact canonical digest.
+        if self.task_revision is None:
+            value.pop('task_revision')
+        if self.event_at is None:
+            value.pop('event_at')
+        if self.timing == 'explicit':
+            value.pop('timing')
+        if self.origin == 'requested':
+            value.pop('origin')
         return value
 
     @classmethod
     def from_record(cls, value):
-        if not isinstance(value, dict) or set(value) != set(cls.__dataclass_fields__):
+        optional = {'event_at', 'timing', 'task_revision', 'origin'}
+        if (not isinstance(value, dict) or set(value)-set(cls.__dataclass_fields__)
+                or not set(cls.__dataclass_fields__)-optional <= set(value)):
             raise ValueError('Reminder definitions require exactly their declared fields.')
         result = dict(value)
         try:

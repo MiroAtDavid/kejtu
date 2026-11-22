@@ -114,7 +114,9 @@
   }
 </script>
 
-<svelte:body onpointerdown={resize} />
+<!-- The document, not the body: in a rounded window the outermost corner
+     pixels can belong to the root element (chat.css). -->
+<svelte:document onpointerdown={resize} />
 
 {#if native}
   <div class="window-controls" role="group" aria-label="Window controls">

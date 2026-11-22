@@ -69,7 +69,9 @@ def _failure():
 
 
 class WindowsCredentials:
-    def __init__(self, attributes, *, _api=None):
+    def __init__(self, attributes, *, _api=None, validate=validate_key, encoding='ascii'):
+        # The consumer's value rule and text encoding; API keys are printable ASCII.
+        self.validate, self.encoding = validate, encoding
         # Hash the complete existing identity tuple, including field names. This
         # avoids separator ambiguity and case-insensitive Windows target aliases.
         if (len(attributes) != 6 or attributes[::2] != ('application', 'provider', 'endpoint')
@@ -104,9 +106,9 @@ class WindowsCredentials:
                 raise _failure()
             # CredentialBlob is application-defined bytes, not a NUL-terminated
             # Windows password. Bound the copy before dereferencing it.
-            value = ctypes.string_at(credential.CredentialBlob, size).decode('ascii')
+            value = ctypes.string_at(credential.CredentialBlob, size).decode(self.encoding)
             try:
-                return validate_key(value)
+                return self.validate(value)
             except Failure:
                 raise _failure() from None
         finally:
@@ -121,16 +123,18 @@ class WindowsCredentials:
             raise _failure() from None
 
     def save(self, key):
-        key = validate_key(key)
-        if len(key) > MAX_BLOB_BYTES:
+        key = self.validate(key)
+        raw = key.encode(self.encoding)
+        if len(raw) > MAX_BLOB_BYTES:
             raise Failure('credential_required',
-                'Windows Credential Manager supports API keys up to 2560 ASCII characters.')
+                'Windows Credential Manager supports API keys up to 2560 ASCII characters.' if self.encoding == 'ascii'
+                else 'Windows Credential Manager stores values up to 2560 bytes; this one is longer.')
         try:
             with _LOCK:
                 api = self._native()
-                blob = (ctypes.c_ubyte * len(key)).from_buffer_copy(key.encode('ascii'))
+                blob = (ctypes.c_ubyte * len(raw)).from_buffer_copy(raw)
                 credential = CREDENTIALW(Type=CRED_TYPE_GENERIC, TargetName=self.target,
-                    CredentialBlobSize=len(key), CredentialBlob=blob,
+                    CredentialBlobSize=len(raw), CredentialBlob=blob,
                     # Persists across logons of this SAME user on this computer.
                     Persist=CRED_PERSIST_LOCAL_MACHINE)
                 try:

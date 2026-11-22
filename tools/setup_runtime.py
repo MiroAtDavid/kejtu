@@ -1,9 +1,16 @@
 """Shared staging and pinned SDK setup for optional MCP runtimes."""
+import importlib.util
 import json
 import re
 from pathlib import Path
 import subprocess
-import tempfile
+
+# Same checkout-anchored load as the source installer: publication is owned by
+# the shared, stdlib-only artifact module, whatever environment runs this tool.
+_spec = importlib.util.spec_from_file_location(
+    'kejtu_artifacts', Path(__file__).resolve().parents[1] / 'src/kejtu_next/adapters/artifacts.py')
+_artifacts = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_artifacts)
 
 
 def run(arguments, *, env=None, capture=False):
@@ -13,15 +20,12 @@ def run(arguments, *, env=None, capture=False):
 
 def install_directory(destination, populate):
     """Publish only a completed new component; never replace an installed one."""
-    if destination.is_symlink():
-        raise ValueError('A runtime cannot be installed through a symlink.')
-    if destination.exists():
-        return
-    with tempfile.TemporaryDirectory(prefix='.install-', dir=destination.parent) as temporary:
-        staging = Path(temporary) / 'component'
+    def prepare(temporary):
+        staging = temporary / 'component'
         staging.mkdir(mode=0o700)
         populate(staging)
-        staging.rename(destination)
+        return staging
+    _artifacts.publish(destination, prepare)
 
 
 def check_sdk(python, sdk, lock):

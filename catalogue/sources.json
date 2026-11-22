@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "entries": [
+    {
+      "id": "notion-codex",
+      "title": "Notion",
+      "publisher": "Notion / OpenAI catalogue",
+      "category": "Work & notes",
+      "summary": "Keep notes, prepare meetings and turn ideas into documents.",
+      "requirements": "Browser sign-in to Notion. Its account and service limits apply.",
+      "icon": "book-open",
+      "repository": "https://github.com/openai/plugins",
+      "commit": "d420d13051bffe4543ed39e30fa46b87148e47dd",
+      "path": "plugins/notion",
+      "license": "MIT",
+      "license_files": [
+        "plugins/notion/skills/notion-knowledge-capture/LICENSE.txt"
+      ]
+    },
+    {
+      "id": "todoist",
+      "title": "Todoist",
+      "publisher": "Doist",
+      "category": "Work & notes",
+      "summary": "Find, create and organise tasks in Todoist.",
+      "requirements": "Browser sign-in to Todoist. Its account and service limits apply.",
+      "icon": "list-checks",
+      "repository": "https://github.com/Doist/todoist-mcp",
+      "commit": "e7ff7f2e29f508f6a77be5518056cef556112d54",
+      "path": "plugins/todoist",
+      "license": "MIT",
+      "license_files": [
+        "plugins/todoist/LICENSE"
+      ]
+    },
+    {
+      "id": "linear",
+      "title": "Linear",
+      "publisher": "Linear",
+      "category": "Work & notes",
+      "summary": "Work with issues, projects and team plans in Linear.",
+      "requirements": "Browser sign-in to Linear. Its account and service limits apply.",
+      "icon": "layers",
+      "repository": "https://github.com/anthropics/claude-plugins-official",
+      "commit": "23c304a6387ed2fa207ceff27646d8514ee75235",
+      "path": "external_plugins/linear",
+      "license": "Apache-2.0",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "id": "canva",
+      "title": "Canva",
+      "publisher": "Canva",
+      "category": "Design & writing",
+      "summary": "Create and revise designs, resize them and work through feedback.",
+      "requirements": "Browser sign-in to Canva. Some features need a paid Canva plan.",
+      "icon": "palette",
+      "repository": "https://github.com/canva-sdks/canva-skills",
+      "commit": "bfcbc681560f6031e9949ea52f81e20beb87e39e",
+      "path": "plugins/canva",
+      "license": "Apache-2.0",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "id": "dropbox",
+      "title": "Dropbox",
+      "publisher": "Dropbox",
+      "category": "Work & notes",
+      "summary": "Find, inspect, organise and share your Dropbox files.",
+      "requirements": "Browser sign-in to Dropbox. Its account and service limits apply.",
+      "icon": "folder-open",
+      "repository": "https://github.com/dropbox/dropbox-ai-plugins",
+      "commit": "078f0ca36df40f054829b58731a5f86a561d9668",
+      "path": "claude",
+      "license": "Apache-2.0",
+      "license_files": [
+        "claude/LICENSE"
+      ]
+    },
+    {
+      "id": "context7-codex",
+      "title": "Context7",
+      "publisher": "Upstash",
+      "category": "Research & learning",
+      "summary": "Look up current documentation for programming libraries and frameworks.",
+      "requirements": "Public lookups work without signing in. Internet access and Context7's service limits apply.",
+      "icon": "book-open",
+      "repository": "https://github.com/upstash/context7",
+      "commit": "b1e3611e32a8b1369ae526cacdf335ddfd6e5fbb",
+      "path": "plugins/codex/context7",
+      "license": "MIT",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "id": "anti-ai-writing",
+      "title": "Anti-AI Writing",
+      "publisher": "avectats7",
+      "category": "Design & writing",
+      "summary": "Review and revise formulaic English and Spanish drafts.",
+      "requirements": "Works in chat with the included editing guides. No extra account is needed.",
+      "icon": "pen-line",
+      "repository": "https://github.com/avectats7/anti-ai-writing",
+      "commit": "d1326aaeca26049b9ac505a22a35fd31f3f585a5",
+      "path": "",
+      "license": "MIT",
+      "license_files": [
+        "LICENSE"
+      ]
+    },
+    {
+      "id": "obsidian-markdown",
+      "title": "Obsidian Markdown",
+      "publisher": "Obsidian",
+      "category": "Work & notes",
+      "summary": "Draft notes with Obsidian wikilinks, properties and callouts.",
+      "requirements": "Writing notes into an existing vault needs write access to that folder.",
+      "icon": "notebook-tabs",
+      "repository": "https://github.com/obsidianmd/obsidian-skills",
+      "commit": "b110b2f8e9eb1f287892f937050dfd40af862cbb",
+      "path": "plugins/obsidian/skills/obsidian-markdown",
+      "license": "MIT",
+      "license_files": [
+        "plugins/obsidian/LICENSE"
+      ]
+    },
+    {
+      "id": "json-canvas",
+      "title": "JSON Canvas",
+      "publisher": "Obsidian",
+      "category": "Work & notes",
+      "summary": "Write .canvas files with nodes and the connections between them.",
+      "requirements": "Saving a .canvas file needs write access to its folder. Open it in Obsidian or another JSON Canvas viewer.",
+      "icon": "route",
+      "repository": "https://github.com/obsidianmd/obsidian-skills",
+      "commit": "b110b2f8e9eb1f287892f937050dfd40af862cbb",
+      "path": "plugins/obsidian/skills/json-canvas",
+      "license": "MIT",
+      "license_files": [
+        "plugins/obsidian/LICENSE"
+      ]
+    }
+  ]
+}

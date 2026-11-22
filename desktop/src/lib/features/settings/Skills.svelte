@@ -1,5 +1,17 @@
 <script lang="ts">
   import { choiceSelect } from "$lib/design/choice-select";
+  import PackageIcon from "./PackageIcon.svelte";
+  import ShelfItemLayout from "./ShelfItemLayout.svelte";
+  import ShelfItemHeading from "./ShelfItemHeading.svelte";
+  import ShelfCard from "./ShelfCard.svelte";
+  import ShelfDialog from "./ShelfDialog.svelte";
+  import {
+    partIcon,
+    partTitle,
+    packageFacts,
+    type ShelfOwner,
+  } from "./shelf-library";
+  import { readSkillLibrary } from "./skill-library";
   import { onMount } from "svelte";
   import { NativeFailure, request } from "$lib/api/client";
   import type {
@@ -10,13 +22,20 @@
 
   export let ownerBusy = false;
   export let busy = false;
-  let saved: SkillStatus | null = null;
+  /** A skill another panel asks to open; the tick changes with each request. */
+  export let focus: { name: string; tick: number } = { name: "", tick: 0 };
+  let focused = 0;
+  export let saved: SkillStatus | null = null;
   let selected: SkillItem | null = null;
-  let adding = false;
+  /** On the Shelf, the page's Add skill button opens the import window. */
+  export let adding = false;
   let kind: "folder" | "text" | "github" = "folder";
   let source = "";
   let update = false;
-  let filter = "";
+  export let filter = "";
+  export let owners = new Map<string, ShelfOwner[]>();
+  export let parent: ShelfOwner | undefined = undefined;
+  export let onOpenItem: ((name: string) => void) | undefined = undefined;
   let error = "";
   let notice = "";
   let page: SkillPage | null = null;
@@ -25,9 +44,14 @@
   let advanced = false;
   $: visible =
     saved?.items.filter((item) =>
-      `${item.name} ${item.description}`
+      `${item.name} ${partTitle("skill", item.name, owners.get(item.name)?.[0])} ${item.description} ${
+        owners
+          .get(item.name)
+          ?.map((owner) => owner.title)
+          .join(" ") ?? ""
+      }`
         .toLowerCase()
-        .includes(filter.toLowerCase()),
+        .includes(filter.trim().toLowerCase()),
     ) ?? [];
 
   async function action(work: () => Promise<void>) {
@@ -45,13 +69,14 @@
       busy = false;
     }
   }
-  async function refresh(offset = 0) {
+  async function refresh() {
     await action(async () => {
-      const value = await request("skills.status", { offset });
-      saved =
-        offset && saved
-          ? { ...value, items: [...saved.items, ...value.items] }
-          : value;
+      try {
+        saved = await readSkillLibrary();
+      } catch (cause) {
+        saved = null;
+        throw cause;
+      }
       if (selected)
         selected =
           saved.items.find((item) => item.name === selected?.name) ?? null;
@@ -62,12 +87,14 @@
     if (ownerBusy || !saved || !source.trim()) return;
     await action(async () => {
       try {
-        saved = await request("skills.import", {
-          kind,
-          source,
-          update,
-          expected_revision: saved!.revision,
-        });
+        saved = await readSkillLibrary(
+          await request("skills.import", {
+            kind,
+            source,
+            update,
+            expected_revision: saved!.revision,
+          }),
+        );
         source = "";
         adding = false;
         selected = null;
@@ -107,12 +134,14 @@
     await action(async () => {
       const name = selected!.name;
       try {
-        saved = await request("skills.enable", {
-          name,
-          revision: selected!.revision,
-          enabled,
-          expected_revision: saved!.revision,
-        });
+        saved = await readSkillLibrary(
+          await request("skills.enable", {
+            name,
+            revision: selected!.revision,
+            enabled,
+            expected_revision: saved!.revision,
+          }),
+        );
         selected = saved.items.find((item) => item.name === name) ?? null;
         notice = enabled
           ? "Enabled. Kejtu can discover this skill, or you can choose it beside your message."
@@ -141,6 +170,21 @@
       path = nextPath;
     });
   }
+  // Opened from Packages: the library is read again first, since the skill may
+  // have been installed after this panel last read it.
+  $: if (focus.tick !== focused && !busy) {
+    focused = focus.tick;
+    void open(focus.name);
+  }
+  async function open(name: string) {
+    await refresh();
+    const item = saved?.items.find((row) => row.name === name);
+    if (item) choose(item);
+    else if (!error) {
+      selected = null;
+      error = "This skill is no longer in the library.";
+    }
+  }
   function choose(item: SkillItem) {
     if (busy) return;
     selected = item;
@@ -151,33 +195,61 @@
     filePath = "";
   }
   onMount(() => {
-    void refresh();
+    if (!focus.tick && !onOpenItem) void refresh();
   });
 </script>
 
+{#snippet power(item: SkillItem)}
+  <button
+    class:primary={!item.enabled}
+    class:cp-action={!!focus.name}
+    disabled={busy || !saved || !!item.error || (ownerBusy && !item.enabled)}
+    on:click={() => enable(!item.enabled)}
+    >{item.enabled ? "Disable skill" : "Enable skill"}</button
+  >
+{/snippet}
+
 <section class="skills-panel" aria-label="Skill library">
-  <h2 class="settings-title">Skills</h2>
-  <p class="panel-intro">
-    Semester organization, study planning, learning support and course research
-    are built in and available automatically. No installation is needed.
-  </p>
-  <p class="panel-intro">Add your own optional procedures below.</p>
-  <div class="actions">
-    <button
-      class="primary"
-      disabled={busy || ownerBusy}
-      on:click={() => (adding = !adding)}>Add skill</button
+  {#if focus.name && (selected?.name === focus.name || error)}
+    <ShelfItemHeading
+      title={partTitle("skill", focus.name, parent)}
+      icon={partIcon("skill", focus.name, parent)}
+      category={parent?.category}
+      subtitle={parent ? parent.title + " · Skill" : "Skill"}
     >
-    <button disabled={busy} on:click={() => refresh()}>Refresh library</button>
-  </div>
-  {#if error}<p role="alert">{error}</p>{/if}
-  {#if notice}<p role="status">{notice}</p>{/if}
-  {#if busy}<p role="status" class="hint">
-      Working… An import can take up to 35 seconds.
-    </p>{/if}
+      {#if selected?.name === focus.name}{@render power(selected)}{/if}
+    </ShelfItemHeading>
+  {/if}
+  {#if !focus.name}
+    {#if !onOpenItem || error}<div class="actions">
+        {#if !onOpenItem}<button
+            class="primary"
+            disabled={busy || ownerBusy}
+            on:click={() => (adding = !adding)}>Add skill</button
+          >{/if}
+        <button disabled={busy} on:click={() => refresh()}
+          >Refresh library</button
+        >
+      </div>{/if}
+  {:else if error}
+    <button disabled={busy} on:click={() => open(focus.name)}
+      >Refresh library</button
+    >
+  {/if}
+  {#if !adding}
+    {#if error}<p role="alert">{error}</p>{/if}
+    {#if notice}<p role="status">{notice}</p>{/if}
+    {#if busy}<p role="status" class="hint">
+        Working… An import can take up to 35 seconds.
+      </p>{/if}
+  {/if}
   {#if adding}
-    <div class="settings-card">
-      <h3>Add a procedure</h3>
+    <ShelfDialog
+      title="Add skill"
+      closeLabel="Close add skill"
+      {busy}
+      onClose={() => (adding = false)}
+    >
       <label
         >Import from<select
           use:choiceSelect={kind}
@@ -195,6 +267,7 @@
       {#if kind === "text"}
         <label
           >SKILL.md<textarea
+            data-first
             rows="9"
             bind:value={source}
             spellcheck="false"
@@ -208,6 +281,7 @@
       {:else}
         <label
           >{kind === "folder" ? "Skill folder path" : "GitHub URL"}<input
+            data-first
             bind:value={source}
             spellcheck="false"
             placeholder={kind === "folder"
@@ -236,15 +310,23 @@
         importing, then choose Enable skill to use them. Earlier revisions are
         kept.
       </p>
-      <button
-        class="primary"
-        disabled={busy || ownerBusy || !saved || !source.trim()}
-        on:click={install}>Import skill</button
-      >
-    </div>
+      {#if error}<p role="alert" class="error">{error}</p>{/if}
+      {#if busy}<p role="status" class="hint">
+          Working… An import can take up to 35 seconds.
+        </p>{/if}
+      <svelte:fragment slot="footer">
+        <button disabled={busy} on:click={() => (adding = false)}>Cancel</button
+        >
+        <button
+          class="primary"
+          disabled={busy || ownerBusy || !saved || !source.trim()}
+          on:click={install}>Import skill</button
+        >
+      </svelte:fragment>
+    </ShelfDialog>
   {/if}
-  {#if saved}
-    {#if saved.items.length > 5}<label class="filter"
+  {#if saved && !focus.name}
+    {#if !onOpenItem && saved.items.length > 5}<label class="filter"
         >Find a skill<input
           type="search"
           bind:value={filter}
@@ -259,107 +341,154 @@
           supporting files.
         </p>
       </div>{/if}
-    <div class="skill-list">
-      {#each visible as item (item.name)}
-        <button
-          class="skill-row"
-          class:selected={selected?.name === item.name}
-          disabled={busy}
-          on:click={() => choose(item)}
-        >
-          <span class="row-title"
-            ><strong>{item.name}</strong><span class="status-tag"
-              >{item.error
-                ? "Needs attention"
-                : item.enabled
-                  ? "Enabled"
-                  : "Disabled"}</span
-            ></span
+    {#if onOpenItem}
+      <div class="cp-cards">
+        {#each visible as item (item.name)}
+          {@const owner = owners.get(item.name)?.[0]}
+          <ShelfCard
+            title={partTitle("skill", item.name, owner)}
+            state={item.error ? "Needs attention" : item.enabled ? "On" : "Off"}
+            summary={owners
+              .get(item.name)
+              ?.map((owner) => owner.title)
+              .join(" · ") || "Skill"}
+            icon={partIcon("skill", item.name, owner)}
+            category={owner?.category}
+            part={"skill:" + item.name}
+            disabled={busy}
+            onOpen={() => onOpenItem?.(item.name)}
+          />
+        {/each}
+      </div>
+    {:else}<div class="skill-list">
+        {#each visible as item (item.name)}
+          {@const owner = owners.get(item.name)?.[0]}
+          <button
+            class="skill-row"
+            data-part={"skill:" + item.name}
+            class:selected={selected?.name === item.name}
+            disabled={busy}
+            on:click={() => (onOpenItem ? onOpenItem(item.name) : choose(item))}
           >
-          <span class="hint">{item.error || item.description}</span>
-        </button>
-      {/each}
-    </div>
-    {#if saved.next_offset !== null}<button
-        disabled={busy}
-        on:click={() => refresh(saved!.next_offset!)}>More skills</button
-      >{/if}
+            <span class="row-title"
+              ><span class="skill-name"
+                ><PackageIcon
+                  compact
+                  name={partIcon("skill", item.name, owner)}
+                  category={owner?.category}
+                /><strong>{item.name}</strong></span
+              ><span class="status-tag"
+                >{item.error
+                  ? "Needs attention"
+                  : item.enabled
+                    ? "Enabled"
+                    : "Disabled"}</span
+              ></span
+            >
+            <span class="hint">{item.error || item.description}</span>
+            {#if owners.has(item.name)}<small
+                >{owners
+                  .get(item.name)
+                  ?.map((owner) => owner.title)
+                  .join(" · ")}</small
+              >{/if}
+          </button>
+        {/each}
+      </div>{/if}
+    {#if filter.trim() && !visible.length}<p class="cp-empty">
+        No matching skills.
+      </p>{/if}
   {/if}
   {#if selected}
-    <div class="settings-card detail">
-      <h3>{selected.name}</h3>
-      <p>{selected.description}</p>
-      {#if selected.compatibility}<p class="hint">
-          Compatibility: {selected.compatibility}
-        </p>{/if}
-      <div class="actions">
-        <button disabled={busy || !!selected.error} on:click={() => read()}
-          >Read instructions</button
-        >
-        <button
-          class:primary={!selected.enabled}
-          disabled={busy ||
-            !saved ||
-            !!selected.error ||
-            (ownerBusy && !selected.enabled)}
-          on:click={() => enable(!selected!.enabled)}
-          >{selected.enabled ? "Disable skill" : "Enable skill"}</button
-        >
-        <button
-          aria-expanded={advanced}
-          disabled={busy}
-          on:click={() => (advanced = !advanced)}>Advanced</button
-        >
-      </div>
-      <p class="hint">
-        A skill gives guidance. It does not grant tool, account or file access.
-        Installing it is not proof that its procedure works.
-      </p>
-      {#if advanced}
-        <div class="advanced-content">
-          <p class="hint">
-            {selected.files} installed files. Exact revision:
-            <code>{selected.revision}</code>
-          </p>
-          <button disabled={busy || !!selected.error} on:click={() => read("")}
-            >Inspect files and origin</button
+    <ShelfItemLayout
+      inline={!focus.name}
+      label="Skill details"
+      facts={[
+        {
+          label: "State",
+          value: selected.error
+            ? "Needs attention"
+            : selected.enabled
+              ? "On"
+              : "Off",
+        },
+        { label: "Name", value: selected.name },
+        { label: "Files", value: String(selected.files) },
+        ...packageFacts(parent),
+      ]}
+    >
+      <div class={focus.name ? "cp-section" : "settings-card detail"}>
+        {#if !focus.name}<h3>{selected.name}</h3>{/if}
+        <p>{selected.description}</p>
+        {#if selected.compatibility}<p class="hint">
+            Compatibility: {selected.compatibility}
+          </p>{/if}
+        <div class="actions">
+          <button disabled={busy || !!selected.error} on:click={() => read()}
+            >Read instructions</button
           >
-          <label
-            >Resource path<input
-              bind:value={filePath}
-              placeholder="references/example.md"
-            /></label
-          >
+          {#if !focus.name}{@render power(selected)}{/if}
           <button
-            disabled={busy || !filePath.trim()}
-            on:click={() => read(filePath)}>Read resource</button
+            aria-expanded={advanced}
+            disabled={busy}
+            on:click={() => (advanced = !advanced)}>Advanced</button
           >
-          <p class="hint">
-            Resources are read as text. Scripts and binary assets are kept but
-            are not executed by the skill library.
-          </p>
         </div>
-      {/if}
-      {#if page}
-        <div class="saved-file">
-          <h4>{path || "Files and origin"}</h4>
-          <p class="hint">
-            Bytes {page.offset}–{page.end} of {page.total_bytes}{page.complete
-              ? " · complete file"
-              : " · exact page"}
-          </p>
-          <pre aria-label="Installed skill text">{page.content}</pre>
-          {#if page.next_offset !== null}<button
-              disabled={busy}
-              on:click={() => read(path, page!.next_offset!)}>Next page</button
-            >{/if}
-        </div>
-      {/if}
-    </div>
+        <p class="hint">
+          A skill gives guidance. It does not grant tool, account or file
+          access. Installing it is not proof that its procedure works.
+        </p>
+        {#if advanced}
+          <div class="advanced-content">
+            <p class="hint">
+              {selected.files} installed files. Exact revision:
+              <code>{selected.revision}</code>
+            </p>
+            <button
+              disabled={busy || !!selected.error}
+              on:click={() => read("")}>Inspect files and origin</button
+            >
+            <label
+              >Resource path<input
+                bind:value={filePath}
+                placeholder="references/example.md"
+              /></label
+            >
+            <button
+              disabled={busy || !filePath.trim()}
+              on:click={() => read(filePath)}>Read resource</button
+            >
+            <p class="hint">
+              Resources are read as text. Scripts and binary assets are kept but
+              are not executed by the skill library.
+            </p>
+          </div>
+        {/if}
+        {#if page}
+          <div class="saved-file">
+            <h4>{path || "Files and origin"}</h4>
+            <p class="hint">
+              Bytes {page.offset}–{page.end} of {page.total_bytes}{page.complete
+                ? " · complete file"
+                : " · exact page"}
+            </p>
+            <pre aria-label="Installed skill text">{page.content}</pre>
+            {#if page.next_offset !== null}<button
+                disabled={busy}
+                on:click={() => read(path, page!.next_offset!)}
+                >Next page</button
+              >{/if}
+          </div>
+        {/if}
+      </div>
+    </ShelfItemLayout>
   {/if}
 </section>
 
 <style>
+  .cp-section > :first-child {
+    margin-top: 0;
+  }
   .actions {
     display: flex;
     flex-wrap: wrap;
@@ -395,8 +524,14 @@
   .row-title {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: center;
     gap: 1rem;
+  }
+  .skill-name {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 8px;
   }
   .row-title strong {
     overflow-wrap: anywhere;
@@ -435,6 +570,9 @@
     background: var(--ke-surface);
     border: 1px solid var(--ke-border);
     border-radius: var(--ke-radius-sm);
+  }
+  .error {
+    color: var(--ke-danger);
   }
   .empty-state {
     padding: 1.5rem 0;

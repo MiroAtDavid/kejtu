@@ -148,7 +148,7 @@ async def request_bytes(request: Request, module: str, provider: str, *, spawn, 
                 try:
                     reported = json.loads(body).get('_failure')
                     if isinstance(reported, str) and reported in {
-                        'response_size', 'provider_http', 'provider_context_limit', 'provider_configuration', 'invalid_response',
+                        'response_size', 'provider_http', 'provider_context_limit', 'provider_configuration', 'provider_state_integrity', 'invalid_response',
                         'provider_auth', 'provider_balance', 'provider_rate_limit', 'credential_required',
                         'credential_exposure', 'provider_filtered', 'provider_interrupted', 'unsupported_tool', 'invalid_tool_call',
                         'image_input_unavailable', 'image_input_size', 'request_size'}:
@@ -156,7 +156,8 @@ async def request_bytes(request: Request, module: str, provider: str, *, spawn, 
                 except (ValueError, AttributeError):
                     pass
                 details = {
-                    'image_input_unavailable': 'Image input is invalid or unavailable for this model. Use a supported PNG/JPEG with an OpenAI vision model or DeepSeek Flash.',
+                    'provider_state_integrity': 'Conversation state is inconsistent. This model request was not sent.',
+                    'image_input_unavailable': 'Image input is invalid or unavailable for this model. Use a supported PNG/JPEG with a supported Claude or OpenAI model, or DeepSeek Flash.',
                     'image_input_size': 'This request contains too many images. Continue with fewer document pages.',
                     'request_size': 'The provider request is too large. Continue with fewer document pages or smaller images.',
                 }

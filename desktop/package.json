@@ -3,6 +3,7 @@
     "@humanspeak/svelte-markdown": "1.9.1",
     "@tauri-apps/api": "^2.0.0",
     "d3-scale": "4.0.2",
+    "docx-preview": "0.4.1",
     "dompurify": "^3.4.13",
     "katex": "0.16.45",
     "layerchart": "2.5.0",

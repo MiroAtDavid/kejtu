@@ -1,0 +1,15 @@
+{
+  "name": "projects",
+  "title": "Projects",
+  "version": "1",
+  "skills": [
+    "skills/kejtu-project-management"
+  ],
+  "description": "Organize work of any kind, with relevant project files and linked conversations.",
+  "icon": "folder-open",
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "author": {
+    "name": "Kejtu"
+  },
+  "license": "MIT"
+}

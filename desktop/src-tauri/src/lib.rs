@@ -3,6 +3,7 @@ mod backend_process;
 mod document_popout;
 mod files;
 mod image_input;
+mod installed_update;
 mod package_startup;
 mod pdf_copy;
 mod private_file;
@@ -14,7 +15,7 @@ use backend::Backend;
 use serde_json::Value;
 use tauri::Manager;
 use tokio::sync::Mutex;
-type Session = Mutex<Result<Backend, String>>;
+pub(crate) type Session = Mutex<Result<Backend, String>>;
 
 #[cfg(desktop)]
 fn window_state_flags() -> tauri_plugin_window_state::StateFlags {
@@ -161,14 +162,75 @@ fn native_commands(invoke: tauri::ipc::Invoke<tauri::Wry>) -> bool {
         pdf_copy::save_markdown_copy,
         image_input::read_dropped_image,
         image_input::read_clipboard_image,
-        web_links::open_web_link
+        web_links::open_web_link,
+        #[cfg(target_os = "linux")]
+        installed_update::relaunch_after_update
     ];
     document_popout::main_commands(invoke, commands)
 }
 
+/// The display choices the development launcher makes (run-development.sh):
+/// X11 through XWayland and no WebKit DMA-BUF renderer, unless the person chose
+/// otherwise. Runs first in `run`, before any thread exists.
+#[cfg(target_os = "linux")]
+fn linux_display_defaults() {
+    for (key, value) in [
+        ("GDK_BACKEND", "x11"),
+        ("WINIT_UNIX_BACKEND", "x11"),
+        ("WEBKIT_DISABLE_DMABUF_RENDERER", "1"),
+    ] {
+        if std::env::var_os(key).is_none() {
+            std::env::set_var(key, value);
+        }
+    }
+    std::env::remove_var("WAYLAND_DISPLAY");
+}
+
+/// Bring the open window back for a second launch, even when minimized.
+/// tao's `set_focus` does nothing while its window still counts as minimized,
+/// and deiconify alone does not activate under GNOME. GTK's present does both;
+/// a current X server time lets the window manager treat it as a fresh request.
+#[cfg(target_os = "linux")]
+fn present_main(app: &tauri::AppHandle) {
+    use gtk::glib::Cast;
+    use gtk::prelude::{GtkWindowExt, WidgetExt};
+    let Some(window) = app.get_webview_window("main") else {
+        return;
+    };
+    let Ok(native) = window.gtk_window() else {
+        return;
+    };
+    let time = native
+        .window()
+        .and_then(|surface| surface.downcast::<gdkx11::X11Window>().ok())
+        .map(|surface| gdkx11::functions::x11_get_server_time(&surface))
+        .unwrap_or(0);
+    native.present_with_time(time);
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // A menu or terminal start of the installed app has no launcher script.
+    #[cfg(target_os = "linux")]
+    if env!("KEJTU_PACKAGE_KIND") == "linux-installed" {
+        // After "Relaunch to update": the previous process releases the archive and
+        // the single-instance name by exiting; start only then (bounded).
+        installed_update::wait_for_previous(std::env::args());
+        linux_display_defaults();
+    }
     let builder = tauri::Builder::default();
+    // Registered first, as the plugin requires. A second launch of the installed
+    // app exits before its own setup and shows the window that is already open;
+    // it never starts a second backend for the same archive.
+    #[cfg(target_os = "linux")]
+    let builder = if env!("KEJTU_PACKAGE_KIND") == "linux-installed" {
+        builder.plugin(tauri_plugin_single_instance::init(|app, _, _| {
+            let handle = app.clone();
+            let _ = app.run_on_main_thread(move || present_main(&handle));
+        }))
+    } else {
+        builder
+    };
     #[cfg(desktop)]
     let builder = builder.plugin(
         tauri_plugin_window_state::Builder::default()

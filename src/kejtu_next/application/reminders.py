@@ -31,7 +31,7 @@ class ReminderSession:
             return
         if args['action'] == 'read':
             self.reads.add(result['reminder']['read_ref'])
-        if args['action'] == 'pending':
+        if args['action'] in ('pending','attention'):
             self.notices.update((row['occurrence_id'], row['receipt']) for row in result['items'])
 
     def operation(self, args, maximum, budget):

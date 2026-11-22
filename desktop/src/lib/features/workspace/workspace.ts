@@ -47,7 +47,7 @@ export type RecordRow<T = Record<string, unknown>> = {
 };
 export type Widget = {
   id: string;
-  kind: "radio" | "note" | "calendar" | "bookmarks" | "university" | "tasks";
+  kind: "note" | "calendar" | "bookmarks" | "university" | "tasks";
   side: "left" | "right";
   size: "compact" | "comfortable";
   collapsed: boolean;
@@ -62,13 +62,26 @@ export type Settings = {
   university_enabled: boolean;
   model_read: boolean;
   model_write: boolean;
-  radio_enabled: boolean;
-  video_enabled: boolean;
   calendar_enabled: boolean;
   calendars: string[];
   widgets: Widget[];
   availability: Availability;
 };
+/** Hide retired settings/cards without changing saved historical data. */
+export function normalizeSettings(value: Settings): Settings {
+  const {
+    radio_enabled: _radio,
+    video_enabled: _video,
+    ...retained
+  } = value as Settings & { radio_enabled?: boolean; video_enabled?: boolean };
+  return {
+    ...retained,
+    widgets: retained.widgets.filter(
+      (widget) => !["radio", "video"].includes(widget.kind),
+    ),
+  };
+}
+
 export type Snapshot = {
   revision: number;
   layout_revision: number;
@@ -89,11 +102,10 @@ export type View =
   | "home"
   | "journal"
   | "overview"
-  | "course"
   | "semesters"
   | "tasks"
   | "research"
-  | "media"
+  | "shelf"
   | "workspace-settings";
 export type WorkspaceAction = Arguments["workspace"]["action"];
 
@@ -112,8 +124,24 @@ export async function workspaceRequest<T>(
   return value as T;
 }
 
+export type ConversationProject = {
+  conversation_id: string;
+  project_id: string | null;
+  module_id?: string | null;
+  module_title?: string | null;
+  module_available?: boolean;
+  revision: number;
+  available: boolean;
+  title: string | null;
+};
+
 type Pending = {
-  action: "record.save" | "settings.save" | "layout.save" | "media.command";
+  action:
+    | "record.save"
+    | "settings.save"
+    | "layout.save"
+    | "media.command"
+    | "conversation.assign";
   payload: Record<string, unknown>;
   key: string;
 };
@@ -126,9 +154,7 @@ type State = {
   noticeTransient: boolean;
 };
 
-/** Media intents belong to this durable store, not the page being viewed.
- * Browsing may continue; mutate still blocks every new effect until recovery.
- */
+/** Retained pre-removal playback intents are lookup-only, never replayed. */
 export function workspaceNavigationLocked(
   state: Pick<State, "busy" | "pending">,
 ): boolean {
@@ -164,7 +190,10 @@ export function createWorkspace() {
     state.update((s) => ({ ...s, ...value }));
   };
   async function refresh() {
-    update({ snapshot: await workspaceRequest<Snapshot>("snapshot") });
+    const snapshot = await workspaceRequest<Snapshot>("snapshot");
+    update({
+      snapshot: { ...snapshot, settings: normalizeSettings(snapshot.settings) },
+    });
   }
   async function resolve() {
     const pending = get(state).pending;
@@ -187,7 +216,7 @@ export function createWorkspace() {
           pending: null,
           notice:
             receipt.status === "unknown"
-              ? "The player command may have run. Observe status before another command."
+              ? "This historical playback request has an uncertain outcome. Playback controls have been removed; nothing was repeated."
               : receipt.warnings?.join(" ") ||
                 "Saved outcome recovered; nothing was repeated.",
           noticeTransient:
@@ -202,7 +231,7 @@ export function createWorkspace() {
     }
   }
   async function mutate<T extends Receipt>(
-    action: Pending["action"],
+    action: Exclude<Pending["action"], "media.command">,
     payload: Record<string, unknown>,
   ): Promise<T | null> {
     if (!archive || get(state).busy || get(state).pending) return null;
@@ -211,9 +240,9 @@ export function createWorkspace() {
       action,
       payload: {
         ...payload,
-        [action === "media.command" ? "intent_key" : "mutation_key"]: id,
+        mutation_key: id,
       },
-      key: action === "media.command" ? `media:${id}` : id,
+      key: id,
     };
     // If local storage is unavailable, fail before the native effect.
     localStorage.setItem(key(), JSON.stringify(pending));
@@ -235,8 +264,8 @@ export function createWorkspace() {
       }
       return result;
     } catch (error) {
-      // Planner validation rejects a record before writing it. Only this
-      // confirmed refusal releases the draft; lost or invalid replies still
+      // Planner validation rejects a record before writing it. Only these
+      // confirmed refusals release the draft; lost or invalid replies still
       // require receipt lookup before another effect can be submitted.
       if (
         action === "record.save" &&
@@ -245,6 +274,13 @@ export function createWorkspace() {
       ) {
         localStorage.removeItem(key());
         update({ pending: null });
+      }
+      // Refused at admission while Kejtu is paused for a package update: nothing
+      // ran, so nothing is unconfirmed. Say it quietly; the update notice explains.
+      if (error instanceof NativeFailure && error.code === "updating") {
+        localStorage.removeItem(key());
+        update({ pending: null, notice: error.message, noticeTransient: true });
+        return null;
       }
       update({ error: String(error) });
       return null;
@@ -266,6 +302,7 @@ export function createWorkspace() {
           if (
             ![
               "record.save",
+              "conversation.assign",
               "settings.save",
               "layout.save",
               "media.command",

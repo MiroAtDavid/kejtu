@@ -86,7 +86,7 @@ def source(url, path=None, ref=None):
     return owner, repo, path, ref
 
 
-def download(url, *, path=None, ref=None, check=lambda: None, timeout=30, deadline=None, get=fetch):
+def download(url, *, path=None, ref=None, check=lambda: None, timeout=30, deadline=None, get=fetch, expected_commit=None):
     owner, repo, path, ref = source(url, path, ref)
     deadline = deadline or time.monotonic() + timeout
     api = f'https://api.github.com/repos/{owner}/{repo}'
@@ -97,6 +97,8 @@ def download(url, *, path=None, ref=None, check=lambda: None, timeout=30, deadli
     commit = json.loads(read(api + '/commits/' + quote(ref, safe=''), 1000000))['sha']
     if not re.fullmatch('[0-9a-f]{40}', commit):
         raise ValueError('GitHub did not return a full commit identity.')
+    if expected_commit is not None and commit != expected_commit:
+        raise ValueError('The repository did not resolve to the pinned commit; nothing was installed.')
     tree = json.loads(read(api + '/git/trees/' + commit + '?recursive=1', 8_000_000))
     if tree.get('truncated'):
         raise ValueError('GitHub tree is incomplete; choose a smaller repository.')
@@ -105,14 +107,15 @@ def download(url, *, path=None, ref=None, check=lambda: None, timeout=30, deadli
         choices = sorted(r['path'][:-len('/SKILL.md')] for r in tree['tree']
                          if r['path'].endswith('/SKILL.md'))
         # A repository link can identify its sole package. Never substitute a
-        # different folder for an explicit selection or guess among packages.
-        if not path and len(choices) == 1:
+        # different folder for an explicit selection or guess among packages. A
+        # pinned (Shelf) source names its exact folder, the root included.
+        if not path and len(choices) == 1 and expected_commit is None:
             path = relative(choices[0])
             prefix = path + '/'
         elif not choices:
             raise ValueError('No SKILL.md was found in this repository. Choose a repository containing a skill.')
         else:
-            message = ('This repository contains several skills. ' if not path else
+            message = ('This repository contains several skills. ' if not path and len(choices) > 1 else
                        'The selected folder does not contain SKILL.md. ')
             message += 'Open the folder containing the skill you want on GitHub, then paste its URL here.'
             # Native import errors have a 500-character bound. List only whole

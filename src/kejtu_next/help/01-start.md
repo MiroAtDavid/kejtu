@@ -9,15 +9,10 @@ before a model is connected.
 
 Open **Settings → Everyday → Models**. Choose a supported connection, enter your
 own API key there if required, check the connection, and save/activate the profile.
-The app supports Ollama, DeepSeek, Kimi, OpenAI API and ChatGPT plan connections; available models
-and thinking choices are shown in the panel. Ollama can use a local server or a
-server elsewhere: its endpoint determines where inference runs.
-
-The source-preview first-run helper currently seeds DeepSeek with a 264,000-token
-context, a 16,384-token reply reserve and medium thinking. Use limits supported
-by your chosen model. A larger number is not a guarantee the provider accepts it.
-No key is supplied. Missing credentials or an incompatible context can prevent
-the first message; Help itself still works.
+Choose from Ollama, Anthropic, DeepSeek, Kimi, OpenAI API and ChatGPT plan connections.
+The model panel shows the available models and thinking settings. With Ollama,
+the endpoint you select determines where the model runs. Use the context and
+reply limits supported by the model. You can read Help before connecting one.
 
 ### Use your ChatGPT subscription
 
@@ -39,21 +34,47 @@ Requests can still consume more than that allowance. Time and response-size
 bounds remain enforced. Only the models supported by this Kejtu version can be
 selected. ChatGPT conversations and ChatGPT memory are not imported.
 
+## The welcome window
+
+On a fresh installation, a small welcome window opens once, in five short steps:
+
+- **Choose a model**: **Open Models** opens **Settings → Models**, where you choose
+  a model and enter its key. The window shows whether a key is saved; it never
+  asks for one, and Kejtu never asks for keys in a chat. **Later** moves on.
+- **A folder for Kejtu?**: **Create folder** makes a Kejtu folder in your home
+  folder, or in the place you choose, with read & write access. It is the same as
+  **Set up working folder** in **Settings → Files**. Other folders stay private
+  until you share them there. **Not now** moves on without any file access.
+- **Tools for Kejtu?**: Browser, PDFs, Spreadsheets and Documents are ticked;
+  on Linux, Quick Terminal is offered unticked. **Turn on** sets up and switches
+  on the ticked tools, the same as **Set up** on their cards in **Shelf →
+  Installed**. The document tools work in your Kejtu folder, or in the folders you
+  share in **Settings → Files**. Each tool keeps its own switch in the Shelf.
+  **Not now** moves on without turning anything on.
+- **Help**: **Open Help** opens this guide; **Done** closes the window.
+
+**Skip setup**, the close button or Escape ends the window on any step. It does not
+come back after Done or Skip, even after restarting; everything it offers stays in
+Settings and the Shelf. If you close Kejtu halfway, it opens again on the next start, with the
+steps already done marked.
+
 ## A short guided introduction
 
-On a fresh installation, choose **Get started with Kejtu**. It opens a conversation
-and prepares a first message for you to review and send. Kejtu asks what you want
-help with and guides one useful task. A connected model is needed for its replies.
+On the welcome window’s last step, **Or let Kejtu show you around in a
+conversation** opens a conversation and prepares a first message for you to review
+and send. It appears once a model is ready. Kejtu asks what you want help with and
+guides one useful task.
 
-Choose **I’m ready** when you are comfortable, or **Skip introduction** at any time
-between replies. The introduction and its temporary instructions disappear, even
-after restarting. Your conversation stays. Setup instructions are not saved as a
-notebook note, and the introduction does not grant access to files or other tools.
-You can always return to **Settings → Help → Guide**.
+Choose **I’m ready** above that conversation when you are comfortable. The
+introduction and its temporary instructions disappear, even after restarting. Your
+conversation stays. Setup instructions are not saved as a notebook note, and the
+introduction does not grant access to files or other tools. You can always return
+to **Settings → Help → Guide**.
 
 ## 2. Try a small request
 
-Open **Conversations**, create a conversation if needed, and send something like:
+Start a conversation with **+** at the top left of the window (or **Ctrl+N**), and
+send something like:
 
 > Help me break this afternoon's work into three manageable steps.
 
@@ -83,14 +104,26 @@ a draft for you to send; it does not make a model request by itself.
 
 Optional runtime installation is still part of this source preview's setup.
 An enabled checkbox cannot install a missing browser, MCP worker or file server.
-The repository README, FILES.md and MCP.md describe those developer setup steps.
+Open **Shelf → Installed → Connections** to see your connected tools.
 
 ## 4. Find your way around
 
-**Home** shows today's Kejtu schedule, tasks and recent conversations. The sidebar
-opens conversations and Projects; narrow windows use the sidebar toggle.
-**Settings** contains connections, permissions and managers. **Widgets** opens
-the optional widget area. Research results are available from Home and Settings.
+**Home** is in the sidebar above **Conversations**. The sidebar also opens
+Calendar, Projects, Research, Shelf and Tasks. In narrow windows, use the sidebar toggle.
+
+- In **Projects**, open a project to see its modules and open tasks, or switch to **Conversations** for its chats.
+- In **Tasks**, open a saved task to read its description in Preview. **New task** opens in Write.
+- In **Research**, choose a saved search for findings, criteria and reports. **New research** starts a chat draft.
+- Open **Shelf** to browse optional packages. Choose **Installed** to manage your packages, skills and connections.
+
+**Settings** is at the bottom of the sidebar, beside a gear icon. It opens a dialog
+for connections, permissions and preferences. Choose **Close** to return to the
+same conversation or project, with your scroll position and draft retained.
+To work on a file, open **Projects**, choose a project, expand its module and
+choose **Conversation**. Or select the module beside the message field of an
+existing chat. Open **Resources** in the chat sidebar and click a file to open
+it on the right. You can edit Markdown there or mark a PDF paragraph and ask
+about it in the same conversation.
 **Settings → Help** can be reopened at any time. There is no setup wizard that silently
 shares folders, imports personal data or enables scheduled work.
 

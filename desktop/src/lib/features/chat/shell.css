@@ -1,5 +1,5 @@
-/* Shared Journal / Study shell. Navigation and widgets have independent controls;
-   the existing main scroll element remains the transcript's reading owner. */
+/* Shared Journal / Study shell. Navigation has its own control; the existing
+   main scroll element remains the transcript's reading owner. */
 .shell {
   height: 100dvh;
   min-height: 0;
@@ -19,24 +19,13 @@
   user-select: none;
 }
 .topbar-left,
-.topbar-actions,
-.journal-actions,
-.destination-nav {
+.topbar-actions {
   display: flex;
   align-items: center;
 }
 .topbar-left {
   min-width: 0;
-  gap: 18px;
-}
-.destination-nav {
-  min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  gap: 22px;
-}
-.journal-actions {
-  gap: 5px;
+  gap: 4px;
 }
 .topbar-actions {
   align-self: stretch;
@@ -44,43 +33,6 @@
 }
 .topbar-actions .window-controls {
   margin-left: 16px;
-}
-.destination-nav button,
-.journal-mode {
-  border: 0;
-  background: none;
-  color: var(--ke-text-secondary);
-  font: inherit;
-  font-size: var(--ke-text-2xs);
-  min-height: 32px;
-  padding: 5px 7px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.destination-nav button:hover:not(:disabled),
-.journal-mode:hover:not(:disabled) {
-  color: var(--ke-text-primary);
-}
-.destination-nav button,
-.journal-mode {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  border-radius: var(--ke-radius-sm);
-}
-.topbar .journal-mode {
-  box-sizing: border-box;
-  height: 28px;
-  min-height: 28px;
-  padding: 0 8px;
-  line-height: 1;
-}
-.destination-nav button[aria-current="page"],
-.journal-mode[aria-expanded="true"],
-.journal-mode[aria-pressed="true"] {
-  background: var(--ke-surface-inset);
-  color: var(--ke-text-primary);
 }
 .result-count {
   font-size: var(--ke-text-3xs);
@@ -126,25 +78,26 @@
   overflow-anchor: none;
   scrollbar-gutter: stable;
 }
-.surface[hidden],
 .shell > .workspace[hidden],
 .column[hidden] {
   display: none !important;
 }
+/* Navigation, the reading column and an empty right area. The right track and
+   gap are the former open widget column's, so a conversation keeps exactly the
+   position and width it had beside widgets. Nothing is placed in that track. */
 .journal-grid {
+  --shell-right-area: 232px;
   display: grid;
-  grid-template-columns: var(--ke-sidebar-width) minmax(0, 1fr);
-  gap: calc(30px * var(--ke-density));
+  grid-template-columns:
+    var(--ke-sidebar-width) minmax(0, 1fr)
+    var(--shell-right-area);
+  gap: calc(28px * var(--ke-density));
   align-items: start;
   width: 100%;
   max-width: 1580px;
   margin: auto;
   padding: 32px 28px 48px;
   min-height: 100%;
-}
-.journal-grid[data-margin-open="true"] {
-  grid-template-columns: var(--ke-sidebar-width) minmax(0, 1fr) 232px;
-  gap: calc(28px * var(--ke-density));
 }
 .column {
   min-width: 0;
@@ -153,49 +106,94 @@
   grid-column: 2;
   grid-row: 1;
 }
-.column-left,
-.column-right {
+.column-left {
   position: sticky;
   top: 32px;
-  max-height: calc(100dvh - 110px);
-  overflow-y: auto;
-  padding-bottom: 18px;
-}
-.column-left {
   grid-column: 1;
   grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - var(--ke-topbar-height) - 48px);
+  max-height: none;
+  /* The grid keeps 48px below the conversation; the sidebar ends 16px from
+     the viewport edge. Exclude that 32px difference from its sticky constraint
+     so reaching the end of the conversation cannot push navigation upward.
+     Allow one more pixel because scrollHeight rounds fractional content heights;
+     otherwise its final scroll offset can still clamp the sidebar by a fraction
+     of a pixel, making individual glyphs and icons snap to another pixel. */
+  margin-bottom: -33px;
+  overflow: hidden;
+  padding-bottom: 0;
 }
-.column-right {
-  grid-column: 3;
-  grid-row: 1;
-  scrollbar-width: thin;
+.sidebar-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+}
+/* Navigation and project files keep separate scroll positions. On short windows
+   navigation can still scroll, but cannot consume the resource tree's space. */
+.column-left.has-files .sidebar-content {
+  flex: 0 1 auto;
+  max-height: 50%;
+}
+.sidebar-files {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  /* Reserve usable tree space as well as its heading on short windows. */
+  min-height: min(140px, 50%);
+  overflow: hidden;
+}
+.sidebar-files[hidden] {
+  display: none;
+}
+.sidebar-files > .material-sidebar {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+/* The current module, above its documents or alone below navigation. */
+.sidebar-module {
+  margin-top: calc(24px * var(--ke-density));
+  padding-top: calc(20px * var(--ke-density));
+  border-top: 1px solid var(--ke-border);
+}
+.sidebar-module > span {
+  font: var(--ke-label-font);
+  letter-spacing: var(--ke-label-tracking);
+  text-transform: uppercase;
+  color: var(--ke-text-tertiary);
+}
+.sidebar-module > p {
+  font-size: var(--ke-label-size);
+  line-height: 1.6;
+  margin: 10px 0 0;
+  color: var(--ke-text-primary);
+  overflow-wrap: anywhere;
+}
+.sidebar-footer {
+  flex: none;
+  padding-top: 12px;
+}
+.settings-collapsed {
+  position: fixed;
+  left: 24px;
+  bottom: 16px;
+  z-index: 35;
+  background: var(--ke-surface);
+  border: 1px solid var(--ke-border);
+  box-shadow: var(--ke-shadow-raised);
 }
 .journal-grid[data-quiet="true"] {
-  grid-template-columns: minmax(0, 1fr);
-}
-.journal-grid[data-quiet="true"][data-margin-open="true"] {
-  grid-template-columns: minmax(0, 1fr) 232px;
+  grid-template-columns: minmax(0, 1fr) var(--shell-right-area);
 }
 .journal-grid[data-quiet="true"] .column-left {
   display: none;
 }
 .journal-grid[data-quiet="true"] .column-middle {
   grid-column: 1;
-}
-.journal-grid[data-quiet="true"] .column-right {
-  grid-column: 2;
-}
-.widget-panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: calc(18px * var(--ke-density));
-  color: var(--ke-text-secondary);
-}
-.widget-panel-heading > span {
-  font: var(--ke-label-font);
-  text-transform: uppercase;
-  letter-spacing: var(--ke-label-tracking);
 }
 /* Conversation and project destinations share the same sidebar row treatment. */
 .sidebar-menu-row {
@@ -240,40 +238,29 @@
   outline: 2px solid var(--ke-accent);
   outline-offset: 2px;
 }
-/* A reading page starts immediately below course navigation. Its sidebar retains
-   the same identity baseline as ordinary pages. */
-.journal-grid[data-course="true"] {
-  padding-top: 0;
-}
-.journal-grid[data-reading="true"] {
-  padding-bottom: 0;
-}
-/* The reader is the vertical scroll owner while Material is open. In particular,
- * the shell's .workspace rules must never leak onto Material's nested workspace. */
-.shell > .workspace[data-reading="true"] {
-  overflow-y: hidden;
-}
-.journal-grid[data-course="true"] .column-left,
-.journal-grid[data-course="true"] .column-right {
-  margin-top: 32px;
-}
 .kept-chat {
   max-width: 730px;
   margin-inline: auto;
 }
 .shell-footer {
-  flex: none;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 0;
+  display: none;
 }
 .shell-footer:has(button) {
-  position: fixed;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: sticky;
+  bottom: 12px;
+  align-self: end;
+  height: 0;
+  /* The reading grid has 48px of trailing space. Extend this zero-height
+     overlay by 36px to keep its button 12px from the viewport at either end. */
+  margin-bottom: -36px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  pointer-events: none;
   z-index: 10;
+}
+.shell-footer button {
+  pointer-events: auto;
 }
 .surface {
   min-height: 0;
@@ -281,71 +268,94 @@
   display: flex;
   flex-direction: column;
 }
-/* Opening or leaving Settings crossfades the whole surface in place. */
-.surface:not([hidden]),
-.shell > .workspace:not([hidden]) {
-  animation: ke-fade-in var(--ke-motion-slow) var(--ke-motion-ease);
+.settings-dialog {
+  box-sizing: border-box;
+  width: min(1200px, calc(100vw - 64px));
+  height: min(900px, calc(100dvh - 96px));
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--ke-border);
+  border-radius: var(--ke-overlay-radius);
+  background: var(--ke-surface);
+  color: var(--ke-text-primary);
+  box-shadow: var(--ke-overlay-shadow);
+  overflow: hidden;
+}
+.settings-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  animation: ke-dialog-in var(--ke-motion-slow) var(--ke-motion-ease);
+}
+.settings-dialog::backdrop {
+  background: var(--ke-scrim);
+}
+.settings-dialog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex: none;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--ke-border);
+}
+.settings-dialog-heading h1 {
+  margin: 0;
+  font: var(--ke-title-section);
+}
+.settings-dialog-heading h1:focus {
+  /* Initial dialog focus is an announcement point, not an interactive control. */
+  outline: none;
+}
+.settings-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border: 0;
+  border-radius: var(--ke-radius-sm);
+  background: transparent;
+  color: var(--ke-text-secondary);
+  font: inherit;
+  font-size: var(--ke-text-xs);
+  cursor: pointer;
+}
+.settings-close:hover:not(:disabled) {
+  color: var(--ke-text-primary);
+  background: var(--ke-surface-inset);
+}
+.settings-close:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 .nav-scrim {
   display: none;
 }
-.source-return {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--ke-text-2xs);
-  color: var(--ke-accent);
-  margin: 0 0 18px;
-  padding: 6px 0;
-  background: none;
-  border: 0;
-  cursor: pointer;
-}
+
 @media (min-width: 1800px) {
   .journal-grid {
     padding-inline: 40px;
-    gap: calc(36px * var(--ke-density));
-  }
-  .journal-grid[data-margin-open="true"] {
     gap: calc(32px * var(--ke-density));
   }
 }
+/* The former widget column floated over the page below this width, so the
+   reading column never reserved its space here. */
 @media (max-width: 1200px) {
   :root {
     --ke-sidebar-width: 190px;
   }
-  .journal-grid,
-  .journal-grid[data-margin-open="true"] {
+  .journal-grid {
     grid-template-columns: var(--ke-sidebar-width) minmax(0, 1fr);
     gap: calc(22px * var(--ke-density));
     padding-inline: 22px;
   }
-  .journal-grid[data-quiet="true"],
-  .journal-grid[data-quiet="true"][data-margin-open="true"] {
+  .journal-grid[data-quiet="true"] {
     grid-template-columns: minmax(0, 1fr);
-  }
-  .column-right,
-  .journal-grid[data-course="true"] .column-right {
-    position: fixed;
-    top: 50px;
-    right: 14px;
-    bottom: 14px;
-    width: 260px;
-    margin: 0;
-    max-height: none;
-    padding: 18px 20px;
-    background: var(--ke-surface);
-    border: 1px solid var(--ke-border);
-    border-radius: var(--ke-overlay-radius);
-    box-shadow: var(--ke-overlay-shadow);
-    z-index: 40;
-    transform-origin: top right;
-    animation: ke-menu-in var(--ke-motion-base) var(--ke-motion-ease);
   }
 }
 @media (max-width: 1000px) {
-  .journal-grid,
-  .journal-grid[data-margin-open="true"] {
+  .journal-grid {
     grid-template-columns: minmax(0, 1fr);
   }
   .column-middle {
@@ -355,11 +365,12 @@
     display: none;
   }
   .journal-grid[data-index-open="true"] .column-left {
-    display: block;
+    display: flex;
     position: fixed;
     inset: 42px auto 0 0;
     margin: 0;
     width: 240px;
+    height: auto;
     max-height: none;
     padding: 18px;
     background: var(--ke-surface);
@@ -383,6 +394,9 @@
   }
 }
 @media (max-width: 650px) {
+  .settings-collapsed {
+    left: 10px;
+  }
   .topbar {
     padding-left: 10px;
     gap: 4px;
@@ -390,32 +404,116 @@
   .topbar-left {
     gap: 10px;
   }
-  .destination-nav {
-    gap: 14px;
-  }
   .topbar-actions .window-controls {
     margin-left: 4px;
-  }
-  .widgets-toggle span {
-    display: none;
-  }
-  .journal-actions {
-    gap: 0;
   }
   .journal-grid {
     padding-inline: 12px;
   }
+  .settings-dialog {
+    width: calc(100vw - 20px);
+    height: calc(100dvh - 56px);
+  }
+  .settings-dialog-heading {
+    padding: 10px 16px;
+  }
 }
 
-/* Reading width is temporary: the shell retains the user's sidebar and widget choices. */
-.journal-grid[data-wide-reading="true"] {
+/* Opening a document changes only presentation. Its live editor stays in its
+   original module DOM; this stable slot supplies viewport bounds to that owner. */
+.journal-grid[data-document-open="true"] {
   max-width: none;
-  grid-template-columns: minmax(0, 1fr);
+  padding-right: 12px;
+  padding-bottom: 12px;
+  grid-template-columns: var(--ke-sidebar-width) minmax(0, 1fr) var(
+      --document-width
+    );
 }
-.journal-grid[data-wide-reading="true"] .column-middle {
-  grid-column: 1;
+.journal-grid[data-document-open="true"][data-quiet="true"] {
+  grid-template-columns: minmax(0, 1fr) var(--document-width);
 }
-.journal-grid[data-wide-reading="true"] .column-left,
-.journal-grid[data-wide-reading="true"] .column-right {
-  display: none;
+.column-document {
+  /* The fixed reader sits at layer 5. Only chrome should intercept input. */
+  z-index: 6;
+  pointer-events: none;
+  grid-column: 3;
+  grid-row: 1;
+  position: sticky;
+  top: 8px;
+  min-width: 0;
+  height: calc(100dvh - var(--ke-topbar-height) - 16px);
+  display: flex;
+  flex-direction: column;
+  margin-top: -24px;
+  margin-bottom: -24px;
+}
+.journal-grid[data-quiet="true"] .column-document {
+  grid-column: 2;
+}
+.document-pane-close {
+  pointer-events: auto;
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 6;
+  width: 30px;
+  height: 32px;
+}
+.document-pane-space {
+  flex: 1;
+  min-height: 0;
+}
+.document-resizer {
+  pointer-events: auto;
+  position: absolute;
+  left: -18px;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: col-resize;
+  touch-action: none;
+  z-index: 25;
+}
+.document-resizer::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--ke-border);
+}
+.document-resizer:hover::after,
+.document-resizer:focus-visible::after {
+  border-color: var(--ke-accent);
+}
+.document-resizer:focus-visible {
+  outline: 2px solid var(--ke-focus-ring);
+  outline-offset: 1px;
+}
+.document-resize-shield {
+  position: fixed;
+  inset: 0;
+  cursor: col-resize;
+  z-index: 20;
+}
+@media (max-width: 1200px) {
+  .document-resizer {
+    left: -15px;
+  }
+}
+@media (max-width: 1000px) {
+  .journal-grid[data-document-open="true"] {
+    grid-template-columns: minmax(0, 1fr) var(--document-width);
+  }
+  .column-document {
+    grid-column: 2;
+  }
+}
+@media (max-width: 650px) {
+  .journal-grid[data-document-open="true"] {
+    column-gap: 14px;
+  }
+  .document-resizer {
+    left: -11px;
+  }
 }

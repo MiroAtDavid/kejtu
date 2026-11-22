@@ -98,7 +98,7 @@
     if (locked || stale || !dirty) return;
     error = "";
     try {
-      // Layout changes cannot grant model, calendar or player permissions.
+      // Layout changes cannot grant model or calendar permissions.
       const result = await workspace.mutate("layout.save", {
         widgets: rows,
         expected_revision: revision,

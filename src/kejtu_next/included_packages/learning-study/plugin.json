@@ -1,0 +1,17 @@
+{
+  "name": "learning-study",
+  "title": "Learning & study",
+  "version": "1",
+  "skills": [
+    "skills/kejtu-study-planning",
+    "skills/kejtu-study-support",
+    "skills/kejtu-study-research"
+  ],
+  "description": "Explain and practise material, plan study time and research course information when you ask.",
+  "icon": "book-open",
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "author": {
+    "name": "Kejtu"
+  },
+  "license": "MIT"
+}

@@ -83,9 +83,10 @@
 
 <section aria-label="Conversation reminder access">
   <p class="panel-intro">
-    Enable once for this conversation, then ask Kejtu to create, change or
-    cancel a reminder. Reminders are separate from personal tasks and do not
-    require note-writing permission.
+    Enable reminders and conversational follow-ups for this conversation. You
+    can ask Kejtu to create, change or cancel a reminder, and Kejtu can remember
+    useful follow-ups from what you discuss. Neither requires note-writing
+    permission.
   </p>
   <p>
     Chat reminders: <strong
@@ -93,9 +94,9 @@
     >.
   </p>
   <p role="note">
-    Creation only for now: timed notifications are not connected yet. Saving a
-    reminder does not mean you will receive an alert. Scheduling runs only while
-    Kejtu is open.
+    Due reminders and companion follow-ups can come up naturally during
+    conversation while Kejtu is open. Home reminders are muted; companion
+    follow-ups are always conversation-only. There is no pop-up or sound.
   </p>
   {#if current && !current.readable}<p>
       Memory permission is unavailable. Reminder access cannot enable it.

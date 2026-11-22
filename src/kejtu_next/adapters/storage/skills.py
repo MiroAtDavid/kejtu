@@ -1,7 +1,9 @@
 """Installed immutable skills own their files, independently of authoring notes."""
 import json
+from contextlib import nullcontext
 from datetime import datetime,timezone
 
+from ...core.included_packages import included_skill, included_origin, packages as included_packages
 from ...core.records import Failure
 from ...core.skills import MAX_SKILLS,MAX_FILE,encode,sha,name as skill_name,revision as skill_revision,path as skill_path
 
@@ -12,6 +14,12 @@ CREATE TABLE skill_packages(name TEXT PRIMARY KEY,head_revision TEXT NOT NULL,en
 CREATE TABLE skill_revisions(name TEXT NOT NULL REFERENCES skill_packages(name),revision TEXT NOT NULL,manifest TEXT NOT NULL,created_at TEXT NOT NULL,PRIMARY KEY(name,revision));
 CREATE TABLE skill_files(name TEXT NOT NULL,revision TEXT NOT NULL,path TEXT NOT NULL,sha256 TEXT NOT NULL,bytes INTEGER NOT NULL,body BLOB NOT NULL,PRIMARY KEY(name,revision,path),FOREIGN KEY(name,revision) REFERENCES skill_revisions(name,revision));
 CREATE TABLE turn_skill_selections(turn_id TEXT PRIMARY KEY REFERENCES turns(id),name TEXT NOT NULL,revision TEXT NOT NULL,FOREIGN KEY(name,revision) REFERENCES skill_revisions(name,revision));
+'''
+# Schema 44: removal hides a package from use without deleting its revisions, which
+# past selections reference. A separate table, so upgrades never alter skill_packages.
+SKILL_REMOVAL_SCHEMA='''
+CREATE TABLE skill_package_removals(name TEXT PRIMARY KEY REFERENCES skill_packages(name),
+ removed_at TEXT NOT NULL,mutation_key TEXT NOT NULL CHECK(length(mutation_key)=32));
 '''
 
 
@@ -50,7 +58,8 @@ class SkillStore:
 
     def status(self,*,enabled=False,offset=0,limit=100):
         items=[]
-        for row in self.db.execute('SELECT name FROM skill_packages WHERE enabled=1 OR ?=0 ORDER BY name',(int(enabled),)):
+        for row in self.db.execute('''SELECT name FROM skill_packages WHERE (enabled=1 OR ?=0)
+                AND name NOT IN (SELECT name FROM skill_package_removals) ORDER BY name''',(int(enabled),)):
             try:
                 item=self.manifest(row['name']);meta=item['metadata']
                 items.append(dict(name=item['name'],revision=item['revision'],enabled=item['enabled'],description=meta['description'],
@@ -59,22 +68,48 @@ class SkillStore:
                 if not enabled:items.append(dict(name=row['name'],revision='',enabled=False,description='',compatibility='',files=0,error=error.detail))
         return dict(revision=self.epoch(),items=items[offset:offset+limit],total=len(items),next_offset=offset+limit if offset+limit<len(items) else None)
 
-    def install(self,package,expected,*,update=False):
+    def head(self,name):
+        """The current revision of an installed, not removed name; None otherwise."""
+        row=self.db.execute('SELECT head_revision FROM skill_packages WHERE name=? AND name NOT IN (SELECT name FROM skill_package_removals)',(name,)).fetchone()
+        return row[0] if row else None
+
+    def install(self,package,expected,*,update=False,disabled=False,record=None,included=False,transaction=True):
+        """Store a verified package as the name's head revision.
+
+        ``disabled`` leaves the head switched off even on an identical reimport, which
+        otherwise keeps its existing decision: a Shelf installation always needs a new
+        enable decision. ``record(package)`` runs inside this transaction, so a caller's
+        own record of the install commits or rolls back with it.
+        """
         manifest,revision,files=package['manifest'],package['revision'],package['files'];name=manifest['name'];stamp=datetime.now(timezone.utc).isoformat()
+        if included_skill(name) and not included:
+            raise Failure('package_included','This skill is included with Kejtu and updates with the app. It can be disabled.')
         # The importer validates syntax. This persistence boundary independently
         # verifies that the supplied immutable identity covers every exact file.
         if (sha(encode(manifest).encode())!=revision or set(files)!=set(manifest['files']) or any(
                 sha(body)!=manifest['files'][path]['sha256'] or len(body)!=manifest['files'][path]['bytes'] for path,body in files.items())):
             raise Failure('skill_integrity','Prepared skill identity does not match its files.')
-        with self.db:
+        with self.db if transaction else nullcontext():
             if self.epoch()!=expected:raise Failure('skill_conflict','Skills changed. Refresh before saving.')
+            # Installing a removed name again brings it back; it stays disabled.
+            removed=self.db.execute('DELETE FROM skill_package_removals WHERE name=?',(name,)).rowcount
             old=self.db.execute('SELECT * FROM skill_packages WHERE name=?',(name,)).fetchone()
+            if included and old and not included_origin(self.manifest(name)['origin']):
+                raise Failure('package_included_conflict','An imported skill uses an included name. Its content was preserved; rename the imported skill before continuing.')
             if old and old['head_revision']==revision:
                 for path in files:self.file(name,revision,path)
-                return self.status(limit=20)  # Identical reimport never re-enables a disabled revision.
-            if old and not update:raise Failure('skill_exists','This name already exists. Review it and choose an explicit update.')
-            if not old and self.db.execute('SELECT count(*) FROM skill_packages').fetchone()[0]>=MAX_SKILLS:
-                raise Failure('skill_limit','The library supports at most 100 skill names.')
+                # Identical reimport never re-enables a disabled revision.
+                switched=disabled and old['enabled']
+                if switched:self.db.execute('UPDATE skill_packages SET enabled=0 WHERE name=?',(name,))
+                if removed or switched:self.db.execute('UPDATE skill_state SET revision=revision+1 WHERE singleton=1')
+                if record:record(package)
+                return self.status(limit=20)
+            if old and not update and not removed:raise Failure('skill_exists','This name already exists. Review it and choose an explicit update.')
+            # Included app resources do not consume the existing 100 user-skill slots.
+            names=tuple(included_packages())
+            count=self.db.execute('SELECT count(*) FROM skill_packages WHERE name NOT IN ('+','.join('?' for _ in names)+')',names).fetchone()[0]
+            if not old and not included and count>=MAX_SKILLS:
+                raise Failure('skill_limit','The library supports at most 100 user-installed skill names.')
             if not old:self.db.execute('INSERT INTO skill_packages VALUES(?,?,0,?,?)',(name,revision,stamp,stamp))
             found=self.db.execute('SELECT 1 FROM skill_revisions WHERE name=? AND revision=?',(name,revision)).fetchone()
             if not found:
@@ -82,21 +117,51 @@ class SkillStore:
                 self.db.executemany('INSERT INTO skill_files VALUES(?,?,?,?,?,?)',[(name,revision,path,sha(body),len(body),body) for path,body in files.items()])
             else:
                 for path in files:self.file(name,revision,path)
-            # Updates need a new enable decision; new instructions cannot inherit
-            # a prior revision's opt-in. Earlier revisions remain inspectable.
-            self.db.execute('UPDATE skill_packages SET head_revision=?,enabled=0,updated_at=? WHERE name=?',(revision,stamp,name))
+            # Third-party updates need a new enable decision. Included guidance
+            # updates with the application, preserving its saved switch. Earlier
+            # revisions remain inspectable in both cases.
+            enabled = (bool(old['enabled']) if old else True) if included else False
+            self.db.execute('UPDATE skill_packages SET head_revision=?,enabled=?,updated_at=? WHERE name=?',(revision,int(enabled),stamp,name))
             self.db.execute('UPDATE skill_state SET revision=revision+1 WHERE singleton=1')
+            if record:record(package)
         return self.status(limit=20)
 
     def enable(self,name,revision,enabled,expected):
         with self.db:
             if self.epoch()!=expected:raise Failure('skill_conflict','Skills changed. Refresh before saving.')
+            if enabled and self.removed(name):raise Failure('skill_removed','This skill was removed. Install it again to use it.')
             item=self.manifest(name,revision)
             if not item['current']:raise Failure('skill_changed','Select the current installed revision.')
             if enabled:
                 for path in item['files']:self.file(name,revision,path)
             self.db.execute('UPDATE skill_packages SET enabled=? WHERE name=?',(int(enabled),name))
             self.db.execute('UPDATE skill_state SET revision=revision+1 WHERE singleton=1')
+        return self.status(limit=20)
+
+    def removed(self,name):
+        return self.db.execute('SELECT 1 FROM skill_package_removals WHERE name=?',(name,)).fetchone() is not None
+
+    def remove(self,name,mutation_key,expected,*,revision=None,record=None):
+        """Hide a package from use and disable it; every revision and past selection stays.
+
+        ``revision`` refuses the removal once the name holds another revision, so an
+        earlier owner never removes a replacement by name alone. ``record()`` runs
+        inside this transaction, so a caller's record of the removal commits with it.
+        """
+        if included_skill(name):
+            raise Failure('package_included','This skill is included with Kejtu. You can disable it, but cannot remove it.')
+        with self.db:
+            if self.epoch()!=expected:raise Failure('skill_conflict','Skills changed. Refresh before saving.')
+            row=self.db.execute('SELECT head_revision FROM skill_packages WHERE name=?',(name,)).fetchone()
+            if row is None:raise Failure('skill_unavailable','This skill is not installed.')
+            if revision is not None and row['head_revision']!=revision:
+                raise Failure('skill_changed','This skill now holds another revision; nothing was removed.')
+            if not self.removed(name):
+                stamp=datetime.now(timezone.utc).isoformat()
+                self.db.execute('INSERT INTO skill_package_removals VALUES(?,?,?)',(name,stamp,mutation_key))
+                self.db.execute('UPDATE skill_packages SET enabled=0,updated_at=? WHERE name=?',(stamp,name))
+                self.db.execute('UPDATE skill_state SET revision=revision+1 WHERE singleton=1')
+            if record:record()
         return self.status(limit=20)
 
     def select(self,turn_id,selected):

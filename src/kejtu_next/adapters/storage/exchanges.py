@@ -140,59 +140,83 @@ class ExchangeStore(NoteRemovalStore):
         self._query("DELETE FROM recall_dirty WHERE kind='operation' AND source_id LIKE ?", (tid + ':%',))
         self._query('DELETE FROM history_units WHERE turn_id=?', (tid,))
 
-    def _renumber(self):
+    def _renumber(self, conversations):
         # Ordinals are a dense admission index, not source/provenance positions.
         # Stable turn sequence, identities, timestamps and exact text never move.
-        rows = self._query('SELECT turn_id,conversation_id FROM history_units ORDER BY conversation_id,sequence').fetchall()
-        if len(rows) > MAX_ROWS:
-            raise Failure('removal_limit', 'History maintenance exceeds its work bound.')
-        self._query('UPDATE history_units SET ordinal=-ordinal')
-        cid, ordinal = None, 0
+        # Unrelated conversations need no maintenance. Stream retained history
+        # under the existing transaction budget rather than cap archive size.
+        for cid in conversations:
+            self._query('UPDATE history_units SET ordinal=-ordinal WHERE conversation_id=?', (cid,))
+            rows = self._query('SELECT turn_id FROM history_units WHERE conversation_id=? ORDER BY sequence', (cid,))
+            for ordinal, row in enumerate(rows, 1):
+                self._query('UPDATE history_units SET ordinal=? WHERE turn_id=?', (ordinal, row['turn_id']))
+
+    def _dependency_records(self, table, owner, column):
+        # Names are internal constants. Never retain the archive's receipts or
+        # treat their total count as the size of the selected dependency closure.
+        # An oversized record must refuse, not disappear from the scan; CASE
+        # prevents transferring an unbounded value before checking its size.
+        size = f'length(CAST({column} AS BLOB))'
+        rows = self._query(f'SELECT {owner} AS owner,{size} AS bytes,'
+                          f'CASE WHEN {size}<=? THEN {column} END AS record FROM {table}', (MAX_BYTES,))
         for row in rows:
-            ordinal = ordinal + 1 if cid == row['conversation_id'] else 1
-            cid = row['conversation_id']
-            self._query('UPDATE history_units SET ordinal=? WHERE turn_id=?', (ordinal, row['turn_id']))
+            self._charge()
+            if row['bytes'] is not None and row['bytes'] > MAX_BYTES:
+                raise Failure('removal_limit', 'An individual dependency receipt exceeds the maintenance bound; nothing changed.')
+            yield row['owner'], row['record']
 
     def _exclude(self, tid):
         selected = {tid}
         # Exact recorded admissions/tool receipts establish dependencies. No
         # keyword guessing, and later unrelated conversations remain eligible.
-        records = []
-        for table, column in (('history_admissions', 'record'), ('history_operations', 'result'), ('recall_admissions','record')):
-            records.extend((r['turn_id'], r[column]) for r in self._query(f'SELECT turn_id,{column} FROM {table}'))
-        if len(records) > MAX_ROWS:
-            raise Failure('removal_limit', 'Dependency maintenance exceeds its work bound.')
-        runs = set()
+        runs, conversations = set(), set()
         while True:
             previous_runs = set(runs)
             identities = set(selected) | runs
-            for row in self._query('SELECT id,user_id,answer_id FROM turns'):
+            for row in self._query('SELECT id,conversation_id,user_id,answer_id FROM turns'):
+                self._charge()
                 if row['id'] in selected:
+                    conversations.add(row['conversation_id'])
                     identities.update(v for v in (row['user_id'], row['answer_id']) if v)
             for row in self._query('''SELECT s.turn_id,e.revision_id,v.record_id FROM manual_memory_sources s
                     JOIN memory_edges e ON e.source_revision_id=s.source_id JOIN memory_revisions v ON v.id=e.revision_id'''):
+                self._charge()
                 if row['turn_id'] in selected:
                     identities.update((row['revision_id'],row['record_id']))
-            for row in self._query('SELECT run_id,payload FROM background_run_events'):
-                if mentions(row['payload'], identities):
-                    runs.add(row['run_id'])
             for row in self._query('SELECT id AS run_id,result_id FROM background_runs'):
+                self._charge()
                 if row['run_id'] in runs and row['result_id']:
                     identities.add(row['result_id'])
             for row in self._query('''SELECT n.revision_id,v.record_id,n.turn_id,o.run_id FROM note_revisions n
                     JOIN memory_revisions v ON v.id=n.revision_id LEFT JOIN note_job_origins o
                     ON o.bank_id=n.bank_id AND o.actor=n.actor AND o.operation_key=n.operation_key'''):
+                self._charge()
                 if row['turn_id'] in selected or row['run_id'] in runs:
                     identities.update((row['revision_id'], row['record_id']))
             while True:
                 before = len(identities)
                 for row in self._query('''SELECT b.memory_revision,b.revision_id,v.record_id FROM note_bases b
                         JOIN memory_revisions v ON v.id=b.revision_id'''):
+                    self._charge()
                     if row['memory_revision'] in identities:
                         identities.update((row['revision_id'],row['record_id']))
                 if len(identities) == before:
                     break
-            additions = {owner for owner, record in records if owner not in selected and mentions(record, identities)}
+            # Derived results/notes must be identities BEFORE examining the next
+            # background run. Rebuild them each closure pass, never infer by text.
+            for run_id, record in self._dependency_records('background_run_events', 'run_id', 'payload'):
+                if run_id not in runs and mentions(record, identities):
+                    runs.add(run_id)
+                    if len(selected) + len(runs) > MAX_ROWS:
+                        raise Failure('removal_limit', 'The selected dependency closure exceeds the maintenance bound; nothing changed.')
+            additions = set()
+            for table, column in (('history_admissions', 'record'), ('history_operations', 'result'),
+                                  ('recall_admissions', 'record'), ('interest_offers', 'admission'), ('reminder_offers', 'admission')):
+                for owner, record in self._dependency_records(table, 'turn_id', column):
+                    if owner not in selected and owner not in additions and mentions(record, identities):
+                        additions.add(owner)
+                        if len(selected) + len(additions) + len(runs) > MAX_ROWS:
+                            raise Failure('removal_limit', 'The selected dependency closure exceeds the maintenance bound; nothing changed.')
             if not additions and runs == previous_runs:
                 break
             selected.update(additions)
@@ -224,7 +248,7 @@ class ExchangeStore(NoteRemovalStore):
             body = self._payload_text(meta)
             self._query("INSERT INTO memory_fts(memory_fts,rowid,scope,body) VALUES('delete',?,?,?)", (row['sequence'], 'b' + row['bank_id'], body))
             self._query('DELETE FROM memory_index WHERE revision_id=?', (row['revision_id'],))
-        self._renumber()
+        self._renumber(conversations)
         return len(selected)
 
     def _remove(self, turn):
@@ -269,4 +293,4 @@ class ExchangeStore(NoteRemovalStore):
             self._query('DELETE FROM artifact_payloads WHERE artifact_id=?', (ident,))
             self._query('DELETE FROM artifacts WHERE id=?', (ident,))
             self._query('INSERT INTO exchange_removed_ids VALUES(?,\'artifact\')', (ident,))
-        self._renumber()
+        self._renumber((cid,))

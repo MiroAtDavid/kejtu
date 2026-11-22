@@ -6,8 +6,8 @@ PURPOSES = ('about_user','shared_experience','knowledge','notebook','open_thread
 THREAD_STATES = ('open','parked','done')
 BASES = ('unspecified','user_statement','user_summary','observation','hypothesis','reference')
 FLAGS = ('coverage-partial','user-rejected')
-FIELDS = frozenset(('title','purpose','tags','thread_status','basis','source_quote','source_ref','correction_reason','basis_refs','flags','preference_scope'))
-METADATA_FIELDS = frozenset(('title','purpose','tags','thread_status','flags','preference_scope'))
+FIELDS = frozenset(('title','purpose','tags','thread_status','basis','source_quote','source_ref','correction_reason','basis_refs','flags','preference_scope','workspace_scope'))
+METADATA_FIELDS = frozenset(('title','purpose','tags','thread_status','flags','preference_scope','workspace_scope'))
 
 def tag_key(value):
     return unicodedata.normalize('NFKC',value).strip().casefold()
@@ -45,6 +45,8 @@ def usable_topic(value):
 def validate_fields(args):
     def text(value,maximum):
         return isinstance(value,str) and '\x00' not in value and len(value.encode())<=maximum
+    if 'workspace_scope' in args and args['workspace_scope'] not in ('global','project','module'):
+        raise ValueError('workspace_scope')
     if 'title' in args and not text(args['title'],240): raise ValueError('title')
     if 'preference_scope' in args and (not text(args['preference_scope'],240)
             or args['preference_scope'] and not args['preference_scope'].strip()):
@@ -89,6 +91,9 @@ def field_schemas():
         'tags':{'type':'array','items':{'type':'string'}},
         'flags':{'type':'array','items':{'type':'string'}},
         'basis_refs':{'type':'array','items':{'type':'string'}},
+        'workspace_scope':{'type':'string','enum':['global','project','module'],'description':
+            'Discovery context only: new notes inherit the turn; about_user defaults global. '
+            'Edits preserve context unless supplied.'},
         'preference_scope':{'type':'string','description':
             'Optional concrete activity where an explicitly stated standing user preference applies '
             '(for example: gathering a daily news roundup). Keep it in a short separate about_user note, '

@@ -1,5 +1,5 @@
 {
-  "protocol": "kejtu.native.v42",
+  "protocol": "kejtu.native.v73",
   "id_pattern": "^[0-9a-f]{32}$",
   "bounds": {
     "control_request_bytes": 1048576,
@@ -180,9 +180,22 @@
           "max": 8
         },
         "note_id": "?id",
-        "task_id": "?id"
+        "task_id": "?id",
+        "event_at": "?label",
+        "timing": {
+          "type": "string",
+          "enum": [
+            "explicit",
+            "flexible"
+          ]
+        },
+        "task_revision": "?integer"
       },
-      "optional": []
+      "optional": [
+        "event_at",
+        "timing",
+        "task_revision"
+      ]
     },
     "reminder_support": {
       "fields": {
@@ -375,7 +388,9 @@
         "reminder_delivery",
         "notebook_maintenance",
         "notebook_care",
-        "research"
+        "research",
+        "interest_following",
+        "reminder_review"
       ]
     },
     "job_run_status": {
@@ -716,12 +731,14 @@
         "placements": {
           "items": "task_saved_placement",
           "max": 100
-        }
+        },
+        "urgency": "task_urgency"
       },
       "optional": [
         "day_group",
         "description",
-        "placements"
+        "placements",
+        "urgency"
       ]
     },
     "task_revision": {
@@ -753,11 +770,13 @@
         "placements": {
           "items": "task_saved_placement",
           "max": 100
-        }
+        },
+        "urgency": "task_urgency"
       },
       "optional": [
         "description",
-        "placements"
+        "placements",
+        "urgency"
       ]
     },
     "task_receipt": {
@@ -1197,6 +1216,54 @@
             "reason": "?label"
           },
           "optional": []
+        },
+        {
+          "fields": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "reply_reference"
+              ]
+            },
+            "answer_id": "id",
+            "reference_id": "id",
+            "attribution": {
+              "one_of": [
+                {
+                  "fields": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "interest_finding"
+                      ]
+                    },
+                    "finding_id": "id",
+                    "source_id": "id",
+                    "admission_sha256": "digest",
+                    "start": "integer",
+                    "end": "integer"
+                  },
+                  "optional": []
+                },
+                {
+                  "fields": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "reminder"
+                      ]
+                    },
+                    "occurrence_id": "id",
+                    "admission_sha256": "digest",
+                    "start": "integer",
+                    "end": "integer"
+                  },
+                  "optional": []
+                }
+              ]
+            }
+          },
+          "optional": []
         }
       ]
     },
@@ -1208,6 +1275,25 @@
         "created_at": "?label"
       },
       "optional": []
+    },
+    "note_workspace": {
+      "one_of": [
+        {
+          "fields": {
+            "project_id": "id",
+            "module_id": "id"
+          },
+          "optional": [
+            "module_id"
+          ]
+        },
+        {
+          "fields": {
+            "module_id": "id"
+          },
+          "optional": []
+        }
+      ]
     },
     "note_organisation": {
       "fields": {
@@ -1234,12 +1320,14 @@
         "preference_scope": {
           "type": "string",
           "max_bytes": 240
-        }
+        },
+        "workspace": "note_workspace"
       },
       "optional": [
         "last_correction_revision",
         "flags",
-        "preference_scope"
+        "preference_scope",
+        "workspace"
       ]
     },
     "note_attribution": {
@@ -1393,7 +1481,8 @@
             "intent_sha256": "digest"
           },
           "optional": []
-        }
+        },
+        "shelf_receipt"
       ]
     },
     "model_settings": {
@@ -1610,6 +1699,7 @@
         "deepseek",
         "kimi",
         "openai",
+        "anthropic",
         "chatgpt"
       ]
     },
@@ -1618,7 +1708,8 @@
       "enum": [
         "deepseek",
         "kimi",
-        "openai"
+        "openai",
+        "anthropic"
       ]
     },
     "provider_profiles": {
@@ -1627,6 +1718,7 @@
         "deepseek": "profile",
         "kimi": "profile",
         "openai": "profile",
+        "anthropic": "profile",
         "chatgpt": "profile"
       },
       "optional": []
@@ -1637,6 +1729,7 @@
         "deepseek": "key_status",
         "kimi": "key_status",
         "openai": "key_status",
+        "anthropic": "key_status",
         "chatgpt": "key_status"
       },
       "optional": []
@@ -1649,6 +1742,7 @@
         "deepseek",
         "kimi",
         "openai",
+        "anthropic",
         "chatgpt"
       ]
     },
@@ -1768,6 +1862,7 @@
         },
         "requires_web": "bool",
         "network": "bool",
+        "available": "bool",
         "read_paths": {
           "items": {
             "type": "string",
@@ -1788,9 +1883,27 @@
             "max_bytes": 80
           },
           "max": 24
-        }
+        },
+        "credential_storage": {
+          "type": "string",
+          "enum": [
+            "none",
+            "keyring",
+            "settings"
+          ]
+        },
+        "installation_id": "id",
+        "inputs": {
+          "items": "mcp_input",
+          "max": 16
+        },
+        "inputs_ready": "bool"
       },
-      "optional": []
+      "optional": [
+        "installation_id",
+        "inputs",
+        "inputs_ready"
+      ]
     },
     "mcp_status": {
       "fields": {
@@ -1801,6 +1914,25 @@
         }
       },
       "optional": []
+    },
+    "mcp_annotations": {
+      "fields": {
+        "title": {
+          "type": "string",
+          "max_bytes": 480
+        },
+        "read_only": "bool",
+        "destructive": "bool",
+        "idempotent": "bool",
+        "open_world": "bool"
+      },
+      "optional": [
+        "title",
+        "read_only",
+        "destructive",
+        "idempotent",
+        "open_world"
+      ]
     },
     "mcp_tool": {
       "fields": {
@@ -1815,9 +1947,14 @@
         "input_schema": {
           "type": "string",
           "max_bytes": 12000
-        }
+        },
+        "annotations": "mcp_annotations",
+        "schema_page": "mcp_schema_cursor"
       },
-      "optional": []
+      "optional": [
+        "annotations",
+        "schema_page"
+      ]
     },
     "mcp_inspection": {
       "fields": {
@@ -2510,6 +2647,1016 @@
         "section_id": "?id"
       },
       "optional": []
+    },
+    "interest_item": {
+      "fields": {
+        "id": "id",
+        "revision": "integer",
+        "topic": {
+          "type": "string",
+          "max_bytes": 100
+        },
+        "quote": {
+          "type": "string",
+          "max_bytes": 1024
+        },
+        "stopped": "bool",
+        "next_at": "label",
+        "checked_at": "?label",
+        "mentioned_at": "?label"
+      },
+      "optional": []
+    },
+    "reminder_message": {
+      "fields": {
+        "id": "id",
+        "sequence": "sequence",
+        "conversation_id": "id",
+        "reminder_id": "id",
+        "reminder_revision": "integer",
+        "revision": "integer",
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "presented",
+            "snoozed",
+            "dismissed"
+          ]
+        },
+        "due_at": "label",
+        "created_at": "label",
+        "presented_at": "?label",
+        "after_sequence": "sequence",
+        "title": {
+          "type": "string",
+          "max_bytes": 500
+        },
+        "text": {
+          "type": "string",
+          "max_bytes": 4096
+        },
+        "timezone": "label",
+        "receipt": "?digest",
+        "available": "bool"
+      },
+      "optional": []
+    },
+    "reminder_message_receipt": {
+      "fields": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "presented",
+            "snoozed",
+            "dismissed"
+          ]
+        },
+        "id": "id",
+        "reminder_id": "id",
+        "revision": "integer",
+        "due_at": "label",
+        "mutation_key": "id",
+        "intent_sha256": "digest",
+        "replayed": "bool"
+      },
+      "optional": []
+    },
+    "delivery_message": {
+      "fields": {
+        "id": "id",
+        "sequence": "sequence",
+        "run_id": "id",
+        "conversation_id": "id",
+        "kind": {
+          "type": "string",
+          "enum": [
+            "check_in",
+            "reminder_delivery"
+          ]
+        },
+        "channel": {
+          "type": "string",
+          "enum": [
+            "quiet",
+            "message"
+          ]
+        },
+        "result_id": "id",
+        "after_sequence": "sequence",
+        "status": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "presented",
+            "dismissed",
+            "cancelled"
+          ]
+        },
+        "created_at": "label",
+        "finished_at": "?label",
+        "reason": "?label",
+        "text": {
+          "type": "string",
+          "max_bytes": 8192
+        }
+      },
+      "optional": []
+    },
+    "reminder_attention": {
+      "fields": {
+        "id": "id",
+        "sequence": "sequence",
+        "reminder_id": "id",
+        "reminder_revision": "integer",
+        "attention_revision": "integer",
+        "conversation_id": "?id",
+        "title": {
+          "type": "string",
+          "max_bytes": 500
+        },
+        "text": {
+          "type": "string",
+          "max_bytes": 4096
+        },
+        "due_at": "label",
+        "timezone": {
+          "type": "string",
+          "max_bytes": 128
+        },
+        "event_at": "?label",
+        "timing": {
+          "type": "string",
+          "enum": [
+            "explicit",
+            "flexible"
+          ]
+        },
+        "task_id": "?id",
+        "receipt": "digest",
+        "task_ref": "?cursor"
+      },
+      "optional": []
+    },
+    "reminder_attention_receipt": {
+      "fields": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "snoozed",
+            "acknowledged"
+          ]
+        },
+        "id": "id",
+        "reminder_id": "id",
+        "due_at": "label",
+        "mutation_key": "id",
+        "intent_sha256": "digest",
+        "replayed": "bool"
+      },
+      "optional": []
+    },
+    "shelf_origin": {
+      "fields": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "github",
+            "folder",
+            "builtin"
+          ]
+        },
+        "repository": {
+          "type": "string",
+          "max_bytes": 512
+        },
+        "path": {
+          "type": "string",
+          "max_bytes": 512
+        },
+        "commit": {
+          "type": "string",
+          "max_bytes": 64
+        },
+        "directory": {
+          "type": "string",
+          "max_bytes": 4096
+        },
+        "catalogue_id": {
+          "type": "string",
+          "max_bytes": 64
+        },
+        "catalogue_digest": "digest",
+        "package": {
+          "type": "string",
+          "max_bytes": 64
+        },
+        "description": {
+          "type": "string",
+          "max_bytes": 512
+        },
+        "icon": {
+          "type": "string",
+          "max_bytes": 64
+        }
+      },
+      "optional": [
+        "repository",
+        "path",
+        "commit",
+        "directory",
+        "catalogue_id",
+        "catalogue_digest",
+        "package",
+        "description",
+        "icon"
+      ]
+    },
+    "shelf_target": {
+      "fields": {
+        "version": {
+          "type": "string",
+          "max_bytes": 128
+        },
+        "origin": "shelf_origin"
+      },
+      "optional": []
+    },
+    "shelf_step": {
+      "fields": {
+        "ordinal": "integer",
+        "component_kind": {
+          "type": "string",
+          "enum": [
+            "skill",
+            "connection",
+            "package_tree",
+            "plugin_data",
+            "cache",
+            "secret"
+          ]
+        },
+        "component_key": {
+          "type": "string",
+          "max_bytes": 512
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "download",
+            "materialize",
+            "register",
+            "enable",
+            "disable",
+            "unregister",
+            "delete",
+            "keep"
+          ]
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "prepared",
+            "applied",
+            "uncertain",
+            "failed",
+            "skipped"
+          ]
+        },
+        "code": "?label"
+      },
+      "optional": []
+    },
+    "shelf_receipt": {
+      "fields": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "applying",
+            "completed",
+            "failed",
+            "interrupted"
+          ]
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "install",
+            "update",
+            "remove",
+            "repair"
+          ]
+        },
+        "mutation_key": "id",
+        "intent_sha256": "digest",
+        "installation_id": "id",
+        "target": "?shelf_target",
+        "steps": {
+          "items": "shelf_step",
+          "max": 256
+        }
+      },
+      "optional": []
+    },
+    "shelf_detail": {
+      "fields": {
+        "revision": "digest",
+        "content_sha256": "digest",
+        "configuration_sha256": "digest",
+        "tree_sha256": "digest",
+        "tree": {
+          "type": "string",
+          "max_bytes": 512
+        },
+        "program": {
+          "type": "string",
+          "max_bytes": 512
+        },
+        "folder": {
+          "type": "string",
+          "max_bytes": 512
+        },
+        "source_configuration_sha256": "digest"
+      },
+      "optional": [
+        "revision",
+        "content_sha256",
+        "configuration_sha256",
+        "tree_sha256",
+        "tree",
+        "program",
+        "folder",
+        "source_configuration_sha256"
+      ]
+    },
+    "shelf_component": {
+      "fields": {
+        "id": "id",
+        "kind": {
+          "type": "string",
+          "enum": [
+            "skill",
+            "connection",
+            "package_tree",
+            "plugin_data",
+            "cache",
+            "secret"
+          ]
+        },
+        "key": {
+          "type": "string",
+          "max_bytes": 512
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "owner",
+            "shared"
+          ]
+        },
+        "members": "integer",
+        "detail": "shelf_detail"
+      },
+      "optional": []
+    },
+    "shelf_unresolved": {
+      "fields": {
+        "mutation_key": "id",
+        "ordinal": "integer",
+        "component_kind": {
+          "type": "string",
+          "enum": [
+            "skill",
+            "connection",
+            "package_tree",
+            "plugin_data",
+            "cache",
+            "secret"
+          ]
+        },
+        "component_key": {
+          "type": "string",
+          "max_bytes": 512
+        },
+        "action": {
+          "type": "string",
+          "enum": [
+            "download",
+            "materialize",
+            "register",
+            "enable",
+            "disable",
+            "unregister",
+            "delete",
+            "keep"
+          ]
+        },
+        "outcome": {
+          "type": "string",
+          "enum": [
+            "prepared",
+            "applied",
+            "uncertain",
+            "failed",
+            "skipped"
+          ]
+        }
+      },
+      "optional": []
+    },
+    "shelf_operation_summary": {
+      "fields": {
+        "mutation_key": "id",
+        "kind": {
+          "type": "string",
+          "enum": [
+            "install",
+            "update",
+            "remove",
+            "repair"
+          ]
+        },
+        "state": {
+          "type": "string",
+          "enum": [
+            "applying",
+            "completed",
+            "failed",
+            "interrupted"
+          ]
+        },
+        "target": "?shelf_target"
+      },
+      "optional": []
+    },
+    "shelf_installation": {
+      "fields": {
+        "id": "id",
+        "identity": {
+          "type": "string",
+          "max_bytes": 512
+        },
+        "version": {
+          "type": "string",
+          "max_bytes": 128
+        },
+        "origin": "shelf_origin",
+        "state": {
+          "type": "string",
+          "enum": [
+            "installing",
+            "installed",
+            "removing",
+            "removed",
+            "interrupted"
+          ]
+        },
+        "components": {
+          "items": "shelf_component",
+          "max": 64
+        },
+        "last_operation": "?shelf_operation_summary",
+        "unresolved": {
+          "items": "shelf_unresolved",
+          "max": 20
+        },
+        "unresolved_total": "integer"
+      },
+      "optional": []
+    },
+    "shelf_status": {
+      "fields": {
+        "items": {
+          "items": "shelf_installation",
+          "max": 100
+        },
+        "complete": "bool"
+      },
+      "optional": []
+    },
+    "shelf_package_source": {
+      "one_of": [
+        {
+          "fields": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "github"
+              ]
+            },
+            "repository": {
+              "type": "string",
+              "max_bytes": 512
+            },
+            "commit": {
+              "type": "string",
+              "max_bytes": 64
+            }
+          },
+          "optional": []
+        },
+        {
+          "fields": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "folder"
+              ]
+            },
+            "directory": {
+              "type": "string",
+              "max_bytes": 4096
+            }
+          },
+          "optional": []
+        },
+        {
+          "fields": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "catalogue"
+              ]
+            },
+            "id": {
+              "type": "string",
+              "max_bytes": 64
+            },
+            "digest": "digest"
+          },
+          "optional": []
+        }
+      ]
+    },
+    "shelf_component_request": {
+      "one_of": [
+        {
+          "fields": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "skill"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "max_bytes": 64
+            },
+            "path": {
+              "type": "string",
+              "max_bytes": 512
+            }
+          },
+          "optional": []
+        },
+        {
+          "fields": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "connection"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "max_bytes": 64
+            },
+            "url": {
+              "type": "string",
+              "max_bytes": 2048
+            },
+            "description": {
+              "type": "string",
+              "max_bytes": 960
+            }
+          },
+          "optional": []
+        },
+        {
+          "fields": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "program"
+              ]
+            },
+            "name": {
+              "type": "string",
+              "max_bytes": 64
+            },
+            "description": {
+              "type": "string",
+              "max_bytes": 960
+            },
+            "artifact": "shelf_artifact",
+            "command": {
+              "type": "string",
+              "max_bytes": 512
+            },
+            "args": {
+              "items": {
+                "type": "string",
+                "max_bytes": 4096
+              },
+              "max": 64
+            },
+            "env": {
+              "items": {
+                "fields": {
+                  "name": {
+                    "type": "string",
+                    "max_bytes": 80
+                  },
+                  "value": {
+                    "type": "string",
+                    "max_bytes": 8192
+                  }
+                },
+                "optional": []
+              },
+              "max": 24
+            },
+            "cwd": {
+              "type": "string",
+              "max_bytes": 600
+            },
+            "inputs": {
+              "items": "mcp_input",
+              "max": 16
+            },
+            "protocol_mode": {
+              "type": "string",
+              "enum": [
+                "auto",
+                "legacy"
+              ]
+            },
+            "network": "bool"
+          },
+          "optional": [
+            "env",
+            "cwd",
+            "inputs",
+            "protocol_mode",
+            "network"
+          ]
+        }
+      ]
+    },
+    "shelf_artifact": {
+      "fields": {
+        "url": {
+          "type": "string",
+          "max_bytes": 2048
+        },
+        "bytes": "integer",
+        "sha256": "digest",
+        "directory": {
+          "type": "string",
+          "max_bytes": 128
+        },
+        "unpacked_bytes": "integer",
+        "tree_sha256": "digest",
+        "dependencies": {
+          "type": "string",
+          "enum": [
+            "npm",
+            "wheels"
+          ]
+        }
+      },
+      "optional": [
+        "dependencies"
+      ]
+    },
+    "shelf_unsupported": {
+      "fields": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "skill",
+            "tool",
+            "settings",
+            "commands",
+            "agents",
+            "hooks",
+            "apps",
+            "package",
+            "cursor"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "max_bytes": 128
+        },
+        "essential": "bool",
+        "reason": {
+          "type": "string",
+          "max_bytes": 512
+        }
+      },
+      "optional": []
+    },
+    "shelf_description": {
+      "fields": {
+        "format": {
+          "type": "string",
+          "enum": [
+            "agent-plugins",
+            "claude-plugin",
+            "codex-plugin",
+            "mcpb",
+            "skill"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "max_bytes": 128
+        },
+        "version": {
+          "type": "string",
+          "max_bytes": 128
+        },
+        "description": {
+          "type": "string",
+          "max_bytes": 960
+        },
+        "directory": {
+          "type": "string",
+          "max_bytes": 4096
+        },
+        "components": {
+          "items": "shelf_component_request",
+          "max": 16
+        },
+        "unsupported": {
+          "items": "shelf_unsupported",
+          "max": 64
+        },
+        "installable": "bool"
+      },
+      "optional": []
+    },
+    "shelf_data_item": {
+      "fields": {
+        "installation_id": "id",
+        "bytes": "integer",
+        "files": "integer",
+        "complete": "bool",
+        "include": "bool"
+      },
+      "optional": []
+    },
+    "shelf_last_backup": {
+      "fields": {
+        "created_at": {
+          "type": "string",
+          "max_bytes": 64
+        },
+        "data_bytes": "integer",
+        "limit_bytes": "integer",
+        "over_limit": "bool",
+        "largest_identity": {
+          "type": "string",
+          "max_bytes": 512
+        },
+        "largest_bytes": "integer"
+      },
+      "optional": []
+    },
+    "shelf_restored": {
+      "fields": {
+        "restored_at": {
+          "type": "string",
+          "max_bytes": 64
+        },
+        "backup_created_at": {
+          "type": "string",
+          "max_bytes": 64
+        },
+        "reinstall": {
+          "items": {
+            "fields": {
+              "installation_id": "id",
+              "identity": {
+                "type": "string",
+                "max_bytes": 512
+              }
+            },
+            "optional": []
+          },
+          "max": 100
+        },
+        "reconnect": {
+          "items": {
+            "fields": {
+              "connection": {
+                "type": "string",
+                "max_bytes": 64
+              },
+              "fields": {
+                "items": {
+                  "type": "string",
+                  "max_bytes": 80
+                },
+                "max": 24
+              },
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "left_out",
+                  "keyring"
+                ]
+              }
+            },
+            "optional": []
+          },
+          "max": 64
+        },
+        "data_not_in_backup": {
+          "items": {
+            "fields": {
+              "installation_id": "id",
+              "identity": {
+                "type": "string",
+                "max_bytes": 512
+              },
+              "bytes": "integer"
+            },
+            "optional": []
+          },
+          "max": 100
+        },
+        "connections_in_backup": "bool",
+        "moved_from": {
+          "type": "string",
+          "max_bytes": 1024
+        }
+      },
+      "optional": []
+    },
+    "shelf_data": {
+      "fields": {
+        "revision": "integer",
+        "limit_bytes": "integer",
+        "total_bytes": "integer",
+        "items": {
+          "items": "shelf_data_item",
+          "max": 100
+        },
+        "last_backup": "?shelf_last_backup",
+        "restored": "?shelf_restored"
+      },
+      "optional": []
+    },
+    "mcp_sign_in_status": {
+      "fields": {
+        "server": {
+          "type": "string",
+          "max_bytes": 64
+        },
+        "revision": "integer",
+        "connected": "bool",
+        "stage": {
+          "type": "string",
+          "enum": [
+            "idle",
+            "waiting",
+            "exchanging",
+            "ready",
+            "error"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "max_bytes": 1024
+        },
+        "authorization_url": "?mcp_authorization_url"
+      },
+      "optional": []
+    },
+    "mcp_authorization_url": {
+      "type": "string",
+      "max_bytes": 8192
+    },
+    "mcp_schema_cursor": {
+      "fields": {
+        "sha256": "digest",
+        "total_bytes": "integer",
+        "next_offset": "integer"
+      },
+      "optional": []
+    },
+    "mcp_schema_page": {
+      "fields": {
+        "content": {
+          "type": "string",
+          "max_bytes": 12000
+        },
+        "sha256": "digest",
+        "total_bytes": "integer",
+        "offset": "integer",
+        "end": "integer",
+        "next_offset": "?integer"
+      },
+      "optional": []
+    },
+    "shelf_catalogue_entry": {
+      "fields": {
+        "id": {
+          "type": "string",
+          "max_bytes": 64
+        },
+        "title": {
+          "type": "string",
+          "max_bytes": 128
+        },
+        "summary": {
+          "type": "string",
+          "max_bytes": 512
+        },
+        "publisher": {
+          "type": "string",
+          "max_bytes": 128
+        },
+        "category": {
+          "type": "string",
+          "max_bytes": 64
+        },
+        "requirements": {
+          "type": "string",
+          "max_bytes": 1024
+        },
+        "license": {
+          "type": "string",
+          "max_bytes": 64
+        },
+        "source_url": {
+          "type": "string",
+          "max_bytes": 1024
+        },
+        "icon": {
+          "type": "string",
+          "max_bytes": 64
+        },
+        "bytes": "integer",
+        "digest": "digest",
+        "package": "shelf_description"
+      },
+      "optional": []
+    },
+    "shelf_catalogue": {
+      "fields": {
+        "revision": {
+          "type": "string",
+          "max_bytes": 128
+        },
+        "entries": {
+          "items": "shelf_catalogue_entry",
+          "max": 32
+        }
+      },
+      "optional": []
+    },
+    "update_status": {
+      "fields": {
+        "phase": {
+          "type": "string",
+          "enum": [
+            "normal",
+            "holding",
+            "stopping",
+            "held",
+            "updated",
+            "failed"
+          ]
+        },
+        "relaunch": "bool",
+        "detail": "?label"
+      },
+      "optional": []
+    },
+    "mcp_input": {
+      "fields": {
+        "name": {
+          "type": "string",
+          "max_bytes": 80
+        },
+        "label": {
+          "type": "string",
+          "max_bytes": 400
+        },
+        "secret": "bool"
+      },
+      "optional": []
+    },
+    "task_urgency": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
     }
   },
   "operations": {
@@ -3251,7 +4398,23 @@
           },
           "placement": "task_placement",
           "project_id": "id",
-          "section_id": "id"
+          "section_id": "id",
+          "urgency": {
+            "type": "string",
+            "enum": [
+              "all",
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "order": {
+            "type": "string",
+            "enum": [
+              "due",
+              "urgency"
+            ]
+          }
         },
         "optional": [
           "read_ref",
@@ -3269,7 +4432,9 @@
           "description",
           "placement",
           "project_id",
-          "section_id"
+          "section_id",
+          "urgency",
+          "order"
         ]
       },
       "result": "task_result"
@@ -3317,7 +4482,7 @@
           "protocol": {
             "type": "string",
             "enum": [
-              "kejtu.native.v42"
+              "kejtu.native.v73"
             ]
           },
           "schema_sha256": "digest",
@@ -3333,20 +4498,27 @@
           "active_turn_id": "?id",
           "creation_intent_sha256": "digest",
           "ingress_context_limit": "integer",
-          "maximum_message_bytes": "integer"
+          "maximum_message_bytes": "integer",
+          "update": "update_status"
         },
         "optional": [
           "ingress_context_limit",
-          "maximum_message_bytes"
+          "maximum_message_bytes",
+          "update"
         ]
       }
     },
     "conversation.create": {
       "arguments": {
         "fields": {
-          "mutation_key": "id"
+          "mutation_key": "id",
+          "project_id": "id",
+          "module_id": "id"
         },
-        "optional": []
+        "optional": [
+          "project_id",
+          "module_id"
+        ]
       },
       "result": {
         "fields": {
@@ -3457,6 +4629,18 @@
               },
               "mutation_key": "id",
               "conversation_id": "id"
+            },
+            "optional": []
+          },
+          {
+            "fields": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "shelf.operation"
+                ]
+              },
+              "mutation_key": "id"
             },
             "optional": []
           }
@@ -4089,6 +5273,38 @@
               }
             },
             "optional": []
+          },
+          {
+            "fields": {
+              "server": {
+                "type": "string",
+                "max_bytes": 64
+              },
+              "expected_revision": "integer",
+              "action": {
+                "type": "string",
+                "enum": [
+                  "credentials"
+                ]
+              },
+              "values": {
+                "items": {
+                  "fields": {
+                    "name": {
+                      "type": "string",
+                      "max_bytes": 80
+                    },
+                    "value": {
+                      "type": "string",
+                      "max_bytes": 8192
+                    }
+                  },
+                  "optional": []
+                },
+                "max": 16
+              }
+            },
+            "optional": []
           }
         ]
       },
@@ -4588,7 +5804,11 @@
               "widget.sources",
               "widget.source",
               "layout.save",
-              "materials.document"
+              "materials.document",
+              "materials.save_code",
+              "conversation.project",
+              "conversation.assign",
+              "conversation.page"
             ]
           },
           "payload_json": {
@@ -4863,7 +6083,9 @@
               "playwright",
               "gridcraft",
               "pdfcraft",
-              "wordcraft"
+              "wordcraft",
+              "terminal-use",
+              "quick-terminal"
             ]
           },
           "expected_revision": "integer",
@@ -4872,6 +6094,498 @@
         "optional": []
       },
       "result": "mcp_status"
+    },
+    "interests.list": {
+      "arguments": {
+        "fields": {},
+        "optional": []
+      },
+      "result": {
+        "fields": {
+          "items": {
+            "items": "interest_item",
+            "max": 32
+          }
+        },
+        "optional": []
+      }
+    },
+    "interests.change": {
+      "arguments": {
+        "fields": {
+          "ident": "id",
+          "action": {
+            "type": "string",
+            "enum": [
+              "stop",
+              "later"
+            ]
+          },
+          "expected_revision": "integer",
+          "mutation_key": "id"
+        },
+        "optional": []
+      },
+      "result": {
+        "fields": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "committed"
+            ]
+          },
+          "interest_id": "id",
+          "action": {
+            "type": "string",
+            "enum": [
+              "stop",
+              "later"
+            ]
+          },
+          "mutation_key": "id"
+        },
+        "optional": []
+      }
+    },
+    "reminders.messages": {
+      "arguments": {
+        "fields": {
+          "conversation_id": "id",
+          "cursor": "?cursor",
+          "page_size": "page"
+        },
+        "optional": [
+          "cursor",
+          "page_size"
+        ]
+      },
+      "result": {
+        "fields": {
+          "items": {
+            "items": "reminder_message",
+            "max": 50
+          },
+          "next_cursor": "?cursor"
+        },
+        "optional": []
+      }
+    },
+    "reminders.inbox": {
+      "arguments": {
+        "fields": {
+          "cursor": "?cursor",
+          "page_size": "page"
+        },
+        "optional": [
+          "cursor",
+          "page_size"
+        ]
+      },
+      "result": {
+        "fields": {
+          "items": {
+            "items": {
+              "fields": {
+                "id": "id",
+                "conversation_id": "id"
+              },
+              "optional": []
+            },
+            "max": 50
+          },
+          "next_cursor": "?cursor"
+        },
+        "optional": []
+      }
+    },
+    "reminders.message": {
+      "arguments": {
+        "one_of": [
+          {
+            "fields": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "present",
+                  "dismiss"
+                ]
+              },
+              "id": "id",
+              "expected_revision": "integer",
+              "receipt": "digest",
+              "mutation_key": "id"
+            },
+            "optional": []
+          },
+          {
+            "fields": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "later"
+                ]
+              },
+              "id": "id",
+              "expected_revision": "integer",
+              "receipt": "digest",
+              "mutation_key": "id",
+              "until": "label"
+            },
+            "optional": []
+          },
+          {
+            "fields": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "validate"
+                ]
+              },
+              "id": "id",
+              "receipt": "digest"
+            },
+            "optional": []
+          },
+          {
+            "fields": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "lookup"
+                ]
+              },
+              "mutation_key": "id",
+              "intent_sha256": "digest"
+            },
+            "optional": []
+          }
+        ]
+      },
+      "result": {
+        "one_of": [
+          "reminder_message",
+          "reminder_message_receipt",
+          {
+            "fields": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "absent"
+                ]
+              }
+            },
+            "optional": []
+          }
+        ]
+      }
+    },
+    "deliveries.messages": {
+      "arguments": {
+        "fields": {
+          "conversation_id": "id",
+          "cursor": "?cursor",
+          "page_size": "page"
+        },
+        "optional": [
+          "cursor",
+          "page_size"
+        ]
+      },
+      "result": {
+        "fields": {
+          "items": {
+            "items": "delivery_message",
+            "max": 50
+          },
+          "next_cursor": "?cursor"
+        },
+        "optional": []
+      }
+    },
+    "reminders.attention": {
+      "arguments": {
+        "fields": {
+          "cursor": "?cursor",
+          "page_size": "page"
+        },
+        "optional": [
+          "cursor",
+          "page_size"
+        ]
+      },
+      "result": {
+        "fields": {
+          "items": {
+            "items": "reminder_attention",
+            "max": 50
+          },
+          "next_cursor": "?cursor"
+        },
+        "optional": []
+      }
+    },
+    "reminders.attend": {
+      "arguments": {
+        "one_of": [
+          {
+            "fields": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "acknowledge"
+                ]
+              },
+              "id": "id",
+              "receipt": "digest",
+              "mutation_key": "id"
+            },
+            "optional": []
+          },
+          {
+            "fields": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "later"
+                ]
+              },
+              "until": "label",
+              "id": "id",
+              "receipt": "digest",
+              "mutation_key": "id"
+            },
+            "optional": []
+          },
+          {
+            "fields": {
+              "action": {
+                "type": "string",
+                "enum": [
+                  "lookup"
+                ]
+              },
+              "mutation_key": "id",
+              "intent_sha256": "digest"
+            },
+            "optional": []
+          }
+        ]
+      },
+      "result": {
+        "one_of": [
+          "reminder_attention_receipt",
+          {
+            "fields": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "absent"
+                ]
+              }
+            },
+            "optional": []
+          }
+        ]
+      }
+    },
+    "shelf.status": {
+      "arguments": {
+        "fields": {},
+        "optional": []
+      },
+      "result": "shelf_status"
+    },
+    "shelf.describe": {
+      "arguments": {
+        "fields": {
+          "directory": {
+            "type": "string",
+            "max_bytes": 4096
+          }
+        },
+        "optional": []
+      },
+      "result": "shelf_description"
+    },
+    "shelf.data": {
+      "arguments": {
+        "fields": {},
+        "optional": []
+      },
+      "result": "shelf_data"
+    },
+    "shelf.data_choice": {
+      "arguments": {
+        "fields": {
+          "expected_revision": "integer",
+          "installation_id": "id",
+          "include": "bool"
+        },
+        "optional": []
+      },
+      "result": "shelf_data"
+    },
+    "shelf.restored_seen": {
+      "arguments": {
+        "fields": {},
+        "optional": []
+      },
+      "result": "shelf_data"
+    },
+    "shelf.install": {
+      "arguments": {
+        "fields": {
+          "mutation_key": "id",
+          "identity": {
+            "type": "string",
+            "max_bytes": 512
+          },
+          "version": {
+            "type": "string",
+            "max_bytes": 128
+          },
+          "source": "shelf_package_source",
+          "components": {
+            "items": "shelf_component_request",
+            "max": 16
+          },
+          "replace_existing": "bool"
+        },
+        "optional": []
+      },
+      "result": "shelf_receipt"
+    },
+    "shelf.update": {
+      "arguments": {
+        "fields": {
+          "mutation_key": "id",
+          "installation_id": "id",
+          "version": {
+            "type": "string",
+            "max_bytes": 128
+          },
+          "source": "shelf_package_source",
+          "components": {
+            "items": "shelf_component_request",
+            "max": 16
+          }
+        },
+        "optional": []
+      },
+      "result": "shelf_receipt"
+    },
+    "shelf.repair": {
+      "arguments": {
+        "fields": {
+          "mutation_key": "id",
+          "installation_id": "id",
+          "reinstall": "bool"
+        },
+        "optional": [
+          "reinstall"
+        ]
+      },
+      "result": "shelf_receipt"
+    },
+    "shelf.remove": {
+      "arguments": {
+        "fields": {
+          "mutation_key": "id",
+          "installation_id": "id",
+          "delete_data": {
+            "type": "boolean"
+          }
+        },
+        "optional": [
+          "delete_data"
+        ]
+      },
+      "result": "shelf_receipt"
+    },
+    "mcp.sign_in.read": {
+      "arguments": {
+        "fields": {
+          "server": {
+            "type": "string",
+            "max_bytes": 64
+          }
+        },
+        "optional": []
+      },
+      "result": "mcp_sign_in_status"
+    },
+    "mcp.sign_in": {
+      "arguments": {
+        "one_of": [
+          {
+            "fields": {
+              "server": {
+                "type": "string",
+                "max_bytes": 64
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "start",
+                  "disconnect"
+                ]
+              },
+              "expected_revision": "integer"
+            },
+            "optional": []
+          },
+          {
+            "fields": {
+              "server": {
+                "type": "string",
+                "max_bytes": 64
+              },
+              "action": {
+                "type": "string",
+                "enum": [
+                  "finish",
+                  "cancel"
+                ]
+              }
+            },
+            "optional": []
+          }
+        ]
+      },
+      "result": "mcp_sign_in_status"
+    },
+    "mcp.schema": {
+      "arguments": {
+        "fields": {
+          "server": {
+            "type": "string",
+            "max_bytes": 64
+          },
+          "tool": {
+            "type": "string",
+            "max_bytes": 128
+          },
+          "expected_revision": "integer",
+          "sha256": "digest",
+          "offset": "integer"
+        },
+        "optional": []
+      },
+      "result": "mcp_schema_page"
+    },
+    "shelf.catalogue": {
+      "arguments": {
+        "fields": {},
+        "optional": []
+      },
+      "result": "shelf_catalogue"
+    },
+    "update.status": {
+      "arguments": {
+        "fields": {},
+        "optional": []
+      },
+      "result": "update_status"
     }
   }
 }

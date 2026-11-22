@@ -13,14 +13,35 @@ from ...core.records import Failure
 
 
 class Connection:
-    def __init__(self, row, *, runtime=None):
+    def __init__(self, row, *, runtime=None, secrets=None, authorize=None):
         self.row = row
+        self.secrets = secrets
+        self.authorize = authorize
+        self.access_token = None
         self.root = Path(__file__).resolve().parents[4]
         self.runtime = Path(runtime) if runtime else self.root / '.state/mcp-runtime/python'
         if sys.platform == 'win32' and runtime is None:
             self.runtime = self.root / 'package-runtime/mcp/python'
         self.process = None
         self.scratch = None
+
+    async def _launch_row(self):
+        """Resolve credentials just before the worker starts; keep no resolved copy."""
+        row = self.row
+        inputs = {f['name'] for f in row.get('inputs', [])}
+        if any(not row.get('env', {}).get(name) and name not in row.get('secrets', {}) for name in inputs):
+            raise Failure('mcp_credentials', 'Enter the account details in Shelf to finish setup. No program was started.')
+        if row.get('secrets'):
+            if self.secrets is None:
+                raise Failure('credential_store', 'The desktop keyring is unavailable in this session; nothing was started.')
+            protected_fields = set(row['secrets'])
+            row = await self.secrets.resolve(row)
+            if row.get('installation') and row.get('root'):
+                from .config import package_value
+                row['env'] = {key: package_value(value, row['root']) if key in protected_fields and key not in inputs else value
+                              for key, value in row['env'].items()}
+        from .files import bind_shared_environment
+        return bind_shared_environment(row)
 
     async def request(self, payload, *, deadline, check):
         from .windows_runtime import is_builtin
@@ -29,6 +50,17 @@ class Connection:
         check()
         try:
             async with asyncio.timeout_at(deadline):
+                token = None
+                if self.row.get('oauth'):
+                    if self.authorize is None:
+                        raise Failure('mcp_sign_in_required', 'Account sign-in is unavailable in this session.')
+                    token = await self.authorize(self.row)
+                    check()
+                    # A fresh token starts a fresh transport before dispatch. A failed
+                    # request is never replayed to discover whether authentication worked.
+                    if token != self.access_token:
+                        await self.close()
+                        self.access_token = token
                 if self.process is None:
                     if sys.platform == 'linux':
                         from .runtime_protection import validate_runtime_writes
@@ -44,6 +76,11 @@ class Connection:
                         check()
                         if asyncio.get_running_loop().time() >= deadline:
                             raise TimeoutError()
+                    row = await self._launch_row()
+                    if token is not None:
+                        row = {k: v for k, v in row.items() if k != 'oauth'}
+                        row['headers'] = dict(row['headers'], Authorization='Bearer ' + token)
+                    check()
                     env = {'PATH': '/usr/bin:/bin', 'LANG': 'C.UTF-8', 'HOME': '/tmp',
                         'PYTHONPATH': os.pathsep.join([str(self.runtime), str(self.root/'src')]),
                         'PYTHONDONTWRITEBYTECODE': '1'}
@@ -68,7 +105,8 @@ class Connection:
                         'kejtu_next.adapters.mcp.worker', stdin=asyncio.subprocess.PIPE,
                         stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.DEVNULL,
                         **options, env=env, limit=MAX_RESULT+2)
-                    row = dict(self.row, cache=str(self.scratch)) if self.scratch else self.row
+                    if self.scratch:
+                        row = dict(row, cache=str(self.scratch))
                     self.process.stdin.write((encode({'server': row})+'\n').encode())
                 self.process.stdin.write((encode(payload)+'\n').encode())
                 await self.process.stdin.drain()

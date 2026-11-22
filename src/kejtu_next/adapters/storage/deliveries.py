@@ -315,6 +315,20 @@ class DeliveryStore:
         with self.transaction():
             return self.metadata(self._row(ident))
 
+    def messages(self, cid, *, before=None, limit=20):
+        if type(limit) is not int or not 1<=limit<=50 or before is not None and (type(before) is not int or before<1):
+            raise Failure('delivery_page', 'Use a bounded exact message page.')
+        with self.transaction():
+            rows=self.db.execute('''SELECT * FROM background_deliveries WHERE conversation_id=? AND status='presented'
+                AND (? IS NULL OR sequence<?) ORDER BY sequence DESC LIMIT ?''', (identity(cid),before,before,limit+1)).fetchall()
+            items=[]
+            for row in rows[:limit]:
+                result=json.loads(self.store._body(row['result_id']))
+                if hashlib.sha256(result['text'].encode()).hexdigest()!=row['content_sha256']:
+                    raise Failure('delivery_integrity','The retained message failed its exact content check.')
+                items.append(dict(self.metadata(row),text=result['text']))
+            return dict(items=items,next_cursor=rows[limit-1]['sequence'] if len(rows)>limit else None)
+
     def page(self, cid, *, after=0, limit=20):
         if type(limit) is not int or not 1 <= limit <= 50 or type(after) is not int or not 0 <= after < 2**63:
             raise Failure('delivery_page', 'Use a bounded delivery-history page.')
@@ -343,8 +357,15 @@ class DeliveryStore:
         return records
 
     def history_messages(self, cid, after_sequence, ledger):
+        return self.messages_from_records(self.history_records(cid, after_sequence, ledger))
+
+    @staticmethod
+    def messages_from_records(records):
         messages = []
-        for record in self.history_records(cid, after_sequence, ledger):
+        for record in records:
+            if 'omitted_presentations' in record:
+                messages.append(Message('system',f"Application history: {record['omitted_presentations']} earlier whole reminder presentations were not loaded; their records remain available in reminder history."))
+                continue
             messages.extend((Message('system', 'Application background presentation: ' + encoded({k:v for k,v in record.items() if k!='text'})
                 + '. Renderer reported presentation, not proof of reading or action. This is not a user message.'),
                 Message('assistant', record['text'])))

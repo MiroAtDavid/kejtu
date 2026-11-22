@@ -46,6 +46,8 @@ MAX_BYTES = 8 * 1024 * 1024
 MAX_STEPS = 5_000_000
 SECONDS = 5
 TABLES = (
+    'reminder_snoozes','reminder_offers','reminder_reply_references',
+    'interest_scan','interest_reviewed','interests','interest_findings','interest_offers','reply_references','interest_stops','interest_controls',
     'notebook_care_state','notebook_care_items','notebook_care_groups','notebook_care_retired','notebook_care_undo',
     'historical_note_imports', 'historical_notes', 'historical_note_revisions',
     'execution_settings', 'turn_execution', 'state_metadata', 'conversations', 'artifacts', 'artifact_payloads', 'artifact_chunks',
@@ -341,6 +343,8 @@ class NoteRemovalStore:
         # retained metadata. Do not silently exempt a copy just because it lives
         # in an independently-authored object. Partial/paraphrased copies remain
         # outside this first explicit guard, not a claimed semantic guarantee.
+        interest_ids = {r['id'] for r in data['interests'] if r['note_id'] == note_id}
+        finding_ids = {r['id'] for r in data['interest_findings'] if r['interest_id'] in interest_ids}
         def candidates():
             for meta in data['memory_payloads']:
                 if meta['id'] not in payload_ids:
@@ -349,7 +353,10 @@ class NoteRemovalStore:
                 if table in ('memory_chunks', 'memory_banks'):
                     continue
                 for row in rows:
-                    if (table == 'memory_revisions' and row['id'] in ids
+                    if (table == 'interests' and row['id'] in interest_ids
+                            or table == 'interest_findings' and row['id'] in finding_ids
+                            or table == 'interest_reviewed' and row['revision_id'] in ids
+                            or table == 'memory_revisions' and row['id'] in ids
                             or table in ('recall_segments','recall_dirty') and row['kind']=='memory' and row['source_id'] in ids
                             or table in ('note_revisions', 'note_bases', 'note_metadata', 'memory_index') and row['revision_id'] in ids
                             or table == 'note_outcomes' and row['bank_id'] == bank['id'] and row['operation_key'] in keys

@@ -1,213 +1,176 @@
 <script lang="ts">
+  import Icon from "$lib/design/Icon.svelte";
   import type { ResearchResult } from "$lib/api/wire.generated";
   import { when } from "../background/editor";
-  import { researchTime } from "./research-view";
+  import { findingHost, findingState, researchDay } from "./research-view";
   export let finding: ResearchResult;
   export let disabled = false;
+  export let onOpen: () => void;
   export let onReview: () => void;
   export let onDisposition: (value: ResearchResult["disposition"]) => void;
-  export let onDiscuss: () => void;
-  let expanded = false;
-  $: host = (() => {
-    try {
-      return new URL(finding.url).hostname.replace(/^www\./, "");
-    } catch {
-      return finding.url;
-    }
-  })();
+  $: saved = finding.disposition === "saved";
+  $: fresh = finding.attention === "new" || finding.attention === "changed";
 </script>
 
 <article
-  class="finding"
-  class:unread={finding.attention === "new" || finding.attention === "changed"}
+  class="finding cp-card"
   aria-label={finding.title}
+  data-finding={finding.id}
 >
-  <div class="meta">
-    <span
-      class="state"
-      class:new={finding.attention === "new"}
-      class:changed={finding.attention === "changed"}
-      >{finding.attention === "new"
-        ? "New"
-        : finding.attention === "changed"
-          ? "Changed"
-          : finding.attention === "dismissed"
-            ? "Dismissed"
-            : "Reviewed"}</span
-    >
-    {#if finding.disposition === "saved"}<span class="saved">Saved</span>{/if}
-    <span class="source">{host}</span>
-    <time
-      datetime={finding.updated_at ?? finding.first_seen}
-      title={when(finding.updated_at ?? finding.first_seen)}
-      >{researchTime(finding.updated_at ?? finding.first_seen)}</time
-    >
-  </div>
-  <h4>
-    <a href={finding.url} target="_blank" rel="noreferrer"
-      >{finding.title}<span aria-hidden="true"> ↗</span></a
-    >
-  </h4>
-  <p class="body" class:preview={!expanded}>{finding.details}</p>
-  {#if expanded}
-    {#if finding.unknowns}<p class="uncertain">
-        Still to verify: {finding.unknowns}
-      </p>{/if}
-    <p class="provenance">
-      First found {when(finding.first_seen)} · Last seen {when(
-        finding.last_seen,
-      )}
-    </p>
-  {/if}
-  <div class="actions">
-    <button
-      class="text-action"
-      aria-expanded={expanded}
-      on:click={() => (expanded = !expanded)}
-      >{expanded ? "Less detail" : "Details"}</button
-    >
-    <div class="item-actions">
+  <div class="top">
+    <!-- The card opens the finding's own page; the source link stays below. -->
+    <button class="open" aria-label={finding.title} on:click={onOpen}>
+      <span class="title">{finding.title}</span>
+      <span class="details">{finding.details}</span>
+    </button>
+    <div class="quick">
       {#if finding.new && finding.disposition !== "dismissed"}<button
+          class="cp-icon"
+          aria-label={`Mark ${finding.title} reviewed`}
+          title="Mark reviewed"
           {disabled}
-          on:click={onReview}>Mark reviewed</button
+          on:click={onReview}><Icon name="check" size={14} /></button
         >{/if}
       <button
+        class="cp-icon"
+        class:saved
+        aria-label={`${saved ? "Unsave" : "Save"} ${finding.title}`}
+        title={saved ? "Unsave" : "Save"}
         {disabled}
-        on:click={() =>
-          onDisposition(finding.disposition === "saved" ? "open" : "saved")}
-        >{finding.disposition === "saved" ? "Unsave" : "Save"}</button
+        on:click={() => onDisposition(saved ? "open" : "saved")}
+        ><Icon name="bookmark" size={14} /></button
       >
-      <button
-        {disabled}
-        on:click={() =>
-          onDisposition(
-            finding.disposition === "dismissed" ? "open" : "dismissed",
-          )}
-        >{finding.disposition === "dismissed" ? "Restore" : "Dismiss"}</button
-      >
-      <button {disabled} on:click={onDiscuss}>Discuss</button>
     </div>
+  </div>
+  <div class="meta">
+    <span class="state"
+      >{#if fresh}<span
+          class="dot"
+          class:changed={finding.attention === "changed"}
+          aria-hidden="true"
+        ></span>{/if}{findingState(finding)}{saved ? " · Saved" : ""}</span
+    >
+    <span class="where"
+      ><a href={finding.url} target="_blank" rel="noreferrer"
+        >{findingHost(finding.url)}</a
+      >
+      ·
+      <time
+        datetime={finding.updated_at ?? finding.first_seen}
+        title={when(finding.updated_at ?? finding.first_seen)}
+        >{researchDay(finding.updated_at ?? finding.first_seen)}</time
+      ></span
+    >
   </div>
 </article>
 
 <style>
   .finding {
-    padding: 20px 22px 16px;
-    border: 1px solid var(--ke-border);
-    border-radius: var(--ke-radius-lg);
-    background: var(--ke-surface);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+    min-width: 0;
+    min-height: 118px;
+    padding: 12px 14px;
+  }
+  .finding:hover {
+    border-color: var(--ke-border-strong);
+  }
+  .top {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
     min-width: 0;
   }
-  .finding.unread {
-    background: var(--ke-accent-soft);
-  }
-  .meta {
+  .open {
     display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    font-size: var(--ke-text-3xs);
-    color: var(--ke-text-secondary);
-  }
-  .source {
-    overflow-wrap: anywhere;
-  }
-  time {
-    margin-left: auto;
-  }
-  .state,
-  .saved {
-    padding: 2px 7px;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
     border-radius: var(--ke-radius-sm);
-    background: var(--ke-surface-inset);
-  }
-  .new {
-    background: color-mix(in srgb, var(--ke-marker-sage) 18%, transparent);
+    background: transparent;
     color: var(--ke-text-primary);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
   }
-  .changed {
-    background: color-mix(in srgb, var(--ke-marker-sand) 20%, transparent);
-    color: var(--ke-text-primary);
+  .open:hover:not(:disabled) {
+    background: transparent;
   }
-  .saved {
-    background: none;
-    border: 1px solid var(--ke-border);
-  }
-  h4 {
-    margin: 12px 0 8px;
-    font: 500 17px/1.4 var(--ke-font-ui);
-  }
-  a {
-    color: var(--ke-text-primary);
-    text-decoration: none;
-    overflow-wrap: anywhere;
-  }
-  a:hover {
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-  a span {
-    font-size: var(--ke-text-xs);
-    color: var(--ke-text-secondary);
-  }
-  .body,
-  .uncertain {
+  .title {
     font-size: var(--ke-text-sm);
-    line-height: 1.75;
-    white-space: pre-wrap;
+    font-weight: 500;
+    line-height: 1.35;
     overflow-wrap: anywhere;
-    margin: 0 0 12px;
   }
-  .preview {
+  .details {
     display: -webkit-box;
     -webkit-line-clamp: 2;
     line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-  }
-  .uncertain {
-    border-left: 2px solid var(--ke-marker-sand);
-    padding-left: 12px;
     color: var(--ke-text-secondary);
+    line-height: 1.45;
+    overflow-wrap: anywhere;
   }
-  .provenance {
-    font-size: var(--ke-text-3xs);
-    color: var(--ke-text-secondary);
-  }
-  .actions,
-  .item-actions {
+  .quick {
     display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
+    flex: none;
+    margin: -4px -6px 0 0;
   }
-  .actions {
-    justify-content: space-between;
-    margin-top: 14px;
+  .quick .cp-icon {
+    width: 26px;
+    min-height: 26px;
   }
-  /* Review actions use the shared page-action surface from planning.css; only
-     the quiet Details toggle keeps its own text treatment. */
-  .text-action {
-    font-size: var(--ke-text-2xs);
-    padding: 5px 8px 5px 0;
-    border: 1px solid transparent;
-    border-radius: var(--ke-radius-sm);
-    background: transparent;
-    color: var(--ke-text-secondary);
-  }
-  .text-action:hover:not(:disabled) {
-    background: var(--ke-surface-inset);
+  .quick .saved {
     color: var(--ke-text-primary);
   }
-  @media (max-width: 600px) {
-    .finding {
-      padding: 16px;
-    }
-    time {
-      margin-left: 0;
-    }
-    h4 {
-      font-size: var(--ke-text-md);
-    }
+  .quick .saved :global(svg) {
+    fill: currentColor;
+  }
+  .meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    min-width: 0;
+    color: var(--ke-text-tertiary);
+    font-size: var(--ke-text-2xs);
+  }
+  .state {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 5px;
+  }
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--ke-marker-sage);
+  }
+  .dot.changed {
+    background: var(--ke-marker-sand);
+  }
+  .where {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--ke-text-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 </style>

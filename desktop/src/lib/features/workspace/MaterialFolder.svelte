@@ -5,8 +5,9 @@
   export let path = "";
   export let selected = "";
   export let refresh = 0;
-  export let onSelect: (path: string) => void;
-  type Item = { name: string; path: string; kind: string };
+  export let disabled = false;
+  export let onSelect: (path: string, code?: boolean) => void;
+  type Item = { name: string; path: string; kind: string; editor?: "code" };
   type Listing = { items: Item[]; next_offset: number | null };
   let listing: Listing = { items: [], next_offset: null };
   let loading = false,
@@ -68,7 +69,7 @@
 
 <ul
   class="material-folder"
-  aria-label={path || "Section folder contents"}
+  aria-label={path || "Module folder contents"}
   aria-busy={loading}
 >
   {#each listing.items as item (item.path)}
@@ -82,9 +83,14 @@
         aria-expanded={item.kind === "folder"
           ? expanded.has(item.path)
           : undefined}
+        disabled={disabled && item.kind === "file"}
         title={item.path}
         on:click={() =>
-          item.kind === "folder" ? toggle(item.path) : onSelect(item.path)}
+          item.kind === "folder"
+            ? toggle(item.path)
+            : item.editor === "code"
+              ? onSelect(item.path, true)
+              : onSelect(item.path)}
       >
         <svg
           width="15"
@@ -110,6 +116,7 @@
             {selected}
             {refresh}
             {onSelect}
+            {disabled}
           />
         </div>
       {/if}

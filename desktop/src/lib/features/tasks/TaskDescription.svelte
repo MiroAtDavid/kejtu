@@ -9,7 +9,7 @@
   export let value = "";
   export let disabled = false;
   export let onChange: (value: string) => void = () => {};
-  let preview = false;
+  export let preview = false;
   let field: HTMLTextAreaElement;
   let error = "";
   $: rendered = preview ? taskDescription(value) : { html: "", checks: [] };
@@ -127,16 +127,20 @@
         on:click={() => format("[", "](https://)")}>Link</button
       >
     </div>
-    <textarea
-      id="task-description"
-      bind:this={field}
-      {value}
-      {disabled}
-      on:input={(event) => change(event.currentTarget.value)}
-      rows="8"
-      placeholder="What needs doing? Add context, steps or a checklist…"
-      aria-describedby="task-description-hint"
-    ></textarea>
+    <!-- The field grows with its text (a hidden copy sets the height), so
+         long notes read as a page instead of a scroll box. -->
+    <div class="grow" data-text={value}>
+      <textarea
+        id="task-description"
+        bind:this={field}
+        {value}
+        {disabled}
+        on:input={(event) => change(event.currentTarget.value)}
+        rows="8"
+        placeholder="What needs doing? Add context, steps or a checklist…"
+        aria-describedby="task-description-hint"
+      ></textarea>
+    </div>
     <p class="hint" id="task-description-hint">
       Use the formatting buttons or Markdown. Preview lets you tick checklist
       items.
@@ -150,8 +154,8 @@
 </div>
 
 <style>
+  /* The surrounding card is the frame: the editor itself has no boxes. */
   .description {
-    grid-column: 1 / -1;
     min-width: 0;
   }
   .description-heading {
@@ -159,11 +163,12 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
   }
   label {
-    color: var(--ke-text-secondary);
-    font-size: var(--ke-text-xs);
+    color: var(--ke-text-tertiary);
+    font-size: 11.5px;
+    font-weight: 500;
   }
   .modes {
     display: flex;
@@ -171,8 +176,9 @@
   }
   .modes button,
   .toolbar button {
+    min-height: 26px;
     margin: 0;
-    padding: 5px 9px;
+    padding: 3px 8px;
     background: transparent;
     color: var(--ke-text-secondary);
     border: 0;
@@ -190,24 +196,41 @@
     display: flex;
     flex-wrap: wrap;
     gap: 2px;
-    border: 1px solid var(--ke-border);
-    border-bottom: 0;
-    border-radius: var(--ke-radius-sm) var(--ke-radius-sm) 0 0;
-    padding: 5px;
-    background: var(--ke-surface-raised);
+    margin: 0 -8px;
+    padding: 0 0 6px;
+    border-bottom: 1px solid var(--ke-border);
+  }
+  .grow {
+    display: grid;
+  }
+  .grow::after {
+    content: attr(data-text) " ";
+    visibility: hidden;
+  }
+  .grow::after,
+  textarea {
+    grid-area: 1 / 1;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 200px;
+    margin: 0;
+    padding: 12px 0 0;
+    border: 0;
+    font: inherit;
+    font-size: var(--ke-text-sm);
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
   textarea {
+    display: block;
     width: 100%;
-    box-sizing: border-box;
-    min-height: 200px;
-    resize: vertical;
-    border: 1px solid var(--ke-border);
-    border-radius: 0 0 var(--ke-radius-sm) var(--ke-radius-sm);
-    padding: 14px;
-    font: inherit;
-    line-height: 1.65;
+    resize: none;
+    overflow: hidden;
+    border-radius: 0;
+    outline: 0;
     color: var(--ke-text-primary);
-    background: var(--ke-surface-raised);
+    background: transparent;
   }
   .hint,
   .placeholder {
@@ -217,10 +240,9 @@
   }
   .preview {
     min-height: 200px;
-    padding: 14px 18px;
-    border: 1px solid var(--ke-border);
-    border-radius: var(--ke-radius-sm);
-    background: var(--ke-surface-raised);
+    padding: 12px 0 0;
+    border-top: 1px solid var(--ke-border);
+    font-size: var(--ke-text-sm);
     line-height: 1.7;
     overflow-wrap: anywhere;
   }

@@ -11,6 +11,7 @@ import time
 import uuid
 
 from .locking import acquire_owner_lock
+from .reply_presentation import restore as restore_reply_presentation
 from ...core.budget import Ledger, message_cost
 from ...core.context import RequestAccounting, request_schema
 from ...core.execution import HistoryPolicy, select_history_policy
@@ -35,15 +36,19 @@ from .jobs import JOB_SCHEMA, JobStore
 from .research import RESEARCH_SCHEMA, ResearchStore
 from .reminders import REMINDER_SCHEMA, ReminderStore
 from .reminder_access import REMINDER_ACCESS_SCHEMA
+from .reminder_chat import REMINDER_CHAT_SCHEMA, ReminderChat
+from .reminder_attention import REMINDER_ATTENTION_SCHEMA, ReminderAttention
 from .deliveries import DELIVERY_SCHEMA, DeliveryStore
 from .people import PEOPLE_SCHEMA, PeopleStore
 from .planner import PLANNER_SCHEMA, PlannerStore
+from .interests import INTEREST_SCHEMA, InterestStore
 
 from .conversation_titles import TITLE_SCHEMA, ConversationTitles
 from .exchanges import EXCHANGE_SCHEMA, ExchangeStore
 from .web import WEB_SCHEMA, WebStore
 from .mcp import MCP_SCHEMA, BACKGROUND_MCP_SCHEMA, McpStore
-from .skills import SKILL_SCHEMA, SkillStore
+from .skills import SKILL_SCHEMA, SKILL_REMOVAL_SCHEMA, SkillStore
+from .shelf import SHELF_SCHEMA, ShelfStore
 from .care import CARE_SCHEMA, CareStore
 from .web_usage import WEB_USAGE_SCHEMA
 from .execution import EXECUTION_SCHEMA, ExecutionStore
@@ -51,7 +56,7 @@ from .conversation_import import IMPORT_SCHEMA, imported, require_writable
 from .historical_notes import HISTORICAL_NOTES_SCHEMA, HistoricalNotes
 
 APPLICATION_ID = 0x4B4A5232
-SCHEMA_VERSION = 39
+SCHEMA_VERSION = 44
 BODY_CHUNK_BYTES = 32768
 
 SCHEMA = '''
@@ -90,7 +95,7 @@ CREATE TABLE provider_states(turn_id TEXT PRIMARY KEY REFERENCES turns(id),
  format TEXT NOT NULL, binding_sha256 TEXT NOT NULL);
 CREATE INDEX unfinished_attempts ON model_attempts(state) WHERE state='reserved';
 CREATE INDEX unfinished_reference_reads ON reference_reads(state) WHERE state='started';
-''' + HISTORY_SCHEMA + MEMORY_SCHEMA + NOTES_SCHEMA + REMOVAL_SCHEMA + RECALL_SCHEMA + NOTE_METADATA_SCHEMA + TASK_SCHEMA + TASK_ACCESS_SCHEMA + JOB_SCHEMA + REMINDER_SCHEMA + REMINDER_ACCESS_SCHEMA + DELIVERY_SCHEMA + PEOPLE_SCHEMA + TITLE_SCHEMA + EXCHANGE_SCHEMA + WEB_SCHEMA + WEB_USAGE_SCHEMA + IMPORT_SCHEMA + EXECUTION_SCHEMA + HISTORICAL_NOTES_SCHEMA + MCP_SCHEMA + SKILL_SCHEMA + CARE_SCHEMA + RESEARCH_SCHEMA + BACKGROUND_MCP_SCHEMA + PLANNER_SCHEMA
+''' + HISTORY_SCHEMA + MEMORY_SCHEMA + NOTES_SCHEMA + REMOVAL_SCHEMA + RECALL_SCHEMA + NOTE_METADATA_SCHEMA + TASK_SCHEMA + TASK_ACCESS_SCHEMA + JOB_SCHEMA + REMINDER_SCHEMA + REMINDER_ACCESS_SCHEMA + DELIVERY_SCHEMA + PEOPLE_SCHEMA + TITLE_SCHEMA + EXCHANGE_SCHEMA + WEB_SCHEMA + WEB_USAGE_SCHEMA + IMPORT_SCHEMA + EXECUTION_SCHEMA + HISTORICAL_NOTES_SCHEMA + MCP_SCHEMA + SKILL_SCHEMA + CARE_SCHEMA + RESEARCH_SCHEMA + BACKGROUND_MCP_SCHEMA + PLANNER_SCHEMA + INTEREST_SCHEMA + REMINDER_CHAT_SCHEMA + REMINDER_ATTENTION_SCHEMA + SKILL_REMOVAL_SCHEMA + SHELF_SCHEMA
 
 
 def stamp() -> str:
@@ -177,11 +182,15 @@ class SqliteStore:
             self.web = WebStore(self)
             self.mcp = McpStore(self)
             self.skills = SkillStore(self)
+            self.shelf = ShelfStore(self)
             self.execution = ExecutionStore(self)
             self.jobs = JobStore(self)
             self.research = ResearchStore(self)
             self.care = CareStore(self)
+            self.interests = InterestStore(self)
             self.reminders = ReminderStore(self)
+            self.reminder_chat = ReminderChat(self)
+            self.reminder_attention = ReminderAttention(self)
             self.deliveries = DeliveryStore(self)
             self.note_removal = NoteRemovalStore(self)
             self.notebook = NotebookStore(self)
@@ -198,6 +207,9 @@ class SqliteStore:
                 self.db.execute("UPDATE background_mcp_calls SET status='uncertain' WHERE status='started'")
                 self._history.recover()
                 self.jobs.recover(stamp())
+                self.interests.recover()
+                self.reminder_attention.recover()
+                self.shelf.recover()
         except Exception:
             self.close()
             raise
@@ -327,15 +339,27 @@ class SqliteStore:
 
     def record_recall_admission(self, turn_id, result):
         from ...core.tools import result_receipt
+        receipt = result_receipt(result)
         with self.db:
-            self.db.execute('INSERT INTO recall_admissions VALUES(?,?)',
-                            (turn_id, json.dumps(result_receipt(result), ensure_ascii=False)))
+            prior = self.db.execute('SELECT record FROM recall_admissions WHERE turn_id=?', (turn_id,)).fetchone()
+            if prior:
+                # Ordinary recall and People can both enter the same request.
+                # Retain each exact admission; never replace the earlier basis.
+                previous = json.loads(prior[0])
+                admissions = previous.get('admissions', [previous])
+                if receipt not in admissions:
+                    admissions.append(receipt)
+                receipt = dict(admissions=admissions)
+            self.db.execute('INSERT INTO recall_admissions VALUES(?,?) '
+                            'ON CONFLICT(turn_id) DO UPDATE SET record=excluded.record',
+                            (turn_id, json.dumps(receipt, ensure_ascii=False)))
 
     def create_conversation(self, profile: Profile, system_prompt: str, *, reference_body: str | None = None,
                             history_enabled: bool = False, history_policy: HistoryPolicy | None = None,
                             memory_enabled: bool = False, notes_enabled: bool = False, hybrid_memory: bool = False,
                             tasks_enabled: bool = False, request_counter=None, provider_first: bool = False,
-                            mutation_key: str | None = None, intent_sha256: str | None = None) -> str:
+                            mutation_key: str | None = None, intent_sha256: str | None = None,
+                            project_id: str | None = None, module_id: str | None = None) -> str:
         # Reject impossible new configurations before writing any artifact. Reads
         # of existing conversations remain available, including older bad configs.
         policy = select_history_policy(history_policy, enabled=history_enabled)
@@ -404,6 +428,8 @@ class SqliteStore:
                 self.db.execute('INSERT INTO memory_grants VALUES(?,?,1,0)', (ident, bank[0]))
             if notes_enabled:
                 self.db.execute('INSERT INTO note_write_grants VALUES(?,?,1,0)', (ident, bank[0]))
+            if project_id is not None or module_id is not None:
+                self.planner._assign_conversation(ident,project_id,0,module_id=module_id)
         return ident
 
     def conversation(self, conversation_id: str) -> Conversation:
@@ -492,6 +518,12 @@ class SqliteStore:
                     SELECT ?,?,?,'running',?,max(coalesce((SELECT max(sequence) FROM turns),0),
                     (SELECT sequence FROM exchange_sequence_floor WHERE singleton=1))+1""",
                     (ident, conversation_id, body, stamp()))
+                # Retain the scope at admission in the existing context record.
+                # Reassigning a conversation never relabels its earlier sources.
+                workspace=self.planner.memory_context(conversation_id)
+                if workspace:
+                    self.db.execute('INSERT INTO context_events(turn_id,record) VALUES(?,?)',
+                        (ident,json.dumps(dict(kind='workspace_scope',**workspace),separators=(',',':'))))
                 if mutation_key is not None:
                     self.db.execute('INSERT INTO native_mutations VALUES(?,?,?,?,?,?)',
                         ('turn.submit', mutation_key, intent_sha256, conversation_id, ident, stamp()))
@@ -514,8 +546,9 @@ class SqliteStore:
         conversation = self.conversation(current['conversation_id'])
         rows = self.db.execute('SELECT * FROM recall_turns WHERE conversation_id=? AND sequence<? ORDER BY sequence',
             (current['conversation_id'], current['sequence']))
-        messages = []
+        messages, admitted_ids = [], []
         for row in rows:
+            admitted_ids.append(row['id'])
             additions = [Message('user', self._body(row['user_id']))]
             if row['status'] == 'completed':
                 answer = self._body(row['answer_id'])
@@ -527,6 +560,8 @@ class SqliteStore:
                     room = (allowance - message_cost(additions[0])
                             - message_cost(Message('assistant', answer, reasoning='')))
                     reasoning = self._reasoning(row, conversation, room)
+                    reasoning = restore_reply_presentation(self, row, conversation, reasoning, answer,
+                        Ledger(conversation.profile, 0).response_bytes, room)
                 additions.append(Message('assistant', answer, reasoning=reasoning))
             else:
                 additions.append(Message('system', f"Application record: preceding request ended {row['status']} ({row['reason']}); no completed assistant answer was delivered."))
@@ -535,6 +570,7 @@ class SqliteStore:
                 if allowance < 0:
                     raise Failure('context_limit', 'Exact conversation history does not fit with the saved generation reserve; no model call was sent. Start a new development conversation; originals remain readable.')
                 messages.append(message)
+        self.record_recall_admission(turn_id, dict(kind='exact_history', admitted_ids=admitted_ids))
         return tuple(messages)
 
     def _reasoning(self, turn, conversation, allowance, *, ledger=None):
@@ -811,6 +847,8 @@ class SqliteStore:
             self.db.execute('UPDATE turns SET answer_id=?,partial_id=?,status=?,reason=?,detail=?,input_tokens=?,output_tokens=?,finish_reason=?,finished_at=? WHERE id=?',
                 (answer, partial, status, reason, detail, *totals, reply.finish_reason if reply else None, stamp(), turn_id))
             self._history.finish(self._row(turn_id), reply)
+            self.interests.finish(turn_id)
+            self.reminder_attention.finish(turn_id, status)
             self.db.execute("UPDATE history_operations SET state='failed',result=? WHERE turn_id=? AND state='started' AND name!='write_note'",
                 (json.dumps({'status': 'not_delivered', 'reason': reason or 'operation_not_completed'}), turn_id))
             self.db.execute("UPDATE history_operations SET state='failed',result=? WHERE turn_id=? AND state='started' AND name='write_note'",
@@ -927,7 +965,10 @@ class SqliteStore:
                     ('status', 'operation_key', 'note_id', 'revision_id', 'sha256', 'reason')}))
         context = [json.loads(row[0]) for row in self.db.execute(
             'SELECT record FROM context_events WHERE turn_id=? ORDER BY sequence', (turn_id,))]
-        return tuple([summary] + attempts + context + operations + note_items)
+        references = [dict(kind='reply_reference', answer_id=r['answer_id'], reference_id=r['reference_id'],
+            attribution=json.loads(r['record'])) for r in self.db.execute(
+                'SELECT * FROM reply_references WHERE turn_id=? UNION ALL SELECT * FROM reminder_reply_references WHERE turn_id=?', (turn_id,turn_id))]
+        return tuple([summary] + attempts + context + operations + note_items + references)
 
     def context_usage(self, turn_id: str):
         """Small latest-request projection; never load inspection/body pages.
