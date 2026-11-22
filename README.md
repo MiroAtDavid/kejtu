@@ -49,8 +49,8 @@ questions about long chat histories, 466 of Kejtu's answers passed automatic
 grading (93.2%). Every case was counted, with no retries or manual corrections.
 [Results, setup and caveats](docs/evaluation.md).
 
-> **Memory search by meaning requires a separate GPU setup.** See the
-> [memory search requirements](docs/install.md#memory-search-requires-a-separate-gpu-setup).
+> Keyword search works without a GPU. To search older conversations by meaning,
+> [set up the local embedding model](docs/install.md#memory-search-requires-a-separate-gpu-setup) on a compatible GPU.
 
 **Local storage and model options.** Conversations, notes and settings live on
 your machine. Kejtu works with local models through Ollama and with online

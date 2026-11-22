@@ -29,11 +29,11 @@
       "source_sha256": "49d81c13d0ad9a479b26a8ce16dcbdc7427f7393dc949ea4b8d486a0f31a3e24"
     },
     "README.md": {
-      "bytes": 4909,
+      "bytes": 4945,
       "mode": "100644",
-      "sha256": "696df7bf11b2a197fa1815fd48c9c7589faaa2bc4e326be022c086d585da5c0e",
+      "sha256": "f8bbc220a65fac93d6f5ada6085a350f890c4e6e2dce7d27238dae5fadff45d1",
       "source": "packaging/source/README.md",
-      "source_sha256": "696df7bf11b2a197fa1815fd48c9c7589faaa2bc4e326be022c086d585da5c0e"
+      "source_sha256": "f8bbc220a65fac93d6f5ada6085a350f890c4e6e2dce7d27238dae5fadff45d1"
     },
     "catalogue/README.md": {
       "bytes": 5372,
@@ -2857,11 +2857,11 @@
       "source_sha256": "5e5176896c2620e2aea24fdceff4de0f99dae7cbf5866d300f3ee9946f4ee651"
     },
     "docs/README.md": {
-      "bytes": 791,
+      "bytes": 947,
       "mode": "100644",
-      "sha256": "819b80a70b697b695f67dff60383101c4af9928a6e0836760de5a3b6b10197de",
+      "sha256": "4d73eb8202fb283b6181e1266cb0950ae67c4086e91c2994a86110c700f3eb0e",
       "source": "docs/README.md",
-      "source_sha256": "819b80a70b697b695f67dff60383101c4af9928a6e0836760de5a3b6b10197de"
+      "source_sha256": "4d73eb8202fb283b6181e1266cb0950ae67c4086e91c2994a86110c700f3eb0e"
     },
     "docs/evaluation.md": {
       "bytes": 16115,
@@ -2898,12 +2898,19 @@
       "source": "docs/images/kejtu-project-workspace.png",
       "source_sha256": "500700a7512cbdc0d56eec2772de63595089c3a6d49553028f9099cca6a31e67"
     },
-    "docs/install.md": {
-      "bytes": 11504,
+    "docs/install-from-source.md": {
+      "bytes": 11093,
       "mode": "100644",
-      "sha256": "fc0f14a1bc39a3cfcd296efb878c9a04fe6a1a5fe9af16f4d843aec713d1cc3b",
+      "sha256": "6f6203f5ea2f043d34534d1e51c73d15a419c65c32ab2969f519b86bae98633f",
+      "source": "docs/install-from-source.md",
+      "source_sha256": "6f6203f5ea2f043d34534d1e51c73d15a419c65c32ab2969f519b86bae98633f"
+    },
+    "docs/install.md": {
+      "bytes": 2821,
+      "mode": "100644",
+      "sha256": "2f4d7e705bf7ce280f4c61a4085fb68920a808ae9c3abc739e5bfae78cfb1097",
       "source": "docs/install.md",
-      "source_sha256": "fc0f14a1bc39a3cfcd296efb878c9a04fe6a1a5fe9af16f4d843aec713d1cc3b"
+      "source_sha256": "2f4d7e705bf7ce280f4c61a4085fb68920a808ae9c3abc739e5bfae78cfb1097"
     },
     "docs/licenses/chatgpt/PyJWT-2.15.1/AUTHORS.rst": {
       "bytes": 322,
@@ -4803,12 +4810,12 @@
       "source_sha256": "5c77c008408d0b235e815af4ca9a91a41428b55922764cd3027e5d47b0eb7418"
     }
   },
-  "inclusion_manifest_sha256": "33365fde50fedc8b6ded59407cb9ab4f3207bd99fe2938e6d44f3e2f3bd6e4ae",
+  "inclusion_manifest_sha256": "a754c03eda5839cf574232e3724ca6f9e1d099e11409be9cb82dc651c119dbcf",
   "kind": "linux-source-x86_64",
   "schema": 1,
-  "source_commit": "74dca8a240187b4e99a8daf6b9d60332be976ba1",
-  "source_date_epoch": 1795376527,
-  "source_tree": "377d94ff51630a759962a9d5808e0e088ecd90b6",
+  "source_commit": "898dbf558ba1abeb4cdc3600c93d8274a6395593",
+  "source_date_epoch": 1795381393,
+  "source_tree": "4cf59159ed722625aca80bd6fd4dec2644a36de5",
   "transformations": {
     "desktop/package-lock.json": {
       "unreachable_package_entries_removed": 84

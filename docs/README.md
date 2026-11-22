@@ -1,6 +1,8 @@
 # Kejtu documentation
 
-- [Installation, updates and backups on Manjaro](install.md)
+- [Install or update a Debian or Arch package](install.md)
+- [Set up optional memory search by meaning](install.md#memory-search-requires-a-separate-gpu-setup)
+- [Build from source on Manjaro](install-from-source.md)
 - [Getting started](../src/kejtu_next/help/01-start.md)
 - [What Kejtu can do](../src/kejtu_next/help/02-capabilities.md)
 - [Projects, module files, Markdown editing and asking about documents](../src/kejtu_next/help/05-projects-documents.md)
